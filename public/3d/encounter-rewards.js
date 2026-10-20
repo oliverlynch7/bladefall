@@ -19,6 +19,8 @@
    [[72,28,0,0,0],[75,24,1,0,0],[45,48,7,0,0],[25,55,19,1,0]][band];
   let n=Math.max(0,Math.min(.999999999,Number(r)||0))*100;for(let i=0;i<5;i++){n-=weights[i];if(n<0)return order[i];}return order[4];
  }
+ // Harder fixed-world encounters pay more; party size and hero level do not alter rewards.
+ function xp(n,lv){return Math.round(Math.max(0,Number(n)||0)*(1+.035*Math.max(0,Math.min(45,(Number(lv)||1)-1))));}
  function gold(n){n=Math.max(0,Number(n)||0);return n<1000000?Math.floor(n).toLocaleString('en-US'):new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n);}
- const api={level,chance:dropChance,grade,gold};root.BFEncounterRewards=api;if(typeof module!=='undefined')module.exports=api;
+ const api={level,chance:dropChance,grade,gold,xp};root.BFEncounterRewards=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

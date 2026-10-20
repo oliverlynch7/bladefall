@@ -7,4 +7,5 @@ for(const flag of ['hub','side','trial','arena','endless','delve','bossRush','bo
 ctx.G.devKeep=true;ctx.G.p.xp=0;ctx.gainXp(800);assert.equal(ctx.G.p.xp,0);delete ctx.G.devKeep;
 ctx.IN_ARENA=true;assert.equal(ctx.characterXpAward(800),800);ctx.IN_ARENA=false;
 assert(src.includes("'+'+characterXpAward(_xp)+' XP'")||src.includes("+characterXpAward(_xp)+' XP'"));assert(src.includes("characterXpAward(reward.amount)+' XP'"));
-assert(src.includes('if(xp>0) gainXp(xp)'));console.log('Campaign character XP +12.5%, class XP unchanged, excluded modes unchanged, award text and shared kill credit pass.');
+assert(src.includes('if(amount>0)gainXp(amount)'));
+for(const invalid of [NaN,Infinity,-Infinity,-1,1e300]){const before=ctx.G.p.xp;ctx.gainXp(invalid);assert.equal(ctx.G.p.xp,before,'invalid award does not poison player XP');}console.log('Campaign character XP +12.5%, class XP unchanged, excluded modes unchanged, award text and shared kill credit pass.');

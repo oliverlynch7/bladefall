@@ -1,0 +1,152 @@
+[
+  {
+    "test": "player-readiness-progression",
+    "pass": true,
+    "output": "{\"checks\":403,\"passed\":true,\"scope\":\"Actual kill/fallback payout functions, bounded curve, invalid inputs and save ordering; staged browser integration also required.\"}"
+  },
+  {
+    "test": "campaign-xp",
+    "pass": true,
+    "output": "Campaign character XP +12.5%, class XP unchanged, excluded modes unchanged, award text and shared kill credit pass."
+  },
+  {
+    "test": "class-progression",
+    "pass": true,
+    "output": "2873 rank, legacy-choice and ordered-choice checks passed across 17 classes.\nSkill/dash lesson persistence, legacy missing field and stale-save guard passed."
+  },
+  {
+    "test": "campaign-threat",
+    "pass": true,
+    "output": "60 campaign threat and health visibility checks passed."
+  },
+  {
+    "test": "campaign-combat-progression",
+    "pass": true,
+    "output": "134 fixed level scaling, boss durability bounds, attack warning/recovery, host snapshot, knockback and stagger fairness checks passed."
+  },
+  {
+    "test": "loot-progression",
+    "pass": true,
+    "output": "{\"checks\":21615,\"earlyRarities\":[\"common\",\"uncommon\"],\"gates\":[1,3,6,9,12],\"gearDeck\":[\"weapon\",\"helmet\",\"amulet\",\"weapon\",\"chest\",\"ring\",\"legs\",\"weapon\"],\"chestsPer100EarlyKills\":12,\"mimicsPer100Chests\":10}"
+  },
+  {
+    "test": "loot-transactions",
+    "pass": true,
+    "output": "PASS Comparison purchase bags gear without replacing equipped weapon\nPASS Full bag purchase preserves gold, inventory and equipped weapon\nPASS Successful comparison confirmation cannot spend twice\nPASS Last free slot accepts exactly one purchased item\nPASS Purchase validates level before spending\nPASS Purchase validates gold before spending\nPASS Purchase validates class before spending\nPASS Paid relic uses existing claim flow and preserves replaced gear capacity\nPASS weapon stays unclaimed with a full bag\nPASS weapon auto-sells only when explicitly enabled\nPASS weapon bags immediately in last free slot\nPASS armor stays unclaimed with a full bag\nPASS armor auto-sells only when explicitly enabled\nPASS armor bags immediately in last free slot\nPASS trinket stays unclaimed with a full bag\nPASS trinket auto-sells only when explicitly enabled\nPASS trinket bags immediately in last free slot\nPASS Repeated full-bag proximity does not flood comparison notices\nPASS Chest capacity warning does not expose its unopened reward\nPASS Full chest stays unclaimed and its fixed reward survives until space is available\nPASS Same-frame pickups fill only the last slot while quest items still collect\nPASS Auto-sell consumes each ground pickup once across repeated updates\n{\"cases\":22,\"passed\":true,\"scope\":\"Actual transaction functions under a DOM adapter; browser, render and integration checks still required.\"}"
+  },
+  {
+    "test": "save-safety",
+    "pass": true,
+    "output": "24 save normalization and isolated recovery checks passed."
+  },
+  {
+    "test": "coop-chests",
+    "pass": true,
+    "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}\nMimic personal co-op reward identity, guest persistence and one-time collection pass."
+  },
+  {
+    "test": "coop-companions",
+    "pass": true,
+    "output": "{\"checks\":82,\"passed\":true,\"pets\":[\"sunwing\",\"cinder\",\"shepherd\",\"emberpup\",\"spiritwolf\",\"stonewhelp\",\"wisp\",\"mender\",\"coinsprite\",\"gravewraith\"]}"
+  },
+  {
+    "test": "onboarding-coop",
+    "pass": true,
+    "output": "26 onboarding/co-op face and dialogue visibility checks passed.\n5 co-op rank/spectator serialization, update and legacy checks passed."
+  },
+  {
+    "test": "first-arrival",
+    "pass": true,
+    "output": "24 first-arrival regression checks passed."
+  },
+  {
+    "test": "premium-progression",
+    "pass": true,
+    "output": "514 premium award coordination, rollover, class choice, model, accessibility and sound-candidate checks passed."
+  },
+  {
+    "test": "campaign-replay",
+    "pass": true,
+    "output": "103 replay start, unlock, invalid input, checkpoint, earnings and guest sync checks passed"
+  },
+  {
+    "test": "campaign-hunts",
+    "pass": true,
+    "output": "2567 repeatable hunt source,3-round lifecycle,group kill,save,reward and shared authority checks passed."
+  },
+  {
+    "test": "campaign-compatibility",
+    "pass": true,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed."
+  },
+  {
+    "test": "menu-experience",
+    "pass": true,
+    "output": "{\"checks\":16,\"passed\":true}"
+  },
+  {
+    "test": "first-shop-upgrade",
+    "pass": true,
+    "output": "{\"rows\":[{\"cls\":\"warrior\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"ranger\",\"starter\":7.9,\"shop\":8.6,\"loot\":9},{\"cls\":\"mage\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"pirate\",\"starter\":null,\"shop\":8.6,\"loot\":9},{\"cls\":\"ninja\",\"starter\":10.6,\"shop\":7.7,\"loot\":8},{\"cls\":\"paladin\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"berserker\",\"starter\":15.8,\"shop\":17.3,\"loot\":18},{\"cls\":\"necromancer\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"chronomancer\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"stormcaller\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"warlock\",\"starter\":17.6,\"shop\":19.2,\"loot\":20},{\"cls\":\"skylancer\",\"starter\":15,\"shop\":16.3,\"loot\":17},{\"cls\":\"bladedancer\",\"starter\":10.6,\"shop\":11.5,\"loot\":12},{\"cls\":\"beastmaster\",\"starter\":7.9,\"shop\":8.6,\"loot\":9}],\"passed\":true}"
+  },
+  {
+    "test": "campaign-interaction",
+    "pass": true,
+    "output": "Campaign reach: solid walls, floors, low steps, overhead beams, raised courtyard walls, doors, owned controls, host validation, duplicate requests and persistent prop state passed."
+  },
+  {
+    "test": "campaign-journey",
+    "pass": true,
+    "output": "Campaign journey: 48 coverage, collision and floor-aware guidance checks passed.\nIce crossing gives its concrete outcome.\nRendering modules share their asset and scene instances.\nCornice guidance selects a reachable ledge without overriding unrelated tasks.\nCampaign dressing stays out of voyages, challenges and beta maps.\nIn-world signage policy and removal contracts passed."
+  },
+  {
+    "test": "campaign-refinement",
+    "pass": true,
+    "output": "Existing hunt progress, split-creature population cap, 56 real discovered-only clue links and purpose-specific pickup text passed."
+  },
+  {
+    "test": "boss-tactics",
+    "pass": true,
+    "output": "59 campaign boss armor, phase, status, cover, flank, co-op authority and isolation checks passed."
+  },
+  {
+    "test": "boss-combat-scope",
+    "pass": true,
+    "output": "146 boss target cases, encounter damage scaling, unchanged soldier/trial damage and Hydra damage replication passed."
+  },
+  {
+    "test": "brute-encounter",
+    "pass": true,
+    "output": "Brute: locked aim, warning safety, impact, 3s stagger, finite waves, slam, snapshot and death checks passed\n28 swept-preview/frame-rate checks plus remapped cue/death advice checks passed."
+  },
+  {
+    "test": "marksman",
+    "pass": true,
+    "output": "Marksman aim lock, recovery, single relocation/wave, protected glide, safe landing, snapshot and dead-state tests passed.\nRounded55percent relocation boundary passed."
+  },
+  {
+    "test": "party-survival",
+    "pass": true,
+    "output": "50 fall landing, rescue deadline, late packets, whole-level recovery, single wipe, guest wait, real die routing and nameplate checks passed.\n4 real fall/solo/duplicate hazard and attack-lock checks passed."
+  },
+  {
+    "test": "party-feedback",
+    "pass": true,
+    "output": "36 rescue reachability, timing, relay, duplicates, menu, legacy and presentation checks passed.\n6 downed rig selection/clamping/recovery checks passed.\n3 fallen-body grounding and get-up transition checks passed."
+  },
+  {
+    "test": "party-transitions",
+    "pass": true,
+    "output": "58 co-op transition, duplicate packet, catch-up and complete escrow checks passed.\n7 authenticated practice entrance/exit permission checks passed."
+  },
+  {
+    "test": "progression-celebrations",
+    "pass": true,
+    "output": "{\"checks\":44,\"introMs\":900,\"multiAward\":true,\"staleOwnerGuards\":true,\"playerNeverPauses\":true,\"distinctSounds\":true}\nActual nonblocking rank-banner / menu suspension / cancellation checks passed."
+  },
+  {
+    "test": "trial-mentor-map",
+    "pass": true,
+    "output": "{\"checks\":54,\"passed\":true}"
+  }
+]

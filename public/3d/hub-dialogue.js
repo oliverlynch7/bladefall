@@ -77,7 +77,7 @@
   el('hubReveal').onclick=unlock;
   unlock(); // Read and choose immediately; narration never gates interaction.
 
-  const allowed=a.meta.soundOn!==false;
+  const allowed=a.meta.soundOn!==false&&!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname||'')&&!/[?&]mute=1\b/.test(location.search);
   let ttsStarted=false;
   async function tts(){
    if(ttsStarted||token!==generation||!allowed||a.meta.dialogueTTS===false)return;ttsStarted=true;

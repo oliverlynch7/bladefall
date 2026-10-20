@@ -1128,10 +1128,10 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./sprint-race.js?v=2255"></script>
 <link rel="stylesheet" href="./sprint-race.css?v=2255">
 <link rel="stylesheet" href="./hub-dialogue.css?v=2288">
-<script src="./voice-content.js?v=2180"></script>
+<script src="./voice-content.js?v=2334"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./render-motion.js?v=2304"></script>
-<script src="./hub-dialogue.js?v=2325"></script>
+<script src="./hub-dialogue.js?v=2334"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
 <script src="./hub-tour.js?v=2294"></script>
 <script src="./controller.js?v=2323"></script>
@@ -1233,7 +1233,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.333.0-weapon-actions';
+const VERSION3D='2.334.0-npc-voices';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1719,7 +1719,7 @@ function audioSettingsHTML(){
       <input id="sfxSlider" type="range" min="0" max="100" step="5" value="${sv}"></div>
     <div class="setrow"><label><span>Narrator · tutorial &amp; story</span><input id="narrationOn" type="checkbox" ${meta.narrationOn!==false?'checked':''}></label><small>Voice B guides practice, menus, the story and the hub. Replay is available on each page.</small></div>
     <div class="setrow"><label><span>Narrator volume</span><b id="narrationVal">${Math.round(narrationVolume()*100)}%</b></label><input id="narrationSlider" type="range" min="0" max="100" step="5" value="${Math.round(narrationVolume()*100)}"><small>Independent of sound effects. Text and controls remain available when narration is off.</small></div>
-    <div class="setrow"><label><span>Recorded NPC voices</span><input id="dialogueVoice" type="checkbox" ${meta.dialogueVoice!==false?'checked':''}></label></div>
+    <div class="setrow"><label><span>Recorded NPC voices</span><input id="dialogueVoice" type="checkbox" ${meta.dialogueVoice!==false?'checked':''}></label><small>Plays the voice for the character you are speaking with. <a href="npc-voices/" target="_blank" rel="noopener" style="color:#f3ce87">Listen to recordings ↗</a></small></div>
     <div class="setrow"><label><span>Device voice for unrecorded lines</span><input id="dialogueTTS" type="checkbox" ${meta.dialogueTTS!==false?'checked':''}></label><small>On by default. Character voices depend on your device. Both follow sound-effects volume.</small></div>${rewardAudioSettings()}`;
 }
 function bindAudioSettings(){

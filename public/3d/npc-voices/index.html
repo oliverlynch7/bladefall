@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bladefall · NPC recordings</title>
+<style>
+:root{color-scheme:dark;font:16px/1.55 system-ui;background:#101c28;color:#edf0ed}body{max-width:1050px;margin:auto;padding:32px 20px}h1{font-family:Georgia,serif;color:#ffdc91;font-size:clamp(30px,6vw,48px);margin:0}a{color:#a8dbff}header{margin-bottom:28px}#summary{background:#203648;border:1px solid #68869c;padding:16px;border-radius:12px}details{border:1px solid #456278;border-radius:12px;margin:12px 0;background:#172a3a}summary{cursor:pointer;padding:16px;color:#ffe2a8;font-weight:650}article{padding:14px 18px;border-top:1px solid #344d61}p{margin:8px 0}audio{width:100%;max-width:600px;margin-top:8px}small{color:#a9bfce}label{display:block;margin:16px 0}input{padding:12px;font:inherit;border:1px solid #658298;border-radius:8px;background:#192d3e;color:white;width:min(90%,420px)}.pending{color:#e5ba8b}
+</style>
+<header><h1>The voices of Bladefall</h1><p>Your approved cast, with the lines currently recorded for the game.</p><a href="../npc-voice-preview/">Original casting auditions</a> · <a href="../">Play Bladefall</a></header>
+<div id="summary" role="status">Loading recording coverage…</div><label>Find a character <input id="search" type="search" placeholder="Thomas, Mara, Rift Keeper…"></label><main id="cast"></main>
+<script>
+let current=null;
+document.addEventListener('play',e=>{if(e.target instanceof HTMLAudioElement){if(current&&current!==e.target)current.pause();current=e.target;}},true);
+const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+fetch('./manifest.json?v=2334').then(r=>{if(!r.ok)throw Error();return r.json()}).then(data=>{
+ document.getElementById('summary').textContent=`${data.recordedLines} of ${data.totalLines} story lines recorded. ${data.characters.filter(c=>c.total&&c.recorded===c.total).length} characters complete. Pending lines still have readable dialogue. Warden’s Shade awaits a canon-safe script.`;
+ const root=document.getElementById('cast');
+ for(const c of data.characters){const d=document.createElement('details');d.dataset.name=c.name.toLowerCase();d.innerHTML=`<summary>${escape(c.name)} · voice ${escape(c.option)} · ${c.recorded}/${c.total} lines</summary>`;
+  const rows=Object.values(data.lines).filter(l=>l.speaker===c.id);
+  if(!rows.length)d.insertAdjacentHTML('beforeend','<article class="pending">Recording pending. Your casting choice is saved.</article>');
+  for(const row of rows){const article=document.createElement('article');article.innerHTML=`<small>${escape(row.id)}</small><p>${escape(row.text)}</p>`;const a=document.createElement('audio');a.controls=true;a.preload='none';a.src='./'+row.audio.split('/').at(-1);article.append(a);d.append(article);}root.append(d);
+ }
+ document.getElementById('search').oninput=e=>{for(const d of root.children)d.hidden=!d.dataset.name.includes(e.target.value.toLowerCase().trim());};
+}).catch(()=>document.getElementById('summary').textContent='Recordings could not load. Please refresh to try again.');
+</script></html>

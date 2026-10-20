@@ -1,6 +1,12 @@
-/* Shared by the dialogue preview and future in-world NPC presentation.
-   Only server-approved, current-wording lines are exposed by this endpoint. */
+/* Approved NPC cast plus published studio recordings.
+   Attach a take only when its wording still matches the live dialogue. */
 let manifestPromise=null,manifestUntil=0;
+let castPromise=null;
+function castManifest(){
+ if(!castPromise)castPromise=fetch('./npc-voices/manifest.json?v=2334')
+  .then(r=>r.ok?r.json():null).catch(()=>{castPromise=null;return null});
+ return castPromise;
+}
 function manifest(){
  const now=Date.now();
  if(manifestPromise&&now<manifestUntil)return manifestPromise;
@@ -15,7 +21,14 @@ function manifest(){
 }
 window.BFVoiceContent={async apply(book){
  try{
-  const data=await manifest();if(!data)return book;
+  const [cast,data]=await Promise.all([castManifest(),manifest()]);
+  for(const [id,line]of Object.entries(cast?.lines||{})){
+   const node=book.nodes[id];
+   if(!node||node.text.trim()!==line.text?.trim()||node.voice?.speaker!==line.speaker)continue;
+   if(!/^\.\/npc-voices\/[a-zA-Z0-9_.-]+\.mp3$/.test(line.audio||''))continue;
+   node.recordedAudio=line.audio;node.voiceRevision=cast.revision;node.voiceCast=line.option;
+  }
+  if(!data)return book;
   for(const [id,line]of Object.entries(data.lines||{})){
    if(!Object.prototype.hasOwnProperty.call(book.nodes,id)||typeof line.text!=='string'||!line.audio?.startsWith('/voice-api/published/'))continue;
    if(book.nodes[id].text.trim()!==line.text.trim())continue;book.nodes[id].recordedAudio=line.audio;book.nodes[id].voiceRevision=line.revision;

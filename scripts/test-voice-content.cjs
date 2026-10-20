@@ -9,15 +9,19 @@ async function run(){
   unsafe:{text:'A safe road.',audio:'https://other.example/unsafe.wav',revision:1}
  }})};
  const window={};
- const context={window,Date:{now:()=>now},AbortSignal:{timeout:()=>({})},fetch:async()=>{calls++;return reply}};
+ const context={window,Date:{now:()=>now},AbortSignal:{timeout:()=>({})},fetch:async url=>{if(url.includes('npc-voices/manifest'))return {ok:true,json:async()=>({revision:'cast-test',lines:{static:{text:'Hello.',speaker:'thomas',audio:'./npc-voices/hello.mp3'},changed:{text:'Old.',speaker:'thomas',audio:'./npc-voices/old.mp3'},wrong:{text:'Hello.',speaker:'mara',audio:'./npc-voices/wrong.mp3'},escape:{text:'Hello.',speaker:'thomas',audio:'./npc-voices/../../unsafe.mp3'}}})};calls++;return reply}};
  vm.runInNewContext(fs.readFileSync('public/3d/voice-content.js','utf8'),context);
- const make=()=>({nodes:{good:{text:'A safe road.'},old:{text:'A revised line.'},unsafe:{text:'A safe road.'}}});
+ const make=()=>({nodes:{good:{text:'A safe road.'},old:{text:'A revised line.'},unsafe:{text:'A safe road.'},static:{text:'Hello.',voice:{speaker:'thomas'}},changed:{text:'New.',voice:{speaker:'thomas'}},wrong:{text:'Hello.',voice:{speaker:'thomas'}},escape:{text:'Hello.',voice:{speaker:'thomas'}}}});
  const books=Array.from({length:20},make);
  await Promise.all(books.map(book=>window.BFVoiceContent.apply(book)));
  assert.equal(calls,1,'parallel dialogue books share one request');
  assert.equal(books[0].nodes.good.recordedAudio,'/voice-api/published/good.wav');
  assert.equal(books[0].nodes.old.recordedAudio,undefined,'outdated take is not attached');
  assert.equal(books[0].nodes.unsafe.recordedAudio,undefined,'unpublished URL is rejected');
+ assert.equal(books[0].nodes.static.recordedAudio,'./npc-voices/hello.mp3','approved static take attaches');
+ assert.equal(books[0].nodes.changed.recordedAudio,undefined,'changed static text rejected');
+ assert.equal(books[0].nodes.wrong.recordedAudio,undefined,'wrong actor rejected');
+ assert.equal(books[0].nodes.escape.recordedAudio,undefined,'path traversal rejected');
  await window.BFVoiceContent.apply(make());assert.equal(calls,1,'successful manifest is reused');
  now+=30001;reply={ok:false};
  await window.BFVoiceContent.apply(make());assert.equal(calls,2,'success cache expires');

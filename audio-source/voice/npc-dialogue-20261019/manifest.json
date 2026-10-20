@@ -1,0 +1,830 @@
+{
+  "schema": 1,
+  "revision": "npc-auditions-20261019-a",
+  "voices": {
+    "thomas": {
+      "status": "saved",
+      "voice_id": "VnH80SvYIrmMPvGN74mj",
+      "option": "C"
+    },
+    "mara": {
+      "status": "saved",
+      "voice_id": "2Yl1LlqOKjDbuYtz84KF",
+      "option": "A"
+    },
+    "gus": {
+      "status": "saved",
+      "voice_id": "B32xfz0bCCJRqaJ2rIHo",
+      "option": "C"
+    },
+    "lewis": {
+      "status": "saved",
+      "voice_id": "8bs1QYIEWrCqhxcYgZMv",
+      "option": "B"
+    },
+    "beth": {
+      "status": "saved",
+      "voice_id": "jTIZMcS9f0qvUKEvKeUa",
+      "option": "A"
+    },
+    "bethBrother": {
+      "status": "saved",
+      "voice_id": "VZg8Ng5etJvZMVBRoWlp",
+      "option": "A"
+    },
+    "beastkeeper": {
+      "status": "saved",
+      "voice_id": "qtvKnVmKqtuTeWxsG8ib",
+      "option": "B"
+    }
+  },
+  "lines": {
+    "briar.thomas.first": {
+      "status": "saved",
+      "sha256": "de3f35bb7618a27c77afe5c75e7b530af5884a4cf14b11043001ad61919876a1",
+      "option": "C",
+      "used_before": 28046,
+      "file": "briar.thomas.first-de3f35bb7618.mp3",
+      "audio_sha256": "299c4f655d4fad09f5bd2c5abaeb6d4632ac6c7b5d9ca3c2f1490e96582eb4ac",
+      "bytes": 65662,
+      "receipt": {
+        "request-id": "M5wsn3Zr6NpjCt8jQDZh",
+        "character-cost": "28",
+        "history-item-id": "LMVGzNei53g4HAwkMJs8"
+      }
+    },
+    "briar.thomas.protect": {
+      "status": "saved",
+      "sha256": "9477a52c3d259017d2aca6103fc3c874dfb68642d7bcac8961843832f4591836",
+      "option": "C",
+      "used_before": 28046,
+      "file": "briar.thomas.protect-9477a52c3d25.mp3",
+      "audio_sha256": "06636792b1158aae2879acb342cbe02939b20cfd82e4c16da8b0881ceb1f009d",
+      "bytes": 75275,
+      "receipt": {
+        "request-id": "iG5dlAiM3eYZRHv9wphr",
+        "character-cost": "39",
+        "history-item-id": "qwbhhR8N8zcT6RN8ESnh"
+      }
+    },
+    "briar.thomas.afraid": {
+      "status": "saved",
+      "sha256": "34f53ab213235959651bf02999a1881226a867053baefba434864995975e8e4d",
+      "option": "C",
+      "used_before": 28046,
+      "file": "briar.thomas.afraid-34f53ab21323.mp3",
+      "audio_sha256": "f30b303040037f1b18bfb7636a03bf6837b277e0f720c3a580e6db8740a2152c",
+      "bytes": 90322,
+      "receipt": {
+        "request-id": "kUeO3mPRyM0uV0ymnnPF",
+        "character-cost": "48",
+        "history-item-id": "CtZmftvjyVh3zMDeag31"
+      }
+    },
+    "briar.thomas.joke": {
+      "status": "saved",
+      "sha256": "e0d26aeff7d1da55a24d8c9a7321cd6e52fd5dcf04d8b8f8058d539a0ad5e3ec",
+      "option": "C",
+      "used_before": 28046,
+      "file": "briar.thomas.joke-e0d26aeff7d1.mp3",
+      "audio_sha256": "8e8997e2b5073a535112016ba004ba78d0cfe9d6a2be69da9f91a4cade160324",
+      "bytes": 74021,
+      "receipt": {
+        "request-id": "fATELPXwr3ubADfiVT2E",
+        "character-cost": "35",
+        "history-item-id": "7VDZumhQDYuqAdu9HkZz"
+      }
+    },
+    "briar.thomas.ready": {
+      "status": "saved",
+      "sha256": "8ebbef6611616c54b465b8eff862d2ed0cf50a7bdcd8e00b929c2b8a2bccaf05",
+      "option": "C",
+      "used_before": 28046,
+      "file": "briar.thomas.ready-8ebbef661161.mp3",
+      "audio_sha256": "63ad75a865610b6811af326c108233017dd5beb56289edc870afdd2d3b7cf1a9",
+      "bytes": 67334,
+      "receipt": {
+        "request-id": "JWhYntsCzUOVD2GjqIsY",
+        "character-cost": "31",
+        "history-item-id": "eoHG2BdSr9gTxZ9ZjNCt"
+      }
+    },
+    "rv.keepsake.offer": {
+      "status": "saved",
+      "sha256": "876c7059166fe216b1b0d9bc2e1557c91e0b9bf04b0f54bf9713aa4ee8003464",
+      "option": "C",
+      "used_before": 28046,
+      "file": "rv.keepsake.offer-876c7059166f.mp3",
+      "audio_sha256": "7fac03b1a4c5522874367c36de4bee7ab871e8a1dd481961a5902fbc870617b4",
+      "bytes": 82798,
+      "receipt": {
+        "request-id": "xiS6Zq4nRkzD2Tz2liTU",
+        "character-cost": "37",
+        "history-item-id": "f44t4Vf9H6GZEP5tpIXg"
+      }
+    },
+    "rv.keepsake.later": {
+      "status": "saved",
+      "sha256": "d65ca196f35c209381d20d92c21bd0530189befa3c4054412ab65acbded7bdbb",
+      "option": "C",
+      "used_before": 28046,
+      "file": "rv.keepsake.later-d65ca196f35c.mp3",
+      "audio_sha256": "a86b5d841033a83242e9e00a8f100f3b2a69a09007551150df8a945740a982ff",
+      "bytes": 46436,
+      "receipt": {
+        "request-id": "7wmmehMcxUlVpot2Vy4a",
+        "character-cost": "22",
+        "history-item-id": "YWVWWIv7kMo4MkqzQk3d"
+      }
+    },
+    "rv.keepsake.accepted": {
+      "status": "saved",
+      "sha256": "c0b76536586823a6d2387322ade1d91a068d4072e42954f8dcda4846f9da8b9c",
+      "option": "C",
+      "used_before": 28046,
+      "file": "rv.keepsake.accepted-c0b765365868.mp3",
+      "audio_sha256": "953b3edc221dd6f3de4551e3907ab2eadc68cdbf8a184f710544fdb9c95ace67",
+      "bytes": 119997,
+      "receipt": {
+        "request-id": "mOujnQnLDVsuWaONhRfz",
+        "character-cost": "49",
+        "history-item-id": "Q7qdFtNIYWWC42NZ17uS"
+      }
+    },
+    "rv.keepsake.wait": {
+      "status": "saved",
+      "sha256": "bf3bc1fb60160134f549cf4208920a00626dbb492688e4bb5031c5ffe5357da3",
+      "option": "C",
+      "used_before": 28046,
+      "file": "rv.keepsake.wait-bf3bc1fb6016.mp3",
+      "audio_sha256": "3dc430bfbd2fcef7a060b0920065a3ed66a7ad25eae6f9cd204253757935af1a",
+      "bytes": 77783,
+      "receipt": {
+        "request-id": "DPpnZRtDdMYQbUnaRNXO",
+        "character-cost": "31",
+        "history-item-id": "5QD1ivrYeJyAHV4k2Yqj"
+      }
+    },
+    "rv.keepsake.deliver": {
+      "status": "saved",
+      "sha256": "10b007440b006a357dd91a3d6f71cd0ed09b4f035054f1535d6bec690526eb24",
+      "option": "C",
+      "used_before": 28046,
+      "file": "rv.keepsake.deliver-10b007440b00.mp3",
+      "audio_sha256": "80d1a004b2ba0ccb523ceb210c70bd0ff6699df0ee97651f5059417846fe91ee",
+      "bytes": 53123,
+      "receipt": {
+        "request-id": "65Q1q1qS10lAzBSw1EKa",
+        "character-cost": "20",
+        "history-item-id": "VV9N65pMBRBdCUsbsgxH"
+      }
+    },
+    "rv.keepsake.thanks": {
+      "status": "saved",
+      "sha256": "fa6cedcf00bb18c4764088c6aed94cdd1f2241bdf20661dba938602a5195672d",
+      "option": "C",
+      "used_before": 28046,
+      "file": "rv.keepsake.thanks-fa6cedcf00bb.mp3",
+      "audio_sha256": "b4694da668201cdef9800f8559eea05bf09f9fe1ac438f518e50c5450231c945",
+      "bytes": 67752,
+      "receipt": {
+        "request-id": "8OEV0eFvGqPA538sBWeZ",
+        "character-cost": "31",
+        "history-item-id": "Z5cT6dNiOqxwYsRvlgrD"
+      }
+    },
+    "rv.keepsake.worry": {
+      "status": "saved",
+      "sha256": "5046a99080d94af7e68264a1595b735cdd35bbfa90a35630a67605af07cd5023",
+      "option": "C",
+      "used_before": 28386,
+      "file": "rv.keepsake.worry-5046a99080d9.mp3",
+      "audio_sha256": "ccee2d0f1450f328f2133f0366e8f2602acdc1a7d11929af535274c483298f58",
+      "bytes": 63572,
+      "receipt": {
+        "request-id": "zrLzydlPQFf31coCtkI2",
+        "character-cost": "32",
+        "history-item-id": "8OrTMYI5px1tSoRFtJRH"
+      }
+    },
+    "rv.keepsake.home": {
+      "status": "saved",
+      "sha256": "1befe0f2aafff185ce2c8d6e5c17d815cd4137802315e01af8c7a273fb35e70b",
+      "option": "C",
+      "used_before": 28386,
+      "file": "rv.keepsake.home-1befe0f2aaff.mp3",
+      "audio_sha256": "a6f80b0b055f349e098efed15c14d0a118ef07f07595ea9af2282a6b2e80a240",
+      "bytes": 67334,
+      "receipt": {
+        "request-id": "rWaKTF5TVWZeHKdnbUXI",
+        "character-cost": "34",
+        "history-item-id": "fEfxo4DiB5EvfIg6VOYz"
+      }
+    },
+    "rv.keepsake.reports": {
+      "status": "saved",
+      "sha256": "f6fc58a2b195e0444b59be4bd181204ef7ba1b05595744ba1ad8b537c8a79a53",
+      "option": "C",
+      "used_before": 28386,
+      "file": "rv.keepsake.reports-f6fc58a2b195.mp3",
+      "audio_sha256": "cbb1013a54f6aef2d32a8371774d1579dd90e029fedcf744d4e96e7c1dd3f7a6",
+      "bytes": 66498,
+      "receipt": {
+        "request-id": "MmhlhqqroHFkta0r2AfH",
+        "character-cost": "31",
+        "history-item-id": "KyLZYrDcgzR7PAqnNnfE"
+      }
+    },
+    "briar.mara.first": {
+      "status": "saved",
+      "sha256": "536d117c948fe131ddbaf5c1762bea7598c75795a231625fc91e26b4f65eb82a",
+      "option": "A",
+      "used_before": 28386,
+      "file": "briar.mara.first-536d117c948f.mp3",
+      "audio_sha256": "47475c026f957af49a64b137158f7a4ce17799fb418a689d62a2e3d16ad66026",
+      "bytes": 134207,
+      "receipt": {
+        "request-id": "TwsWxCPOJR6kDsAzYX7Q",
+        "character-cost": "41",
+        "history-item-id": "0UXI0RGkaPlF3vfPdNfL"
+      }
+    },
+    "briar.mara.why": {
+      "status": "saved",
+      "sha256": "921808df50942a2e6ebb86793aeea1d985794b5539219b690497610fa955d412",
+      "option": "A",
+      "used_before": 28386,
+      "file": "briar.mara.why-921808df5094.mp3",
+      "audio_sha256": "ce39289dfd9afa50997d3f3b23b77274dee2685ddcf7630afbd1cfa38d498132",
+      "bytes": 61901,
+      "receipt": {
+        "request-id": "ULEsAeKZToac1XVJ9Y2n",
+        "character-cost": "24",
+        "history-item-id": "3skjbns6irKsgj6p3sQm"
+      }
+    },
+    "briar.mara.joke": {
+      "status": "saved",
+      "sha256": "fc04469c394e2535e3478eec47bd0158e8b6a60923f950a1c264173e386f5a85",
+      "option": "A",
+      "used_before": 28386,
+      "file": "briar.mara.joke-fc04469c394e.mp3",
+      "audio_sha256": "10ca3d5f4902ae4a35124d395024ce7acb1ec307fc7934cfa4f0ae5dcd2e5e53",
+      "bytes": 100771,
+      "receipt": {
+        "request-id": "BQFWWStGm8ZFlTsnPoVj",
+        "character-cost": "30",
+        "history-item-id": "4D9dBAP7wdaKBqCMx3gN"
+      }
+    },
+    "briar.mara.supplies": {
+      "status": "saved",
+      "sha256": "44edaf9b885abea044f5c212c4440649bac86684960bb36f9baef12178d0ed88",
+      "option": "A",
+      "used_before": 28386,
+      "file": "briar.mara.supplies-44edaf9b885a.mp3",
+      "audio_sha256": "c53c73a2e63cc2200e9e18bd779db3ea0c61b50db222e7e34562e36c3915864b",
+      "bytes": 81963,
+      "receipt": {
+        "request-id": "q8TMVwy0iJnojpOpzvFR",
+        "character-cost": "43",
+        "history-item-id": "WQLIjd3XIWVDaT6z4X6s"
+      }
+    },
+    "briar.mara.wait": {
+      "status": "saved",
+      "sha256": "6385cb38d7cc82f77bfaa452cabf6fe771c1181e938b6ea7245912f37f6a72de",
+      "option": "A",
+      "used_before": 28386,
+      "file": "briar.mara.wait-6385cb38d7cc.mp3",
+      "audio_sha256": "ca45cd36600190893ed2210ed7b59fe506479fa216496b7524f331e3fb169628",
+      "bytes": 75275,
+      "receipt": {
+        "request-id": "fY5fc8yVjmNMnrHsHpmA",
+        "character-cost": "24",
+        "history-item-id": "2BYl3NMKCy5KED2qLNCj"
+      }
+    },
+    "briar.mara.heal": {
+      "status": "saved",
+      "sha256": "02a1b6667cf53fc806844cd42cb74e9a40c9af44073a73a7a0ba81e0f409917e",
+      "option": "A",
+      "used_before": 28386,
+      "file": "briar.mara.heal-02a1b6667cf5.mp3",
+      "audio_sha256": "1f638de9086203960ebecfd4398d4d5597638b123bd7a25d3ddf876f310fcffe",
+      "bytes": 198155,
+      "receipt": {
+        "request-id": "VfTUkOXR6zaKgzpM1hyL",
+        "character-cost": "68",
+        "history-item-id": "IABFNeKLDBfZjqoHCSpT"
+      }
+    },
+    "briar.mara.next": {
+      "status": "saved",
+      "sha256": "6c84c8485fe0bdf5271d3df44d26bc8806b65450dc4c158d3b88918a295bfce1",
+      "option": "A",
+      "used_before": 28386,
+      "file": "briar.mara.next-6c84c8485fe0.mp3",
+      "audio_sha256": "8bcfed56a8a874a3af68bcb9837f4af8f84c7de63ad2b57892af2847ec26d434",
+      "bytes": 138387,
+      "receipt": {
+        "request-id": "L8v8BDRJMZtX7Z3Vn0fI",
+        "character-cost": "46",
+        "history-item-id": "HJzL7XgkEnNXJMkIU3wG"
+      }
+    },
+    "briar.gus.first": {
+      "status": "saved",
+      "sha256": "67e509beff7c8e5decc5a1c53dfedf0e13b77b79bf1e316ef8a5727ed4a88ab5",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.first-67e509beff7c.mp3",
+      "audio_sha256": "ebc8c2ee5cb80affaf702ffcf2d2bb8a9531b20aeb06588f14c6506183694a4c",
+      "bytes": 93247,
+      "receipt": {
+        "request-id": "ktndwGfB4azscO28QfpN",
+        "character-cost": "28",
+        "history-item-id": "QRqjeTNbPMAiN85ctwkl"
+      }
+    },
+    "briar.gus.home": {
+      "status": "saved",
+      "sha256": "44dd74754c082e0432d450cd44fd41d49ba4796be93439989ededfd8305ecd61",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.home-44dd74754c08.mp3",
+      "audio_sha256": "5e3b8fe4db8c5c8adb1b760c480a20f931f3a14a035846746dd981f6b3358723",
+      "bytes": 52287,
+      "receipt": {
+        "request-id": "9uToIztsqO4ZY7HLIdeV",
+        "character-cost": "18",
+        "history-item-id": "9zTtcfCHKkkXZO5LETw9"
+      }
+    },
+    "briar.gus.request": {
+      "status": "saved",
+      "sha256": "f7313e645b10315f65376ea6700600df631e1682832b384aa9cac81cf39c1370",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.request-f7313e645b10.mp3",
+      "audio_sha256": "2ddbcface1322004949c6ee5efc853865be3d5ec84462fe3bb3128b8956bfaad",
+      "bytes": 113310,
+      "receipt": {
+        "request-id": "0trTz5hjQV6ogOWAUCuf",
+        "character-cost": "40",
+        "history-item-id": "iBZjvrK3NPiu06MsUMca"
+      }
+    },
+    "briar.gus.waiting": {
+      "status": "saved",
+      "sha256": "df955197a3ed3d78c8a1973380bfe3c51b956f9e48f53450fc1fe89b32b9f41d",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.waiting-df955197a3ed.mp3",
+      "audio_sha256": "7c7ffbdf40e5724c21236ada246ddc85690366ad2adcb88f6d02f2c5bf79cc5d",
+      "bytes": 51452,
+      "receipt": {
+        "request-id": "gu1YjHUdDZjFBRop5HNs",
+        "character-cost": "14",
+        "history-item-id": "KIeZ5WlIgQSqnIOJVjz4"
+      }
+    },
+    "briar.gus.thanks": {
+      "status": "saved",
+      "sha256": "2e2effda542ca08c9cef97d24c6bb21187a11d40962f0d7320c93e16b16c454f",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.thanks-2e2effda542c.mp3",
+      "audio_sha256": "87a91e979f96c07fa1bea011416e6eaeadb1f13dd66e9785192d3ef0173ec4ca",
+      "bytes": 119997,
+      "receipt": {
+        "request-id": "eH13Nx7WAYPFdfZMQzhs",
+        "character-cost": "34",
+        "history-item-id": "S2BXazH1e9X9GdxBmyQ3"
+      }
+    },
+    "briar.gus.done": {
+      "status": "saved",
+      "sha256": "8d3dfc6e319be5462619dfd8d7ff6a45637920c71bade0515e50aefe31991953",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.done-8d3dfc6e319b.mp3",
+      "audio_sha256": "f7d95721be8aa775ec7342051c2bc47137b7f99d1f6e90b8d2196b88f467e937",
+      "bytes": 103696,
+      "receipt": {
+        "request-id": "kgrHRyyHQRnhBRjYPuhR",
+        "character-cost": "30",
+        "history-item-id": "y3FGX8JgR5LzRBpkEWU3"
+      }
+    },
+    "briar.gus.hurt": {
+      "status": "saved",
+      "sha256": "d7b542d2073424a90a2d92578d5978e755e71c862fc1a9b34b6ae29300b61d49",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.hurt-d7b542d20734.mp3",
+      "audio_sha256": "6ca948a32d3fad136adf5325f7175d1e44561825d9b08f4a5015e461f961dc79",
+      "bytes": 125848,
+      "receipt": {
+        "request-id": "yISV9yY999BN0mwWFeVk",
+        "character-cost": "34",
+        "history-item-id": "aUuD6Q56mhdjI37fI2xW"
+      }
+    },
+    "briar.gus.sorry": {
+      "status": "saved",
+      "sha256": "496a055b89298fe2e84e870d016b7d61a3f14bcc01b9f86a096d8283761b6044",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.sorry-496a055b8929.mp3",
+      "audio_sha256": "b95e5ad4b468ca2dbf9aa8fd5f217763737605d238fd1931dc3a852316cde228",
+      "bytes": 104532,
+      "receipt": {
+        "request-id": "g0aemZB89tKyRj9208uH",
+        "character-cost": "28",
+        "history-item-id": "DzZMTzpqKXITSC3wE95B"
+      }
+    },
+    "briar.gus.repair": {
+      "status": "saved",
+      "sha256": "5dec7891fb008ffe3c143ffbc2a86ad3eea5ad63de2feec955281a0e916f985a",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.repair-5dec7891fb00.mp3",
+      "audio_sha256": "25e84cd550b8072605891f8d1295768dea386b30a80aec7067f53e8a44b77804",
+      "bytes": 92412,
+      "receipt": {
+        "request-id": "bCVOvsO7jA65Hxel6tYJ",
+        "character-cost": "30",
+        "history-item-id": "xAhK3betTscEtdId9rEh"
+      }
+    },
+    "briar.gus.closed": {
+      "status": "saved",
+      "sha256": "87816dcfdd455e3ffeae8a0660e79c056ade94d2ee18410cef8c6714b3e42bf6",
+      "option": "C",
+      "used_before": 28790,
+      "file": "briar.gus.closed-87816dcfdd45.mp3",
+      "audio_sha256": "00ec325d2a92747392dc6aef03cdd54d6ba82cf4e2aa0fa30bbdcc6b634d4e87",
+      "bytes": 99099,
+      "receipt": {
+        "request-id": "SuNYdWPsb4hCtMNw4gAE",
+        "character-cost": "30",
+        "history-item-id": "FlM932rDNWGkPXtgznAL"
+      }
+    },
+    "briar.lewis.first": {
+      "status": "saved",
+      "sha256": "0b273377470b19b3e71c6553fc0b4b74c666e41b0b8a2eca790154c48f2607e3",
+      "option": "B",
+      "used_before": 29076,
+      "file": "briar.lewis.first-0b273377470b.mp3",
+      "audio_sha256": "1bcb224d8099e4afe090bbd7f5305b28407ccf8479b2ca0c94d8ba712f407bb7",
+      "bytes": 93247,
+      "receipt": {
+        "request-id": "Fd7xSxrlc7qXILaXp2ga",
+        "character-cost": "35",
+        "history-item-id": "YssHopruWyy9aAgUCCKf"
+      }
+    },
+    "briar.lewis.routes": {
+      "status": "saved",
+      "sha256": "baa2b8887e21d57051a0fd0e37318b8ada110f26e3a897de02196c8603009299",
+      "option": "B",
+      "used_before": 29076,
+      "file": "briar.lewis.routes-baa2b8887e21.mp3",
+      "audio_sha256": "e2d86ab8b1f40c761bf1c68ecb2b4d1d531170f621e53a36884e4a97348d1f87",
+      "bytes": 154270,
+      "receipt": {
+        "request-id": "GQXG1PwA3WFbvXNmO8P8",
+        "character-cost": "45",
+        "history-item-id": "X5HnTmQN9PalWxqV4cRh"
+      }
+    },
+    "briar.lewis.prisoners": {
+      "status": "saved",
+      "sha256": "97a5f9cd732277a7a1d9d52282206d261a4a237b3d56884f59d0e9bbbc0a9566",
+      "option": "B",
+      "used_before": 29076,
+      "file": "briar.lewis.prisoners-97a5f9cd7322.mp3",
+      "audio_sha256": "f41e9a0057b8685cfe1ca6f924db9148e9d8be77881a9181d8ceb1d88c124131",
+      "bytes": 114145,
+      "receipt": {
+        "request-id": "j8ISoB1CqHzVitFTo9cg",
+        "character-cost": "37",
+        "history-item-id": "bkUJrebsN9ZJ0TbLvUkE"
+      }
+    },
+    "briar.lewis.waiting": {
+      "status": "saved",
+      "sha256": "6921fafdf7427f39293d57c265215e669167b0e87e78d56ca47d3f0f42f81665",
+      "option": "B",
+      "used_before": 29076,
+      "file": "briar.lewis.waiting-6921fafdf742.mp3",
+      "audio_sha256": "623a4b6941dce50f505fa8e3568bddf3f59d7d50eb545406cad621129cf8c1a8",
+      "bytes": 109548,
+      "receipt": {
+        "request-id": "G3xekEKeifVyer6bSfoZ",
+        "character-cost": "30",
+        "history-item-id": "FXGsGt58XS4HwlL77dD5"
+      }
+    },
+    "briar.lewis.clear": {
+      "status": "saved",
+      "sha256": "f8f38ef3483968f6279888770f71d1c30a3238cce89ca284918d53951a58503b",
+      "option": "B",
+      "used_before": 29076,
+      "file": "briar.lewis.clear-f8f38ef34839.mp3",
+      "audio_sha256": "bdddab1c05f0dbb869fa9bf3e626d784f371f642fd4f9e785ddf752ef1a1a7dc",
+      "bytes": 137969,
+      "receipt": {
+        "request-id": "Oo4fwjSpkdcs1b2N5vmC",
+        "character-cost": "36",
+        "history-item-id": "OPkFfHRHlAD9Kq6Jksyx"
+      }
+    },
+    "briar.beth.first": {
+      "status": "saved",
+      "sha256": "88b1dd7db8bb934e4973dfe73d91c2df4a68eb065f1b8189fbc7643c0925d2da",
+      "option": "A",
+      "used_before": 29076,
+      "file": "briar.beth.first-88b1dd7db8bb.mp3",
+      "audio_sha256": "cb5543b513543e631f4f2d1bd18fa3ab0e65c92e75c76ac42142890e51344e99",
+      "bytes": 102861,
+      "receipt": {
+        "request-id": "r87btcx7TuRQ2nB9RLzB",
+        "character-cost": "37",
+        "history-item-id": "YVlNlgoqoeEk7E2fXa4V"
+      }
+    },
+    "briar.beth.sheep": {
+      "status": "saved",
+      "sha256": "82a3899749d96a1f589cb9079c9cf492fe182ae9a0e4ac152f7290bd66b487b2",
+      "option": "A",
+      "used_before": 29076,
+      "file": "briar.beth.sheep-82a3899749d9.mp3",
+      "audio_sha256": "58e244538cadc5c13f33facd6c96bfa0f3560cce22bbb2e8037ef4637a2c3e13",
+      "bytes": 55213,
+      "receipt": {
+        "request-id": "szLFVThiIN515Y4G7400",
+        "character-cost": "25",
+        "history-item-id": "UYgOd0LIN68AJXu8gpB4"
+      }
+    },
+    "briar.beth.trail": {
+      "status": "saved",
+      "sha256": "d6e5a3e2896adf08fa589cf1877c9cebdd368ed1141f2d79740afc4b820a6fe5",
+      "option": "A",
+      "used_before": 29076,
+      "file": "briar.beth.trail-d6e5a3e2896a.mp3",
+      "audio_sha256": "4661ee0e8df2cd11c7187e1212dc155b445474a678915a7bf06a3bd8ef712cca",
+      "bytes": 110384,
+      "receipt": {
+        "request-id": "MlHx81nfidWui59O6aZi",
+        "character-cost": "43",
+        "history-item-id": "U80kOuTby6v3GxqwPsL4"
+      }
+    },
+    "briar.beth.relief": {
+      "status": "saved",
+      "sha256": "73ce8df8bb77149b135eeeacaf6eba005ccc310724c3ba3ab20d01cc98e765e5",
+      "option": "A",
+      "used_before": 29076,
+      "file": "briar.beth.relief-73ce8df8bb77.mp3",
+      "audio_sha256": "e06e7004c50d277a69672259a41492b76eaaeda3204fbff0c24840be026f619d",
+      "bytes": 71514,
+      "receipt": {
+        "request-id": "Zix5gHVJkzdeZpfKTtbA",
+        "character-cost": "26",
+        "history-item-id": "qXd6HaVnWMgWvsFjODOL"
+      }
+    },
+    "briar.bethBrother.first": {
+      "status": "saved",
+      "sha256": "adbcb4c43051585e89c22be2eb98beb8b697fcd43b83ec8084571e03da82d27a",
+      "option": "A",
+      "used_before": 29076,
+      "file": "briar.bethBrother.first-adbcb4c43051.mp3",
+      "audio_sha256": "88d5a6389391066a976d211042222e28fbd25aa097f3680dab52f5d708ffd90b",
+      "bytes": 138387,
+      "receipt": {
+        "request-id": "Tl2eDKH8MoJf8Ji3UAJR",
+        "character-cost": "32",
+        "history-item-id": "HeZbeupm1an7vcRZIFnN"
+      }
+    },
+    "briar.bethBrother.wait": {
+      "status": "saved",
+      "sha256": "ddf5af03dd2156f76bcd907348b77b68ff0c118062d7baa04f5467427eec89f2",
+      "option": "A",
+      "used_before": 29076,
+      "file": "briar.bethBrother.wait-ddf5af03dd21.mp3",
+      "audio_sha256": "2d478d844ad3b42cdc102cc22a47b6bf3f8b0d9685db40cab98e207146785dda",
+      "bytes": 57721,
+      "receipt": {
+        "request-id": "AVILkBpxnW2zsFdp10Lf",
+        "character-cost": "14",
+        "history-item-id": "GAkYUZK75V9IhOjOmJBP"
+      }
+    },
+    "briar.bethBrother.safe": {
+      "status": "saved",
+      "sha256": "1a953a8ff127b15e4256787abcadfab15876d64db3cb69309b8d6cb23af74487",
+      "option": "A",
+      "used_before": 29436,
+      "file": "briar.bethBrother.safe-1a953a8ff127.mp3",
+      "audio_sha256": "8d8dbaf1cb57b979ebc95e8d0d93979c9d83ead7357e182365733789c5019288",
+      "bytes": 109548,
+      "receipt": {
+        "request-id": "wWE7JH3HfC0aqiLa6l2F",
+        "character-cost": "28",
+        "history-item-id": "2g3gn0X95iPpr0bV90cT"
+      }
+    },
+    "hub.beastkeeper.intro": {
+      "status": "saved",
+      "sha256": "cdafd7eae584d8009da66818e49129fc54f37094035d6ca351980d6c27c3bef2",
+      "option": "B",
+      "used_before": 29436,
+      "file": "hub.beastkeeper.intro-cdafd7eae584.mp3",
+      "audio_sha256": "7ebb30b1afd573715a0b2b17b95e44138ce0c732cb7b12c5dd431ec7562eefc7",
+      "bytes": 94501,
+      "receipt": {
+        "request-id": "kxnbT9sW9biEXOV46Ga6",
+        "character-cost": "26",
+        "history-item-id": "2ekbKW5lRuBStjkh9l80"
+      }
+    },
+    "hub.beastkeeper.guide": {
+      "status": "saved",
+      "sha256": "901b67d423d6ae4959dac88c6e901216168bc13d3f0ce7d657a310164492f08f",
+      "option": "B",
+      "used_before": 29436,
+      "file": "hub.beastkeeper.guide-901b67d423d6.mp3",
+      "audio_sha256": "bdb041c3601302d9fc22342d4427fa0d4e16ada36a5fcd11f852177794662c56",
+      "bytes": 154270,
+      "receipt": {
+        "request-id": "JwYFvxzh1HUXvMOI8vn0",
+        "character-cost": "44",
+        "history-item-id": "xvWDQxXH9aj3JQvt64Hv"
+      }
+    },
+    "hub.beastkeeper.about": {
+      "status": "saved",
+      "sha256": "aa89286dc2930ab3013867fb62ae4d61bc54879385ecdb42f137c8f7fec78136",
+      "option": "B",
+      "used_before": 29436,
+      "file": "hub.beastkeeper.about-aa89286dc293.mp3",
+      "audio_sha256": "f8a5fe09b9fcf7dd763c62119ec0969594d130addfb2149a01631a7579072696",
+      "bytes": 65662,
+      "receipt": {
+        "request-id": "orD6fph4gmmSmORK2ALx",
+        "character-cost": "20",
+        "history-item-id": "t6BLX0JG6i7k7vzdNPF5"
+      }
+    },
+    "hub.beastkeeper.news": {
+      "status": "saved",
+      "sha256": "09acfe2f50ecfdb947dcd3755e9814d2522d70e25075902988f5e1d9ddda025b",
+      "option": "B",
+      "used_before": 29436,
+      "file": "hub.beastkeeper.news-09acfe2f50ec.mp3",
+      "audio_sha256": "d195023ac66fb62b4e914bfac035ede00193547a3e8039911282ae530e1cf5c5",
+      "bytes": 51452,
+      "receipt": {
+        "request-id": "Fh91aJgwv0uobmIj7U1T",
+        "character-cost": "18",
+        "history-item-id": "IS5tVL7eLrSYE1kfN9SJ"
+      }
+    },
+    "hub.beastkeeper.news.keep": {
+      "status": "saved",
+      "sha256": "df5bc27f97c2062ac84792112c6dab2e2710ce97c5428d555217e356070f0189",
+      "option": "B",
+      "used_before": 29436,
+      "file": "hub.beastkeeper.news.keep-df5bc27f97c2.mp3",
+      "audio_sha256": "0d0889b71a0c360b96abd26b2296a10bcd1188fd97249c44b9b442b1e86b0d79",
+      "bytes": 104950,
+      "receipt": {
+        "request-id": "FmMdNciIbESOSO7v5Fo3",
+        "character-cost": "26",
+        "history-item-id": "z4UwcgG8hHzyNIVF3G2I"
+      }
+    },
+    "hub.beastkeeper.news.ember": {
+      "status": "saved",
+      "sha256": "ddd489ba4aca529f61d2cc3de7bf4945d2b90f3f21914e7b10377aa3e1299771",
+      "option": "B",
+      "used_before": 29436,
+      "file": "hub.beastkeeper.news.ember-ddd489ba4aca.mp3",
+      "audio_sha256": "732c27b377779f993aa9bc9d2ffb7b2b570f5014fd91bcb52b2935129b578953",
+      "bytes": 47272,
+      "receipt": {
+        "request-id": "83BhjU63elVmLTVTXsnO",
+        "character-cost": "19",
+        "history-item-id": "jFh2jIn2gRpNF7oRrVoh"
+      }
+    },
+    "hub.beastkeeper.news.castle": {
+      "status": "saved",
+      "sha256": "484cb53fa50557ccb784fed2e7821b9f58768c7f301abb426514a07527d11aa7",
+      "option": "B",
+      "used_before": 29436,
+      "file": "hub.beastkeeper.news.castle-484cb53fa505.mp3",
+      "audio_sha256": "15b54b4bd4fca871a3b61176e91936e3ebb8b0db8da742f54188ffe4049396db",
+      "bytes": 87814,
+      "receipt": {
+        "request-id": "8HetuxscBUW4G8RVR6pI",
+        "character-cost": "27",
+        "history-item-id": "yj7UvCcVKHnW96Q3SXaT"
+      }
+    },
+    "rv.tracks.offer": {
+      "status": "saved",
+      "sha256": "2dde08b6d402818f0131f825245a9740c6e267b38a03d0891d85393964015e37",
+      "option": "B",
+      "used_before": 29436,
+      "file": "rv.tracks.offer-2dde08b6d402.mp3",
+      "audio_sha256": "3bcb1de3a4d5cc27d6287a27d83d8f03a5dc6cdafc8e6d31977aac22c9eb0e86",
+      "bytes": 145074,
+      "receipt": {
+        "request-id": "vM2vUd6lM7yxsXlSei7R",
+        "character-cost": "40",
+        "history-item-id": "XodqZiwIfJR2nWEslDfC"
+      }
+    },
+    "rv.tracks.later": {
+      "status": "saved",
+      "sha256": "4fd0de2134a575d6b9662690dc6d85c8e3ab9ab54dcd67633546bf84c6b6c723",
+      "option": "B",
+      "used_before": 29436,
+      "file": "rv.tracks.later-4fd0de2134a5.mp3",
+      "audio_sha256": "94a9489ff40517927b5606ee8dbfff76462265332bae88c491492ba0c2f81a2e",
+      "bytes": 70260,
+      "receipt": {
+        "request-id": "DX8wrus9eDlhVKIqGdKn",
+        "character-cost": "24",
+        "history-item-id": "7E6fCJOsehBjpG5jw5EI"
+      }
+    },
+    "rv.tracks.accepted": {
+      "status": "saved",
+      "sha256": "b66a120015ee55292ea33f6e40a52f2ba494e772f3690a2765e15e80b78ee10a",
+      "option": "B",
+      "used_before": 29436,
+      "file": "rv.tracks.accepted-b66a120015ee.mp3",
+      "audio_sha256": "235184f98d7e6e6c72cff0801ad87c361bfe1ec1daa9b508ec1997bb3c63cc00",
+      "bytes": 187706,
+      "receipt": {
+        "request-id": "I97jlENfkbagI77gqgoj",
+        "character-cost": "44",
+        "history-item-id": "hX7W7Zyz1bsGt7l8UsLi"
+      }
+    },
+    "rv.tracks.wait": {
+      "status": "saved",
+      "sha256": "d17f5a310a643d73540e9c9900a8b09d1dd62f57372dfd1cf3106c67213aea65",
+      "option": "B",
+      "used_before": 29752,
+      "file": "rv.tracks.wait-d17f5a310a64.mp3",
+      "audio_sha256": "0da3c866cfba73f5df7595dc11d7f92ab8e911caf2c02ef21bb732df4046305e",
+      "bytes": 183109,
+      "receipt": {
+        "request-id": "1cA9richJuGX1F7M2H3n",
+        "character-cost": "46",
+        "history-item-id": "K7DqD25DHraGnSCj1waD"
+      }
+    },
+    "rv.tracks.deliver": {
+      "status": "saved",
+      "sha256": "8351dc35fdd5f31470cf3afb27c047a96b04d52e345fd70053a259a57f7ab66a",
+      "option": "B",
+      "used_before": 29752,
+      "file": "rv.tracks.deliver-8351dc35fdd5.mp3",
+      "audio_sha256": "3bb4b9a7c033031a3717766f7a912b75cb0ef480cf1d4b0da6fd2894083260ff",
+      "bytes": 99099,
+      "receipt": {
+        "request-id": "QGJ36hwqEM7GGGUSWmLM",
+        "character-cost": "32",
+        "history-item-id": "xuYNo3WvCmUfVyqoCjH1"
+      }
+    },
+    "rv.tracks.thanks": {
+      "status": "saved",
+      "sha256": "c96a6e506d14925b5335e046608024e8303a34583eb2b7926100218f48977d1b",
+      "option": "B",
+      "used_before": 29752,
+      "file": "rv.tracks.thanks-c96a6e506d14.mp3",
+      "audio_sha256": "9541ef39e3bbdc1f4532614e312a413f4e02f67aff58c11b05952312b247e179",
+      "bytes": 131282,
+      "receipt": {
+        "request-id": "avTFDpa28VexjCYsFoAP",
+        "character-cost": "32",
+        "history-item-id": "yYTT3en3Pui457fJEqNL"
+      }
+    }
+  },
+  "used_before": 28046,
+  "remaining": 10248,
+  "used_after": 29752
+}

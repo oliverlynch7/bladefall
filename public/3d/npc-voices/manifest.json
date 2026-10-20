@@ -1,0 +1,922 @@
+{
+  "schema": 1,
+  "revision": "npc-dialogue-20261019",
+  "auditionRevision": "npc-auditions-20261019-a",
+  "lines": {
+    "briar.thomas.first": {
+      "id": "briar.thomas.first",
+      "speaker": "thomas",
+      "text": "The Legion has reached our fields. You're going to fight, aren't you?",
+      "sha256": "de3f35bb7618a27c77afe5c75e7b530af5884a4cf14b11043001ad61919876a1",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.thomas.first-de3f35bb7618.mp3",
+      "option": "C",
+      "audio_sha256": "299c4f655d4fad09f5bd2c5abaeb6d4632ac6c7b5d9ca3c2f1490e96582eb4ac"
+    },
+    "briar.thomas.protect": {
+      "id": "briar.thomas.protect",
+      "speaker": "thomas",
+      "text": "I know. I just wish that someone didn't have to be you. Come here. That strap won't last a minute.",
+      "sha256": "9477a52c3d259017d2aca6103fc3c874dfb68642d7bcac8961843832f4591836",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.thomas.protect-9477a52c3d25.mp3",
+      "option": "C",
+      "audio_sha256": "06636792b1158aae2879acb342cbe02939b20cfd82e4c16da8b0881ceb1f009d"
+    },
+    "briar.thomas.afraid": {
+      "id": "briar.thomas.afraid",
+      "speaker": "thomas",
+      "text": "Being scared means you're paying attention. Let me fix your strap. Then promise me you'll come back when you need help.",
+      "sha256": "34f53ab213235959651bf02999a1881226a867053baefba434864995975e8e4d",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.thomas.afraid-34f53ab21323.mp3",
+      "option": "C",
+      "audio_sha256": "f30b303040037f1b18bfb7636a03bf6837b277e0f720c3a580e6db8740a2152c"
+    },
+    "briar.thomas.joke": {
+      "id": "briar.thomas.joke",
+      "speaker": "thomas",
+      "text": "Try standing behind the fence. Makes you look taller. Hold still while I fix this strap.",
+      "sha256": "e0d26aeff7d1da55a24d8c9a7321cd6e52fd5dcf04d8b8f8058d539a0ad5e3ec",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.thomas.joke-e0d26aeff7d1.mp3",
+      "option": "C",
+      "audio_sha256": "8e8997e2b5073a535112016ba004ba78d0cfe9d6a2be69da9f91a4cade160324"
+    },
+    "briar.thomas.ready": {
+      "id": "briar.thomas.ready",
+      "speaker": "thomas",
+      "text": "Go to Mara. She needs help treating the wounded. I'll help our neighbors pack.",
+      "sha256": "8ebbef6611616c54b465b8eff862d2ed0cf50a7bdcd8e00b929c2b8a2bccaf05",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.thomas.ready-8ebbef661161.mp3",
+      "option": "C",
+      "audio_sha256": "63ad75a865610b6811af326c108233017dd5beb56289edc870afdd2d3b7cf1a9"
+    },
+    "briar.mara.first": {
+      "id": "briar.mara.first",
+      "speaker": "mara",
+      "text": "I need tangle roots for fevers and clean dressings for wounds. Help me get these people ready to leave.",
+      "sha256": "536d117c948fe131ddbaf5c1762bea7598c75795a231625fc91e26b4f65eb82a",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.mara.first-536d117c948f.mp3",
+      "option": "A",
+      "audio_sha256": "47475c026f957af49a64b137158f7a4ce17799fb418a689d62a2e3d16ad66026"
+    },
+    "briar.mara.why": {
+      "id": "briar.mara.why",
+      "speaker": "mara",
+      "text": "The wounded need treatment before they can fight or escape.",
+      "sha256": "921808df50942a2e6ebb86793aeea1d985794b5539219b690497610fa955d412",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.mara.why-921808df5094.mp3",
+      "option": "A",
+      "audio_sha256": "ce39289dfd9afa50997d3f3b23b77274dee2685ddcf7630afbd1cfa38d498132"
+    },
+    "briar.mara.joke": {
+      "id": "briar.mara.joke",
+      "speaker": "mara",
+      "text": "Only if it comes wrapped in clean cloth. And please don't bring it inside.",
+      "sha256": "fc04469c394e2535e3478eec47bd0158e8b6a60923f950a1c264173e386f5a85",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.mara.joke-fc04469c394e.mp3",
+      "option": "A",
+      "audio_sha256": "10ca3d5f4902ae4a35124d395024ce7acb1ec307fc7934cfa4f0ae5dcd2e5e53"
+    },
+    "briar.mara.supplies": {
+      "id": "briar.mara.supplies",
+      "speaker": "mara",
+      "text": "Bring three tangle roots from the garden and clean dressings from the village store. Its front door is open.",
+      "sha256": "44edaf9b885abea044f5c212c4440649bac86684960bb36f9baef12178d0ed88",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.mara.supplies-44edaf9b885a.mp3",
+      "option": "A",
+      "audio_sha256": "c53c73a2e63cc2200e9e18bd779db3ea0c61b50db222e7e34562e36c3915864b"
+    },
+    "briar.mara.wait": {
+      "id": "briar.mara.wait",
+      "speaker": "mara",
+      "text": "Three roots from the garden. Clean dressings from the store.",
+      "sha256": "6385cb38d7cc82f77bfaa452cabf6fe771c1181e938b6ea7245912f37f6a72de",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.mara.wait-6385cb38d7cc.mp3",
+      "option": "A",
+      "audio_sha256": "ca45cd36600190893ed2210ed7b59fe506479fa216496b7524f331e3fb169628"
+    },
+    "briar.mara.heal": {
+      "id": "briar.mara.heal",
+      "speaker": "mara",
+      "text": "Thank you. The neighbors can rest now. I found this purple crystal in the fields—take it from my supply table. It may help on your journey. Next, clear the mill crossing.",
+      "sha256": "02a1b6667cf53fc806844cd42cb74e9a40c9af44073a73a7a0ba81e0f409917e",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.mara.heal-02a1b6667cf5.mp3",
+      "option": "A",
+      "audio_sha256": "1f638de9086203960ebecfd4398d4d5597638b123bd7a25d3ddf876f310fcffe"
+    },
+    "briar.mara.next": {
+      "id": "briar.mara.next",
+      "speaker": "mara",
+      "text": "Follow the road to the mill. Its pressure plate shuts the water feed. Keep it down while you free the jammed wheel.",
+      "sha256": "6c84c8485fe0bdf5271d3df44d26bc8806b65450dc4c158d3b88918a295bfce1",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.mara.next-6c84c8485fe0.mp3",
+      "option": "A",
+      "audio_sha256": "8bcfed56a8a874a3af68bcb9837f4af8f84c7de63ad2b57892af2847ec26d434"
+    },
+    "briar.gus.first": {
+      "id": "briar.gus.first",
+      "speaker": "gus",
+      "text": "My tools are in the loft. I can't climb up while the Legion is outside.",
+      "sha256": "67e509beff7c8e5decc5a1c53dfedf0e13b77b79bf1e316ef8a5727ed4a88ab5",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.first-67e509beff7c.mp3",
+      "option": "C",
+      "audio_sha256": "ebc8c2ee5cb80affaf702ffcf2d2bb8a9531b20aeb06588f14c6506183694a4c"
+    },
+    "briar.gus.home": {
+      "id": "briar.gus.home",
+      "speaker": "gus",
+      "text": "These are my neighbors. I'm staying to help.",
+      "sha256": "44dd74754c082e0432d450cd44fd41d49ba4796be93439989ededfd8305ecd61",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.home-44dd74754c08.mp3",
+      "option": "C",
+      "audio_sha256": "5e3b8fe4db8c5c8adb1b760c480a20f931f3a14a035846746dd981f6b3358723"
+    },
+    "briar.gus.request": {
+      "id": "briar.gus.request",
+      "speaker": "gus",
+      "text": "Bring my tool roll from the loft window. I'll open the workshop shortcut and give you a purple shard.",
+      "sha256": "f7313e645b10315f65376ea6700600df631e1682832b384aa9cac81cf39c1370",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.request-f7313e645b10.mp3",
+      "option": "C",
+      "audio_sha256": "2ddbcface1322004949c6ee5efc853865be3d5ec84462fe3bb3128b8956bfaad"
+    },
+    "briar.gus.waiting": {
+      "id": "briar.gus.waiting",
+      "speaker": "gus",
+      "text": "The tool roll is by the loft window.",
+      "sha256": "df955197a3ed3d78c8a1973380bfe3c51b956f9e48f53450fc1fe89b32b9f41d",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.waiting-df955197a3ed.mp3",
+      "option": "C",
+      "audio_sha256": "7c7ffbdf40e5724c21236ada246ddc85690366ad2adcb88f6d02f2c5bf79cc5d"
+    },
+    "briar.gus.thanks": {
+      "id": "briar.gus.thanks",
+      "speaker": "gus",
+      "text": "Thanks. Take this shard. The workshop shortcut is open if the street gets dangerous.",
+      "sha256": "2e2effda542ca08c9cef97d24c6bb21187a11d40962f0d7320c93e16b16c454f",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.thanks-2e2effda542c.mp3",
+      "option": "C",
+      "audio_sha256": "87a91e979f96c07fa1bea011416e6eaeadb1f13dd66e9785192d3ef0173ec4ca"
+    },
+    "briar.gus.done": {
+      "id": "briar.gus.done",
+      "speaker": "gus",
+      "text": "Door's open. Watch the low beam. It has won every argument I've had with it.",
+      "sha256": "8d3dfc6e319be5462619dfd8d7ff6a45637920c71bade0515e50aefe31991953",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.done-8d3dfc6e319b.mp3",
+      "option": "C",
+      "audio_sha256": "f7d95721be8aa775ec7342051c2bc47137b7f99d1f6e90b8d2196b88f467e937"
+    },
+    "briar.gus.hurt": {
+      "id": "briar.gus.hurt",
+      "speaker": "gus",
+      "text": "I'm scared. They knocked our village sign into the mud. Please don't make this worse.",
+      "sha256": "d7b542d2073424a90a2d92578d5978e755e71c862fc1a9b34b6ae29300b61d49",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.hurt-d7b542d20734.mp3",
+      "option": "C",
+      "audio_sha256": "6ca948a32d3fad136adf5325f7175d1e44561825d9b08f4a5015e461f961dc79"
+    },
+    "briar.gus.sorry": {
+      "id": "briar.gus.sorry",
+      "speaker": "gus",
+      "text": "All right. Give me a moment. Seeing our village name in the dirt hurt.",
+      "sha256": "496a055b89298fe2e84e870d016b7d61a3f14bcc01b9f86a096d8283761b6044",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.sorry-496a055b8929.mp3",
+      "option": "C",
+      "audio_sha256": "b95e5ad4b468ca2dbf9aa8fd5f217763737605d238fd1931dc3a852316cde228"
+    },
+    "briar.gus.repair": {
+      "id": "briar.gus.repair",
+      "speaker": "gus",
+      "text": "You fixed the sign. Thank you. Fetch my tools and I'll help with the door.",
+      "sha256": "5dec7891fb008ffe3c143ffbc2a86ad3eea5ad63de2feec955281a0e916f985a",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.repair-5dec7891fb00.mp3",
+      "option": "C",
+      "audio_sha256": "25e84cd550b8072605891f8d1295768dea386b30a80aec7067f53e8a44b77804"
+    },
+    "briar.gus.closed": {
+      "id": "briar.gus.closed",
+      "speaker": "gus",
+      "text": "Go. I'll find someone else to help. I've got enough trouble outside my door.",
+      "sha256": "87816dcfdd455e3ffeae8a0660e79c056ade94d2ee18410cef8c6714b3e42bf6",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.gus.closed-87816dcfdd45.mp3",
+      "option": "C",
+      "audio_sha256": "00ec325d2a92747392dc6aef03cdd54d6ba82cf4e2aa0fa30bbdcc6b634d4e87"
+    },
+    "briar.lewis.first": {
+      "id": "briar.lewis.first",
+      "speaker": "lewis",
+      "text": "Their signal post is ahead. Silence the horn before it brings patrols to our neighbors.",
+      "sha256": "0b273377470b19b3e71c6553fc0b4b74c666e41b0b8a2eca790154c48f2607e3",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.lewis.first-0b273377470b.mp3",
+      "option": "B",
+      "audio_sha256": "1bcb224d8099e4afe090bbd7f5305b28407ccf8479b2ca0c94d8ba712f407bb7"
+    },
+    "briar.lewis.routes": {
+      "id": "briar.lewis.routes",
+      "speaker": "lewis",
+      "text": "Go through the camp or climb the roots on the right. Stop the crank below the horn, or cut its cable from above.",
+      "sha256": "baa2b8887e21d57051a0fd0e37318b8ada110f26e3a897de02196c8603009299",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.lewis.routes-baa2b8887e21.mp3",
+      "option": "B",
+      "audio_sha256": "e2d86ab8b1f40c761bf1c68ecb2b4d1d531170f621e53a36884e4a97348d1f87"
+    },
+    "briar.lewis.prisoners": {
+      "id": "briar.lewis.prisoners",
+      "speaker": "lewis",
+      "text": "They took prisoners north toward Hollow Pass. The guards know their names, but show no mercy.",
+      "sha256": "97a5f9cd732277a7a1d9d52282206d261a4a237b3d56884f59d0e9bbbc0a9566",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.lewis.prisoners-97a5f9cd7322.mp3",
+      "option": "B",
+      "audio_sha256": "f41e9a0057b8685cfe1ca6f924db9148e9d8be77881a9181d8ceb1d88c124131"
+    },
+    "briar.lewis.waiting": {
+      "id": "briar.lewis.waiting",
+      "speaker": "lewis",
+      "text": "Silence the horn, then reach the north clearing. I'll watch the neighbors.",
+      "sha256": "6921fafdf7427f39293d57c265215e669167b0e87e78d56ca47d3f0f42f81665",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.lewis.waiting-6921fafdf742.mp3",
+      "option": "B",
+      "audio_sha256": "623a4b6941dce50f505fa8e3568bddf3f59d7d50eb545406cad621129cf8c1a8"
+    },
+    "briar.lewis.clear": {
+      "id": "briar.lewis.clear",
+      "speaker": "lewis",
+      "text": "The horn is quiet. Our neighbors are safe here, but something large blocks the way ahead.",
+      "sha256": "f8f38ef3483968f6279888770f71d1c30a3238cce89ca284918d53951a58503b",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.lewis.clear-f8f38ef34839.mp3",
+      "option": "B",
+      "audio_sha256": "bdddab1c05f0dbb869fa9bf3e626d784f371f642fd4f9e785ddf752ef1a1a7dc"
+    },
+    "briar.beth.first": {
+      "id": "briar.beth.first",
+      "speaker": "beth",
+      "text": "My brother followed our sheep across the bridge. It broke. He's trapped beyond those beasts.",
+      "sha256": "88b1dd7db8bb934e4973dfe73d91c2df4a68eb065f1b8189fbc7643c0925d2da",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.beth.first-88b1dd7db8bb.mp3",
+      "option": "A",
+      "audio_sha256": "cb5543b513543e631f4f2d1bd18fa3ab0e65c92e75c76ac42142890e51344e99"
+    },
+    "briar.beth.sheep": {
+      "id": "briar.beth.sheep",
+      "speaker": "beth",
+      "text": "Those sheep are our food and wool. He was trying to save them.",
+      "sha256": "82a3899749d96a1f589cb9079c9cf492fe182ae9a0e4ac152f7290bd66b487b2",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.beth.sheep-82a3899749d9.mp3",
+      "option": "A",
+      "audio_sha256": "58e244538cadc5c13f33facd6c96bfa0f3560cce22bbb2e8037ef4637a2c3e13"
+    },
+    "briar.beth.trail": {
+      "id": "briar.beth.trail",
+      "speaker": "beth",
+      "text": "Follow his crooked heel prints east. Cross the remaining bridge beams; there's a lower dry path if you slip.",
+      "sha256": "d6e5a3e2896adf08fa589cf1877c9cebdd368ed1141f2d79740afc4b820a6fe5",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.beth.trail-d6e5a3e2896a.mp3",
+      "option": "A",
+      "audio_sha256": "4661ee0e8df2cd11c7187e1212dc155b445474a678915a7bf06a3bd8ef712cca"
+    },
+    "briar.beth.relief": {
+      "id": "briar.beth.relief",
+      "speaker": "beth",
+      "text": "He's safe! Once we leave the woods, our dog can travel with you.",
+      "sha256": "73ce8df8bb77149b135eeeacaf6eba005ccc310724c3ba3ab20d01cc98e765e5",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.beth.relief-73ce8df8bb77.mp3",
+      "option": "A",
+      "audio_sha256": "e06e7004c50d277a69672259a41492b76eaaeda3204fbff0c24840be026f619d"
+    },
+    "briar.bethBrother.first": {
+      "id": "briar.bethBrother.first",
+      "speaker": "bethBrother",
+      "text": "The fallen tree could roll. Clear the beasts, then use the rope lift to raise it.",
+      "sha256": "adbcb4c43051585e89c22be2eb98beb8b697fcd43b83ec8084571e03da82d27a",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.bethBrother.first-adbcb4c43051.mp3",
+      "option": "A",
+      "audio_sha256": "88d5a6389391066a976d211042222e28fbd25aa097f3680dab52f5d708ffd90b"
+    },
+    "briar.bethBrother.wait": {
+      "id": "briar.bethBrother.wait",
+      "speaker": "bethBrother",
+      "text": "I can walk once the path is clear.",
+      "sha256": "ddf5af03dd2156f76bcd907348b77b68ff0c118062d7baa04f5467427eec89f2",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.bethBrother.wait-ddf5af03dd21.mp3",
+      "option": "A",
+      "audio_sha256": "2d478d844ad3b42cdc102cc22a47b6bf3f8b0d9685db40cab98e207146785dda"
+    },
+    "briar.bethBrother.safe": {
+      "id": "briar.bethBrother.safe",
+      "speaker": "bethBrother",
+      "text": "The tree's up and the crossing is fixed. I'm heading back. Thank you.",
+      "sha256": "1a953a8ff127b15e4256787abcadfab15876d64db3cb69309b8d6cb23af74487",
+      "file": "public/3d/story/briar-foundation.json",
+      "audio": "./npc-voices/briar.bethBrother.safe-1a953a8ff127.mp3",
+      "option": "A",
+      "audio_sha256": "8d8dbaf1cb57b979ebc95e8d0d93979c9d83ead7357e182365733789c5019288"
+    },
+    "hub.beastkeeper.intro": {
+      "id": "hub.beastkeeper.intro",
+      "speaker": "beastkeeper",
+      "text": "Looking for a companion? Mind your fingers around the hungry ones.",
+      "sha256": "cdafd7eae584d8009da66818e49129fc54f37094035d6ca351980d6c27c3bef2",
+      "file": "public/3d/story/hub-dialogue.json",
+      "audio": "./npc-voices/hub.beastkeeper.intro-cdafd7eae584.mp3",
+      "option": "B",
+      "audio_sha256": "7ebb30b1afd573715a0b2b17b95e44138ce0c732cb7b12c5dd431ec7562eefc7"
+    },
+    "hub.beastkeeper.guide": {
+      "id": "hub.beastkeeper.guide",
+      "speaker": "beastkeeper",
+      "text": "Equip one owned companion in the Pet Yard. Check its abilities, name it, and train it to suit your play style.",
+      "sha256": "901b67d423d6ae4959dac88c6e901216168bc13d3f0ce7d657a310164492f08f",
+      "file": "public/3d/story/hub-dialogue.json",
+      "audio": "./npc-voices/hub.beastkeeper.guide-901b67d423d6.mp3",
+      "option": "B",
+      "audio_sha256": "bdb041c3601302d9fc22342d4427fa0d4e16ada36a5fcd11f852177794662c56"
+    },
+    "hub.beastkeeper.about": {
+      "id": "hub.beastkeeper.about",
+      "speaker": "beastkeeper",
+      "text": "Even a small companion can make a big difference.",
+      "sha256": "aa89286dc2930ab3013867fb62ae4d61bc54879385ecdb42f137c8f7fec78136",
+      "file": "public/3d/story/hub-dialogue.json",
+      "audio": "./npc-voices/hub.beastkeeper.about-aa89286dc293.mp3",
+      "option": "B",
+      "audio_sha256": "f8a5fe09b9fcf7dd763c62119ec0969594d130addfb2149a01631a7579072696"
+    },
+    "hub.beastkeeper.news": {
+      "id": "hub.beastkeeper.news",
+      "speaker": "beastkeeper",
+      "text": "The animals knew you were back before I did.",
+      "sha256": "09acfe2f50ecfdb947dcd3755e9814d2522d70e25075902988f5e1d9ddda025b",
+      "file": "public/3d/story/hub-dialogue.json",
+      "audio": "./npc-voices/hub.beastkeeper.news-09acfe2f50ec.mp3",
+      "option": "B",
+      "audio_sha256": "d195023ac66fb62b4e914bfac035ede00193547a3e8039911282ae530e1cf5c5"
+    },
+    "hub.beastkeeper.news.keep": {
+      "id": "hub.beastkeeper.news.keep",
+      "speaker": "beastkeeper",
+      "text": "A freed prisoner called his dog's name. It recognized him at once.",
+      "sha256": "df5bc27f97c2062ac84792112c6dab2e2710ce97c5428d555217e356070f0189",
+      "file": "public/3d/story/hub-dialogue.json",
+      "audio": "./npc-voices/hub.beastkeeper.news.keep-df5bc27f97c2.mp3",
+      "option": "B",
+      "audio_sha256": "0d0889b71a0c360b96abd26b2296a10bcd1188fd97249c44b9b442b1e86b0d79"
+    },
+    "hub.beastkeeper.news.ember": {
+      "id": "hub.beastkeeper.news.ember",
+      "speaker": "beastkeeper",
+      "text": "Less smoke from Emberdeep helps the animals too.",
+      "sha256": "ddd489ba4aca529f61d2cc3de7bf4945d2b90f3f21914e7b10377aa3e1299771",
+      "file": "public/3d/story/hub-dialogue.json",
+      "audio": "./npc-voices/hub.beastkeeper.news.ember-ddd489ba4aca.mp3",
+      "option": "B",
+      "audio_sha256": "732c27b377779f993aa9bc9d2ffb7b2b570f5014fd91bcb52b2935129b578953"
+    },
+    "hub.beastkeeper.news.castle": {
+      "id": "hub.beastkeeper.news.castle",
+      "speaker": "beastkeeper",
+      "text": "The restored animals are recognizing their families. Give them time.",
+      "sha256": "484cb53fa50557ccb784fed2e7821b9f58768c7f301abb426514a07527d11aa7",
+      "file": "public/3d/story/hub-dialogue.json",
+      "audio": "./npc-voices/hub.beastkeeper.news.castle-484cb53fa505.mp3",
+      "option": "B",
+      "audio_sha256": "15b54b4bd4fca871a3b61176e91936e3ebb8b0db8da742f54188ffe4049396db"
+    },
+    "rv.tracks.offer": {
+      "id": "rv.tracks.offer",
+      "speaker": "beastkeeper",
+      "text": "Paw prints lead west from Black Woods' old grove. Check the abandoned traps and rescue both animals.",
+      "sha256": "2dde08b6d402818f0131f825245a9740c6e267b38a03d0891d85393964015e37",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.tracks.offer-2dde08b6d402.mp3",
+      "option": "B",
+      "audio_sha256": "3bcb1de3a4d5cc27d6287a27d83d8f03a5dc6cdafc8e6d31977aac22c9eb0e86"
+    },
+    "rv.tracks.later": {
+      "id": "rv.tracks.later",
+      "speaker": "beastkeeper",
+      "text": "They're off the main path. Help when you can safely return.",
+      "sha256": "4fd0de2134a575d6b9662690dc6d85c8e3ab9ab54dcd67633546bf84c6b6c723",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.tracks.later-4fd0de2134a5.mp3",
+      "option": "B",
+      "audio_sha256": "94a9489ff40517927b5606ee8dbfff76462265332bae88c491492ba0c2f81a2e"
+    },
+    "rv.tracks.accepted": {
+      "id": "rv.tracks.accepted",
+      "speaker": "beastkeeper",
+      "text": "Follow both trails west of the grove: low logs and roots. Free both animals, finish Black Woods, then return.",
+      "sha256": "b66a120015ee55292ea33f6e40a52f2ba494e772f3690a2765e15e80b78ee10a",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.tracks.accepted-b66a120015ee.mp3",
+      "option": "B",
+      "audio_sha256": "235184f98d7e6e6c72cff0801ad87c361bfe1ec1daa9b508ec1997bb3c63cc00"
+    },
+    "rv.tracks.wait": {
+      "id": "rv.tracks.wait",
+      "speaker": "beastkeeper",
+      "text": "Follow four-toed paw prints, not split hooves. Check the roots and raised cage. Your own companion isn't required.",
+      "sha256": "d17f5a310a643d73540e9c9900a8b09d1dd62f57372dfd1cf3106c67213aea65",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.tracks.wait-d17f5a310a64.mp3",
+      "option": "B",
+      "audio_sha256": "0da3c866cfba73f5df7595dc11d7f92ab8e911caf2c02ef21bb732df4046305e"
+    },
+    "rv.tracks.deliver": {
+      "id": "rv.tracks.deliver",
+      "speaker": "beastkeeper",
+      "text": "Both animals are free. I'll prepare their shelter and improve our companion care.",
+      "sha256": "8351dc35fdd5f31470cf3afb27c047a96b04d52e345fd70053a259a57f7ab66a",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.tracks.deliver-8351dc35fdd5.mp3",
+      "option": "B",
+      "audio_sha256": "3bb4b9a7c033031a3717766f7a912b75cb0ef480cf1d4b0da6fd2894083260ff"
+    },
+    "rv.tracks.thanks": {
+      "id": "rv.tracks.thanks",
+      "speaker": "beastkeeper",
+      "text": "The care shelter is ready. All equipped companions now gain 10% maximum health.",
+      "sha256": "c96a6e506d14925b5335e046608024e8303a34583eb2b7926100218f48977d1b",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.tracks.thanks-c96a6e506d14.mp3",
+      "option": "B",
+      "audio_sha256": "9541ef39e3bbdc1f4532614e312a413f4e02f67aff58c11b05952312b247e179"
+    },
+    "rv.keepsake.offer": {
+      "id": "rv.keepsake.offer",
+      "speaker": "thomas",
+      "text": "If you return home, find the little wooden bird you carved. I'd like something of ours here.",
+      "sha256": "876c7059166fe216b1b0d9bc2e1557c91e0b9bf04b0f54bf9713aa4ee8003464",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.keepsake.offer-876c7059166f.mp3",
+      "option": "C",
+      "audio_sha256": "7fac03b1a4c5522874367c36de4bee7ab871e8a1dd481961a5902fbc870617b4"
+    },
+    "rv.keepsake.later": {
+      "id": "rv.keepsake.later",
+      "speaker": "thomas",
+      "text": "It can wait. I want you safe more than I want the bird.",
+      "sha256": "d65ca196f35c209381d20d92c21bd0530189befa3c4054412ab65acbded7bdbb",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.keepsake.later-d65ca196f35c.mp3",
+      "option": "C",
+      "audio_sha256": "a86b5d841033a83242e9e00a8f100f3b2a69a09007551150df8a945740a982ff"
+    },
+    "rv.keepsake.accepted": {
+      "id": "rv.keepsake.accepted",
+      "speaker": "thomas",
+      "text": "Look behind our old house, southwest of the village yard—somewhere sheltered from rain. Finish Homefields before returning.",
+      "sha256": "c0b76536586823a6d2387322ade1d91a068d4072e42954f8dcda4846f9da8b9c",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.keepsake.accepted-c0b765365868.mp3",
+      "option": "C",
+      "audio_sha256": "953b3edc221dd6f3de4551e3907ab2eadc68cdbf8a184f710544fdb9c95ace67"
+    },
+    "rv.keepsake.wait": {
+      "id": "rv.keepsake.wait",
+      "speaker": "thomas",
+      "text": "Behind our old house, southwest of the yard. Remember that awkward plant pot?",
+      "sha256": "bf3bc1fb60160134f549cf4208920a00626dbb492688e4bb5031c5ffe5357da3",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.keepsake.wait-bf3bc1fb6016.mp3",
+      "option": "C",
+      "audio_sha256": "3dc430bfbd2fcef7a060b0920065a3ed66a7ad25eae6f9cd204253757935af1a"
+    },
+    "rv.keepsake.deliver": {
+      "id": "rv.keepsake.deliver",
+      "speaker": "thomas",
+      "text": "Still crooked. Still my favorite bird. Thank you.",
+      "sha256": "10b007440b006a357dd91a3d6f71cd0ed09b4f035054f1535d6bec690526eb24",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.keepsake.deliver-10b007440b00.mp3",
+      "option": "C",
+      "audio_sha256": "80d1a004b2ba0ccb523ceb210c70bd0ff6699df0ee97651f5059417846fe91ee"
+    },
+    "rv.keepsake.thanks": {
+      "id": "rv.keepsake.thanks",
+      "speaker": "thomas",
+      "text": "A little piece of home. Take these coins. When this is over, carve me another.",
+      "sha256": "fa6cedcf00bb18c4764088c6aed94cdd1f2241bdf20661dba938602a5195672d",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.keepsake.thanks-fa6cedcf00bb.mp3",
+      "option": "C",
+      "audio_sha256": "b4694da668201cdef9800f8559eea05bf09f9fe1ac438f518e50c5450231c945"
+    },
+    "rv.keepsake.worry": {
+      "id": "rv.keepsake.worry",
+      "speaker": "thomas",
+      "text": "I'm worried, and I'm proud. You brought people home. Both feelings can be true.",
+      "sha256": "5046a99080d94af7e68264a1595b735cdd35bbfa90a35630a67605af07cd5023",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.keepsake.worry-5046a99080d9.mp3",
+      "option": "C",
+      "audio_sha256": "ccee2d0f1450f328f2133f0366e8f2602acdc1a7d11929af535274c483298f58"
+    },
+    "rv.keepsake.home": {
+      "id": "rv.keepsake.home",
+      "speaker": "thomas",
+      "text": "I'll mend what I can and feed the new arrivals. You're not the only stubborn one here.",
+      "sha256": "1befe0f2aafff185ce2c8d6e5c17d815cd4137802315e01af8c7a273fb35e70b",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.keepsake.home-1befe0f2aaff.mp3",
+      "option": "C",
+      "audio_sha256": "a6f80b0b055f349e098efed15c14d0a118ef07f07595ea9af2282a6b2e80a240"
+    },
+    "rv.keepsake.reports": {
+      "id": "rv.keepsake.reports",
+      "speaker": "thomas",
+      "text": "People tell me how you helped them. That's the part of every story I believe.",
+      "sha256": "f6fc58a2b195e0444b59be4bd181204ef7ba1b05595744ba1ad8b537c8a79a53",
+      "file": "public/3d/story/return-visits.json",
+      "audio": "./npc-voices/rv.keepsake.reports-f6fc58a2b195.mp3",
+      "option": "C",
+      "audio_sha256": "cbb1013a54f6aef2d32a8371774d1579dd90e029fedcf744d4e96e7c1dd3f7a6"
+    }
+  },
+  "characters": [
+    {
+      "id": "thomas",
+      "name": "Thomas",
+      "option": "C",
+      "total": 14,
+      "recorded": 14
+    },
+    {
+      "id": "mara",
+      "name": "Mara",
+      "option": "A",
+      "total": 7,
+      "recorded": 7
+    },
+    {
+      "id": "gus",
+      "name": "Gus",
+      "option": "C",
+      "total": 10,
+      "recorded": 10
+    },
+    {
+      "id": "lewis",
+      "name": "Lewis",
+      "option": "B",
+      "total": 5,
+      "recorded": 5
+    },
+    {
+      "id": "beth",
+      "name": "Beth",
+      "option": "A",
+      "total": 4,
+      "recorded": 4
+    },
+    {
+      "id": "bethBrother",
+      "name": "Beth’s brother",
+      "option": "A",
+      "total": 3,
+      "recorded": 3
+    },
+    {
+      "id": "grant",
+      "name": "Grant",
+      "option": "B",
+      "total": 5,
+      "recorded": 0
+    },
+    {
+      "id": "felix",
+      "name": "Felix",
+      "option": "B",
+      "total": 5,
+      "recorded": 0
+    },
+    {
+      "id": "roland",
+      "name": "Roland",
+      "option": "C",
+      "total": 9,
+      "recorded": 0
+    },
+    {
+      "id": "cross",
+      "name": "Captain Cross",
+      "option": "A",
+      "total": 7,
+      "recorded": 0
+    },
+    {
+      "id": "ellis",
+      "name": "Professor Ellis",
+      "option": "C",
+      "total": 10,
+      "recorded": 0
+    },
+    {
+      "id": "hugo",
+      "name": "Hugo",
+      "option": "A",
+      "total": 8,
+      "recorded": 0
+    },
+    {
+      "id": "abyss_king",
+      "name": "The Abyss King",
+      "option": "A",
+      "total": 4,
+      "recorded": 0
+    },
+    {
+      "id": "ian",
+      "name": "Ian",
+      "option": "B",
+      "total": 8,
+      "recorded": 0
+    },
+    {
+      "id": "pike",
+      "name": "Foreman Pike",
+      "option": "A",
+      "total": 6,
+      "recorded": 0
+    },
+    {
+      "id": "martin",
+      "name": "Martin",
+      "option": "C",
+      "total": 10,
+      "recorded": 0
+    },
+    {
+      "id": "caleb",
+      "name": "Caleb",
+      "option": "C",
+      "total": 6,
+      "recorded": 0
+    },
+    {
+      "id": "skip",
+      "name": "Skip",
+      "option": "A",
+      "total": 7,
+      "recorded": 0
+    },
+    {
+      "id": "quartermaster",
+      "name": "Quartermaster",
+      "option": "B",
+      "total": 13,
+      "recorded": 0
+    },
+    {
+      "id": "anvil",
+      "name": "The Smith",
+      "option": "A",
+      "total": 13,
+      "recorded": 0
+    },
+    {
+      "id": "keeper",
+      "name": "The Stylist",
+      "option": "A",
+      "total": 7,
+      "recorded": 0
+    },
+    {
+      "id": "drillmaster",
+      "name": "Drillmaster",
+      "option": "B",
+      "total": 7,
+      "recorded": 0
+    },
+    {
+      "id": "beastkeeper",
+      "name": "Beastkeeper",
+      "option": "B",
+      "total": 13,
+      "recorded": 13
+    },
+    {
+      "id": "flint",
+      "name": "Flint",
+      "option": "C",
+      "total": 10,
+      "recorded": 0
+    },
+    {
+      "id": "jack",
+      "name": "Jack",
+      "option": "A",
+      "total": 7,
+      "recorded": 0
+    },
+    {
+      "id": "miles",
+      "name": "Miles",
+      "option": "A",
+      "total": 9,
+      "recorded": 0
+    },
+    {
+      "id": "ward",
+      "name": "Captain Ward",
+      "option": "B",
+      "total": 7,
+      "recorded": 0
+    },
+    {
+      "id": "ruth",
+      "name": "Ruth",
+      "option": "B",
+      "total": 9,
+      "recorded": 0
+    },
+    {
+      "id": "grace",
+      "name": "Sister Grace",
+      "option": "B",
+      "total": 11,
+      "recorded": 0
+    },
+    {
+      "id": "victor",
+      "name": "Sergeant Victor",
+      "option": "C",
+      "total": 7,
+      "recorded": 0
+    },
+    {
+      "id": "walter",
+      "name": "Walter",
+      "option": "A",
+      "total": 6,
+      "recorded": 0
+    },
+    {
+      "id": "sly",
+      "name": "Sly",
+      "option": "C",
+      "total": 10,
+      "recorded": 0
+    },
+    {
+      "id": "riftkeeper",
+      "name": "Rift Keeper",
+      "option": "A",
+      "total": 8,
+      "recorded": 0
+    },
+    {
+      "id": "mentor_berserker",
+      "name": "Berserker Mentor",
+      "option": "A",
+      "total": 4,
+      "recorded": 0
+    },
+    {
+      "id": "mentor_ninja",
+      "name": "Ninja Mentor",
+      "option": "A",
+      "total": 4,
+      "recorded": 0
+    },
+    {
+      "id": "mentor_reaper",
+      "name": "Reaper Mentor",
+      "option": "B",
+      "total": 4,
+      "recorded": 0
+    },
+    {
+      "id": "mentor_chronomancer",
+      "name": "Chronomancer Mentor",
+      "option": "C",
+      "total": 4,
+      "recorded": 0
+    },
+    {
+      "id": "mentor_pirate",
+      "name": "Pirate Mentor",
+      "option": "A",
+      "total": 4,
+      "recorded": 0
+    },
+    {
+      "id": "mentor_paladin",
+      "name": "Paladin Mentor",
+      "option": "C",
+      "total": 4,
+      "recorded": 0
+    },
+    {
+      "id": "mentor_necromancer",
+      "name": "Necromancer Mentor",
+      "option": "C",
+      "total": 4,
+      "recorded": 0
+    },
+    {
+      "id": "mentor_pyromancer",
+      "name": "Pyromancer Mentor",
+      "option": "A",
+      "total": 4,
+      "recorded": 0
+    },
+    {
+      "id": "otto",
+      "name": "Otto",
+      "option": "A",
+      "total": 9,
+      "recorded": 0
+    },
+    {
+      "id": "rose",
+      "name": "Captain Rose",
+      "option": "B",
+      "total": 9,
+      "recorded": 0
+    },
+    {
+      "id": "hugh",
+      "name": "Master Hugh",
+      "option": "B",
+      "total": 7,
+      "recorded": 0
+    },
+    {
+      "id": "simon",
+      "name": "Simon",
+      "option": "A",
+      "total": 11,
+      "recorded": 0
+    },
+    {
+      "id": "heath",
+      "name": "Heath",
+      "option": "A",
+      "total": 10,
+      "recorded": 0
+    },
+    {
+      "id": "sunspire_orb",
+      "name": "The Sunspire Orb",
+      "option": "B",
+      "total": 8,
+      "recorded": 0
+    },
+    {
+      "id": "abe",
+      "name": "Abe",
+      "option": "A",
+      "total": 7,
+      "recorded": 0
+    },
+    {
+      "id": "dash",
+      "name": "Dash",
+      "option": "A",
+      "total": 5,
+      "recorded": 0
+    },
+    {
+      "id": "warden_shade",
+      "name": "Warden’s Shade",
+      "option": "B",
+      "total": 0,
+      "recorded": 0
+    }
+  ],
+  "totalLines": 363,
+  "recordedLines": 56,
+  "legacyShade": "Pending canon-safe migration; not recorded from obsolete lore."
+}

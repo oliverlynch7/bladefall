@@ -21,7 +21,7 @@ async function fresh(cid=document.getElementById('progressClass').value){
  return b;
 }
 async function pick(b){await wait(420);const opt=document.querySelector('.c2opt');if(opt){opt.click();await wait(420);document.getElementById('classChoiceConfirm').click();}if(document.querySelector('.skilltut')){await wait(420);document.getElementById('tutGo').click();BFGuidedTutorial.stop();}}
-function place(b,e,d){const p=b.G.p;let spot=null;for(const distance of [d,d*.8,d*.6]){for(let i=0;i<16;i++){const a=i*Math.PI/8,x=e.x+Math.sin(a)*distance,z=e.z+Math.cos(a)*distance,y=b.floorAt(x,z,p.r,e.y+15);if(!Number.isFinite(y)||Math.abs(y-e.y)>(e.kind==='fly'?150:25))continue;const q={x,y,z};b.resolveObstacles(q,p.r,null,0);if(Math.hypot(q.x-x,q.z-z)>1)continue;spot={x,y,z};break;}if(spot)break;}check('Supported combat position',spot);Object.assign(p,{...spot,vx:0,vy:0,vz:0,onGround:true,yaw:Math.atan2(e.x-spot.x,e.z-spot.z)});b.G.camYaw=p.yaw;Object.assign(b.G.cam,spot);delete b.G._cameraBoom;}
+function place(b,e,d,requireSight=false){const p=b.G.p;let spot=null;for(const distance of [d,d*.8,d*.6]){for(let i=0;i<16;i++){const a=i*Math.PI/8,x=e.x+Math.sin(a)*distance,z=e.z+Math.cos(a)*distance,y=b.floorAt(x,z,p.r,e.y+15);if(!Number.isFinite(y)||Math.abs(y-e.y)>(e.kind==='fly'?150:p.weapon.cls==='ranged'?120:44))continue;const q={x,y,z};b.resolveObstacles(q,p.r,null,0);if(Math.hypot(q.x-x,q.z-z)>1)continue;if(requireSight&&b.aimTarget({x,y,z,yaw:Math.atan2(e.x-x,e.z-z)},{cls:'ranged'},distance+e.r+5)!==e)continue;spot={x,y,z};break;}if(spot)break;}check('Supported combat position',spot);Object.assign(p,{...spot,vx:0,vy:0,vz:0,onGround:true,yaw:Math.atan2(e.x-spot.x,e.z-spot.z)});b.G.camYaw=p.yaw;Object.assign(b.G.cam,spot);delete b.G._cameraBoom;}
 button('Start fresh tutorial',async()=>{const b=await fresh();results.start=hero(b);return results.start;});
 button('Fight six tutorial foes',async()=>{
  const b=await fresh(),G=b.G,p=G.p,rows=[];results.tutorial=rows;
@@ -29,19 +29,21 @@ button('Fight six tutorial foes',async()=>{
  // Test one authored foe at a time. Do not park others in the void: that grants false kill credit.
  for(let i=0;i<6;i++){
   const {e,x,y,z}=saved[i];G.enemies=[e];Object.assign(e,{x,z,y,sx:x,sz:z,active:true,dropT:0});const floor=b.enemySupport(e);if(e.kind!=='fly'&&Number.isFinite(floor))e.y=floor;
-  results.combatPlacement={type:e.type,x:e.x,y:e.y,z:e.z,floor:b.floorAt(e.x,e.z,e.r,e.y+15),platforms:G.platforms?.length};write();place(b,e,p.weapon.cls==='melee'?e.r+p.r+8:200);const before=hero(b),enemyHp=e.hp;let steps=0,attacks=0,skills=0;
+  results.combatPlacement={type:e.type,x:e.x,y:e.y,z:e.z,floor:b.floorAt(e.x,e.z,e.r,e.y+15),platforms:G.platforms?.length};write();place(b,e,p.weapon.cls==='melee'?e.r+p.r+8:200,true);const before=hero(b),enemyHp=e.hp;let steps=0,attacks=0,skills=0;
   while(!e.dead&&steps<1800&&p.hp>0){
    if(b.mode==='upgrade'){await pick(b);continue;}
    if(b.mode!=='play')break;
    p.yaw=Math.atan2(e.x-p.x,e.z-p.z);
-   if(p.atkCd<=0){b.playerAttack();attacks++;}
-   if(i>=3&&b.c2CurSkills()[0]&&p.skillCd[0]<=0){b.useSkill(0);skills++;}
+   if(i>=3&&b.c2CurSkills()[0]&&p.skillCd[0]<=0){const mana=p.mana;b.useSkill(0);if(p.skillCd[0]>0&&p.mana<mana)skills++;}
+   if(p.atkCd<=0&&(i<3||steps>=30)){b.playerAttack();attacks++;}
    pump(b,6);steps+=6;if(steps%120===0)await wait(1);
   }
   const row={n:i+1,type:e.type,enemyHp,before,after:hero(b),dead:e.dead,attacks,skills,seconds:steps/60,mode:b.mode};rows.push(row);write();check('Tutorial foe '+(i+1)+' defeated without inflated stats',e.dead&&p.hp>0);
-  if(b.mode==='upgrade')await pick(b);
+  if(i===2&&!b.c2ch()[2]){const end=Date.now()+4500;while(b.mode!=='upgrade'&&Date.now()<end){pump(b,3);window.BFProgressCelebration?.tick(G,b.mode,()=>null,{hidden:false,reduceMotion:true,particles:false});await wait(30);}check('Real rank choice actually presented',b.mode==='upgrade'&&!!document.querySelector('.c2opt'));await pick(b);check('First skill actually learned',!!b.c2ch()[2]);}
+  else if(b.mode==='upgrade')await pick(b);
  }
  check('Third kill unlocks rank 2',rows[0].after.rank===1&&rows[1].after.rank===1&&rows[2].after.rank===2);
+ check('Remaining foes include an actual mana-spending skill use',rows.slice(3).some(r=>r.skills>0));
  check('Tutorial has an exit',!!G.portal);results.tutorialEnd=hero(b);b.trialComplete();document.getElementById('hubBtn').click();await until(()=>!window.BF_LOADING?.active);results.hub=hero(b);b.autosaveRun();
  return {rows:rows.map(r=>({n:r.n,rank:r.after.rank,hp:r.after.hp,attacks:r.attacks,skills:r.skills,seconds:r.seconds})),hub:results.hub};
 });

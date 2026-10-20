@@ -31,7 +31,7 @@ const pauseHint=()=>guide?.hint?.('pause')||'Tab';
 function practice(action){if(guide?.steps[guide.i]?.practice===action){guide.practiceOpened=true;suspend();}}
 function suspend(){if(guide)window.BFNarration?.hide(guide);if(guide){const practice=guide.steps[guide.i].practice;if(practice==='bag'&&document.getElementById('bagItems')||practice==='pause'&&document.getElementById('resBtn'))guide.practiceOpened=true;}if(panel)panel.hidden=true;BFTutorialCallout.hide();}
 function stop(){if(guide)window.BFNarration?.hide(guide);if(guide)guide.g._tutorialSafe=false;guide=null;panel?.remove();panel=null;BFTutorialCallout.clear();}
-function start(g){if(!g)return;stop();g._guidedUsed=true;g._tutorialSafe=true;document.exitPointerLock?.();guide={g,i:0,steps:lessons,hold:0,run:0};}
+function start(g,lessonId){if(!g)return;stop();g._guidedUsed=true;if(lessonId==='done'){g._tutorialSafe=false;return;}const i=Math.max(0,lessons.findIndex(s=>s.id===(lessonId==='skill-use'?'skills':lessonId)));g._tutorialSafe=!!lessons[i].safe;document.exitPointerLock?.();guide={g,i,steps:lessons,hold:0,run:0};}
 function skill(g){
  if(!g)return;if(guide)window.BFNarration?.hide(guide);const resume=guide?.g===g?guide:null;
  if(resume?.steps[resume.i]?.id==='skill-use')return;

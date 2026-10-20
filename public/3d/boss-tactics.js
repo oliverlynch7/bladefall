@@ -15,11 +15,29 @@ function rule(G,e,src,kind='direct'){
  else if(e.marbleGuardian){const open=e.mcExposed>0;r.factor=open?2.5:0;r.key=open?'screen:'+e.mcSeq:null;r.limit=.34;r.hint=open?'Armor seal open — attack':'Turn a screen; reflect the heavy strike';}
  else if(e.hydraChain){const h=G.hydraArena,open=h?.state==='recover'&&h.head===e.hydraIndex&&(h.seq||0)>0;r.factor=open?2.5:0;r.key=open?'joint:'+h.seq:null;r.limit=.55;r.hint=open?'Pale joint — break this restraint':'Use the ledges and stone cover; strike after the head attacks';}
  else if(e.finalKing){const open=e.akState==='recover'&&e.akEnvSeq>0&&e.akEnvSeq===e.akSeq&&e.akEnvPhase===e.phase;r.factor=open?3:0;r.floor=e.phase===2&&!e.akSummoned?.55:0;r.key=open?'king:'+e.phase+':'+e.akSeq:null;r.limit=.38;r.hint=e.akState==='adds'?'Defeat the summoned guards':open?'Royal ward broken — attack now':'Block the beam with a pillar or jump the ground wave';}
- if(r.key&&e._bossBudgetKey===r.key&&(e._bossBudgetSpent||0)>=Math.ceil(e.maxHp*r.limit)){r.factor=0;r.hint='Opening spent — set up the next arena counter';}
+ if(r.key&&e._bossBudgetKey===r.key&&(e._bossBudgetSpent||0)>=Math.ceil(e.maxHp*r.limit)){r.factor=0;r.ended=true;r.hint='Opening ended — prepare the next counter';}
+ // A phase threshold already blocks damage. Its cue must not invite another hit.
+ if(r.hint&&r.floor>0&&e.hp<=Math.ceil(e.maxHp*r.floor)){r.factor=0;r.transition=true;r.hint=e.marksmanCrossing?'Changing nests — follow the outside paths':'Royal guards arriving — defeat them next';}
+ if(r.hint&&e.untargetable){r.factor=0;r.transition=true;r.hint=e.marksmanCrossing?'Changing nests — follow the outside paths':'Repositioning — wait for the next opening';}
 
  return r;
 }
 function closeEnough(e,src){return src&&Math.abs((src.y||0)-(e.y||0))<95&&Math.hypot(src.x-e.x,src.z-e.z)<340;}
+function focus(G,e,yaw){
+ if(!e?.frostOfficer||!G?.p)return e;
+ let best=e,score=Infinity;const p=G.p,angle=Number.isFinite(yaw)?yaw:p.yaw||0;
+ for(const q of G.enemies||[]){if(!q.frostOfficer||!live(q))continue;const dx=q.x-p.x,dz=q.z-p.z,d=Math.hypot(dx,dz),dot=d>1?(dx*Math.sin(angle)+dz*Math.cos(angle))/d:1;
+  const value=d*.35+Math.acos(Math.max(-1,Math.min(1,dot)))*180;if(value<score){score=value;best=q;}
+ }return best;
+}
+// This view reads the damage rule; it never starts, extends or resets an opening.
+function view(G,e,src){
+ const r=rule(G,e,src);if(!r.hint)return null;
+ const open=r.factor>0;
+ const nest=e.marksmanCrossing&&e.markState==='recover'&&!(e.markAttack>0)&&(closeEnough(e,src)||Number.isInteger(e.markNestSeq)&&e.markNestSeq===e.markTurns);
+ const clock=e.bruteOrchard?e.bruteClock:e.marksmanCrossing?Math.max(e.markExposed||0,nest?e.markClock||0:0):e.fallenDuel?e.fallClock:e.frostOfficer?e.offClock:e.furnaceColossus?e.fcExposed:e.marbleGuardian?e.mcExposed:e.hydraChain?G.hydraArena?.clock:e.finalKing?e.akClock:0;
+ return {state:open?'open':r.transition?'transition':r.ended?'ended':'guarded',label:open?'ATTACK NOW':r.transition?'PHASE CHANGING':r.ended?'OPENING ENDED':'GUARDED',hint:r.hint,seconds:open&&Number.isFinite(clock)?Math.max(0,clock):0};
+}
 function damage(G,e,src,dmg,kind='direct'){
  if(!Number.isFinite(dmg)||dmg<=0)return 0;
  if(e?.marksmanCrossing){const turn=e.markTurns||0;
@@ -53,6 +71,7 @@ function damage(G,e,src,dmg,kind='direct'){
 function cue(G,e,keys={}){
  if(!live(e))return null;
  const jump=keys.jump||'Space',dodge=keys.dodge||'Right click',out=(text,safe=false)=>({text,safe});
+ const r=rule(G,e,G.p);if(r.transition||r.ended)return out(r.hint);
  if(e.marksmanCrossing){if(e.markState==='aim')return out(e.markClock>.6?'Aiming — move toward stone cover':'Shot locked — stay behind cover');if(['relocate','glide'].includes(e.markState))return out('Changing nests — watch the approach for guards');if(e.markExposed>0&&rule(G,e,G.p).factor>0)return out('Bow exposed — attack now',true);return out('Reloading — advance toward her nest');}
  if(e.fallenDuel){if(e.fallState==='feint')return out('Feint — wait for the real sweep');if(e.fallState==='thrust')return out('Thrust — sidestep or put a pillar in its path');if(e.fallState==='sweep')return out('Sweep — '+dodge+' to move behind the blade');if(e.fallState==='stagger')return out('Blade caught — attack now',true);if(e.fallState==='recover')return out('Blade guarded — line up another pillar counter');}
  if(e.frostOfficer){const threats=(G.enemies||[]).filter(q=>q.frostOfficer&&live(q)&&['wind','strike'].includes(q.offState));const t=threats.find(q=>q.offState==='strike')||threats[0];if(t)return out(t.frostOfficer==='shield'?'Shield wave — '+jump+' to jump':t.frostOfficer==='spear'?'Spear rush — sidestep the lane':'Ice marks — move out of the circles');return out('Use the ramps to split the officers; flank the recovering shield');}
@@ -64,5 +83,5 @@ function cue(G,e,keys={}){
 }
 
 function snapshot(e){const out={};for(const key of ['_bossBudgetKey','_bossBudgetSpent','_fcCool','akEnvSeq','akEnvPhase','offFlankedSeq','markNestSeq','markCoverSeq','markWindowSeq','markWindowTurn'])if(e[key]!=null)out[key]=e[key];return out;}
-root.BFBossTactics={rule,damage,cue,snapshot};if(typeof module!=='undefined')module.exports=root.BFBossTactics;
+root.BFBossTactics={rule,damage,cue,snapshot,view,focus};if(typeof module!=='undefined')module.exports=root.BFBossTactics;
 })(typeof window!=='undefined'?window:globalThis);

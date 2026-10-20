@@ -1,0 +1,27 @@
+/* Local first-session observer and explicit staged profiling controls. Never shipped. */
+(()=>{'use strict';
+ if(!['localhost','127.0.0.1'].includes(location.hostname))return;
+ const rows=[],events=[];let previous='',frames=[];
+ const box=document.createElement('details');box.style.cssText='position:fixed;bottom:2px;right:2px;max-width:460px;z-index:200001;color:#fff;background:#112332;padding:5px;font:11px system-ui';
+ box.innerHTML='<summary>First-hour QA</summary><button id="hourCapture">Capture current session</button><button id="hourProfile">Profile staged Briar/Keep route</button><button id="hourCpu">Profile staged CPU route</button><pre id="hourResult" style="max-height:200px;overflow:auto;white-space:pre-wrap">Ready</pre><textarea id="hourEvidence" aria-label="First-hour evidence JSON" style="width:420px;height:40px"></textarea>';
+ document.body.append(box);
+ const wait=ms=>new Promise(r=>setTimeout(r,ms));
+ const state=()=>{const b=window.__BF3,g=b?.G,p=g?.p;return !b?{}:{mode:b.mode,zone:g?.zone,area:g?.area,trial:g?.trial,hub:g?.hub,position:p&&[p.x,p.y,p.z],hp:p?.hp,mana:p?.mana,level:p?.level,xp:p?.xp,class:b.meta.classId,rank:b.meta.classes?.[b.meta.classId],gold:b.meta.gold,bag:b.meta.stash?.length,lesson:window.BFGuidedTutorial?.state,objective:document.querySelector('#questbox')?.innerText,enemies:g?.enemies?.filter(e=>!e.dead).map(e=>({id:e.id,type:e.type,x:e.x,y:e.y,z:e.z,hp:e.hp,atkTimer:e.atkTimer,phase:e.ce?.phase})),doors:g?.doors,rooms:g?.rooms,keys:g?.keys,storyObjects:g?.storyObjects,portal:g?.portal,story:g?.storyState,loading:window.BF_LOADING?.active,graphics:window.__hero3dStats?.(),render:window.__BF_RENDER_STATS,mob:window.__mob3d?.()};};
+ const show=()=>{hourResult.textContent=JSON.stringify({state:state(),rows,events,errors:window.firstHourErrors});hourEvidence.value=JSON.stringify({state:state(),rows,events,errors:window.firstHourErrors});};
+ const stats=a=>{if(!a.length)return null;const v=a.slice().sort((a,b)=>a-b);return {n:v.length,p50:v[Math.floor(v.length*.5)],p95:v[Math.min(v.length-1,Math.floor(v.length*.95))],max:v.at(-1)};};
+ let t0=0,observed=0;function observe(t){if(t0)frames.push(t-t0);t0=t;if(frames.length>1800)frames.shift();if(++observed%30===0){const s=state(),sig=JSON.stringify([s.mode,s.zone,s.area,s.trial,s.hub,s.level,s.rank?.rank,s.lesson?.id]);if(sig!==previous){previous=sig;events.push({at:performance.now(),state:s});}}requestAnimationFrame(observe);}requestAnimationFrame(observe);
+ hourCapture.onclick=()=>{rows.push({capture:true,visibility:document.visibilityState,frameGaps:stats(frames),save:window.__BF3?.meta});show();};
+ async function loaded(){const end=performance.now()+30000,g=__BF3.G;await wait(50);while(BF_LOADING.active||window.HERO3D?.on!==false&&!(window.__BF_RENDER_WARMUP?.world===g&&window.__BF_RENDER_WARMUP.ready)){if(performance.now()>end)throw Error('Loading timed out');await wait(30);}}
+ async function profile(manual){
+  const b=__BF3;await b.briarReady;b.loadMode('rl');Object.assign(b.meta,{originSeen:true,hubTutDone:true,introSeen:true,tutOff:true,autoAttack:false,soundOn:false,musicOn:false,dialogueTTS:false,camMode:'shoulder',quality:'high',classId:'mage'});b.meta.classUnlocked.mage=true;
+  const points=[['briar-entry',0,0,0,420,0],['briar-orchard',0,0,-600,-2350,0],['black-woods',0,1,0,420,0],['keep-courtyard',2,0,0,420,0],['keep-water',2,1,1950,-3700,80]];
+  for(const [label,zone,area,x,z,y]of points){b.openHub();await loaded();b.enterZone(zone);await loaded();if(area){b.nextArea();await loaded();}Object.assign(b.G.p,{x,y,z,yaw:Math.PI,vx:0,vy:0,vz:0,invuln:99999});b.G.camYaw=Math.PI;b.G.camPitch=.14;await wait(400);const phases={},gaps=[],slow=[],programStart=window.__hero3dInfo?.(),started=performance.now();let last=started,visibility=document.visibilityState;window.firstHourPhases={};window.firstHourManual=manual;
+   try{for(let i=0;i<180;i++){b.input.right=i%120<60;b.input.left=!b.input.right;if(i%60===0){b.G.p.dodgeCdT=0;b.input.dodge=true;b.input.dodgeEdge=true;}if(i%60===6)b.input.dodge=false;
+    if(manual){const t=performance.now();b.update(1/60);b.renderFrame();gaps.push(performance.now()-t);await wait(14);}else{await Promise.race([new Promise(requestAnimationFrame),wait(1000)]);const now=performance.now();gaps.push(now-last);last=now;if(document.visibilityState!=='visible'||now-started>12000){visibility='invalid-background-or-throttled';break;}}
+    if(gaps.at(-1)>30)slow.push({i,gap:gaps.at(-1),phases:window.firstHourPhases,loading:BF_LOADING.active,graphics:window.__hero3dInfo?.(),visibility:document.visibilityState});for(const [k,v]of Object.entries(window.firstHourPhases))(phases[k]||(phases[k]=[])).push(v);window.firstHourPhases={};
+   }}finally{window.firstHourManual=false;b.releaseKeyboard();window.firstHourPhases=null;}
+   rows.push({label,scope:manual?'explicit update/render CPU cost; NOT FPS':'native rAF frame gaps',visibility,elapsed:performance.now()-started,timing:stats(gaps),slow,phases:Object.fromEntries(Object.entries(phases).map(([k,v])=>[k,stats(v)])),programStart,programEnd:window.__hero3dInfo?.(),render:window.__BF_RENDER_STATS,state:state()});show();
+  }show();
+ }
+ for(const [id,manual]of [['hourProfile',false],['hourCpu',true]])document.getElementById(id).onclick=async()=>{document.getElementById(id).disabled=true;try{await profile(manual);}catch(e){firstHourErrors.push(e.stack);}finally{document.getElementById(id).disabled=false;show();}};
+})();

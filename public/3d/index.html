@@ -1056,14 +1056,14 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 #dragonFlight[hidden]{display:none}#dragonFlight strong{display:block;font-size:15px}#dragonFlight progress{display:block;width:100%;height:12px;margin:7px 0;accent-color:#f7c15b}#dragonFlight small{display:block;color:#d3e6e5;margin:5px 0;line-height:1.5}#dragonFlight button{border:1px solid #d9b46e;border-radius:6px;background:#e3b659;color:#1d2025;padding:6px 12px;cursor:pointer;font-weight:bold}
 </style>
 <link rel="stylesheet" href="./bag-menu.css?v=2238">
-<link rel="stylesheet" href="./adventure-hud.css?v=2312">
+<link rel="stylesheet" href="./adventure-hud.css?v=2340">
 <script src="./adventure-hud.js?v=2312"></script>
 <style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
 </head>
 <body class="adventure-hud">
 <canvas id="gl"></canvas>
 <div id="hud" class="hide">
-  <div class="hudportrait"><img id="hudportraitimg" src="icons/skins/skin-knight.png" alt="Equipped skin"></div>
+  <div class="hudportrait"><img id="hudportraitimg" src="icons/class-warrior.png" alt="Warrior class"></div>
   <div class="hudpanel">
   <div class="meta"><div class="left"><span class="hudidentity"><span class="hudplayername" id="playername">Player</span></span><span id="weapontag">Rusty Sword</span></div><div style="display:flex;align-items:center;gap:9px"><span id="lvlbadge">Warrior</span><span style="display:inline-flex;align-items:center;gap:5px"><span class="ico ico-coin" style="vertical-align:middle"></span><span id="goldtag" style="color:#ffd24a;font-weight:800;font-size:11px">0</span></span><span id="stagetag">Stage 1</span><span id="armortag"></span></div></div>
   <button id="hudDetails" aria-label="Show equipped weapon" aria-expanded="false" title="Equipped weapon">⋯</button>
@@ -1144,7 +1144,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./emotes.js?v=2225"></script>
 <script src="./camera-occlusion.js?v=2239"></script>
 <script src="./campaign-threat.js?v=2337"></script>
-<script src="./boss-tactics.js?v=2338"></script>
+<script src="./boss-tactics.js?v=2340"></script>
+<script src="./starter-practice.js?v=2340"></script>
 <script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-welcome.js?v=2234"></script>
 <script src="./currency-feedback.js?v=2311"></script>
@@ -1214,7 +1215,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2285">
 <script src="./tutorial-callout.js?v=2232"></script>
-<script src="./guided-tutorial.js?v=2325"></script>
+<script src="./guided-tutorial.js?v=2340"></script>
 <script src="./menu-tour.js?v=2294"></script>
 <script src="./keep-beta.js?v=2113"></script>
 <script src="./briar-terrain.js?v=2120"></script>
@@ -1233,7 +1234,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.339.0-enemy-attacks';
+const VERSION3D='2.340.0-first-hour-clarity';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1252,6 +1253,7 @@ function saveGenerationCurrent(){try{return localStorage.getItem(SAVE_EPOCH_KEY)
 function slotSummary(sl){ const pfx=sl===0?'':('s'+sl+'_');
   let g={}; try{ g=loadJSON('bladefall3d_'+pfx+'global')||{}; }catch(e){}
   let best=null; for(const m of ['rl','hc','hl']){ let mv={}; try{ mv=loadJSON('bladefall3d_'+pfx+m)||{}; }catch(e){}
+    const practice=BFStarterPractice.normalize(mv.starterPractice,BFSaveSafety.snapshot);if(practice)mv={...mv,classId:practice.cid,hero:practice.p};
     if(mv.hero||mv.gold||mv.zoneMax||mv.run?.p||Object.values(mv.classUnlocked||{}).some(Boolean)){ if(!best||(mv.zoneMax||0)>(best.zoneMax||0)) best=mv; } }
   if(best?.run?.p) best={...best,hero:best.run.p};
   const cls=best&&best.classId, has=!!best;
@@ -1295,7 +1297,7 @@ const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol','progressPlayerSound','progressClassSound','combatDetailAudio','actionDetailAudio',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','sprintBests','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','motionTrails','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
-const MODE_FIELDS=['campaignLootDeals','riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','companionWhistle','secretSense'];
+const MODE_FIELDS=['starterPractice','campaignLootDeals','riftWelcomeSeen','chestRecords','classLooks','hubDialogue','returnVisits','riftOpen','riftHallStory','riftShards','campaignNgHp','campaignNgDmg','gold','run','ngPlus','bestStage','lastNgHp','lastNgDmg','stash','descent','perks','perkV2','classId','classes','hero','bank','zoneMax','zoneDone','classUnlocked','trialsDone','sideFound','sideDone','socks','bagSlots','hubUpgrades','petOwned','petActive','petNames','petTrain','petLabel','heroName','faceAdjust','eyeColor','mouthStyle','browStyle','hairStyle','hairColor','optionalDone','optionalProgress','iansShards','iansComplete','masterSeal','masterSealSeen','companionWhistle','secretSense'];
 let _g=loadJSON(GKEY);
 if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/achievements carry over
   let old=SLOT===0?loadJSON(SAVE_KEY_OLD):{};
@@ -1304,6 +1306,7 @@ if(!_g){ // migrate: prefer the old single 3D save, else the 2D save, so skins/a
 }
 _g.legacyHubDialogue=_g.legacyHubDialogue||_g.hubDialogue||{};
 const meta=Object.assign({
+  starterPractice:null,
   motionTrails:false,soundOn:true,musicOn:true,musicVol:1,sfxVol:1,showArmor:true,autoAttack:false,autoKeep:false,autoBag:true,autoSellEquipment:false,camMode:'shoulder',lookSens:1,fpsFov:92,shoulderZoom:1,overheadZoom:1,renderDist:1,silhouette:true,dmgNumbers:true,
   unlockedSkins:['knight'],selectedSkin:'knight',achievements:{},
   totalKills:0,bossKills:0,kingKills:0,tyrantKills:0,magicBossKills:0,rangedBossKills:0,legendaryFound:0,flawlessStages:0,maxLevel:1,
@@ -1337,7 +1340,7 @@ if(!meta.unlockedSkins.includes('knight')) meta.unlockedSkins.unshift('knight');
 function persistGlobal(){ if(!saveGenerationCurrent())return; const g={}; GLOBAL_FIELDS.forEach(f=>g[f]=meta[f]); try{localStorage.setItem(GKEY,JSON.stringify(g));}catch(e){} }
 persistGlobal(); // commit the (possibly just-migrated) global store immediately so skins/achievements are durable
 function persist(){ if(!saveGenerationCurrent()||IN_ARENA) return;   // the Arena is fully save-protected — never write its temporary state to disk
-  persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); const cp=campaignCheckpoint(); if(cp){retainCampaignEarnings();Object.assign(mv,checkpointClone(cp.state));}for(const f of ['prisonSaves','prisonProfile'])if(meta[f]!==undefined)mv[f]=meta[f]; try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv)); window.__saveStatus={ok:true,at:Date.now(),mode:MODE};}catch(e){ window.__saveStatus={ok:false,error:e.name,at:Date.now(),mode:MODE}; console.error('[save] Progress could not be stored',e); } } }
+  captureStarterPractice();persistGlobal(); if(MODE){ const mv={}; MODE_FIELDS.forEach(f=>mv[f]=meta[f]); const cp=campaignCheckpoint(); if(cp){retainCampaignEarnings();Object.assign(mv,checkpointClone(cp.state));}for(const f of ['prisonSaves','prisonProfile'])if(meta[f]!==undefined)mv[f]=meta[f]; try{localStorage.setItem(MKEY(MODE),JSON.stringify(mv)); window.__saveStatus={ok:true,at:Date.now(),mode:MODE};}catch(e){ window.__saveStatus={ok:false,error:e.name,at:Date.now(),mode:MODE}; console.error('[save] Progress could not be stored',e); } } }
 // Campaign keeps the route checkpoint while committing earned growth, gold and hub requests.
 // Secondary modes retain their own save contracts.
 function autosaveRun(){ try{
@@ -1351,6 +1354,7 @@ function autosaveRun(){ try{
     persist();
   }catch(e){} }
 function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
+  meta.starterPractice=BFStarterPractice.normalize(mv.starterPractice,BFSaveSafety.snapshot);if(meta.starterPractice&&mv.trialsDone?.[meta.starterPractice.cid])meta.starterPractice=null;
   meta.campaignLootDeals=Math.max(0,Math.floor(Number(mv.campaignLootDeals)||0));
   meta.chestRecords=mv.chestRecords&&typeof mv.chestRecords==='object'?mv.chestRecords:{};
   meta.hubDialogue=checkpointClone(mv.hubDialogue||(Object.keys(mv).length?(meta.legacyHubDialogue||loadJSON(GKEY)?.hubDialogue||{}):{}));meta.returnVisits=BFReturnVisits.normalize(mv.returnVisits);
@@ -1389,13 +1393,13 @@ function loadMode(m){ MODE=m; const mv=loadJSON(MKEY(m))||{};
   meta.companionWhistle=mv.companionWhistle===true;
   meta.masterSeal=!!mv.masterSeal; meta.masterSealSeen=!!mv.masterSealSeen;                             // Drillmaster's Seal (field class-swap/respec)
   // an existing save already past the start never gets re-gated behind the starter picker
-  if(!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
+  if(!meta.starterPractice&&!Object.keys(meta.classUnlocked).length && (meta.hero||meta.zoneMax>0||meta.gold>0)) meta.classUnlocked[meta.classId||'warrior']=true;
   if(!CLASSES[meta.classId]||!meta.classUnlocked[meta.classId]){ const f=CLASSIDS.find(c=>meta.classUnlocked[c]); if(f) meta.classId=f; }
   if(meta.run && (!meta.run.p || !meta.run.p.gear)) meta.run=null;
   if(!CLASSES[meta.classId]){meta.classId='warrior';meta.classUnlocked.warrior=true;}
   migrateClassEquipment();
 }
-function wipeMode(m){ meta.campaignLootDeals=0;meta.riftWelcomeSeen=false;meta.chestRecords={}; try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.hubDialogue={};meta.returnVisits={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
+function wipeMode(m){ meta.starterPractice=null;meta.campaignLootDeals=0;meta.riftWelcomeSeen=false;meta.chestRecords={}; try{localStorage.removeItem(MKEY(m));}catch(e){} meta.gold=0; meta.run=null; meta.ngPlus=0; meta.bestStage=0; meta.lastNgHp=1; meta.lastNgDmg=1; meta.stash=[]; meta.descent=0; meta.perks={}; meta.perkV2=true; meta.classes={}; meta.hero=null; meta.bank=null; meta.zoneMax=0; meta.zoneDone={}; meta.socks=false; meta.bagSlots=0; refreshBagCap(); meta.hubUpgrades={}; meta.hubDialogue={};meta.returnVisits={}; meta.petOwned=[]; meta.petActive=null; meta.petNames={}; meta.petTrain={}; meta.petLabel=true; meta.heroName='';
   // permadeath wipes the RUN (gold/gear/progress) but KEEPS the classes you earned — dying never
   // forces you back through a class trial you already beat.
   if(!Object.keys(meta.classUnlocked||{}).length){ meta.classUnlocked={}; meta.trialsDone={}; }
@@ -4313,7 +4317,7 @@ function optionalBump(id,by){ const m=(G.optionalMissions||[]).find(x=>x.id===id
 function questKill(type){
   if(G.trial){ const T=TRIALS[G.trial]; G.trialKills++; if(!T.earned&&G.trialKills===3){const cs=classState(meta.classId);if(cs.rank===1)gainClassXp(Math.max(1,RANK_XP(1)-cs.xp));}        // trials count every kill, whatever it was
     if(G.trialKills>=T.kills && !G.portal&&!MP.guest()){if(G.riftMentor)trialMentorProved();else openWay();}
-    questUpdate(); return; }
+    questUpdate();if(G._starterPractice)persist();return; }
   for(const q of areaQuests()) if(q.k==='kill'&&q.mob===type&&!questDone(q)) questBump(q.id,1); }
 /* The `hunt` verb bumps on a SPECIFIC creature dying, not on its species, so it needs the entity
    rather than the type string questKill receives. */
@@ -5827,9 +5831,20 @@ function sideClear(){
   document.getElementById('hubBtn').onclick=openHub;
 }
 /* ---- Trials: starter tutorials (skippable) and earned-class gauntlets (must be won) ---- */
+function captureStarterPractice(){
+ if(!G?._starterPractice||G._starterPracticeMode!==MODE||!meta.starterPractice||G.trialCompleted||MP.active||!G.p)return;
+ const record={v:1,cid:G.trial,p:snapOf(G.p),runSeed:G.runSeed>>>0,kills:Math.min(6,G.trialKills||0),defeated:[...(G.starterDefeated||[])]};
+ record.lesson=G._guidedUsed?(BFGuidedTutorial.state?.id||'done'):meta.starterPractice.lesson||'welcome';
+ const valid=BFStarterPractice.normalize(record,BFSaveSafety.snapshot);if(valid)meta.starterPractice=valid;
+}
+function resumeStarterPractice(){
+ const saved=BFStarterPractice.normalize(meta.starterPractice,BFSaveSafety.snapshot);if(!saved||meta.trialsDone?.[saved.cid])return false;
+ startTrial(saved.cid,0,{starterResume:saved});return true;
+}
 function startTrial(cid,fromZone,opts={}){
   if(MP.active&&!opts.remote){requestPartyTrial(cid);return;}
   const T=TRIALS[cid]; if(!T) return;
+  const saved=opts.starterResume&&opts.starterResume.cid===cid?BFStarterPractice.normalize(opts.starterResume,BFSaveSafety.snapshot):null;
   initAudio(); queueLevelUp=0; queueSubclass=false;
   /* Bank FIRST, then switch. bankNow() escrows meta.classId, so switching before banking would
      escrow the trial class as the thing to restore and the bug would survive the fix. */
@@ -5839,14 +5854,18 @@ function startTrial(cid,fromZone,opts={}){
   meta.classId=cid;                                              // you play the trial AS the class you're earning
   // A class trial borrows progression, never equipment. Existing level/stat growth carries in,
   // while the real loadout stays escrowed in meta.bank until completion, abandonment, or death.
-  const hadHero=!!meta.hero, p=hadHero?freshFromSnapshot(meta.hero):freshPlayer(), issued=trialWeapon(cid);
+  const hadHero=!saved&&!!meta.hero, p=saved?freshFromSnapshot(saved.p):hadHero?freshFromSnapshot(meta.hero):freshPlayer(), issued=trialWeapon(cid);
   p.weapon=issued; p.gear=freshGear();                            // deliberately naked, with only the trial-class weapon
   recomputeArmor(p); p.hp=effMaxHp(p);
   G=newG(p,{zone:fromZone||0,area:0,zoneTier:T.tier||1,trial:cid,trialFrom:wasClass,trialKills:0,tip:0,tipT:0,
     trialHadHero:hadHero,trialReturnHero:hadHero?JSON.parse(JSON.stringify(meta.hero)):null,trialIssuedWeapon:JSON.parse(JSON.stringify(issued))});
   if(opts.session){G.trialSession=opts.session;G.trialPartySize=Math.max(1,Math.min(8,opts.partySize||1));G.runSeed=opts.runSeed;MP.zone=MP.TRIAL;MP.rseed=opts.runSeed;}
+  const firstPractice=!T.earned&&!hadHero&&!Object.keys(meta.classUnlocked||{}).length&&!opts.session;
+  if(firstPractice){G._starterPractice=true;G._starterPracticeMode=MODE;G.starterDefeated=saved?.defeated||[];if(saved){G.runSeed=saved.runSeed;G.trialKills=saved.kills;}meta.starterPractice=saved||{v:1,cid,p:snapOf(p),runSeed:G.runSeed>>>0,kills:0,defeated:[],lesson:'welcome'};}
   meta.run=null; persist();
-  loadArea(); musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
+  loadArea();
+  if(saved){const defeated=new Set(saved.defeated);G.enemies=G.enemies.filter(e=>!defeated.has(e.mid));G.kills=saved.kills;p.mana=p.maxMana;if(saved.kills>=T.kills)openWay();}
+  musicForScene(); mode='play'; showOverlay(false); showGameUI(true); skillbarUpdate(); hudUpdate();
   if(!T.earned && !hadHero && !Object.keys(meta.classUnlocked||{}).length){ showTutorial(cid); }   // FIRST-TIME tutorial (skippable)
   else if(!meta.tutOff&&T.earned&&T.tips?.length){ toast(T.tips[0]); G.tipT=4; }
 }
@@ -5864,7 +5883,7 @@ window.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')hudDevice('
 function beginnerControls(){return [['Move',[...new Set(['up','left','down','right'].map(controlHint))].join(' · ')],['Jump · hold for height',controlHint('jump')],['Basic attack',controlHint('attack')],['Dodge / air dash',controlHint('dodge')],['Talk / use',controlHint('interact')],['Journal',controlHint('journal')],['Bag',controlHint('bag')],['Emotes',controlHint('emote')],['Toggle auto-sell',controlHint('loot')],['Camera zoom / first-person FOV','Scroll wheel · Settings → Controls & camera'],['Menu / release mouse',controlHint('pause')],['Fullscreen',controlHint('fullscreen')+' · Middle-click']];}
 function showTutorial(cid){mode='menu';
  showOverlayHTML(`<div class="card"><p class="ovkicker">Your first steps</p><h2 class="ovh">Try your ${CLASSES[cid]?.disp||'class'}</h2><p class="ovsub">Learn the controls, defeat 6 enemies, then find the exit. Enemies wait during basic practice.</p><button class="bigbtn" id="tutGo">Start practicing · ${htmlSafe(controlKey('interact'))}</button><button class="bigbtn ghost" id="tutSkip">Skip practice · ${htmlSafe(hudInputDevice==='controller'?controlKey('dodge'):'Esc')}</button></div>`);
- document.getElementById('tutGo').onclick=()=>{resumePlay();BFGuidedTutorial.start(G);};
+ document.getElementById('tutGo').onclick=()=>{resumePlay();BFGuidedTutorial.start(G,G._starterPractice?meta.starterPractice?.lesson:undefined);};
  document.getElementById('tutSkip').onclick=()=>{showOverlayHTML(`<div class="card"><h2 class="ovh">Skip the practice area?</h2><p class="ovsub">You will keep your chosen class and go to the Waystation. You can find the controls again in Pause → Help.</p><button class="bigbtn" id="skipYes">Skip and go to the Waystation</button><button class="bigbtn ghost" id="skipNo">Return to practice instructions</button></div>`);document.getElementById('skipYes').onclick=skipTrial;document.getElementById('skipNo').onclick=()=>showTutorial(cid);};
 }
 // second-stage onboarding: how the hub works, shown once after the first trial is done
@@ -6033,7 +6052,7 @@ function trialComplete(remote=false){
   if(!G?.trial||G.trialCompleted)return;
   if(MP.active&&!remote){finishPartyTrial();return;}
   if(MP.active&&(!G.storyState?.flags['trial.taught']||G.trialKills<TRIALS[G.trial].kills))return;
-  G.trialCompleted=true;if(MP.active)MP.completeSurvival();
+  G.trialCompleted=true;if(G._starterPractice)meta.starterPractice=null;if(MP.active)MP.completeSurvival();
   const cid=G.trial, T=TRIALS[cid];
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
   const protectedHero=G.trialReturnHero||((meta.bank&&meta.bank.hero)||null);
@@ -6061,6 +6080,7 @@ function trialComplete(remote=false){
 function skipTrial(){
   const cid=G?G.trial:null; if(!cid) return;
   if(TRIALS[cid].earned){ toast('This one you have to earn.'); return; }
+  if(G._starterPractice)meta.starterPractice=null;
   meta.classUnlocked[cid]=true; meta.trialsDone[cid]=true; meta.classId=cid;
   if(!G.trialHadHero)meta.hero=snapOf(G.p);
   meta.bank=null; persist();
@@ -10448,7 +10468,7 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 // Desktop: ANY click anywhere in live play recaptures the camera. Capture phase prevents HUD layers
 // or controls from shrinking the usable reacquisition region after tabbing away.
 function acquireCameraLock(event){
-  if(event?.target?.closest?.('#visual-qa-panel,#journalNotice,#questbox,#guidedLesson,#inventoryDock,#equipmentFeed,#hud')) return;
+  if(event?.target?.closest?.('button,a,input,select,textarea,summary,[role="button"],[contenteditable="true"],#visual-qa-panel,#journalNotice,#questbox,#guidedLesson,#inventoryDock,#equipmentFeed,#hud')) return;
   /* NEVER grab the pointer while the level editor is open. Oliver: "i dont have control of my
      mouse." The over-the-shoulder camera pointer-locks the canvas on click to steer the hero, which
      hides the cursor and feeds the movement straight to the camera - so in edit mode you could not
@@ -12124,14 +12144,19 @@ function buildAmt(w,boss){ const cd=(w&&w.cd)||0.4, scy=(w&&w.art==='scythe')?2.
 function campaignBossDamage(e,dmg,src,kind='direct'){
  if(!isCampaignAdventure()||G.area>=0)return dmg;
  const r=BFBossTactics.rule(G,e,src,kind),n=BFBossTactics.damage(G,e,src,dmg,kind);
- if(r.hint&&n<dmg*.6&&(e._tacticHintAt||0)<G.time){e._tacticHintAt=G.time+3;addText(e.x,(e.y||0)+e.h+24,e.z,r.hint,'#ebcf8a');}
+ if(r.hint&&n<=0&&kind==='direct'&&(e._tacticHintAt||0)<G.time){e._tacticHintAt=G.time+1.8;addText(e.x,(e.y||0)+e.h+24,e.z,r.transition?'PHASE CHANGING':r.ended?'OPENING ENDED':'GUARDED','#ebcf8a');}
  return n;
 }
 function updateBossTactic(e){
  const wrap=document.getElementById('bosshpwrap');let tip=document.getElementById('bossTactic');
  if(!tip){tip=document.createElement('div');tip.id='bossTactic';tip.style.cssText='font-size:13px;line-height:1.35;text-align:center;margin-top:5px;color:#ebcf8a;text-shadow:0 2px 3px #000';wrap.appendChild(tip);}
- const r=isCampaignAdventure()?BFBossTactics.rule(G,e,G.p):null;
- const text=r?.hint||'',color=r?.factor>=1?'#a6edb5':'#ebcf8a';if(tip.textContent!==text)tip.textContent=text;tip.hidden=!text;if(tip.style.color!==color)tip.style.color=color;
+ const view=isCampaignAdventure()?BFBossTactics.view(G,e,G.p):null;
+ if(view&&e.frostOfficer)view.label=e.frostOfficer.toUpperCase()+' · '+view.label;
+ let state=document.getElementById('bossOpening');if(!state){state=document.createElement('div');state.id='bossOpening';state.className='boss-opening';state.innerHTML='<span class="boss-opening-icon" aria-hidden="true"></span><strong></strong><span class="boss-opening-time"></span>';state.setAttribute('role','status');wrap.insertBefore(state,tip);}
+ state.hidden=!view;
+ if(view){state.dataset.state=view.state;const label=state.querySelector('strong'),clock=state.querySelector('.boss-opening-time'),icon=state.querySelector('.boss-opening-icon');if(label.textContent!==view.label){label.textContent=view.label;icon.textContent=view.state==='open'?'✦':view.state==='transition'?'↗':'◆';}const time=view.seconds>0?Math.ceil(view.seconds)+'s':'';if(clock.textContent!==time)clock.textContent=time;}
+ const text=view?.state==='open'?view.hint.replace(/ — attack(?: now)?$/,''):view?.hint||'',color=view?.state==='open'?'#a6edb5':'#ebcf8a';if(tip.textContent!==text)tip.textContent=text;tip.hidden=!text;if(tip.style.color!==color)tip.style.color=color;
+ const cue=document.getElementById('bosscue');if(cue&&(view?.state==='open'&&!e.frostOfficer||cue.textContent===text))cue.hidden=true;
 }
 function statusDamage(e,dmg,flatHeal=0){
  if(e._peer){MP.sendPvp(e._peerId||e.id,dmg,G.p.x,G.p.z,{flatHeal});return;}
@@ -13949,6 +13974,7 @@ function killEnemy(e,weaponKill){
     (G.trails=G.trails||[]).push({x:e.x,z:e.z,y:e.y,warn:0.85,warnMax:0.85,r:56,life:3.0,max:3.0,dmg:Math.max(4,Math.round(e.dmg*0.45)),hit:0,col:'#ff8a3a',cause:{name:'a dying emberling',attack:'the cinders'}});
     burst(e.x,e.y+10,e.z,'#ff8a3a',18);
   }
+  if(G._starterPractice&&Number.isSafeInteger(e.mid)&&!(G.starterDefeated||[]).includes(e.mid))(G.starterDefeated||(G.starterDefeated=[])).push(e.mid);
   e.dead=true;e.defeatedAt=G.time; if(isCampaignAdventure()&&BFCampaignPatrols.killed(G,adventureStoryState(),e,{host:!MP.guest(),party:campaignParty(),notice:(title,text)=>presentStoryNotice({id:(G.patrolWork?.id||'combat')+':'+adventureStoryState().revision+':'+title,title,text,kind:'Task complete'})})){briarSync();questUpdate();} G.kills++; meta.totalKills=(meta.totalKills||0)+1;
   if(meta.classId==='necromancer'&&!e.boss){ (G.corpses=G.corpses||[]).push({x:e.x,z:e.z,y:e.y,t:3.5,sourceType:e.type==='colossus'&&__BF_WORLD().theme==='marble'?'marblecolossus':e.type,sourceH:e.h,ranged:['archer','caster','frostlobber','sunpriest','royalarcanist','cragspitter','voidtether'].includes(e.type)}); G.lastSlainEnemy=G.corpses[G.corpses.length-1]; if(G.corpses.length>24) G.corpses.shift(); }   // fresh corpse for Raise the Dead
   if(e===G.sideGuardian){ G.sideTaskDone=true; SFX.achieve(); toast('The Thornheart falls — the old gate opens',null,'event-secret-rift'); openWay(); questUpdate(); }
@@ -17212,10 +17238,11 @@ function onBossActivate(e){ SFX.boss();
     }
   } }
 function updateBossBar(e){
+ if(e.frostOfficer)e=BFBossTactics.focus(G,e,playerAimYaw(G.p));
  if(G?.escape?.layoutVersion>=12)document.getElementById('bossnametx').textContent=BFPrisonDungeon.boss(G.floor)?.name||e.label;
  updateBossTactic(e);
  const cueNode=document.getElementById('bosscue'),cue=isCampaignAdventure()?(e.bruteOrchard?BFBruteEncounter.cue(e,{jump:controlHint('jump'),dodge:controlHint('dodge')}):BFBossTactics.cue(G,e,{jump:controlHint('jump'),dodge:controlHint('dodge')})):null;
- if(cueNode){cueNode.hidden=!cue;if(cue){if(cueNode.textContent!==cue.text)cueNode.textContent=cue.text;cueNode.style.color=cue.safe?'#c4efa1':'#ffcf8c';}}
+ if(cueNode){cueNode.hidden=!cue||cue.safe&&document.getElementById('bossOpening')?.dataset.state==='open'||cue.text===document.getElementById('bossTactic')?.textContent;if(cue){if(cueNode.textContent!==cue.text)cueNode.textContent=cue.text;cueNode.style.color=cue.safe?'#c4efa1':'#ffcf8c';}}
  if(e.hydraChain)return;if(e.finalKing){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',BFFinalKing.combat(e));document.getElementById('bossnametx').textContent=e.label;}if(e.marbleGuardian){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Marble Colossus'+(e.mcExposed>0?' · Armor seal open':' · Sealed armor');} if(e.furnaceColossus){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Ember Colossus'+(e.fcExposed>0?' · Armor cooled':' · Heated armor');}if(e.frostOfficer){document.getElementById('bosshpwrap').classList.add('officer-team');const team=G.enemies.filter(q=>q.frostOfficer),live=team.filter(q=>!q.dead&&q.hp>0);document.getElementById('bosshpwrap').classList.toggle('on',!!live.length);document.getElementById('bossnametx').textContent='Hollowed Officers · '+live.length+' / 3';document.querySelector('#bosshp > i').style.width=(team.reduce((n,q)=>n+(q.dead?0:q.hp),0)/team.reduce((n,q)=>n+q.maxHp,0)*100)+'%';return;}document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
 function dangerRing(x,y,z,r,color,alpha=1,arc=Math.PI,dx=0,dz=1){
   const n=Math.max(8,Math.ceil(28*arc/Math.PI)),base=Math.atan2(dz,dx),step=arc*2/n;
@@ -17561,7 +17588,7 @@ function restorePlayer(snap){ const p=G.p; Object.assign(p,snap,{stats:Object.as
   if(!p.weapon||typeof p.weapon!=='object'||!p.weapon.cls) p.weapon=classStartWeapon(meta.classId); else p.weapon=normWeapon(p.weapon);
   p.gear=cloneGear(snap.gear); recomputeArmor(p); p.hp=Math.min(snap.hp,effMaxHp(p));
   p.x=(G.lastSafe?G.lastSafe.x:0);p.z=(G.lastSafe?G.lastSafe.z:140);p.y=G.lastSafe?.y||0;p.vx=0;p.vy=0;p.vz=0;p.yaw=Math.PI;p.onGround=true;p.atkTimer=0;p.atkCd=0;p.invuln=0;p.dead=false; }
-function resumeSavedAdventure(){ if(meta.run?.p?.gear) continueRun(); else openHub(); }
+function resumeSavedAdventure(){ if(resumeStarterPractice())return;if(meta.run?.p?.gear) continueRun(); else openHub(); }
 function continueRun(){
   if(!meta.run) return; initAudio(); queueLevelUp=0; queueSubclass=false;
   const checkpoint=campaignCheckpoint();if(checkpoint)restoreCampaignState();
@@ -17785,6 +17812,7 @@ function showDeathScreen(){
     showOverlayHTML(`<div class="card narrow"><h2 class="ovh">Try again</h2><p class="ovsub">You're still learning. Respawn at the start with full health and keep practicing as your ${CLASSES[G.trial].disp}. Your tutorial progress is safe.</p><button class="bigbtn" id="tutorialRetry">Retry tutorial</button></div>`);
     document.getElementById('tutorialRetry').onclick=()=>{
       document.getElementById('deathfade')?.remove();
+      clearWorldTexts();
       G.p=freshFromSnapshot(snapOf(G.p));const p=G.p,sp=G.startPos||{x:0,z:0};
       p.dead=false;p.downed=false;p.hp=effMaxHp(p);p.mana=p.maxMana;p.invuln=3;p.x=sp.x;p.z=sp.z;p.y=(sp.y||0)+30;p.vx=p.vy=p.vz=0;p.onGround=false;
       G.lastHitBy=null;G.slowmo=0;G.shake=0;resumePlay();
@@ -18610,6 +18638,8 @@ function openTitleOptions(){
 }
 function modeSelect(){                    // no mode select — the adventure IS the game. Only the earned difficulties get a choice.
   initAudio();
+  const savedMode=diffMode(meta.diff||'normal'),saved=loadJSON(MKEY(savedMode));
+  if(BFStarterPractice.normalize(saved?.starterPractice,BFSaveSafety.snapshot)){loadMode(savedMode);resumeSavedAdventure();return;}
   const open=Object.keys(DIFFS).filter(diffOpen);
   if(open.length<2){ meta.diff='normal'; loadMode('rl'); resumeSavedAdventure(); return; }
   openDiffSelect();
@@ -20924,8 +20954,8 @@ function hudUpdate(){
   if(window.BFProgressCelebration)window.BFProgressCelebration.paintBar(document.getElementById('clsfill'),atMax?100:cs.xp/need*100,cs.rank,G,'class',meta.reduceMotion);else document.getElementById('clsfill').style.width=(atMax?100:Math.max(0,cs.xp/need*100))+'%';
   document.getElementById('clslabel').innerHTML=curClass().icon+' '+curClass().disp.toUpperCase()+' · RANK '+cs.rank;
   document.getElementById('clsnum').textContent=atMax?'MAX':(Math.floor(cs.xp)+'/'+need);
-  const portrait=document.getElementById('hudportraitimg'), skinId=SKINS[p.skin]?p.skin:'knight';
-  if(portrait&&portrait.dataset.skin!==skinId){ portrait.dataset.skin=skinId; portrait.onerror=()=>{portrait.onerror=null;portrait.src='icons/skins/skin-knight.png?v='+VERSION3D;}; portrait.src='icons/skins/skin-'+skinId+'.png?v='+VERSION3D; }
+  const portrait=document.getElementById('hudportraitimg'),portraitClass=CLASSES[meta.classId]?meta.classId:'warrior';
+  if(portrait&&portrait.dataset.classId!==portraitClass){portrait.dataset.classId=portraitClass;portrait.alt=CLASSES[portraitClass].disp+' class';portrait.onerror=()=>{portrait.onerror=null;portrait.src='icons/class-warrior.png?v='+VERSION3D;};portrait.src='icons/class-'+portraitClass+'.png?v='+VERSION3D;}
   const playerName=document.getElementById('playername'); if(playerName) playerName.textContent=(meta.heroName||'').trim()||'Player';
   document.getElementById('lvlbadge').textContent=curClass().disp+(cs.sub?' · '+CLASSES[meta.classId].subs.find(s=>s.id===cs.sub).disp:'');
   const wt=document.getElementById('weapontag'), offF=!classFamilyOk(p.weapon);

@@ -177,3 +177,9 @@ body.adventure-hud{--hud-edge:#76958b;--hud-panel:#12252eed;--hud-gold:#efd794;-
 .adventure-hud #riftShardHud[hidden]{display:none!important}.adventure-hud #riftShardHud img{width:20px;height:23px;object-fit:contain}.adventure-hud #riftShardHud b{font-size:15px;white-space:nowrap;color:#fff1ff;font-variant-numeric:tabular-nums}.adventure-hud #riftShardHud.ready{border-color:#d8acf7;box-shadow:0 0 10px #b677e944}
 .adventure-hud #journalNotice{top:max(345px,calc(var(--hud-map-caption-bottom,333px) + 12px))!important}
 @media(max-width:899px),(pointer:coarse){.adventure-hud #riftShardHud{gap:5px;padding:5px 7px;font-size:10px;margin-top:6px}.adventure-hud #riftShardHud b{font-size:13px}.adventure-hud #riftShardHud img{width:16px;height:19px}.adventure-hud #journalNotice{top:max(252px,calc(var(--hud-map-caption-bottom,240px) + 10px))!important}}
+
+/* State is shared with actual boss damage; no animation hides a closed window. */
+.boss-opening{display:flex;align-items:center;justify-content:center;gap:7px;margin:6px auto 0;padding:4px 9px;width:max-content;max-width:100%;box-sizing:border-box;border:1px solid #baa177;border-radius:5px;background:#262c39ed;color:#f3d6a6;font:700 11px/1.3 system-ui;letter-spacing:.04em;text-shadow:none}
+.boss-opening[hidden]{display:none!important}.boss-opening[data-state="open"]{border-color:#a8e9b6;background:#163d32ed;color:#d4ffcf;box-shadow:0 0 10px #a8edb425}.boss-opening[data-state="transition"]{border-color:#b7b5e3;color:#e0dcff;background:#2d2942ed}
+.boss-opening-time{font-variant-numeric:tabular-nums;letter-spacing:0}.boss-opening-time:not(:empty){border-left:1px solid #ffffff45;padding-left:7px}
+@media(max-width:899px),(pointer:coarse){.boss-opening{font-size:10px;padding:3px 6px;gap:4px}}

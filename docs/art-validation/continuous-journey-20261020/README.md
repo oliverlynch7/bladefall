@@ -34,3 +34,7 @@ Earlier attempts with `First Journey` were interrupted by page restarts around c
 Two oversized early DOM exports were truncated and are rejected, not shipped as valid JSON. The retained final performance export was retrieved in chunks and parsed. Generated `.qa-*` HTML stays local. `scripts/qa-continuous-journey.js` only observes errors, frames, inputs and entry calls; it does not alter input or gameplay.
 
 Not established: all optional routes/quests/shards, two-human Internet co-op, subjective fun/balance, every camera angle or low-end performance. These remain distinct from this completed first-campaign route.
+
+## Publication
+
+Code commit288caeed122c8035463965fff216a04810f481ef deployed successfully as Cloudflare464c450a-dcd5-4633-8d76-ff0522fdffbd. `live-verification.json` verifies all three changed public game files byte-for-byte against committed blobs (Windows working copies use CRLF). Muted public Chrome displays v2.341.0, loads the new camera function and has no warning/error log entries. The local mirror received the task patch; its two pre-existing index differences were verified against both baseline commits and preserved.

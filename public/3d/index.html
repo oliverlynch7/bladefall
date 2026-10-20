@@ -1144,15 +1144,15 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./emotes.js?v=2225"></script>
 <script src="./camera-occlusion.js?v=2239"></script>
 <script src="./campaign-threat.js?v=2337"></script>
-<script src="./boss-tactics.js?v=2337"></script>
+<script src="./boss-tactics.js?v=2338"></script>
 <script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-welcome.js?v=2234"></script>
 <script src="./currency-feedback.js?v=2311"></script>
 <script src="./rift-shards.js?v=2300"></script>
 <script src="./trial-themes.js?v=2315"></script>
 <script src="./rift-hall.js?v=2076"></script>
-<script src="./brute-encounter.js?v=2289"></script>
-<script src="./marksman-encounter.js?v=2276"></script>
+<script src="./brute-encounter.js?v=2338"></script>
+<script src="./marksman-encounter.js?v=2338"></script>
 <script src="./story-state.js?v=2288"></script>
 <script src="./campaign-placement.js?v=2183a"></script>
 <script src="./campaign-geography.js?v=2196"></script>
@@ -1176,7 +1176,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./thunder-cliffs.js?v=2318"></script>
 <script src="./castle-gates.js?v=2318"></script>
 <script src="./long-ascent.js?v=2185"></script>
-<script src="./final-king.js?v=2022"></script>
+<script src="./final-king.js?v=2338"></script>
 <script src="./return-adventures.js?v=2038"></script>
 <script src="./return-visits.js?v=2317"></script>
 <script src="./palace-courtyard.js?v=2317"></script>
@@ -1185,7 +1185,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./dragon-riding.js?v=2225"></script>
 <script src="./sky-library.js?v=2318"></script>
 <script src="./marble-guardian.js?v=2276"></script>
-<script src="./hydra.js?v=2276"></script>
+<script src="./hydra.js?v=2338"></script>
 <script src="./shipwreck-shore.js?v=2318"></script>
 <script src="./ship-crossing.js?v=2299"></script>
 <script src="./great-furnace.js?v=2318"></script>
@@ -1195,8 +1195,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./puzzle-feedback.js?v=2197"></script>
 <script src="./journal-clues.js?v=2203"></script>
 <script src="./music-score.js?v=2293"></script>
-<script src="./fallen-encounter.js?v=2007"></script>
-<script src="./frost-officers.js?v=2276"></script>
+<script src="./fallen-encounter.js?v=2338"></script>
+<script src="./frost-officers.js?v=2338"></script>
 <script src="./story-authority.js?v=2325"></script>
 <script src="./skill-surfaces.js?v=2330f"></script><script src="./skill-identity.js?v=2330f"></script>
 <script src="./campaign-journey.js?v=2318"></script>
@@ -1233,7 +1233,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.337.0-campaign-combat';
+const VERSION3D='2.338.0-boss-mastery';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -8621,6 +8621,8 @@ function finalKingTick(dt){if(!G?.kingFinal){document.getElementById('finalCharg
 }
 function updateFinalKing(e,dt,p){updateBossBar(e);if(!BFFinalKing.combat(e))return;if(!MP.guest()){const target=bossPartyTarget(e,p);
  if(target)BFFinalKing.step(e,dt,target,{adds:G.enemies.filter(q=>q.kingAdd&&!q.dead&&q.hp>0).length,cue:k=>{if(k!=='wind'||!window.BFWorldSfx?.warningReady(e,key=>!!FXBUF[key]))playFx(k==='wind'?'atk2':'heavyhit',.6);},summon:()=>{for(const [i,type]of ['grunt','royalarcanist','grunt'].entries()){const q=spawnEnemy(type,-250+i*250,450,false);Object.assign(q,{y:0,active:true,dropT:0,kingAdd:true});}toast('His last guards enter. The King holds back while they fight.');}});}
+ BFFinalKing.trackWaveJump(e,p); // Local to each player: a cleared wave cannot hit again on landing.
+ if(!MP.guest()&&BFFinalKing.environmentalCounter(e,[...(pauseState().protected?[]:[p]),...Object.values(MP.active?MP.peers:{}).filter(q=>q.zone===G.zone&&q.area===G.area&&(q.last==null||q.last<3))])){addText(e.x,e.y+e.h+25,e.z,'ROYAL WARD BROKEN','#a6edb5');playFx('heavyhit',.6);}
  if(BFFinalKing.inAttack(e,p)&&e._akHit!==e.akSeq){e._akHit=e.akSeq;hurtPlayer(e.dmg,e.x,e.z,foeHit(e,{sweep:'a marked royal sweep',line:'a marked soul beam',burst:'a marked Void burst',wave:'a low soul wave'}[e.akKind]));}}
 
 function updateMarbleGuardian(e,dt,p){
@@ -8652,7 +8654,7 @@ function updateFallenDuel(e,dt,p,eff){
 function updateCrossingMarksman(e,dt,p){
  updateBossBar(e);if(MP.guest())return;
  const target=bossPartyTarget(e,p);if(!target)return;
- BFMarksman.step(e,dt,target,{tell:toast,cue:()=>{if(!window.BFWorldSfx?.warningReady(e,key=>!!FXBUF[key]))playFx('atk2',.65);},fire:aim=>{const cover=BFMarksman.coverBlock(e,aim,G.marksmanArena.cover);if(cover){e.markExposed=4;e.markTacticDone=true;addText(e.x,e.y+e.h+24,e.z,'COVERED SHOT — ATTACK','#a6edb5');}const first=G.projectiles.length;releaseEnemyShot(e,aim);for(const pr of G.projectiles.slice(first))pr.life=5;},reinforce:()=>{for(const z of [-740,-880]){const q=spawnEnemy('grunt',1180,z,false);q.active=true;q.dropT=0;q.marksmanGuard=true;}toast('Two guards on the east path. Her bow needs time to reset after landing.');}});
+ BFMarksman.step(e,dt,target,{tell:toast,cue:()=>{if(!window.BFWorldSfx?.warningReady(e,key=>!!FXBUF[key]))playFx('atk2',.65);},fire:aim=>{const cover=BFMarksman.coverBlock(e,aim,G.marksmanArena.cover);if(cover){BFMarksman.expose(e);addText(e.x,e.y+e.h+24,e.z,'COVERED SHOT — ATTACK','#a6edb5');}const first=G.projectiles.length;releaseEnemyShot(e,aim);for(const pr of G.projectiles.slice(first))pr.life=5;},reinforce:()=>{for(const z of [-740,-880]){const q=spawnEnemy('grunt',1180,z,false);q.active=true;q.dropT=0;q.marksmanGuard=true;}toast('Two guards on the east path. Her bow needs time to reset after landing.');}});
 }
 function syncOrchardWaves(waves){
  const arena=G.bruteArena;if(!arena)return;
@@ -15637,6 +15639,7 @@ const MP={
   enemySnap(){ const out=[]; if(!G) return out; const es=G.enemies;
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
       const row=[e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null];
+      if(e.boss||e.hydraChain)row[7]={...row[7],...BFBossTactics.snapshot(e)};
       if(e.homeBellWave)row[7]={...row[7],homeBellWave:e.homeBellWave,label:e.label,y:e.y};
       if(syncedMelee(e))row[7]={...row[7],normalMelee:true,y:e.y,yaw:e.yaw,meleeW:e.meleeW||0,meleeActive:e.meleeActive||0,meleeCd:e.meleeCd||0,meleeSerial:e.meleeSerial||0,meleeReach:e.meleeReach||0,keepGuard:e.keepGuard||null,keepEscort:!!e.keepEscort,furnaceEscort:!!e.furnaceEscort,furnaceEscortWave:e.furnaceEscortWave||0,canyonEscort:!!e.canyonEscort,canyonEscortWave:e.canyonEscortWave||0,canyonAlarm:!!e.canyonAlarm};
       if(e.canyonEscort||e.canyonAlarm)row[7]={...row[7],canyonEscort:!!e.canyonEscort,canyonEscortWave:e.canyonEscortWave||0,canyonAlarm:!!e.canyonAlarm};
@@ -19383,11 +19386,11 @@ const BESTIARY_INFO={
   sparkling:{name:'Arc Spark',tell:'A quick flying attacker infused with Arcane power.',lore:'Loose palace magic condensed around a restless core.'},
   brute:{name:'The Brute',tell:'Bait a charge into a cart or stone to break its guard. Strike while it is staggered; jump its ground waves.',lore:'It was livestock once. The nightmare made its anger larger than its body.'},
   archer:{name:'Hollow Marksman',tell:'Stone cover stops her volleys and opens a counterattack. Climb the outside paths to flank her nests.',lore:'A Hollowed watcher ordered to stop prisoners escaping through the pass.'},
-  warden:{name:'The Fallen',tell:'Locks a long thrust, or lowers the blade before a warned sweep. Pillars stop the thrust.',lore:'A Hollowed champion ordered to prevent anyone leaving the prison. The name remembers a person who lost their freedom, not their courage.'},
-  sorcerer:{name:'Frost Sorcerer',tell:'Kites away while firing a spread of freezing orbs.',lore:'A scholar who studied Frostfell until the ancient cold began studying him.'},
-  colossus:{name:'The Colossus',tell:'Slow, massive attacks and arcing elemental shots.',lore:'A mountain-sized guardian forced upright by heat, stone, and nightmare.'},
-  king:{name:'Abyss King',tell:'Relentless close pressure backed by the power of the deep.',lore:'The sleeping source of the dream that has poisoned every layer above him.'},
-  tyrant:{name:'Abyss King, Awakened',tell:'Combines crushing attacks with a five-bolt Void spread.',lore:'The King fully awake: not the dreamer beneath the world, but the dream given a body.'}
+  warden:{name:'The Fallen',tell:'Lead its thrust into a pillar to break its guard. Attack the staggered warrior, then set up the next counter.',lore:'A Hollowed champion ordered to prevent anyone leaving the prison. The name remembers a person who lost their freedom, not their courage.'},
+  sorcerer:{name:'Frost Sorcerer',tell:'Draw the shield officer away. Avoid the ice circles and strike the caster during recovery.',lore:'A scholar who studied Frostfell until the ancient cold began studying him.'},
+  colossus:{name:'The Colossus',tell:'Turn a cooling valve to expose its armor. Strike the cooled joints; stop the repair crew.',lore:'A mountain-sized guardian forced upright by heat, stone, and nightmare.'},
+  king:{name:'Abyss King',tell:'Block the royal beam with a pillar to break its ward. Attack during the opening.',lore:'The sleeping source of the dream that has poisoned every layer above him.'},
+  tyrant:{name:'Abyss King, Awakened',tell:'Block its beam with a pillar or jump the ground wave. Attack the broken ward and defeat its summoned guards.',lore:'The King fully awake: not the dreamer beneath the world, but the dream given a body.'}
 };
 const BESTIARY_SPECIAL={
   hydra:{name:'Storm Coast Hydra',where:'Storm Coast · Thunder Cliffs',portrait:'hydra',health:'Three chains',damage:'Varies by attack',speed:'Stationary',xp:'Story encounter',style:'Bites, waves and lightning',tell:'Attack the three restraints while avoiding its heads. You free the creature rather than kill it.',lore:'A chained sea beast driven to defend the cliff passage.'},

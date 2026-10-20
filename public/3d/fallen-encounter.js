@@ -20,7 +20,7 @@ function step(e,dt,p,a){if(e.dead||e.hp<=0)return;dt=clamp(dt,0,.05);if(!e.fallS
    e.fallTravel=0;e.fallSeq++;e.fallAttack=.32;enter(e,'strike',.32);a.cue?.('strike');}return;
  }
  if(e.fallState==='strike'){if(e.fallKind==='thrust'){e.fallTravel=e.fallRange*(1-e.fallClock/.32);e.x=e.fallX+e.fallDX*e.fallTravel;e.z=e.fallZ+e.fallDZ*e.fallTravel;}if(!e.fallClock){const stopped=e.fallKind==='thrust'&&e.fallRange<400;enter(e,stopped?'stagger':'recover',stopped?2.2:e.fallKind==='sweep'?1.65:1.25);if(stopped)a.cue?.('stagger');}return;}
- if(!e.fallClock)enter(e,'hunt',e.phase===2?.8:1.2);
+ if(!e.fallClock)enter(e,'hunt',e.phase===2?.65:.95);
 }
 function inAttack(e,p){if(e.dead||e.hp<=0||!(e.fallAttack>0)||p.hp<=0||p.downed||Math.abs((p.y||0)-(e.y||0))>75)return false;
  const dx=p.x-e.fallX,dz=p.z-e.fallZ,d=Math.hypot(dx,dz),forward=dx*e.fallDX+dz*e.fallDZ,side=Math.abs(dx*e.fallDZ-dz*e.fallDX),r=p.r||16;

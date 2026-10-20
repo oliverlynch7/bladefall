@@ -51,7 +51,7 @@ export function createHydra(parent){
    neckPose.position.copy(m.position).add(new T.Vector3(Math.sin(angle)*43,Math.cos(angle)*32,0));neckPose.quaternion.copy(m.quaternion);neckPose.scale.set(32,13,58);neckPose.updateMatrix();neckScales.setMatrixAt(i*20+j*2+side,neckPose.matrix);
   }
  }
- n.cuff.position.set(x,y-65,z-12);n.cuff.visible=!broken;n.cuff.material.color.set(active&&h.state==='recover'?'#f0efc8':'#829997');for(let j=0;j<10;j++){const u=j/9,l=n.links[j];l.visible=!broken;l.position.set(x+(anchor.x+(i-1)*55-x)*u,y-65+(125-y+65)*u,z-12+(anchor.z+65-z+12)*u+35*Math.sin(u*Math.PI));l.rotation.y=j%2*Math.PI/2;}
+ n.cuff.position.set(x,y-65,z-12);n.cuff.visible=!broken;n.cuff.material.color.set(window.BFHydra.exposed(G,G.enemies.find(e=>e.hydraIndex===i))?'#f0efc8':'#829997');for(let j=0;j<10;j++){const u=j/9,l=n.links[j];l.visible=!broken;l.position.set(x+(anchor.x+(i-1)*55-x)*u,y-65+(125-y+65)*u,z-12+(anchor.z+65-z+12)*u+35*Math.sin(u*Math.PI));l.rotation.y=j%2*Math.PI/2;}
  });neckScales.instanceMatrix.needsUpdate=true;
  }
  function dispose(){for(const g of geos)g.dispose();for(const m of mats)m.dispose();root.removeFromParent();}

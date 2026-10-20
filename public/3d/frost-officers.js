@@ -1,7 +1,7 @@
 /* One shared attack slot; locked geometry is also the visible warning and hit test. */
 (function(root){'use strict';
 const paths={west:[[-600,520,0],[-600,0,100],[-600,-500,100],[-320,-740,160],[0,-740,160]],east:[[600,520,0],[600,-80,180],[600,-520,180],[320,-740,160],[0,-740,160]],south:[[-600,520,0],[0,520,0],[600,520,0]],center:[[0,520,0],[0,-300,0]]};
-const fields=['frostOfficer','offState','offClock','offSeq','offX','offZ','offY','offDX','offDZ','offRange','offTravel','offTwin','offAttack','offTurn','yaw','y','h','r','boss','kind','label'];
+const fields=['frostOfficer','offState','offClock','offSeq','offX','offZ','offY','offDX','offDZ','offRange','offTravel','offTwin','offAttack','offTurn','offFlankedSeq','yaw','y','h','r','boss','kind','label'];
 const alive=e=>!e.dead&&e.hp>0,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),busy=e=>alive(e)&&['wind','strike'].includes(e.offState);
 function floor(x,z,arena){let y=0;for(const p of arena.surfaces)if(Math.abs(x-p.x)<=p.w/2&&Math.abs(z-p.z)<=p.d/2)y=Math.max(y,p.y);return y;}
 function nav(arena,e,p){const nodes=arena.nodes,nearest=q=>nodes.reduce((best,n,i)=>Math.hypot(q.x-n[0],q.z-n[1])+Math.abs(q.y-n[2])*6<best.d?{i,d:Math.hypot(q.x-n[0],q.z-n[1])+Math.abs(q.y-n[2])*6}:best,{i:0,d:Infinity}).i;
@@ -25,7 +25,7 @@ function step(e,dt,p,a){if(!alive(e))return;dt=clamp(dt,0,.05);const group=a.ene
  }
  if(e.offState==='wind'){e.yaw=Math.atan2(e.offDX,e.offDZ);if(!e.offClock){e.offSeq++;e.offTravel=0;e.offState='strike';e.offClock=e.frostOfficer==='shield'?.9:e.frostOfficer==='caster'?.35:.4;e.offAttack=e.offClock;a.cue?.('strike',e);}return;}
  if(e.offState==='strike'){if(e.frostOfficer==='spear'){e.offTravel=e.offRange*(1-e.offClock/.4);e.x=e.offX+e.offDX*e.offTravel;e.z=e.offZ+e.offDZ*e.offTravel;}if(!e.offClock){e.offState='recover';e.offClock=e.frostOfficer==='spear'?1.7:2.0;}return;}
- if(!e.offClock){e.offState='hunt';e.offClock=group.length===1?.65:1.1;}
+ if(!e.offClock){e.offState='hunt';e.offClock=group.length===1?.55:.85;}
 }
 function inAttack(e,p){if(!alive(e)||e.offState!=='strike'||!(e.offAttack>0)||p.hp<=0||p.downed)return false;const dx=p.x-e.offX,dz=p.z-e.offZ,r=p.r||16,d=Math.hypot(dx,dz),forward=dx*e.offDX+dz*e.offDZ,side=Math.abs(dx*e.offDZ-dz*e.offDX),dy=Math.abs(p.y-e.offY);
  if(e.frostOfficer==='caster')return dy<75&&(d<115+r||(e.offTwin&&Math.hypot(dx-240,dz)<115+r));

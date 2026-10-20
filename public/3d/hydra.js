@@ -23,9 +23,9 @@ function step(G,dt,p,cue){const h=G.hydraArena;if(!h)return;dt=Math.min(.05,Math
  h.clock=Math.max(0,h.clock-dt);if(h.clock)return;
  if(h.state==='recover'){const e=alive[h.beat%alive.length];h.head=e.hydraIndex;h.kind=['bite','sweep','blast'][h.beat++%3];h.state='wind';h.clock=h.kind==='blast'?2:1.6;h.x=p.x;h.z=p.z;h.y=p.y;cue?.('wind');}
  else if(h.state==='wind'){h.state='strike';h.clock=.45;h.seq++;cue?.('strike');}
- else{h.state='recover';h.clock=4.5;cue?.('rest');}
+ else{h.state='recover';h.clock=3.4;cue?.('rest');}
 }
-function exposed(G,e){const h=G.hydraArena;return !!h&&!h.freed&&h.state==='recover'&&h.head===e.hydraIndex;}
+function exposed(G,e){const h=G.hydraArena;return !!e&&!e.dead&&e.hp>0&&!!h&&!h.freed&&h.state==='recover'&&h.head===e.hydraIndex&&(h.seq||0)>0&&(!root.BFBossTactics||root.BFBossTactics.rule(G,e,G.p).factor>0);}
 function lineDistance(p,a,b){const dx=b.x-a.x,dz=b.z-a.z,l=dx*dx+dz*dz,u=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.z-a.z)*dz)/(l||1)));return Math.hypot(p.x-a.x-u*dx,p.z-a.z-u*dz);}
 function blocked(p,a){return covers.some(c=>{const dx=p.x-a.x,dz=p.z-a.z;let lo=0,hi=1;for(const [v,d,min,max]of [[a.x,dx,c.x-c.w/2,c.x+c.w/2],[a.z,dz,c.z-c.d/2,c.z+c.d/2]]){if(Math.abs(d)<.001){if(v<min||v>max)return false;}else{const t1=(min-v)/d,t2=(max-v)/d;lo=Math.max(lo,Math.min(t1,t2));hi=Math.min(hi,Math.max(t1,t2));if(lo>hi)return false;}}return lo<1&&hi>0;});}
 function inAttack(G,p){const h=G.hydraArena;if(!h||h.freed||h.state!=='strike'||p.downed||p.hp<=0)return false;const r=p.r||16;
@@ -33,8 +33,8 @@ function inAttack(G,p){const h=G.hydraArena;if(!h||h.freed||h.state!=='strike'||
  if(h.kind==='sweep')return Math.abs(p.x)<820+r&&p.z>-230-r&&p.z<420+r&&p.y<215;
  const a=heads[h.head],dx=h.x-a.x,dz=h.z-a.z,len=Math.hypot(dx,dz)||1,b={x:a.x+dx/len*2200,z:a.z+dz/len*2200};return Math.abs(p.y-120)<100&&lineDistance(p,a,b)<75+r&&!blocked(p,a);
 }
-function snapshot(G,epoch){return {epoch,...G.hydraArena,chains:G.enemies.filter(e=>e.hydraChain).map(e=>({i:e.hydraIndex,hp:e.hp,maxHp:e.maxHp,dead:e.dead}))};}
-function apply(G,s,epoch){if(!G.hydraArena||!s||s.epoch!==epoch||!Number.isFinite(s.revision)||s.revision<G.hydraArena.revision)return false;const {chains,epoch:_,...state}=s;Object.assign(G.hydraArena,state);for(const e of G.enemies)if(e.hydraChain&&(s.broken||[]).includes(e.hydraIndex)){e.dead=true;e.hp=0;}for(const q of chains||[]){const e=G.enemies.find(e=>e.hydraChain&&e.hydraIndex===q.i);if(e){e.hp=q.hp;e.maxHp=q.maxHp;e.dead=q.dead;}}return true;}
+function snapshot(G,epoch){return {epoch,...G.hydraArena,chains:G.enemies.filter(e=>e.hydraChain).map(e=>({i:e.hydraIndex,hp:e.hp,maxHp:e.maxHp,dead:e.dead,_bossBudgetKey:e._bossBudgetKey??null,_bossBudgetSpent:e._bossBudgetSpent||0}))};}
+function apply(G,s,epoch){if(!G.hydraArena||!s||s.epoch!==epoch||!Number.isFinite(s.revision)||s.revision<G.hydraArena.revision)return false;const {chains,epoch:_,...state}=s;Object.assign(G.hydraArena,state);for(const e of G.enemies)if(e.hydraChain&&(s.broken||[]).includes(e.hydraIndex)){e.dead=true;e.hp=0;}for(const q of chains||[]){const e=G.enemies.find(e=>e.hydraChain&&e.hydraIndex===q.i);if(e){e.hp=q.hp;e.maxHp=q.maxHp;e.dead=q.dead;if(q._bossBudgetKey!==undefined)e._bossBudgetKey=q._bossBudgetKey;if(Number.isFinite(q._bossBudgetSpent))e._bossBudgetSpent=q._bossBudgetSpent;}}return true;}
 function draw({G,bx,ring},t){const h=G.hydraArena;if(!h||h.freed)return;const col=h.state==='strike'?'#e7faff':'#e8ba62';
  if(h.state==='wind'||h.state==='strike'){
  if(h.kind==='bite')ring(h.x,h.y+5,h.z,150,col,.85);

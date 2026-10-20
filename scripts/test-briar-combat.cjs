@@ -29,7 +29,7 @@ for(const fps of [20,30,60,120]){
  const env={props:[],walkable:(x,z)=>z<200,speed:90,tell(){},impact(){throw Error('edge must not grant cart stagger')},slam(){},handlers(){}};
  while(e.bruteState==='charge')B.step(e,1/fps,{x:0,z:900},env);ok(e.z<200&&e.bruteState==='recover','boss stops before arena edge at '+fps+'fps');
 }
-e={hp:1000,maxHp:1000,bruteOrchard:true,bruteStaggers:1,bruteState:'recover'};ok(T.damage({},e,p,100)===100,'recovery really takes full damage');e.bruteState='hunt';ok(T.damage({},e,p,100)===16,'cart guard remains meaningful');
+e={hp:1000,maxHp:1000,bruteOrchard:true,bruteStaggers:1,bruteState:'recover'};ok(T.damage({},e,p,100)===0,'ordinary recovery cannot bypass cart strategy');e.bruteState='hunt';ok(T.damage({},e,p,100)===0,'cart guard blocks damage outside a stagger');
 console.log(checks+' Briar role, LOS, warning, cover, pressure, pursuit, interruption, reward, finite placement, boss edge and recovery checks passed.');
 
 for(const [health,state,wind]of [[100,'wind',1.15],[60,'slam',0],[20,'slam',0]]){const boss={x:0,z:0,y:0,r:44,hp:health,maxHp:100,bruteState:'hunt',bruteClock:0,bruteTurns:2,bruteWaves:2};B.step(boss,.016,{x:0,z:350},{props:[],speed:90,tell(){},impact(){},handlers(){},slam(){}});assert.equal(boss.bruteState,state);if(wind)assert.equal(boss.windMax,wind);}

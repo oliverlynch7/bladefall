@@ -2528,3 +2528,7 @@ Validation:30 focused suites pass, including403 new curve/payout/invalid-input/s
 
 ## [2026-10-20] Campaign-wide combat improvement (U-COMBAT-20261020)
 User requests a massive combat-experience pass across all campaign levels. Preserve the existing campaign, specialist enemies, boss environmental strategies, beginner trials, earned progression and co-op authority. Ground changes in actual attack decisions, visible danger, avoidance and punish opportunities rather than recolors or blanket health inflation.
+
+
+## [2026-10-20] Boss environmental mastery (U-BOSSES-20261020)
+User: "And make all bosses much harder and reliant on stage environmental strategies to be beaten". Grounded plan: remove damage-through-armor and generic recovery bypasses; meaningful bounded damage windows after cart collisions, stone cover/nest approaches, pillar-caught thrusts, separated officers, cooling valves, reflected screens and exposed Hydra joints. The King opens only after the party blocks his actual beam with a pillar or jumps his ground wave. Require repeated successes, preserve readable wind-ups, host authority, party HP fractions, tutorials, saves and authored dialogue/audio. Verify no direct/DoT/pet/overpowered burst path skips mechanics; prove each fight can still finish with actual arena events and new openings after spent budgets.

@@ -20,13 +20,13 @@ function cue(e,{jump='Jump',dodge='Dodge'}={}){
  if(e.bruteState==='charge')return {text:'Charging · stay clear',safe:false};
  if(e.bruteState==='slam')return {text:'Ground wave · '+jump+' to jump',safe:false};
  if(e.bruteState==='stagger')return {text:'Staggered · attack now',safe:true};
- if(e.bruteState==='recover')return {text:'Recovering · attack now',safe:true};
+ if(e.bruteState==='recover')return {text:'Line up another charge into a cart or stone',safe:false};
  return null;
 }
 function retryAdvice(attack){
  if(attack==='a ground wave'||attack==='a sweeping blow')return 'Jump over the expanding ground ring. Move back in after it passes.';
  if(attack==='a crushing lunge')return 'Step sideways when the charge line locks. A cart or stone stops the Brute and leaves it open to attack.';
- return 'Clear the handlers when they arrive. Attack the Brute while it recovers or is stunned against a cart.';
+ return 'Clear the handlers when they arrive. Bait each charge into a cart or stone, then attack the staggered Brute.';
 }
 function enter(e,state,time){e.bruteState=state;e.bruteClock=time;e.windT=0;e.lunge=0;e.slamW=0;e.staggerT=0;}
 function step(e,dt,target,env){
@@ -52,7 +52,7 @@ function step(e,dt,target,env){
  }else if(e.bruteState==='slam'){
   e.slamW=e.bruteClock;if(e.bruteClock===0){env.slam();enter(e,'recover',1.1);}
  }else if(e.bruteState==='stagger'){e.staggerT=e.bruteClock;if(e.bruteClock===0)enter(e,'hunt',1.15);}
- else if(e.bruteClock===0)enter(e,'hunt',e.phase>=2?.7:1.05);
+ else if(e.bruteClock===0)enter(e,'hunt',e.phase>=2?.6:.85);
 }
 function snapshot(e){return Object.fromEntries(fields.map(k=>[k,e[k]??0]));}
 root.BFBruteEncounter={step,snapshot,fields,chargePreview,cue,retryAdvice};if(typeof module!=='undefined')module.exports=root.BFBruteEncounter;

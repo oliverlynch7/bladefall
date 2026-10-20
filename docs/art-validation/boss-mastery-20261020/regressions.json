@@ -1,0 +1,172 @@
+[
+  {
+    "suite": "furnace-colossus",
+    "pass": true,
+    "output": "Colossus passed: locked warnings, exact attack geometry, high-route sweep protection, cooling, limited repair budget, pressure benefit and snapshot fields.\n"
+  },
+  {
+    "suite": "marble-guardian",
+    "pass": true,
+    "output": "Marble passed: locked warnings, screen interception/rearming, hit geometry and safe responses, three dialogue approaches, leave/resume, death gate, no finale spoilers.\n"
+  },
+  {
+    "suite": "frost-officers",
+    "pass": true,
+    "output": "Officers passed: all three roles, single major attack cap across 256 seconds, locked warnings, no early hits, height dodges, death cancellation and survivor tactic.\nAll three officers pursue players onto both shelves and the high northern exit.\n"
+  },
+  {
+    "suite": "final-king",
+    "pass": true,
+    "output": "Final King: locked telegraphs, safe regions/height/cover, two lethal gates, finite summons, validated charge/retry/fifth-failure skip and complete voice/story graph passed.\n"
+  },
+  {
+    "suite": "fallen",
+    "pass": true,
+    "output": "Fallen: aim lock, delayed feint follow-up, swept thrust motion, pillar collision/recovery, directional damage, vertical/downed/dead safety, bounded pursuit and snapshots passed.\n"
+  },
+  {
+    "suite": "thunder-hydra",
+    "pass": true,
+    "output": "Thunder/Hydra passed: both Dash routes, main independence, race retry/deadline, three shard gates, graph, wind cycle, all warnings/hit shapes, cover, exposure, mercy and stale packets.\n"
+  },
+  {
+    "suite": "boss-environment-mastery",
+    "pass": true,
+    "output": "{\n  \"checks\": 151,\n  \"results\": [\n    {\n      \"boss\": \"Brute\",\n      \"fps\": 20,\n      \"events\": 3\n    },\n    {\n      \"boss\": \"Fallen\",\n      \"fps\": 20,\n      \"events\": 3\n    },\n    {\n      \"boss\": \"Brute\",\n      \"fps\": 30,\n      \"events\": 3\n    },\n    {\n      \"boss\": \"Fallen\",\n      \"fps\": 30,\n      \"events\": 3\n    },\n    {\n      \"boss\": \"Brute\",\n      \"fps\": 60,\n      \"events\": 3\n    },\n    {\n      \"boss\": \"Fallen\",\n      \"fps\": 60,\n      \"events\": 3\n    },\n    {\n      \"boss\": \"Brute\",\n      \"fps\": 120,\n      \"events\": 3\n    },\n    {\n      \"boss\": \"Fallen\",\n      \"fps\": 120,\n      \"events\": 3\n    },\n    {\n      \"boss\": \"Marksman\",\n      \"shots\": 3,\n      \"relocated\": true\n    },\n    {\n      \"boss\": \"Ember Colossus\",\n      \"events\": 3\n    },\n    {\n      \"boss\": \"Marble Colossus\",\n      \"reflections\": 3\n    },\n    {\n      \"boss\": \"Hydra\",\n      \"windows\": 6\n    },\n    {\n      \"boss\": \"Officers\",\n      \"events\": {\n        \"caster\": 3,\n        \"shield\": 3,\n        \"spear\": 3\n      }\n    },\n    {\n      \"boss\": \"King\",\n      \"phase\": 1,\n      \"counters\": 3,\n      \"summoned\": false\n    },\n    {\n      \"boss\": \"King\",\n      \"phase\": 2,\n      \"counters\": 4,\n      \"summoned\": true\n    }\n  ]\n}\n"
+  },
+  {
+    "suite": "boss-tactics",
+    "pass": true,
+    "output": "86 campaign boss armor, phase, status, cover, flank, co-op authority and isolation checks passed.\n"
+  },
+  {
+    "suite": "boss-combat-scope",
+    "pass": true,
+    "output": "146 boss target cases, encounter damage scaling, unchanged soldier/trial damage and Hydra damage replication passed.\n"
+  },
+  {
+    "suite": "brute-encounter",
+    "pass": true,
+    "output": "Brute: locked aim, warning safety, impact, 3s stagger, finite waves, slam, snapshot and death checks passed\n28 swept-preview/frame-rate checks plus remapped cue/death advice checks passed.\n"
+  },
+  {
+    "suite": "marksman",
+    "pass": true,
+    "output": "Marksman aim lock, recovery, single relocation/wave, protected glide, safe landing, snapshot and dead-state tests passed.\nRounded55percent relocation boundary passed.\n"
+  },
+  {
+    "suite": "briar-combat",
+    "pass": true,
+    "output": "75 Briar role, LOS, warning, cover, pressure, pursuit, interruption, reward, finite placement, boss edge and recovery checks passed.\nBrute phase 2/3 ground-wave variation and first-phase charge preserved.\n"
+  },
+  {
+    "suite": "campaign-combat-experience",
+    "pass": true,
+    "output": "3058 campaign tactics, geometry, counterplay, scope, co-op, pursuit and boss cue checks passed.\n"
+  },
+  {
+    "suite": "campaign-elites",
+    "pass": true,
+    "output": "{\"checks\":[\"raid replaces random role and preserves original body stats\",\"raid full harmless warning and locked aim\",\"raid snapshot carries complete phase geometry\",\"raid recovery leaves an attack opening\",\"forge replaces random role and preserves original body stats\",\"forge full harmless warning and locked aim\",\"forge snapshot carries complete phase geometry\",\"forge recovery leaves an attack opening\",\"shore replaces random role and preserves original body stats\",\"shore full harmless warning and locked aim\",\"shore snapshot carries complete phase geometry\",\"shore recovery leaves an attack opening\",\"tower replaces random role and preserves original body stats\",\"tower full harmless warning and locked aim\",\"tower snapshot carries complete phase geometry\",\"tower recovery leaves an attack opening\",\"raid hits front, misses rear/outside/above\",\"forge expands outward and jumping clears it\",\"shore hits three lanes, gaps and cover range stay safe\",\"tower cardinal lanes hit, diagonal gaps stay safe\",\"dead enemy or target cannot damage\",\"tall solid cover blocks, ground and overhead props do not\"]}\n"
+  },
+  {
+    "suite": "campaign-threat",
+    "pass": true,
+    "output": "60 campaign threat and health visibility checks passed.\n"
+  },
+  {
+    "suite": "campaign-combat-progression",
+    "pass": true,
+    "output": "135 fixed level scaling, boss durability bounds, attack warning/recovery, host snapshot, knockback and stagger fairness checks passed.\n"
+  },
+  {
+    "suite": "campaign-hunts",
+    "pass": true,
+    "output": "2567 repeatable hunt source,3-round lifecycle,group kill,save,reward and shared authority checks passed.\n"
+  },
+  {
+    "suite": "campaign-compatibility",
+    "pass": true,
+    "output": "33 campaign scene authority, downed reward, host-menu continuity, final controls and guest snapshot-order checks passed.\n"
+  },
+  {
+    "suite": "campaign-interaction",
+    "pass": true,
+    "output": "Campaign reach: solid walls, floors, low steps, overhead beams, raised courtyard walls, doors, owned controls, host validation, duplicate requests and persistent prop state passed.\n"
+  },
+  {
+    "suite": "campaign-journey",
+    "pass": true,
+    "output": "Campaign journey: 48 coverage, collision and floor-aware guidance checks passed.\nIce crossing gives its concrete outcome.\nRendering modules share their asset and scene instances.\nCornice guidance selects a reachable ledge without overriding unrelated tasks.\nCampaign dressing stays out of voyages, challenges and beta maps.\nIn-world signage policy and removal contracts passed.\n"
+  },
+  {
+    "suite": "campaign-refinement",
+    "pass": true,
+    "output": "Existing hunt progress, split-creature population cap, 56 real discovered-only clue links and purpose-specific pickup text passed.\n"
+  },
+  {
+    "suite": "player-readiness-progression",
+    "pass": true,
+    "output": "{\"checks\":403,\"passed\":true,\"scope\":\"Actual kill/fallback payout functions, bounded curve, invalid inputs and save ordering; staged browser integration also required.\"}\n"
+  },
+  {
+    "suite": "campaign-xp",
+    "pass": true,
+    "output": "Campaign character XP +12.5%, class XP unchanged, excluded modes unchanged, award text and shared kill credit pass.\n"
+  },
+  {
+    "suite": "class-progression",
+    "pass": true,
+    "output": "2873 rank, legacy-choice and ordered-choice checks passed across 17 classes.\nSkill/dash lesson persistence, legacy missing field and stale-save guard passed.\n"
+  },
+  {
+    "suite": "loot-progression",
+    "pass": true,
+    "output": "{\"checks\":21615,\"earlyRarities\":[\"common\",\"uncommon\"],\"gates\":[1,3,6,9,12],\"gearDeck\":[\"weapon\",\"helmet\",\"amulet\",\"weapon\",\"chest\",\"ring\",\"legs\",\"weapon\"],\"chestsPer100EarlyKills\":12,\"mimicsPer100Chests\":10}\n"
+  },
+  {
+    "suite": "save-safety",
+    "pass": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  },
+  {
+    "suite": "coop-chests",
+    "pass": true,
+    "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}\nMimic personal co-op reward identity, guest persistence and one-time collection pass.\n"
+  },
+  {
+    "suite": "coop-companions",
+    "pass": true,
+    "output": "{\"checks\":82,\"passed\":true,\"pets\":[\"sunwing\",\"cinder\",\"shepherd\",\"emberpup\",\"spiritwolf\",\"stonewhelp\",\"wisp\",\"mender\",\"coinsprite\",\"gravewraith\"]}\n"
+  },
+  {
+    "suite": "onboarding-coop",
+    "pass": true,
+    "output": "26 onboarding/co-op face and dialogue visibility checks passed.\n5 co-op rank/spectator serialization, update and legacy checks passed.\n"
+  },
+  {
+    "suite": "party-survival",
+    "pass": true,
+    "output": "50 fall landing, rescue deadline, late packets, whole-level recovery, single wipe, guest wait, real die routing and nameplate checks passed.\n4 real fall/solo/duplicate hazard and attack-lock checks passed.\n"
+  },
+  {
+    "suite": "party-feedback",
+    "pass": true,
+    "output": "36 rescue reachability, timing, relay, duplicates, menu, legacy and presentation checks passed.\n6 downed rig selection/clamping/recovery checks passed.\n3 fallen-body grounding and get-up transition checks passed.\n"
+  },
+  {
+    "suite": "party-transitions",
+    "pass": true,
+    "output": "58 co-op transition, duplicate packet, catch-up and complete escrow checks passed.\n7 authenticated practice entrance/exit permission checks passed.\n"
+  },
+  {
+    "suite": "premium-progression",
+    "pass": true,
+    "output": "514 premium award coordination, rollover, class choice, model, accessibility and sound-candidate checks passed.\n"
+  },
+  {
+    "suite": "npc-recordings",
+    "pass": true,
+    "output": "{\"casting\":50,\"recorded\":371,\"total\":371,\"complete\":50,\"sourceAndAudioHashes\":\"pass\"}\n"
+  }
+]

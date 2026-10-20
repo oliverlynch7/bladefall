@@ -25,7 +25,7 @@ assert.equal(chargePreview({...make(),teleX:0,teleZ:1}).distance,651);
 assert.equal(chargePreview({...make(),teleX:0,teleZ:1},[{id:'behind',x:0,z:-300,w:100,d:100}]).hit,null);
 const active={...make(),active:true,bruteState:'wind',windT:.3};
 assert(cue(active,{dodge:'F'}).text.includes('F sideways'));assert.equal(cue({...active,active:false}),null);assert.equal(cue({...active,dead:true}),null);
-assert.equal(cue({...active,bruteState:'stagger'}).safe,true);assert.equal(cue({...active,bruteState:'recover'}).safe,true);
+assert.equal(cue({...active,bruteState:'stagger'}).safe,true);assert.equal(cue({...active,bruteState:'recover'}).safe,false);
 assert(cue({...active,bruteState:'slam'},{jump:'RB'}).text.includes('RB'));
 assert.match(retryAdvice('a ground wave'),/Jump/);assert.match(retryAdvice('a crushing lunge'),/sideways/);
 console.log(`${previews} swept-preview/frame-rate checks plus remapped cue/death advice checks passed.`);

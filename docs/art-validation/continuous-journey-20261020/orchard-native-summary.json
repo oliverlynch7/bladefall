@@ -1,0 +1,52 @@
+{
+  "camera": "shoulder",
+  "quality": "high",
+  "allFrameCount": 12000,
+  "windowSeconds": 80.11,
+  "nativeHeldFrameCount": 2791,
+  "nativeHeldFrameSeconds": 23.64,
+  "p50Ms": 5.7999999999883585,
+  "p95Ms": 11.200000000011642,
+  "maxMs": 16.800000000017462,
+  "nativeStallsOver100Ms": [],
+  "allStallsOver100Ms": 1,
+  "longTasks": [
+    {
+      "at": 300.40000000596046,
+      "ms": 122
+    },
+    {
+      "at": 734.8000000119209,
+      "ms": 50
+    },
+    {
+      "at": 1595.800000011921,
+      "ms": 144
+    },
+    {
+      "at": 1801.300000011921,
+      "ms": 86
+    },
+    {
+      "at": 1952,
+      "ms": 538
+    },
+    {
+      "at": 2602.300000011921,
+      "ms": 245
+    },
+    {
+      "at": 113011.5,
+      "ms": 134
+    },
+    {
+      "at": 164620,
+      "ms": 102
+    }
+  ],
+  "errors": [],
+  "boundsMs": [
+    146811.5,
+    226918.9
+  ]
+}

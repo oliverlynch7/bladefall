@@ -4,7 +4,7 @@ const live=e=>e&&!e.dead&&e.hp>0;
 function rule(G,e,src,kind='direct'){
  const r={factor:1,floor:0,hint:'',key:null,limit:0};if(!live(e)||e._peer||e.bot||e.practice||e.dummy)return r;
  const close=src&&Math.abs((src.y||0)-(e.y||0))<95&&Math.hypot(src.x-e.x,src.z-e.z)<340;
- if(e.bruteOrchard){const open=e.bruteState==='stagger';r.factor=open?3:0;r.key=open?'cart:'+e.bruteStaggers:null;r.limit=.38;r.hint=open?'Cart impact — attack now':'Bait another charge into a cart or stone';}
+ if(e.bruteOrchard){const open=e.bruteState==='stagger';r.factor=open?3:0;r.key=open?'cart:'+e.bruteStaggers:null;r.limit=.38;r.hint=open?'Charge stopped — attack now':'Bait another charge into a cart or stone';}
  else if(e.marksmanCrossing){const opening=e.markExposed>0||(e.markState==='recover'&&!(e.markAttack>0)&&((kind==='direct'&&close)||(Number.isInteger(e.markNestSeq)&&e.markNestSeq===e.markTurns)));r.factor=opening?1.75:0;r.floor=!e.markMoved?.55:0;r.key=opening?'marksman:'+(e.markWindowSeq||0):null;r.limit=.34;r.hint=opening?'Bow exposed — attack now':'Block a shot with stone cover, or reach her nest during reload';}
  else if(e.fallenDuel){const open=e.fallState==='stagger';r.factor=open?3:0;r.key=open?'pillar:'+e.fallSeq:null;r.limit=.38;r.hint=open?'Blade caught — attack now':'Lead the thrust into a pillar; ordinary recovery stays guarded';}
  else if(e.frostOfficer){const protector=(G.enemies||[]).find(q=>q.frostOfficer==='shield'&&live(q));const separated=!protector||Math.hypot(e.x-protector.x,e.z-protector.z)>1000;

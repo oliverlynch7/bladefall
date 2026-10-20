@@ -28,4 +28,22 @@ function constrain(world,target,desired){
  }
  return {x:ax+(bx-ax)*nearest,y:ay+(by-ay)*nearest,z:az+(bz-az)*nearest,fraction:nearest};
 }
-window.BFCameraOcclusion={blocks,constrain};})();
+// A low obstacle immediately behind an overhead hero can retract the normal
+// diagonal boom into their head. Try steeper rays at the same height before
+// accepting that close-up. Each candidate still passes the identical wall,
+// door and ceiling test; this never makes geometry or actors see-through.
+function overview(world,target,desired){
+ const normal=constrain(world,target,desired),minRise=76;
+ if(normal.y-target.y>=minRise)return {...normal,steep:false};
+ let best=normal,steep=false,ray=desired;
+ for(const amount of [.75,.5,.25,0]){
+  const candidate={x:target.x+(desired.x-target.x)*amount,y:desired.y,z:target.z+(desired.z-target.z)*amount};
+  const safe=constrain(world,target,candidate);
+  if(safe.y>best.y+1){best=safe;steep=true;ray=candidate;}
+  if(safe.y-target.y>=minRise)break;
+ }
+ // Return the desired ray separately: callers may ease its safe fraction but
+ // must not apply a previous ray's fraction to a newly steeper view.
+ return {...best,steep,ray,look:{x:best.x,y:target.y-8,z:Math.min(target.z-4,best.z-4)}};
+}
+window.BFCameraOcclusion={blocks,constrain,overview};})();

@@ -2749,3 +2749,7 @@ User: "Please improve all attack animations of bosses and mobs". Preserve existi
 
 ## U-FIRST-HOUR-20261020 — approved readiness pass
 Fresh-session performance, progression, combat readability and transitions authorized. Begin with Briar as benchmark; preserve trial difficulty, saves, voice text and effects. Status: partial — first-hour save/combat-clarity repairs implemented and verified in v2.340.0; uninterrupted Briar/Black Woods/boss route and extended hitch trace remain open. Evidence art-validation/first-hour-20261020/README.md; source requirements/USER_SOURCE_2026-10-20_FIRST_HOUR.md.
+
+Continuation confirmed: USER_SOURCE_2026-10-20_UNINTERRUPTED_RUN.md explicitly requests completing the natural route now. Controlled fight fixtures do not satisfy this acceptance check.
+
+U-FIRST-HOUR-20261020 continuation completed: v2.341.0 actual clean fresh Warrior/tutorial/lore/hub/Homefields/Black Woods/Brute/handlers/victory/hub/reload verified through native inputs. Scoped repairs and remaining performance/co-op/human-discovery limits: docs/art-validation/continuous-journey-20261020/README.md. No save/reward/combat/voice/layout changes.

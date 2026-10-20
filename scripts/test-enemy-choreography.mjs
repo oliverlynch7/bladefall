@@ -29,12 +29,12 @@ assert(!instantEnemyRelease({phase:'Windup',phaseKey:'raid'},idle,{ceKind:'raid'
 assert(!instantEnemyRelease({phase:'Windup',phaseKey:'slamW'},idle,{stunT:1}));
 assert(instantEnemyRelease({phase:'Windup',phaseKey:'slamW'},idle,{}),'instant legacy effect remains animated');
 assert.equal(enemyActionState({shotReleaseT:.2}).phase,'Attack');
-assert.equal(enemyActionState({ceKind:'raid',ceState:'recover',ceClock:1}).phase,null);
+assert.equal(enemyActionState({ceKind:'raid',ceState:'recover',ceClock:1}).phase,'Recover');
 console.log('PASS: nine distinct bounded poses, continuous wind/strike/recovery, staff support, cancellation and explicit shot release');
 
 for(const [flag,prefix] of [['furnaceColossus','fc'],['marbleGuardian','mc']]){
  const e={[flag]:true,[prefix+'State']:'recover',[prefix+'Clock']:1};
- assert.equal(enemyActionState(e).phase,null);assert(!instantEnemyRelease({phase:'Windup',phaseKey:'slamW'},idle,e));
+ assert.equal(enemyActionState(e).phase,'Recover');assert(!instantEnemyRelease({phase:'Windup',phaseKey:'slamW'},idle,e));
  e[prefix+'State']='strike';assert.equal(enemyActionState(e).phase,'Attack');
 }
 assert(instantEnemyRelease({phase:'Windup',phaseKey:'slamW'},idle,{bruteOrchard:true,bruteState:'recover'}));

@@ -1233,7 +1233,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.338.0-boss-mastery';
+const VERSION3D='2.339.0-enemy-attacks';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -24924,7 +24924,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
 </script>
 <!-- Optional 3D hero layer. Loads after the game, shares its WebGL context, and is OFF by
      default (window.HERO3D.on=true). If this file fails to load the game is unaffected. -->
-<script type="importmap">{"imports":{"three":"./three.module.js","./jsm/loaders/GLTFLoader.js":"./jsm/loaders/GLTFLoader.js?v=2254","three/addons/":"./jsm/","./mob3d.js?v=2104":"./mob3d.js?v=2233a","./mob3d.js?v=2216":"./mob3d.js?v=2233a","./companion3d.js?v=2073":"./companion3d.js?v=2259","./companion3d.js?v=2226e":"./companion3d.js?v=2259"}}</script>
+<script type="importmap">{"imports":{"three":"./three.module.js","./jsm/loaders/GLTFLoader.js":"./jsm/loaders/GLTFLoader.js?v=2254","three/addons/":"./jsm/","./mob3d.js?v=2104":"./mob3d.js?v=2339","./mob3d.js?v=2216":"./mob3d.js?v=2339","./companion3d.js?v=2073":"./companion3d.js?v=2259","./companion3d.js?v=2226e":"./companion3d.js?v=2259","./mob3d.js?v=2233a":"./mob3d.js?v=2339","./mob3d.js?v=2311":"./mob3d.js?v=2339"}}</script>
 <script type="module">
   /* Exposed on window rather than imported by the game code: the game lives in a classic,
      non-module script tag and so cannot use `import`. Same bridge pattern as __BF_WORLD.
@@ -24939,7 +24939,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2333d"></script>
+<script type="module" src="./hero3d.js?v=2339"></script>
 <script type="module" src="./progression-model-preview.js?v=2278"></script>
 <script type="module" src="./social-hub.js?v=2322"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

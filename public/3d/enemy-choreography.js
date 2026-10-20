@@ -1,3 +1,4 @@
+import {performanceProfile,performancePose} from './enemy-attack-performance.js?v=2339';
 // Bind-local rotations only. Equipment remains attached to its authored hand;
 // neither the combat collider nor the actor's world position is animated here.
 const profiles={
@@ -80,16 +81,5 @@ const specialMoves={
  'prison_unbound:toll':{...P.pulse,label:'Soul toll',wind:{body:[-.11,0,0],head:[-.11,0,0],armL:[-.80,0,-.25],armR:[-.80,0,.25]},strike:{body:[.19,0,0],head:[.06,0,0],armL:[-1.10,0,-.50],armR:[-1.10,0,.50]}}
 };
 const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
-export function choreographyProfile(type,move){return specialMoves[type+':'+move]||profiles[type]||P[styleOf[type]]||null;}
-export function choreographyPose(type,phase,u,move){
- const p=choreographyProfile(type,move);if(!p||!['Windup','Attack','Recover'].includes(phase))return null;
- u=Math.max(0,Math.min(1,u));const result={};
- for(const key of new Set([...Object.keys(p.wind),...Object.keys(p.strike)])){
-  const a=p.wind[key]||[0,0,0],b=p.strike[key]||[0,0,0];
-  result[key]=a.map((angle,i)=>phase==='Windup'?angle*smooth(u/.85):
-   phase==='Recover'?b[i]*.35*(1-smooth(u)):
-   u<.16?angle+(b[i]-angle)*smooth(u/.16):
-   u<.38?b[i]*(1+.07*Math.sin(Math.PI*(u-.16)/.22)):
-   b[i]*(1-.65*smooth((u-.38)/.62)));
- }return result;
-}
+export function choreographyProfile(type,move){return performanceProfile(type,move)||specialMoves[type+':'+move]||profiles[type]||P[styleOf[type]]||null;}
+export function choreographyPose(type,phase,u,move){return performancePose(choreographyProfile(type,move),phase,u);}

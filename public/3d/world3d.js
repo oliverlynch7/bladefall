@@ -12,7 +12,7 @@ import {buildCastleGates} from './castle-gates-art.js?v=2239';
 import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2239';
 import {buildSkyLibrary} from './sky-library-art.js?v=2239';
 import {buildPalaceCourt} from './palace-courtyard-art.js?v=2239';
-import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2197';
+import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2339';
 import {buildStorm,updateStorm} from './storm-art.js?v=2197';
 import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2255';
 import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2234b';
@@ -60,7 +60,7 @@ import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hol
 /* Same specifier hero3d uses. Importing 'three' via the importmap could resolve to a
    SECOND module instance, and two THREE copies break every instanceof check silently. */
 import * as THREE from './three.module.js';
-import { clearMobs } from './mob3d.js?v=2233a';
+import { clearMobs } from './mob3d.js?v=2339';
 import { clearProps } from './prop3d.js?v=2057';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';

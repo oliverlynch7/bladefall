@@ -45,8 +45,8 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=2330f';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2315';
-import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2311';
+import { WORLD3D, syncWorld } from './world3d.js?v=2339';
+import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2339';
 import { PROP3D, syncProps } from './prop3d.js?v=2184';
 
 const ASSETS = '../slice3d/assets/';       // shared with the slice; not duplicated

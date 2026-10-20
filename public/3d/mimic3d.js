@@ -38,6 +38,15 @@ export function makeMimic(){
  }
  const track=(name,values)=>new T.NumberKeyframeTrack(name, [0,.25,.5,.75,1],values);
  const clip=(name,amount)=>new T.AnimationClip(name,1,[track('mimicJaw.rotation[x]',[-.68,-.68-amount,-.75,-.68-amount,-.68]),track('mimicArmL.rotation[x]',[0,amount,-amount,0,0]),track('mimicArmR.rotation[x]',[0,-amount,amount,0,0]),track('mimicLegL.rotation[x]',[0,amount*.5,0,-amount*.5,0]),track('mimicLegR.rotation[x]',[0,-amount*.5,0,amount*.5,0])]);
- const animations=[clip('Idle',.05),clip('Move',.4),clip('Windup',.18),clip('Attack',.75),clip('Recover',.12),clip('Hit',.16),new T.AnimationClip('Death',.8,[new T.NumberKeyframeTrack('mimicBody.rotation[z]',[0,.4,.8],[0,.5,1.45])])];
+ const bite=(name,duration)=>{
+  const times=Array.from({length:33},(_,i)=>i/32*duration),poses=times.map(t=>{
+   const u=t/duration,s=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
+   const open=name==='Windup'?s(u/.62):name==='Attack'?1-.88*s(u/.16):.12*(1-s(u));
+   const lean=name==='Windup'?-.10*s(u):name==='Attack'?-.10+.27*s(u/.13)-.11*s((u-.2)/.8):.06*(1-s(u));
+   return {jaw:-.68-open*.72,body:lean,left:-.18*open,right:-.22*open,elbow:0};
+  });
+  return new T.AnimationClip(name,duration,[new T.NumberKeyframeTrack('mimicJaw.rotation[x]',times,poses.map(p=>p.jaw)),new T.NumberKeyframeTrack('mimicBody.rotation[x]',times,poses.map(p=>p.body)),new T.NumberKeyframeTrack('mimicArmL.rotation[x]',times,poses.map(p=>p.left)),new T.NumberKeyframeTrack('mimicArmR.rotation[x]',times,poses.map(p=>p.right)),new T.NumberKeyframeTrack('mimicLegL.rotation[x]',times,times.map(()=>0)),new T.NumberKeyframeTrack('mimicLegR.rotation[x]',times,times.map(()=>0))]);
+ };
+ const animations=[clip('Idle',.05),clip('Move',.4),bite('Windup',1),bite('Attack',.42),bite('Recover',.38),clip('Hit',.16),new T.AnimationClip('Death',.8,[new T.NumberKeyframeTrack('mimicBody.rotation[z]',[0,.4,.8],[0,.5,1.45])])];
  scene.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(scene),size=bb.getSize(new T.Vector3());return {scene,animations,_revisedAnimations:animations,_nativeH:size.y,_baseY:bb.min.y,_nativeX:size.x,_nativeZ:size.z,_nativeW:Math.max(size.x,size.z)};
 }

@@ -1,8 +1,9 @@
-import {choreographyProfile,choreographyPose} from './enemy-choreography.js?v=2142';
+import {attackVariants} from './enemy-attack-performance.js?v=2339';
+import {choreographyProfile,choreographyPose} from './enemy-choreography.js?v=2339';
 import {fallenClips} from './fallen-motion.js?v=2007';
 import {orchardClips} from './brute-motion.js?v=2000';
 import * as THREE from './three.module.js';
-import {bakeWeaponContacts} from './weapon-choreography.js?v=1980';
+import {bakeWeaponContacts} from './weapon-choreography.js?v=2339';
 export const articulatedTypes=new Set(["grunt","emberling","frostling","toxling","goblin","caster","sentinel","revenant","frostlobber","blinkstalker","sunpriest","marblestatue","siegeknight","royalarcanist","brute","warden","archer","sorcerer","colossus","king","tyrant","marblecolossus"]);
 export const upgradedTypes=new Set('grunt flyer emberling frostling toxling shadeling sparkling goblin bones slime slimelet caster charger mimic dustjackal cragspitter galewisp thornboar sporeback sentinel revenant dummy bosscrystal frostshell frostlobber magmaskit embertotem blinkstalker voidtether sunpriest marblestatue siegeknight royalarcanist brute warden archer sorcerer king tyrant officer-shield officer-spear prison_pike prison_guard prison_hound prison_vessel prison_bell prison_maw prison_unbound'.split(' '));
 export function enemyAsset(type,original=false){if(original&&type.startsWith('prison_')){const base={prison_pike:'grunt',prison_guard:'sentinel',prison_hound:'dustjackal',prison_vessel:'embertotem',prison_bell:'siegeknight',prison_maw:'charger',prison_unbound:'tyrant'}[type];return './enemy-assets/upgraded/'+base+'-v2128.glb';}if(original&&type.startsWith('officer-'))return './enemy-assets/officers/'+type.slice(8)+'.glb';if(!original&&type==='colossus')return './enemy-assets/articulated/forge-colossus-v2125.glb';if(!original&&type==='marblecolossus')return './enemy-assets/articulated/marblecolossus-v2126.glb';if(!original&&upgradedTypes.has(type))return './enemy-assets/upgraded/'+type+'-v2142.glb';return './enemy-assets/'+(!original&&articulatedTypes.has(type)?'articulated/':'')+(!original&&['archer','brute','warden'].includes(type)?type+'-v1980':type)+'.glb';}
@@ -88,6 +89,12 @@ function rootTravel(type,phase,u){
  if(phase==='Idle')return [0,HOVER_MOTION.has(type)?.025*Math.sin(2*Math.PI*u):.005*Math.sin(2*Math.PI*u),0];
  if(phase==='Hit')return [0,0,.025*Math.sin(Math.PI*u)];
  if(phase==='Death')return [0,-(heavy?.10:quad?.08:.075)*Math.min(1,u*1.4),0];
+ if(['Windup','Attack','Recover'].includes(phase)){
+  const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
+  const load=phase==='Windup'?smooth(u/.58):phase==='Attack'?1-smooth(u):0;
+  const reach=phase==='Windup'?-.018*load:phase==='Recover'?.010*(1-smooth(u)):u<.12?-.018+.053*smooth(u/.12):.035-.025*smooth((u-.12)/.88);
+  return [0,-(heavy?.018:quad?.012:.007)*load,reach];
+ }
  return [0,0,0];
 }
 // Angles are offsets in each bone's bind-local frame. Translation stays anchored.
@@ -110,9 +117,15 @@ function jointPose(key,phase,u,family,type){
 }
 export function revisedClips(root,type,original){const family=motionFamily(type),bones={};root.traverse(o=>{if(o.isBone)bones[o.name]=o;});const replace=new Set(['Idle','Move','Windup','Attack','Hit','Death','Recover']);const clips=original.filter(c=>!replace.has(c.name));
  const names=[['Idle',2.4],['Move',QUAD_MOTION.has(type)?.55:HEAVY_MOTION.has(type)?.90:.68],['Windup',1],['Attack',.5],['Hit',.32],['Death',.78],...(choreographyProfile(type)?[['Recover',choreographyProfile(type).recover]]:[])];
- for(const move of ACTION_VARIANTS[type]||[])names.push(['Windup_'+move,1],['Attack_'+move,.5],['Recover_'+move,choreographyProfile(type,move)?.recover||.38]);
+ for(const move of new Set([...(ACTION_VARIANTS[type]||[]),...(attackVariants[type]||[])]))names.push(['Windup_'+move,1],['Attack_'+move,.5],['Recover_'+move,choreographyProfile(type,move)?.recover||.38]);
  for(const [name,duration] of names){const tracks=[],times=Array.from({length:25},(_,i)=>i/24*duration),phase=name.split('_')[0],move=name.includes('_')?name.slice(name.indexOf('_')+1):null;
   if(bones.root){const values=[];for(let i=0;i<25;i++){const travel=rootTravel(type,phase,i/24);values.push(bones.root.position.x+travel[0],bones.root.position.y+travel[1],bones.root.position.z+travel[2]);}tracks.push(new THREE.VectorKeyframeTrack('root.position',times,values));}
+  if(['slime','slimelet'].includes(type)&&bones.body&&['Windup','Attack','Recover'].includes(phase)){
+   const values=[];for(let i=0;i<25;i++){const u=i/24,s=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};let squash;
+    if(phase==='Windup')squash=s(u/.58);else if(phase==='Recover')squash=.20*(1-s(u));else squash=u<.12?1-1.65*s(u/.12):-.65+.85*s((u-.12)/.88);
+    values.push(bones.body.scale.x*(1+.14*squash),bones.body.scale.y*(1-.20*squash),bones.body.scale.z*(1+.14*squash));
+   }tracks.push(new THREE.VectorKeyframeTrack('body.scale',times,values));
+  }
   for(const [key,bone]of Object.entries(bones)){if(key==='root')continue;const values=[];for(let i=0;i<25;i++){const u=i/24,custom=choreographyPose(type,phase,u,move),angles=['Idle','Move','Hit','Death'].includes(phase)?lifePose(type,phase,u)[key]||[0,0,0]:custom?(custom[key]||[0,0,0]):jointPose(key,phase,u,family,type)||pose(family,phase,u,type)[key]||[0,0,0];const q=bone.quaternion.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(...angles)));values.push(q.x,q.y,q.z,q.w);}tracks.push(new THREE.QuaternionKeyframeTrack(bone.name+'.quaternion',times,values));}
   clips.push(new THREE.AnimationClip(name,duration,tracks));
  }

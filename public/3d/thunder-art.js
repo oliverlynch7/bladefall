@@ -5,7 +5,7 @@ import {craftModel} from './campaign-craft-models.js?v=2187a';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 import {campaignMaterial,beveledBoxGeometry} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';
-import {createHydra} from './hydra-art.js?v=2141';
+import {createHydra} from './hydra-art.js?v=2339';
 let active;
 export function buildCoastHigh(scene,w){
  scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.5:.16);}});

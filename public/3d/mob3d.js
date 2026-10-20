@@ -1,10 +1,10 @@
-import {makeMimic} from './mimic3d.js?v=2311';
+import {makeMimic} from './mimic3d.js?v=2339';
 import {makeStrawDummy} from './training-dummy3d.js?v=2233';
-import {officerClips} from './officer-motion.js?v=2010';
+import {officerClips} from './officer-motion.js?v=2339';
 import * as THREE from './three.module.js';
 import { deathPresentation } from './death-presentation.js?v=1978';
-import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2142';
-import { enemyActionState, instantEnemyRelease } from './enemy-action-state.js?v=2141';
+import { revisedClips, articulatedTypes } from './enemy-motion.js?v=2339';
+import { enemyActionState, instantEnemyRelease } from './enemy-action-state.js?v=2339';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { loadModelAnyExt } from './loadmodel.js?v=1981s';
 
@@ -154,7 +154,7 @@ function acquireMob(type,e){
     for(const c of clips){const a=mixer.clipAction(c);if(c.name.startsWith('Fallen')||/^(Attack|Windup|Recover)(_|$)/.test(c.name)||['Hit','Death','BruteBrace'].includes(c.name)){a.setLoop(THREE.LoopOnce,1);a.clampWhenFinished=true;}actions[c.name]=a;}
     rec={root,mixer,actions,type,src,materials};_mobGroup.add(root);_mobPool.push(rec);
   }
-  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,restart:false,suspended:false,attack:0,recover:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null,lastAttackKey:null});
+  Object.assign(rec,{enemy:e,x:e.x,z:e.z,cur:null,restart:false,suspended:false,attack:0,recover:0,death:0,wasDead:false,wind:0,shoot:e.shootT||0,hit:e.hitFlash||0,contact:0,phase:null,phaseKey:null,phaseMove:null,lastAttackKey:null});
   rec.mixer.stopAllAction();rec.root.visible=true;_actors.set(e,rec);return rec;
 }
 function play(rec,name,duration){
@@ -205,7 +205,7 @@ function syncMobsInner(scene,dt,camera){
     if(offscreen){
       if(!rec&&window.BF_LOADING?.active)rec=acquireMob(type,e);
       _drawn.add(e);culled++; // handled: do not draw the old voxel fallback
-      if(rec){rec.root.visible=false;rec.suspended=true;rec.x=e.x;rec.z=e.z;rec.attack=0;rec.recover=0;const state=enemyActionState(e);rec.phase=state.phase;rec.phaseKey=state.key;rec.hit=e.hitFlash||0;}
+      if(rec){rec.root.visible=false;rec.suspended=true;rec.x=e.x;rec.z=e.z;rec.attack=0;rec.recover=0;const state=enemyActionState(e);rec.phase=state.phase;rec.phaseKey=state.key;rec.phaseMove=state.move;rec.hit=e.hitFlash||0;}
       continue;
     }
     if(!rec&&!e.dead)rec=acquireMob(type,e);
@@ -244,22 +244,24 @@ function syncMobsInner(scene,dt,camera){
     rec.attack=Math.max(0,rec.attack-animDt);rec.recover=Math.max(0,rec.recover-animDt);
     const released=instantEnemyRelease(rec,state,e);
     const started=state.phase==='Attack'&&(rec.phase!=='Attack'||rec.phaseKey!==state.key);
-    if(released){rec.attack=.42;rec.restart=true;rec.lastAttackKey=state.key||rec.phaseKey;}
-    if(started){rec.restart=true;rec.recover=0;rec.lastAttackKey=state.key;}
+    if(released){rec.attack=.42;rec.restart=true;rec.lastAttackKey=state.move||rec.phaseMove||state.key||rec.phaseKey;}
+    if(started){rec.restart=true;rec.recover=0;rec.lastAttackKey=state.move||state.key;}
     const recoverClip=rec.actions['Recover_'+rec.lastAttackKey]||rec.actions.Recover;
     if(wasAttacking&&state.phase!=='Attack'&&state.phase!=='Windup'&&rec.attack===0&&recoverClip){rec.recover=recoverClip.getClip().duration;rec.restart=true;}
     if(state.phase==='Windup'){rec.recover=0;if(rec.phase!=='Windup'||rec.phaseKey!==state.key||wind>rec.wind+.05)rec.restart=true;}
+    const actionKey=state.move||state.key||rec.lastAttackKey;
     const orchard=e.bruteOrchard?{wind:'BruteBrace',charge:'BruteRush',stagger:'BruteStagger'}[e.bruteState]:null;
     const fallen=e.fallenDuel?{feint:'FallenFeint',stagger:'FallenStagger'}[e.fallState]:null;
     if(fallen)play(rec,fallen,e.fallClock);
     else if(orchard)play(rec,orchard,orchard==='BruteBrace'?wind:undefined);
-    else if(wind>0)play(rec,rec.actions['Windup_'+state.key]?'Windup_'+state.key:'Windup',wind);
-    else if(rec.attack>0||state.phase==='Attack')play(rec,rec.actions['Attack_'+state.key]?'Attack_'+state.key:'Attack',state.phase==='Attack'?state.remaining:rec.attack);
+    else if(wind>0)play(rec,rec.actions['Windup_'+actionKey]?'Windup_'+actionKey:'Windup',wind);
+    else if(rec.attack>0||state.phase==='Attack')play(rec,rec.actions['Attack_'+actionKey]?'Attack_'+actionKey:'Attack',state.phase==='Attack'?state.remaining:rec.attack);
+    else if(state.phase==='Recover')play(rec,rec.actions['Recover_'+actionKey]?'Recover_'+actionKey:'Recover',state.remaining);
     else if(rec.recover>0)play(rec,rec.actions['Recover_'+rec.lastAttackKey]?'Recover_'+rec.lastAttackKey:'Recover');
     else if((e.hitFlash||0)>rec.hit+.025){rec.restart=true;play(rec,'Hit');}
     else if(rec.cur!=='Hit'||!rec.actions.Hit?.isRunning())play(rec,speed>3&&speed<1600?'Move':'Idle');
     if(rec.cur==='Move'&&rec.actions.Move)rec.actions.Move.setEffectiveTimeScale(Math.max(.65,Math.min(1.7,speed/(e.speed||60))));
-    rec.phase=state.phase;rec.phaseKey=state.key;
+    rec.phase=state.phase;rec.phaseKey=state.key;rec.phaseMove=state.move;
     rec.mixer.update(animDt);
     rec.wind=wind;rec.shoot=e.shootT||0;rec.hit=e.hitFlash||0;
     _drawn.add(e);live++;

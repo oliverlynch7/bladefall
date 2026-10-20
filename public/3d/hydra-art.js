@@ -1,7 +1,8 @@
+import {hydraAttackPose} from './hydra-attack-motion.js?v=2339';
 import * as T from './three.module.js';
 // Segmented sea-serpent necks, plated jaws and visible iron restraints. No enemy corpse.
 export function createHydra(parent){
- const root=new T.Group();parent.add(root);const geos=[],mats=[],parts=[],necks=[];
+ const root=new T.Group();root.name='Hydra articulated body';parent.add(root);const geos=[],mats=[],parts=[],necks=[];
  const mat=c=>{const m=new T.MeshStandardMaterial({color:c,roughness:.75,metalness:c==='#829997'?.6:0,flatShading:true});mats.push(m);return m;};
  const skin=mat('#346a6c'),belly=mat('#91b1a2'),ridge=mat('#193e4a'),iron=mat('#829997'),eye=mat('#e3ca76'),tooth=mat('#d9d2aa'),scale=mat('#497d79'),shadow=mat('#102d36');
  eye.emissive=new T.Color('#9d7836');eye.emissiveIntensity=.45;
@@ -11,7 +12,7 @@ export function createHydra(parent){
  for(const side of [-1,1])for(let j=0;j<5;j++){const plate=ell(side*(250-j*19),60-j*9,-1150+j*145,92,24,125,scale);plate.rotation.z=side*.27;}
  const neckScaleGeo=new T.IcosahedronGeometry(1,0);geos.push(neckScaleGeo);const neckScales=new T.InstancedMesh(neckScaleGeo,scale,60);root.add(neckScales);const neckPose=new T.Object3D();
  for(let i=0;i<3;i++){const g=new T.Group();root.add(g);const segs=[];for(let j=0;j<10;j++)segs.push(make(new T.CylinderGeometry(43-j*1.1,48-j*1.1,1,9),skin,g));
- const head=new T.Group();g.add(head);ell(0,10,0,73,57,100,skin,head);ell(0,-20,60,59,25,85,belly,head);ell(0,5,72,63,26,85,skin,head);
+ const head=new T.Group();head.name='Hydra head '+i;g.add(head);ell(0,10,0,73,57,100,skin,head);const lowerJaw=new T.Group();lowerJaw.position.y=-12;head.add(lowerJaw);ell(0,-8,60,59,25,85,belly,lowerJaw);ell(0,5,72,63,26,85,skin,head);
  ell(0,-10,144,42,20,62,ridge,head);ell(0,17,102,48,28,68,scale,head);
  for(const s of [-1,1]){
   ell(s*59,27,36,9,6,16,eye,head);ell(s*66,38,-8,21,16,45,ridge,head);
@@ -23,29 +24,23 @@ export function createHydra(parent){
   for(let j=0;j<3;j++){const frill=make(new T.ConeGeometry(22-j*3,68-j*9,5),ridge,head);frill.position.set(s*(59+j*15),42-j*11,-65-j*29);frill.rotation.z=-s*.70;}
  }
  for(let j=0;j<4;j++){const dorsal=make(new T.ConeGeometry(13-j*2,67-j*8,5),ridge,head);dorsal.position.set(0,67-j*5,-95+j*44);dorsal.rotation.x=-.28;}
- const jaw=ell(0,-37,89,55,10,88,shadow,head);jaw.rotation.x=.07;
+ ell(0,-25,89,55,10,88,shadow,lowerJaw);const jaw=lowerJaw;jaw.name='Hydra lower jaw '+i;jaw.rotation.x=.07;
  const cuff=make(new T.TorusGeometry(59,10,6,12),iron,g);cuff.material=iron.clone();mats.push(cuff.material);cuff.rotation.x=Math.PI/2;const links=[];for(let j=0;j<10;j++){const l=make(new T.TorusGeometry(15,4,5,8),iron,g);links.push(l);}
  necks.push({g,segs,head,jaw,cuff,links,pose:null,previousTime:null});}
  const jet=make(new T.CylinderGeometry(1,1,1,8),new T.MeshBasicMaterial({color:0x9adee9,transparent:true,opacity:.78,depthWrite:false}));mats.push(jet.material);jet.name='Hydra water jet';jet.visible=false;
- function update(G){const h=G.hydraArena;if(!h)return;const t=h.elapsed;jet.visible=h.state==='strike'&&h.kind==='blast'&&!h.freed;if(jet.visible){const a=window.BFHydra.heads[h.head],dir=new T.Vector3(h.x-a.x,0,h.z-a.z).normalize();let len=2200;for(let d=20;d<2200;d+=20)if(window.BFHydra.blocked({x:a.x+dir.x*d,z:a.z+dir.z*d},a)){len=d;break;}const start=new T.Vector3(a.x,180,a.z),end=start.clone().addScaledVector(dir,len);jet.position.copy(start.add(end).multiplyScalar(.5));jet.scale.set(50,len,50);jet.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),dir);}
+ function update(G){const h=G.hydraArena;if(!h)return;const t=h.elapsed;jet.visible=h.state==='strike'&&h.kind==='blast'&&!h.freed;
  root.position.z=-h.retreat*2100;root.position.y=-h.retreat*370;
  necks.forEach((n,i)=>{const anchor=window.BFHydra.heads[i],broken=(h.broken||[]).includes(i);
- let x=anchor.x,y=broken?320:215,z=anchor.z-35;const active=h.head===i&&!h.freed;
- if(active&&h.state==='wind'){y+=Math.sin(Math.min(1,(2-h.clock)/2)*Math.PI/2)*120;}
- if(active&&h.state==='strike'&&h.kind==='sweep'){x=Math.sin((.45-h.clock)/.45*Math.PI-Math.PI/2)*800;y=190;z=100;}
- if(active&&h.state==='strike'&&h.kind==='bite'){x=h.x;y=h.y+58;z=h.z;}
- y+=Math.sin(t*1.6+i*2)*9;
+ const target=hydraAttackPose(h,i,anchor);let {x,y,z}=target;const active=h.head===i&&!h.freed;
  // The combat target moves instantly, but the visible neck must follow an arc.
  // A short, time-corrected settle keeps a bite from teleporting across the arena.
  const elapsed=n.previousTime==null ? .05 : Math.max(0,Math.min(.05,t-n.previousTime));n.previousTime=t;
  const approach=1-Math.exp(-elapsed*(active&&h.state==='strike'?15:8));
  if(!n.pose)n.pose=new T.Vector3(x,y,z);else n.pose.lerp(new T.Vector3(x,y,z),approach);
  x=n.pose.x;y=n.pose.y;z=n.pose.z;
- n.head.position.copy(n.pose);n.head.rotation.y=Math.atan2(h.x-x,h.z-z)*.25;
- const attackOpen=active&&h.state==='strike'&&h.kind==='bite'?1:active&&h.state==='wind'&&h.kind==='bite'?.45:0;
- n.jaw.rotation.x+=(.07+attackOpen*.36-n.jaw.rotation.x)*Math.min(1,approach*1.7);
- n.jaw.position.y=-37-attackOpen*8;
- n.head.rotation.x+=(attackOpen*.12-n.head.rotation.x)*Math.min(1,approach*1.3);
+ n.head.position.copy(n.pose);n.head.rotation.y=target.yaw;
+ n.jaw.rotation.x+=(.07+target.open*.52-n.jaw.rotation.x)*Math.min(1,approach*1.7);
+ n.head.rotation.x+=(target.pitch-n.head.rotation.x)*Math.min(1,approach*1.3);
  const point=u=>new T.Vector3(x*u,20+(y-20)*u+Math.sin(u*Math.PI)*200,-850+(z+850)*u);for(let j=0;j<10;j++){const a=point(j/10),b=point((j+1)/10),d=b.clone().sub(a),m=n.segs[j];m.position.copy(a.add(b).multiplyScalar(.5));m.scale.y=d.length()+5;m.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),d.normalize());
   for(let side=0;side<2;side++){const angle=(side?1:-1)*.63;
    neckPose.position.copy(m.position).add(new T.Vector3(Math.sin(angle)*43,Math.cos(angle)*32,0));neckPose.quaternion.copy(m.quaternion);neckPose.scale.set(32,13,58);neckPose.updateMatrix();neckScales.setMatrixAt(i*20+j*2+side,neckPose.matrix);
@@ -53,6 +48,14 @@ export function createHydra(parent){
  }
  n.cuff.position.set(x,y-65,z-12);n.cuff.visible=!broken;n.cuff.material.color.set(window.BFHydra.exposed(G,G.enemies.find(e=>e.hydraIndex===i))?'#f0efc8':'#829997');for(let j=0;j<10;j++){const u=j/9,l=n.links[j];l.visible=!broken;l.position.set(x+(anchor.x+(i-1)*55-x)*u,y-65+(125-y+65)*u,z-12+(anchor.z+65-z+12)*u+35*Math.sin(u*Math.PI));l.rotation.y=j%2*Math.PI/2;}
  });neckScales.instanceMatrix.needsUpdate=true;
+ if(jet.visible){
+  const a=window.BFHydra.heads[h.head],dir=new T.Vector3(h.x-a.x,0,h.z-a.z).normalize();let length=2200;
+  for(let d=20;d<2200;d+=20)if(window.BFHydra.blocked({x:a.x+dir.x*d,z:a.z+dir.z*d},a)){length=d;break;}
+  const head=necks[h.head].head;head.updateWorldMatrix(true,false);
+  const start=root.worldToLocal(head.localToWorld(new T.Vector3(0,-6,170))),end=new T.Vector3(a.x+dir.x*length,180,a.z+dir.z*length),delta=end.clone().sub(start);
+  jet.position.copy(start).add(end).multiplyScalar(.5);jet.scale.set(50,delta.length(),50);jet.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),delta.normalize());
+ }
+
  }
  function dispose(){for(const g of geos)g.dispose();for(const m of mats)m.dispose();root.removeFromParent();}
  return {root,update,dispose};

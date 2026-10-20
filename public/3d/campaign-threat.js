@@ -8,7 +8,7 @@ function bossDamage(z,area){return 1.18+.0035*(level(z,area,true)-4);}
 function pacing(z){return {speed:1.08+zone(z)*.014,recovery:.90-zone(z)*.012,shoot:.90-zone(z)*.012};}
 // Light impacts must not cancel every attack. A substantial hit can stagger a wind-up.
 function stagger(e,dealt,kb,now){
- if(!e||e.boss||!e.ceKind||e.briarRole==='hex'||e.ceState!=='wind'||(e.poiseReadyAt||0)>now||!(dealt>0))return false;
+ if(!e||e.boss||!e.ceKind||e.briarRole==='hex'||e.campaignRole==='caster'||e.ceState!=='wind'||(e.poiseReadyAt||0)>now||!(dealt>0))return false;
  if(dealt<e.maxHp*.18&&!(kb>=450))return false;e.poiseReadyAt=now+3;return true;
 }
 function knockback(e,kb){return kb*(e.ceKind&&['wind','strike'].includes(e.ceState)?.25:1);}

@@ -1143,8 +1143,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <link rel="stylesheet" href="./character-creator.css?v=2083"><script src="./character-creator.js?v=2336"></script>
 <script src="./emotes.js?v=2225"></script>
 <script src="./camera-occlusion.js?v=2239"></script>
-<script src="./campaign-threat.js?v=2310"></script>
-<script src="./boss-tactics.js?v=2289"></script>
+<script src="./campaign-threat.js?v=2337"></script>
+<script src="./boss-tactics.js?v=2337"></script>
 <script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-welcome.js?v=2234"></script>
 <script src="./currency-feedback.js?v=2311"></script>
@@ -1160,7 +1160,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./campaign-hunts.js?v=2325"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2289"></script>
-<script src="./campaign-elites.js?v=2310"></script>
+<script src="./campaign-elites.js?v=2337"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2319"></script>
 <script src="./briar-journey.js?v=2302"></script>
@@ -1233,7 +1233,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.336.0-player-readiness';
+const VERSION3D='2.337.0-campaign-combat';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -8483,40 +8483,46 @@ function updatePrisonFoe(e,dt,p,eff){
 function updateCampaignElite(e,dt,p,eff){
  const kit=BFCampaignElites.kits[e.ceKind];if(!kit)return;
  if(!MP.guest()){
-  let target=p.hp>0&&!p.downed?p:null;
-  for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===G.zone&&q.area===G.area&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
-  const command=(inBriar()||inBlackWoods())?BFBriarCombat.decision(G,e,target,!!target&&enemyMeleeClear(e,target),partySize()):{target,attack:true};
-  BFCampaignElites.step(e,dt,command.target,eff,command.attack);
+  const target=enemyPartyTarget(e,p),living=target&&target.hp>0&&!target.downed&&!target.dead;
+  const clear=living&&(e.ceState!=='hunt'||enemyMeleeClear(e,target));
+  const base=(inBriar()||inBlackWoods())?BFBriarCombat.decision(G,e,living?target:null,clear,partySize()):{target:living?target:null,attack:clear};
+  const command=BFCampaignElites.decision(G,e,base.target,base.attack,partySize()),serial=e.ceSerial;
+  BFCampaignElites.step(e,dt,command.target,eff,command.attack,(dx,dz,length,rush)=>{
+   if(!(length>0)||!(dt>0))return;
+   if(rush){const next={x:e.x+dx*length,z:e.z+dz*length};if(enemyRouteEdge(e,e,next,enemyRouteContext(e,length+e.r*2+32))){e.x=next.x;e.z=next.z;}}
+   else moveGroundEnemy(e,dx,dz,length/dt,dt,Math.max(90,Math.min(300,dXZ(e.x,e.z,command.target.x,command.target.z))));
+  });
+  if(serial!==e.ceSerial){e.ceStartedAt=G.time;if(e.ceState==='wind'&&BFCampaignElites.shape(e)==='circle'){const ground=floorAt(e.ceX,e.ceZ,2,command.target.y+8);if(Number.isFinite(ground))e.ceY=ground;}}
  }
  if(['wind','strike'].includes(e.ceState))e.yaw=Math.atan2(e.ceDX,e.ceDZ);
  // Use the existing body wind-up/release clips, without generic contact damage.
  e.meleeW=e.ceState==='wind'?e.ceClock:0;e.meleeActive=e.ceState==='strike'?e.ceClock:0;
  if(e.ceState==='wind'){
-  if(e._ceWarnSerial!==e.ceSerial){e._ceWarnSerial=e.ceSerial;e._ceSeen=0;playFx('atk2',.55);if(!e._ceHint){e._ceHint=true;G._combatHints=G._combatHints||{};if(!G._combatHints[e.ceKind]){G._combatHints[e.ceKind]=true;toast(e.label+': '+kit.hint);}}}
+  if(e._ceWarnSerial!==e.ceSerial){e._ceWarnSerial=e.ceSerial;e._ceSeen=0;playFx(e.campaignRole==='caster'?(e.ceKind==='ember_ring'?'cast1':e.ceKind==='frost_ring'?'cast2':e.ceKind==='dusk_curse'?'cast5':'cast4'):'atk2',.55);if(!e._ceHint){e._ceHint=true;G._combatHints=G._combatHints||{};if(!G._combatHints[e.ceKind]){G._combatHints[e.ceKind]=true;toast((e.label||foeName(e))+': '+kit.hint);}}}
   e._ceSeen+=dt;
  }
  // A guest that missed the warning never gets an invisible catch-up hit.
  if(e.ceState==='strike'&&(!MP.guest()||(e._ceWarnSerial===e.ceSerial&&e._ceSeen>=.55))){
-  if(e._ceFx!==e.ceSerial){e._ceFx=e.ceSerial;playFx(e.ceKind==='shore'?'heavyhit':'ma_stomp',.65);}
-  if(e._ceHit!==e.ceSerial&&BFCampaignElites.contains(e,p)&&(e.briarRole!=='hex'||!losBlocked(e.x,e.z,p.x,p.z))&&!losBlocked(e.ceX,e.ceZ,p.x,p.z)&&!BFCampaignElites.blocked(e,p,G.obstacles)){e._ceHit=e.ceSerial;hurtPlayer(e.dmg*kit.damage,e.ceX,e.ceZ,foeHit(e,kit.title.toLowerCase()));}
-  if(G.pet&&!G.pet.dead&&e._cePetHit!==e.ceSerial&&BFCampaignElites.contains(e,G.pet)&&(e.briarRole!=='hex'||!losBlocked(e.x,e.z,G.pet.x,G.pet.z))&&!losBlocked(e.ceX,e.ceZ,G.pet.x,G.pet.z)&&!BFCampaignElites.blocked(e,G.pet,G.obstacles)){e._cePetHit=e.ceSerial;hurtPet(e.dmg*kit.damage,e.ceX,e.ceZ);}
+  if(e._ceFx!==e.ceSerial){e._ceFx=e.ceSerial;playFx(e.campaignRole==='caster'?(BFCampaignElites.shape(e)==='ring'?'ma_stomp':'cast4'):e.ceKind==='shore'?'heavyhit':'ma_stomp',.65);}
+  if(e._ceHit!==e.ceSerial&&BFCampaignElites.contains(e,p)&&(BFCampaignElites.shape(e)!=='circle'||!losBlocked(e.x,e.z,p.x,p.z))&&!losBlocked(e.ceX,e.ceZ,p.x,p.z)&&!BFCampaignElites.blocked(e,p,G.obstacles)){e._ceHit=e.ceSerial;hurtPlayer(e.dmg*kit.damage,e.ceX,e.ceZ,foeHit(e,kit.title.toLowerCase()));}
+  if(G.pet&&!G.pet.dead&&e._cePetHit!==e.ceSerial&&BFCampaignElites.contains(e,G.pet)&&(BFCampaignElites.shape(e)!=='circle'||!losBlocked(e.x,e.z,G.pet.x,G.pet.z))&&!losBlocked(e.ceX,e.ceZ,G.pet.x,G.pet.z)&&!BFCampaignElites.blocked(e,G.pet,G.obstacles)){e._cePetHit=e.ceSerial;hurtPet(e.dmg*kit.damage,e.ceX,e.ceZ);}
  }
 }
 function drawCampaignEliteDanger(e){
  const k=BFCampaignElites.kits[e.ceKind];if(!k)return;
- if(e.briarRole&&e.ceState==='recover'){for(let i=0;i<12;i++){const a=i*Math.PI/6,r=e.r+15;bx(e.x+Math.cos(a)*r,e.y+4,e.z+Math.sin(a)*r,4,2,4,'#9ce3b1','#173a24',.6);}return;}
+ if((e.briarRole||e.campaignRole)&&e.ceState==='recover'){for(let i=0;i<12;i++){const a=i*Math.PI/6,r=e.r+15;bx(e.x+Math.cos(a)*r,e.y+4,e.z+Math.sin(a)*r,4,2,4,'#9ce3b1','#173a24',.6);}return;}
  if(!['wind','strike'].includes(e.ceState))return;
- const strike=e.ceState==='strike',color=strike?(e.briarRole?'#ff7655':'#fff1d0'):k.color,alpha=strike?1:.86,x=e.ceX,z=e.ceZ;
- const mark=(px,pz,width,alpha2=alpha)=>{const floor=floorAt(px,pz,2,e.ceY+65);if(Number.isFinite(floor)&&floor>=e.ceY-45)bx(px,floor+5,pz,width,3,width,color,e.briarRole?(strike?'#4a170d':e.briarRole==='hex'?'#2d173b':'#392615'):color,alpha2);};
+ const form=BFCampaignElites.shape(e),troop=!!(e.briarRole||e.campaignRole),strike=e.ceState==='strike',color=strike?(troop?'#ff7655':'#fff1d0'):k.color,edge=troop?(strike?'#4a170d':form==='circle'?'#2d173b':'#392615'):'#392d20',alpha=strike?1:.86,x=e.ceX,z=e.ceZ;
+ const mark=(px,pz,width,alpha2=alpha)=>{const floor=floorAt(px,pz,2,e.ceY+65);if(Number.isFinite(floor)&&floor>=e.ceY-45)bx(px,floor+5,pz,width,3,width,color,edge,alpha2);};
  const ring=(radius,arc=Math.PI)=>{const base=Math.atan2(e.ceDZ,e.ceDX),n=Math.max(10,Math.ceil(radius*arc*2/18));for(let i=0;i<=n;i++){const a=base-arc+2*arc*i/n;mark(x+Math.cos(a)*radius,z+Math.sin(a)*radius,5);}if(arc<Math.PI)for(const side of [-1,1]){const a=base+side*arc;line(x,z,x+Math.cos(a)*radius,z+Math.sin(a)*radius,4);}};
- const line=(ax,az,bx2,bz2,width)=>{const len=Math.hypot(bx2-ax,bz2-az),n=Math.max(1,Math.ceil(len/22));for(let i=0;i<=n;i++)mark(ax+(bx2-ax)*i/n,az+(bz2-az)*i/n,width);};
+ const line=(ax,az,bx2,bz2,width)=>{const len=Math.hypot(bx2-ax,bz2-az),n=Math.max(1,Math.ceil(len/22)),yaw=Math.atan2(bx2-ax,bz2-az);for(let i=0;i<n;i++){const f=(i+.5)/n,px=ax+(bx2-ax)*f,pz=az+(bz2-az)*f,floor=floorAt(px,pz,2,e.ceY+65);if(!Number.isFinite(floor)||floor<e.ceY-45)continue;pushM();mv(px,floor+5,pz);rotY(yaw);box(width,3,len/n+1,color,edge,alpha);popM();}};
  const point=(f,a)=>({x:x+e.ceDX*f+e.ceDZ*a,z:z+e.ceDZ*f-e.ceDX*a});
  const lane=(dx,dz,reach,width,both=false)=>{const a=both?-reach:0;for(const side of [-1,1])line(x+dx*a+dz*width*side,z+dz*a-dx*width*side,x+dx*reach+dz*width*side,z+dz*reach-dx*width*side,4);};
- if(e.ceKind==='raid'||e.ceKind==='cliff'||e.briarRole==='guard')ring(k.reach,1.05);
- else if(e.briarRole==='runner')lane(e.ceDX,e.ceDZ,k.reach,19);
- else if(e.briarRole==='hex')ring(k.radius);
- else if(e.ceKind==='forge'){ring(k.reach);const r=strike?25+(k.reach-25)*(1-e.ceClock/k.strike):k.reach*(1-e.ceClock/k.wind);ring(Math.max(10,r));}
- else if(e.ceKind==='shore')for(const a of [-.32,0,.32]){const q=point(Math.cos(a),Math.sin(a));lane(q.x-x,q.z-z,k.reach,13);}
+ if(form==='fan')ring(k.reach,1.05);
+ else if(form==='lunge'||form==='thrust')lane(e.ceDX,e.ceDZ,k.reach,k.width||19);
+ else if(form==='circle')ring(k.radius);
+ else if(form==='ring'){ring(k.reach);const r=strike?25+(k.reach-25)*(1-e.ceClock/k.strike):k.reach*(1-e.ceClock/k.wind);ring(Math.max(10,r));}
+ else if(form==='volley')for(const a of [-.32,0,.32]){const q=point(Math.cos(a),Math.sin(a));lane(q.x-x,q.z-z,k.reach,13);}
  else {lane(e.ceDX,e.ceDZ,k.reach,22,true);lane(e.ceDZ,-e.ceDX,k.reach,22,true);}
  if(!strike)ring(16+24*(1-e.ceClock/k.wind));
 }
@@ -8556,6 +8562,7 @@ function updateHydra(dt){
  if(!MP.guest()){const target=bossPartyTarget({x:0,z:-300},p);
  if(target)BFHydra.step(G,dt,target,k=>{if(k!=='wind'||!FXBUF.bosswarn_hydra)playFx(k==='wind'?'atk2':k==='free'?'portalopen':'heavyhit',.5);});}
  if(BFHydra.inAttack(G,p)&&G._hydraHit!==h.seq){G._hydraHit=h.seq;const e=G.enemies.find(e=>e.hydraIndex===h.head);hurtPlayer(h.attackDamage||scaledEnemyDamage(ENEMY.grunt.dmg,true)*1.8,h.x,h.z,foeHit(e,'the hydra’s '+h.kind));}
+ const cue=BFBossTactics.cue(G,G.enemies.find(e=>e.hydraChain&&e.hydraIndex===h.head)||G.boss,{jump:controlHint('jump'),dodge:controlHint('dodge')}),cueNode=document.getElementById('bosscue');cueNode.hidden=!cue;if(cue){cueNode.textContent=cue.text;cueNode.style.color=cue.safe?'#c4efa1':'#ffcf8c';}
  updateBossTactic(G.enemies.find(e=>e.hydraChain&&e.hydraIndex===h.head)||G.boss);const bar=document.getElementById('bosshpwrap');bar.classList.add('officer-team');bar.classList.toggle('on',!h.freed);document.getElementById('bossnametx').textContent='Free the Sea Hydra · '+BFHydra.live(G).length+' chains';const es=G.enemies.filter(e=>e.hydraChain);document.querySelector('#bosshp > i').style.width=(es.reduce((n,e)=>n+Math.max(0,e.hp),0)/(h.totalHp||1)*100)+'%';
  if(h.freed&&!G._hydraPaid){G._hydraPaid=true;gainXp(480);awardGold(700);adventureStoryState().notes['tc.hydra.free']={region:'storm',title:'The sea is its own again',text:'All three restraints are broken. The hydra returned to the sea. The stone climb beyond its ledges leads toward Sunspire.'};musicCue('hydra_release');toast('The hydra is free. The climb to Sunspire is open.');openWay();journalNoticeSync();}
  if(!G._hydraIntro){G._hydraIntro=true;toast('Free the three neck restraints. Dodge the marked attack, then strike its pale joint while that head rests. Stone blocks stop the water blast.');}questUpdate();
@@ -13766,7 +13773,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
      and every downstream multiplier - power, elements, crits, difficulty - then carried the
      fraction into the floating-point tail. Rounding at the point of application keeps the number on
      screen and the number subtracted from HP identical, which a display-only round would not. */
-  if(BFBriarCombat.active(G))dmg=BFBriarCombat.damage(e,dmg);
+  if(BFBriarCombat.active(G))dmg=BFBriarCombat.damage(e,dmg);else if(isCampaignAdventure())dmg=BFCampaignElites.damage(e,dmg);
   dmg = Math.max(1, Math.round(dmg));
   if(src===G.p && meta.classId==='monk' && c2def('monk') && !e.dead){ const cap=classState('monk').rank>=10?7:5; G.p.focusStacks=Math.min(cap,(G.p.focusStacks||0)+1); G.p.focusT=c2Passive('mon_focused')?5:4; }   // Monk builds Focus on every hit
   if(src===G.p && meta.classId==='stormcaller' && c2def('stormcaller') && !e.dead){ G.p.staticStacks=Math.min(5,(G.p.staticStacks||0)+1); G.p.staticT=4; }   // Stormcaller builds Static (speed) on every hit
@@ -13784,6 +13791,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   }
   e.hp-=dmg;
   if(BFBriarCombat.active(G)){const feedback=BFBriarCombat.hit(e,dealt);if(feedback){addText(e.x,e.y+e.h+25,e.z,feedback,'#a6edb5');if(feedback==='CAST INTERRUPTED')playFx('heavyhit',.45);}}
+  if(isCampaignAdventure()&&e.campaignRole){const feedback=BFCampaignElites.hit(e,dealt);if(feedback){addText(e.x,e.y+e.h+25,e.z,feedback,'#a6edb5');if(feedback==='CAST INTERRUPTED')playFx('heavyhit',.45);}}
   e.hitFlash=0.12; e.hitYaw=Math.atan2(e.x-(src?.x??e.x),e.z-(src?.z??e.z));
   if(healRatio>0)classHeal(G.p,dealt*healRatio);
   if(G._artCast && G._artCast.hits.length<16 && !G._artCast.hits.includes(e))G._artCast.hits.push(e);
@@ -14215,7 +14223,7 @@ function checkStageClear(){ if(G?.kingFinal||G?.escape)return;
     addText(G.p.x,G.p.y+90,G.p.z,'THE WAY OPENS!','var(--amber)',true); playFx('portalopen');
   }
 }
-function foeName(e){ if(G?.escape?.layoutVersion>=12&&e?.boss)return BFPrisonDungeon.boss(G.floor)?.name||e.label;if(e?.prisonFoe)return e.label;if((e?.briarRole||e?.homeRaid||e?.patrolGroup)&&e.label)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
+function foeName(e){ if(G?.escape?.layoutVersion>=12&&e?.boss)return BFPrisonDungeon.boss(G.floor)?.name||e.label;if(e?.prisonFoe)return e.label;if((e?.briarRole||e?.campaignRole||e?.homeRaid||e?.patrolGroup)&&e.label)return e.label;if(e?.frostOfficer)return e.label;if(!e) return 'an unseen foe';
   if(e.boss){ try{ if(curZone().boss) return curZone().boss.name; }catch(x){} }
   return (typeof BESTIARY_INFO!=='undefined'&&BESTIARY_INFO[e.type]&&BESTIARY_INFO[e.type].name) || e.label || e.type || 'a creature'; }
 /* `src:e` carries the BODY beside the words. Everything that reads this reads `.name` and
@@ -15739,7 +15747,7 @@ const MP={
       if(e){const st=a[8];if(st){e.st=Object.fromEntries(STATUS_ORDER.map((k,i)=>[k,Math.max(0,Number(st[i])||0)]));e.stDmg=Math.max(0,Number(st[6])||0);e.stunT=Math.max(0,Number(st[7])||0);e.slowT=Math.max(0,Number(st[8])||0);e.exposed=Math.max(0,Number(st[9])||0);e.primed=!!st[10];e.markT=Math.max(0,Number(st[11])||0);e.markOwner=st[12]||null;e.warCurseT=Math.max(0,Number(st[13])||0);e.warCurseOwner=st[14]||null;e.markExplode=Math.max(0,Number(st[15])||0);}else{e.st=null;e.stunT=0;e.slowT=0;e.exposed=0;e.primed=false;e.markT=0;e.markOwner=null;e.warCurseT=0;e.warCurseOwner=null;e.markExplode=0;}}
       if(e){const fx=a[9];if(fx){e._tether=fx[0]||null;e._tetherT=Math.max(0,Number(fx[1])||0);e.doomT=Math.max(0,Number(fx[2])||0);e.warBurstT=Math.max(0,Number(fx[3])||0);e.beastMarkT=Math.max(0,Number(fx[4])||0);e.tauntT=Math.max(0,Number(fx[5])||0);e.tauntId=fx[6]||null;e.petTauntT=Math.max(0,Number(fx[7])||0);e.petTauntId=fx[8]||null;e.warBurstDmg=Math.max(0,Number(fx[9])||0);}else{e._tether=null;e._tetherT=0;e.doomT=0;e.warBurstT=0;e.warBurstDmg=0;e.beastMarkT=0;e.tauntT=0;e.tauntId=null;e.petTauntT=0;e.petTauntId=null;}}
     }
-    for(const a of en)if(a[7]?.normalMelee||a[7]?.homeBellWave||a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
+    for(const a of en)if(a[7]?.normalMelee||a[7]?.homeBellWave||a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ if(Number.isFinite(k[4])&&k[4]>=0)e.xp=k[4];e.elite=!!k[2];this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -16900,12 +16908,12 @@ function updateWorld(dt){
     if(G._tutorialSafe)continue;
     if(e.dead) continue;
     if(e.hydraChain)continue;
-    if(!MP.guest()&&G.zone===0&&G.area>=0&&isCampaignAdventure())BFCampaignElites.briar(e);
+    if(!MP.guest()&&G.area>=0&&isCampaignAdventure()){if(G.zone===0)BFCampaignElites.briar(e);else BFCampaignElites.campaign(G,e);}
     window.BFEnemyWarnings?.warm(e,p,queueSkillFx);
     if(e.bot){ botAI(e,dt); continue; }                 // Arena AI bots run their own player-like combat AI
     if(e.boss&&!e.active&&!(e.dropT>0))e.dropT=.65;
     const bossTarget=e.boss?bossPartyTarget(e,p):null;
-    const wakeDistance=e.boss?(bossTarget?dXZ(e.x,e.z,bossTarget.x,bossTarget.z):Infinity):(e.briarRole||syncedMelee(e))&&MP.active?Math.min(dXZ(e.x,e.z,p.x,p.z),...Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area&&q.hp>0&&!q.downed).map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
+    const wakeDistance=e.boss?(bossTarget?dXZ(e.x,e.z,bossTarget.x,bossTarget.z):Infinity):(e.ceKind||syncedMelee(e))&&MP.active?Math.min(dXZ(e.x,e.z,p.x,p.z),...Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area&&q.hp>0&&!q.downed).map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
     if(e.dropT>0){ if(wakeDistance<(e.marksmanCrossing?1600:640)){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
       if(e.boss) onBossActivate(e); else mobAggro(e); } } continue; }   // curated per-mob aggro voice on wake
     if(!e.active) continue;
@@ -17203,7 +17211,7 @@ function onBossActivate(e){ SFX.boss();
 function updateBossBar(e){
  if(G?.escape?.layoutVersion>=12)document.getElementById('bossnametx').textContent=BFPrisonDungeon.boss(G.floor)?.name||e.label;
  updateBossTactic(e);
- const cueNode=document.getElementById('bosscue'),cue=e.bruteOrchard?BFBruteEncounter.cue(e,{jump:controlHint('jump'),dodge:controlHint('dodge')}):null;
+ const cueNode=document.getElementById('bosscue'),cue=isCampaignAdventure()?(e.bruteOrchard?BFBruteEncounter.cue(e,{jump:controlHint('jump'),dodge:controlHint('dodge')}):BFBossTactics.cue(G,e,{jump:controlHint('jump'),dodge:controlHint('dodge')})):null;
  if(cueNode){cueNode.hidden=!cue;if(cue){if(cueNode.textContent!==cue.text)cueNode.textContent=cue.text;cueNode.style.color=cue.safe?'#c4efa1':'#ffcf8c';}}
  if(e.hydraChain)return;if(e.finalKing){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',BFFinalKing.combat(e));document.getElementById('bossnametx').textContent=e.label;}if(e.marbleGuardian){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Marble Colossus'+(e.mcExposed>0?' · Armor seal open':' · Sealed armor');} if(e.furnaceColossus){document.getElementById('bosshpwrap').classList.add('officer-team');document.getElementById('bosshpwrap').classList.toggle('on',!e.dead&&e.hp>0);document.getElementById('bossnametx').textContent='Ember Colossus'+(e.fcExposed>0?' · Armor cooled':' · Heated armor');}if(e.frostOfficer){document.getElementById('bosshpwrap').classList.add('officer-team');const team=G.enemies.filter(q=>q.frostOfficer),live=team.filter(q=>!q.dead&&q.hp>0);document.getElementById('bosshpwrap').classList.toggle('on',!!live.length);document.getElementById('bossnametx').textContent='Hollowed Officers · '+live.length+' / 3';document.querySelector('#bosshp > i').style.width=(team.reduce((n,q)=>n+(q.dead?0:q.hp),0)/team.reduce((n,q)=>n+q.maxHp,0)*100)+'%';return;}document.querySelector('#bosshp > i').style.width=Math.max(0,e.hp/e.maxHp*100)+'%'; }
 function dangerRing(x,y,z,r,color,alpha=1,arc=Math.PI,dx=0,dz=1){
@@ -24559,7 +24567,7 @@ window.__BF3={buyCompanionWhistle,fieldEquipCompanion,openFieldCompanions,COMPAN
   openCheatMenu, cheatGiveWeapons, cheatGiveArmor, cheatLevels, cheatKitOut, cheatUnlockClasses, cheatRank10All, cheatResetRanks, cheatOpenEverything, cheatAllPets, fistsWeapon, FXDEF, MUSVOL, get MUS_DEFAULT(){return MUS_DEFAULT;}, get _audio(){return {master,procBus,fxBus,ctx:actx};}, initAudio,
   ARCHES, ARCHEIDS, RETIRED_ARCHES, elemMod, WEAK, affName, affStatus, normEl, weapFamily, weapClassName, ART_FAMILY, applyElement,
   applyStatus, statusTick, estat, STCAP, EL_STAT, buildAmt, consumeRunes, ruptureCorrupt,
-  STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, enemyKillXp, ARCHES, ARCHEIDS,
+  STAGES, THEMEMOBS, ENEMY, RARITY, killEnemy, spawnEnemy, enemyKillXp, updateCampaignElite, ARCHES, ARCHEIDS,
   TRIALS, STARTERS, startTrial, trialComplete, skipTrial, enterZone, enterSide, sideClear, shopWeapon, shopWeapCost, normWeapon, LEGACY_ART, TIERBAND, intrinsicWeapon, migrateClassEquipment, isIntrinsicLoot, CLASS_GROUPS, WEAPON_GROUPS, classFamilyOk, classStartWeapon, ensureClassWeapon, cheatGiveWeapons,
   DIFFS, HAZARDS, COSMETICS, COSSLOTS, checkCosmetics, cosEquipped, cosOwned, curDiff, diffOpen, diffMode, isHitless, isPermadeath, hazUpdate, hazSetup, winGame, lavaHit, effMaxHp, hurtPlayer,
   MUSCREDITS, MUSDIR, musicCue, musicVolume, musicPlay, musicStop, musicForScene, musicRefresh, musicSting, get musCurKey(){ return musCurKey; }, get musEls(){ return musEls; },

@@ -29,5 +29,20 @@ function damage(G,e,src,dmg,kind='direct'){
  if(e.marksmanCrossing&&kind==='direct'&&n>0&&(e.markExposed>0||src&&Math.abs((src.y||0)-(e.y||0))<95&&Math.hypot(src.x-e.x,src.z-e.z)<340))e.markTacticDone=true;
  return n;
 }
-root.BFBossTactics={rule,damage};if(typeof module!=='undefined')module.exports=root.BFBossTactics;
+
+// Phase cues describe the active attack, while the existing tactic line explains the arena.
+function cue(G,e,keys={}){
+ if(!live(e))return null;
+ const jump=keys.jump||'Space',dodge=keys.dodge||'Right click',out=(text,safe=false)=>({text,safe});
+ if(e.marksmanCrossing){if(e.markState==='aim')return out(e.markClock>.6?'Aiming — move toward stone cover':'Shot locked — stay behind cover');if(['relocate','glide'].includes(e.markState))return out('Changing nests — watch the approach for guards');if(e.markExposed>0)return out('Bow exposed — attack now',true);return out('Reloading — advance toward her nest',true);}
+ if(e.fallenDuel){if(e.fallState==='feint')return out('Feint — wait for the real sweep');if(e.fallState==='thrust')return out('Thrust — sidestep or put a pillar in its path');if(e.fallState==='sweep')return out('Sweep — '+dodge+' to move behind the blade');if(['stagger','recover'].includes(e.fallState))return out('Blade recovering — attack now',true);}
+ if(e.frostOfficer){const threats=(G.enemies||[]).filter(q=>q.frostOfficer&&live(q)&&['wind','strike'].includes(q.offState));const t=threats.find(q=>q.offState==='strike')||threats[0];if(t)return out(t.frostOfficer==='shield'?'Shield wave — '+jump+' to jump':t.frostOfficer==='spear'?'Spear rush — sidestep the lane':'Ice marks — move out of the circles');return out('Officers regrouping — flank the shield',true);}
+ if(e.furnaceColossus){if(e.fcExposed>0)return out('Cooled armor — attack the joints',true);if(['wind','strike'].includes(e.fcState))return out(e.fcKind==='sweep'?'Wide sweep — '+dodge+' behind the Colossus':e.fcKind==='vents'?'Vents erupting — leave the marked circles':'Ground slam — leave the marked circle');return out('Reach a cooling valve while it recovers');}
+ if(e.marbleGuardian){if(e.mcExposed>0)return out('Armor seal broken — attack now',true);if(['wind','strike'].includes(e.mcState))return out(e.mcKind==='hammer'?'Heavy strike — stand behind a screen facing the boss':e.mcKind==='sweep'?'Low sweep — '+jump+' to jump':'Falling stone — leave the marked circle');return out('Turn a screen toward the boss');}
+ if(e.hydraChain){const h=G.hydraArena;if(!h||h.freed)return null;if(h.state==='recover')return out('Head resting — strike the pale joint',true);return out(h.kind==='blast'?'Water blast — get behind a stone block':h.kind==='sweep'?'Neck sweep — climb onto the high ledges':'Bite — leave the marked circle');}
+ if(e.finalKing){if(!['fight1','fight2'].includes(e.akStage))return null;if(e.akState==='adds')return out('Royal guards — defeat them to reach the King');if(e.akState==='recover')return out('The King is recovering — attack now',true);return out(e.akKind==='line'?'Royal beam — put a pillar between you and the King':e.akKind==='wave'?'Ground wave — '+jump+' to jump':e.akKind==='burst'?'Void burst — leave the marked circle':'Blade sweep — '+dodge+' behind the King');}
+ return null;
+}
+
+root.BFBossTactics={rule,damage,cue};if(typeof module!=='undefined')module.exports=root.BFBossTactics;
 })(typeof window!=='undefined'?window:globalThis);

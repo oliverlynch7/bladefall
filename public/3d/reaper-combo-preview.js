@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {createClassDisplay} from './hero3d.js?v=2332c';
+import {createClassDisplay} from './hero3d.js?v=2342';
 import {applyReaperPose,restoreReaperPose} from './reaper-combo3d.js?v=2332c';
 import {syncCombatArt} from './combat-art-three.js?v=2330f';
 const $=id=>document.getElementById(id),api=window.BFReaperCombo,canvas=$('view'),renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.outputColorSpace=T.SRGBColorSpace;

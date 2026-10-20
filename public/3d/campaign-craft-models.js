@@ -58,7 +58,7 @@ function construct(name,theme,o){
   }
   for(let j=0;j<layers;j++)for(let i=0;i<n;i++){const a=j*n+i,bb=j*n+(i+1)%n,c=a+n,d=bb+n;indices.push(a,c,bb,bb,c,d);}
   vertices.push(0,H*iceHeight,0);const cap=vertices.length/3-1;for(let i=0;i<n;i++)indices.push(cap,layers*n+(i+1)%n,layers*n+i);
-  let g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();const skin=put(g,name==='ice'?'#8bbacb':'stone',0,0,0,0,0,0,name==='ice'?'ice':'stone'),colors=skin.attributes.color,positions=skin.attributes.position;
+  let g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(vertices,3));g.setIndex(indices);g.computeVertexNormals();const skin=put(g,name==='ice'?'#8bbacb':o.grass?'#749a50':'stone',0,0,0,0,0,0,name==='ice'?'ice':o.grass?'body':'stone'),colors=skin.attributes.color,positions=skin.attributes.position;
   // Color the actual strata, rather than pushing unrelated rings through the rock.
   for(let i=0;i<positions.count;i+=3){const y=(positions.getY(i)+positions.getY(i+1)+positions.getY(i+2))/3,band=Math.min(layers-1,Math.floor(y/(H*iceHeight)*layers)),shade=[.9,1.02,.95,1.05,.91,1][band%6];for(let v=0;v<3;v++)colors.setXYZ(i+v,colors.getX(i+v)*shade,colors.getY(i+v)*shade,colors.getZ(i+v)*shade);}
   if(name==='ice'&&!o.fullHeight)for(let i=0;i<6;i++){const a=i*2.4,r=W*(.06+.065*(i%3)),h=H*(i===0?.68:.35+.045*(i%4)),g=new T.ConeGeometry(W*.11,h,5);put(g,i%2?'#bfe9ed':'#87bdce',Math.cos(a)*r,H*.32+h*.5,Math.sin(a)*D*.23,0,.4*i,.05*(i-2),'ice');}
@@ -135,6 +135,15 @@ function construct(name,theme,o){
   const base=o.openAwning?H*.7:0,rise=H-base,ridge=H;for(const z of [-D*.4,D*.4]){if(o.openAwning){if(!o.existingPosts)for(const side of [-1,1])cyl(side*W*.46,base/2,z,5,base,'wood');}else cyl(0,H/2,z,3,H,'wood');rod([-W/2,base,z],[0,H,z],2,'light');rod([W/2,base,z],[0,H,z],2,'light');}
   for(const side of [-1,1]){const g=new T.PlaneGeometry(Math.hypot(W/2,rise),D,3,4);g.rotateX(-Math.PI/2);g.rotateZ(-side*Math.atan2(rise,W/2));put(g,'cloth',side*W/4,base+rise/2,0,0,0,0,'cloth');}
   for(const z of [-D/2,D/2]){rod([-W*.57,0,z],[0,ridge,z],1.5,'light');rod([W*.57,0,z],[0,ridge,z],1.5,'light');}box(0,2,0,W*.7,3,D*.85,'dark');
+ }else if(name==='farm-stair'){
+  // One material-merged staircase. True treads, diagonal stringers and grounded trestles.
+  const n=Math.max(2,Math.min(32,Math.round(o.steps||14))),run=D/n,rise=H/n;
+  for(let i=1;i<=n;i++){const z=i*run,y=i*rise;box(0,y-6,z,W,12,run+2,'wood');box(0,y-1,z+run*.43,W+5,4,6,'light');
+   for(const x of [-W*.38,W*.38]){ball(x,y+1,z,1.5,'metal',1,.4,1);if(i===1||i===n||i%4===0){box(x,y/2-10,z,9,y+20,9,'dark');box(x,3,z,18,6,18,'stone');}}
+  }
+  for(const side of [-1,1]){rod([side*W*.36,-12,0],[side*W*.36,H-12,D],6,'wood');
+   for(const i of [1,Math.round(n/2),n]){const z=i*run,y=i*rise;box(side*(W/2+2),y+28,z,6,56,6,'wood');}
+   rod([side*(W/2+2),rise+53,run],[side*(W/2+2),H+53,D],2.2,'light');}
  }else if(name==='barricade'){
   for(let i=-2;i<=2;i++){cyl(i*W/5,H*.42,0,5,H*.85,'wood',7,0,.12*(i%2));put(new T.ConeGeometry(5,H*.18,6),'light',i*W/5,H*.94,0);}
   for(const y of [H*.28,H*.65])box(0,y,3,W,7,7,'wood');for(const x of [-W*.36,W*.36])rod([x,H*.65,0],[x,0,D*.5],4,'wood');
@@ -263,7 +272,7 @@ function construct(name,theme,o){
  }else throw new Error('Unknown campaign craft model: '+name);
  return b.finish();
 }
-export const CRAFT_MODEL_NAMES=['cliff','shelf','bank','rock','ice','wall','arch','cave-mouth','gatehouse','buttress','roof','cottage','window','door','bridge','rope-bridge','stone-bridge','scaffold','perch','landing','wagon','prison-cart','tent','barricade','rack','supplies','barrel','lantern','sconce','brazier','bench','workbench','laboratory','bookshelf','folding-shelf','cell-front','portcullis','waterwheel','winch','pulley','valve','pressure','counterweight','crane','pipe','bellows','furnace','press','wreck','ballista','bollard','fountain','mirror','receiver','balustrade','throne','root','trunk','foliage'];
+export const CRAFT_MODEL_NAMES=['cliff','shelf','bank','rock','ice','wall','arch','cave-mouth','gatehouse','buttress','roof','cottage','window','door','bridge','rope-bridge','stone-bridge','scaffold','perch','landing','wagon','prison-cart','tent','farm-stair','barricade','rack','supplies','barrel','lantern','sconce','brazier','bench','workbench','laboratory','bookshelf','folding-shelf','cell-front','portcullis','waterwheel','winch','pulley','valve','pressure','counterweight','crane','pipe','bellows','furnace','press','wreck','ballista','bollard','fountain','mirror','receiver','balustrade','throne','root','trunk','foliage'];
 export function craftModel(name,theme='briar',options={}){const key=name+'|'+theme+'|'+JSON.stringify(options);if(!cache.has(key))cache.set(key,construct(name,theme,options));return cache.get(key);}
 export function createCraftModel(name,theme='briar',options={}){const group=new T.Group();group.name='Craft '+name;for(const rec of craftModel(name,theme,options)){const mesh=new T.Mesh(rec.geo,rec.material);mesh.castShadow=true;mesh.receiveShadow=true;group.add(mesh);}group.userData.craft={name,theme,options};return group;}
 export function craftCacheStats(){let triangles=0;for(const list of cache.values())for(const r of list)triangles+=r.tri;return {models:cache.size,triangles,materials:matCache.size};}

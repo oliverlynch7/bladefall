@@ -17,12 +17,12 @@ OUT.mkdir(parents=True, exist_ok=True)
 # Main routes are names exported by the actual builders. Stops are real object/NPC IDs.
 # The notes explain the spatial job of each branch, not just its story name.
 PLANS = [
-dict(title='Briar Town · Homefields',module='index.html',main=['lane0To1','lane1To2','lane2To4','lane4To8','lane8To10','lane10To12'],
+dict(title='Briar Town · Homefields',module='index.html',main=['villageMill','lane4To8','millSouth','lane8To10','lane10To12'],
  idea='A village and its working farmland, divided by one real millrace. Home, treatment, mill and escape gate form the northward journey.',
  steps=[('thomas','Start at home','Thomas establishes the danger close to familiar houses.'),('mara','Help the neighbors','Find roots in the garden and dressings through the store’s open front doorway; return to the treatment station.'),('briar.water','Hold the sluice closed','Move the grain crate along the clear working lane west of the mill.'),('briar.mill.plate','Hold the plate down','Body weight stops the feed temporarily; crate weight keeps it closed.'),('briar.jam','Free the wheel','Reach the jam beside the stopped machinery.'),('briar.bridge','Restore the crossing','Cross only after the bridge has moved.'),('briar.depart','Leave through the wagon gate','Clear the bridge guards, then enter the woods.')],
  branches=[('home.farm.supplies','West farm loop','Recover supplies along the farm valley; the lane returns toward the mill.'),('home.grain.hopper','Granary loft','Shallow timber treads reach the loft. The nearby west watchpost uses two separate20-tread stone flights (7 rise /28 run), east approach and south return; no overlapping stair blocks.'),('home.orchard.wheel','Orchard lookout','Two shallow timber stair flights reach the picking deck. The working walkway leads to a lookout coin coffer; a separate stair returns to ground.'),('home.bell.alarm','Watchtower','Use the elevated warning post; keep it visually distinct from the mill.')],
  protect='Keep the millrace open. Broad soil may catch ordinary falls, but must not replace the working bridge. The western ford remains a separate route.',
- review='Briar journey pass implemented: joined earth trails and destination boards, a physical crate/plate west of the mill, and a lowering crossing on the main trail at x=180. Normal movement checks cover Thomas to the wagon gate plus the granary and orchard climbs. Large farm loops remain. Human pacing feedback remains outstanding.'),
+ review='Homefields district rebuild2342: authored village-to-mill field lane; supply/workshop/orchard and granary/watchtower loops; enclosed planted boundaries; west tower-return stair and varied picking-deck jumps. See briar-district-plan.json for builder-owned route and boundary coordinates. Existing journey pass: joined earth trails and destination boards, a physical crate/plate west of the mill, and a lowering crossing on the main trail at x=180. Normal movement checks cover Thomas to the wagon gate plus the granary and orchard climbs. Large farm loops remain. Human pacing feedback remains outstanding.'),
 dict(title='Briar Town · Black Woods',module='index.html',main=['campTrail'],
  idea='Clearings around an occupied camp and a signal tower. The ground approach and a genuine canopy crossing meet at the same objective.',
  steps=[('lewis','Read the situation','Lewis stands at the forest entrance, before the route divides.'),('woods.signal.crank','Stop the signal','Fight through the camp to the ground crank, or use the canopy cable instead.'),('exit','Reach the shelter','Both approaches rejoin the northern trail.')],
@@ -147,6 +147,13 @@ def briar_paths(row):
         result['granaryStairs']=[[960,345-i*20,i*5] for i in range(21)]
         result['watchEastStairs']=[[100-i*28,-1060,i*7] for i in range(21)]
         result['watchSouthStairs']=[[-800,-1290-i*28,140-i*7] for i in range(21)]
+    if row['area']==0:
+        plan=json.loads((OUT/'briar-district-plan.json').read_text(encoding='utf-8'))
+        result={k:v for k,v in result.items() if k not in names}
+        result.update({r['id']:[p+[0] for p in r['points']] for r in plan['roads']})
+        result['bellRidgeUp']=[[2350,-1000-i*50,i*12] for i in range(15)]
+        result['bellRidgeReturn']=[[2080-i*28,-1810,168-i*7] for i in range(25)]
+        result['pickingDecks']=[[p['x'],p['z'],p['y']] for p in plan['jumps']]
     return result
 
 def canyon_paths():

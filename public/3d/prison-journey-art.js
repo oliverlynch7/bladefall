@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {craftBuilder,createCraftModel} from './campaign-craft-models.js?v=2187a';
+import {craftBuilder,createCraftModel} from './campaign-craft-models.js?v=2342';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
 import {createChestActor,animateChest} from './chest-art.js?v=2184';
 

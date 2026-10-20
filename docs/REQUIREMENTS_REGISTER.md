@@ -2753,3 +2753,9 @@ Fresh-session performance, progression, combat readability and transitions autho
 Continuation confirmed: USER_SOURCE_2026-10-20_UNINTERRUPTED_RUN.md explicitly requests completing the natural route now. Controlled fight fixtures do not satisfy this acceptance check.
 
 U-FIRST-HOUR-20261020 continuation completed: v2.341.0 actual clean fresh Warrior/tutorial/lore/hub/Homefields/Black Woods/Brute/handlers/victory/hub/reload verified through native inputs. Scoped repairs and remaining performance/co-op/human-discovery limits: docs/art-validation/continuous-journey-20261020/README.md. No save/reward/combat/voice/layout changes.
+
+
+## U-BRIAR-DISTRICT-20261020
+Approved: substantial Homefields spatial rebuild with connected optional loops and purposeful combat; retain large landscape and good assets, protect working mill and current quests/recordings. Source requirements/USER_SOURCE_2026-10-20_BRIAR_DISTRICT.md. Acceptance: before/after geometry, native movement and adverse turns, reward/gate/save/co-op scope checks. Implementation pending verification.
+
+U-BRIAR-DISTRICT-20261020 implementation: Homefields district built and technically verified in v2.342.213 staged route/quest observations plus native stair/camera samples, old-save fixture and13 suites. Human pacing/discovery review remains; Black Woods and other campaign layouts are not claimed rebuilt. See art-validation/briar-district-20261020/README.md.

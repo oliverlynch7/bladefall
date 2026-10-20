@@ -1,5 +1,5 @@
 import {updateLocalLights} from './scene-lights.js?v=2239';
-import {makeHubMirror} from './hub-mirror3d.js?v=2308';
+import {makeHubMirror} from './hub-mirror3d.js?v=2342';
 import {buildHubUpgrades} from './hub-upgrades.js?v=2121';
 /* The Waystation: original, instanced Blender scenery. The layout is owned by
    rebuildWaystationSanctum; service callbacks and portal unlocks stay in the game. */

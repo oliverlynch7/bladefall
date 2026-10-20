@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {craftBuilder,createCraftModel} from './campaign-craft-models.js?v=2187a';
+import {craftBuilder,createCraftModel} from './campaign-craft-models.js?v=2342';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
 
 // Ground trails describe actual walking lanes. No route mesh supplies collision.

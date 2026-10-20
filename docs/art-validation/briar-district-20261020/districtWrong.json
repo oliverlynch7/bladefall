@@ -1,0 +1,67 @@
+{
+  "staged": true,
+  "checks": [
+    {
+      "name": "West homes",
+      "blocked": true,
+      "damage": 0,
+      "target": [
+        -1800,
+        300
+      ],
+      "at": [
+        -899,
+        0,
+        300
+      ],
+      "frames": 157,
+      "ok": false
+    },
+    {
+      "name": "East fields",
+      "blocked": true,
+      "damage": 0,
+      "target": [
+        2200,
+        -20
+      ],
+      "at": [
+        1659,
+        0,
+        -20
+      ],
+      "frames": 126,
+      "ok": false
+    },
+    {
+      "name": "South commons",
+      "blocked": true,
+      "damage": 0,
+      "target": [
+        0,
+        1200
+      ],
+      "at": [
+        0,
+        0,
+        1032
+      ],
+      "frames": 151,
+      "ok": false
+    },
+    {
+      "name": "Return to main lane",
+      "target": [
+        280,
+        -830
+      ],
+      "at": [
+        291.5,
+        0,
+        -834.7
+      ],
+      "frames": 65,
+      "ok": true
+    }
+  ]
+}

@@ -1,7 +1,7 @@
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2342';
 import {trackCampaignOccluder,updateCampaignOccluders,updateCampaignSun} from './campaign-scene.js?v=2182f';
 import * as T from './three.module.js';
-import {craftModel} from './campaign-craft-models.js?v=2187a';
+import {craftModel} from './campaign-craft-models.js?v=2342';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 import {campaignMaterial,beveledBoxGeometry} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';

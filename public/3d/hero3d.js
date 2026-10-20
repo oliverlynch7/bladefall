@@ -1,7 +1,7 @@
 import {applyWeaponAction,restoreWeaponAction} from './weapon-actions3d.js?v=2333d';
 import {applyReaperPose,restoreReaperPose} from './reaper-combo3d.js?v=2332c';
 import {applySkillPose,restoreSkillPose} from './skill-motion3d.js?v=2328';
-import {syncInspectionMirror} from './hub-mirror3d.js?v=2308';
+import {syncInspectionMirror} from './hub-mirror3d.js?v=2342';
 const inspectionBackdrop=new THREE.Color(0x0e0d12);
 import {syncArenaArt} from './arena-art.js?v=2274';
 import {warmSceneGeometry} from './render-warmup3d.js?v=2234b';
@@ -45,7 +45,7 @@ import * as THREE from './three.module.js';
 import { syncCombatArt } from './combat-art-three.js?v=2330f';
 import * as SkeletonUtils from './jsm/utils/SkeletonUtils.js';
 import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-import { WORLD3D, syncWorld } from './world3d.js?v=2339';
+import { WORLD3D, syncWorld } from './world3d.js?v=2342';
 import { MOB3D, syncMobs, mobDrawn } from './mob3d.js?v=2339';
 import { PROP3D, syncProps } from './prop3d.js?v=2184';
 

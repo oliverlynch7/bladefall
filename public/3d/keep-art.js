@@ -1,8 +1,8 @@
 import {updateLocalLights} from './scene-lights.js?v=2239';
-import {buildKeepJourneyArt} from './keep-journey-art.js?v=2236';
-import {buildPrisonJourneyArt} from './prison-journey-art.js?v=2196';
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
-import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
+import {buildKeepJourneyArt} from './keep-journey-art.js?v=2342';
+import {buildPrisonJourneyArt} from './prison-journey-art.js?v=2342';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2342';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2342';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Ruined Keep: authored fortress scenery fitted to the existing game geometry. */

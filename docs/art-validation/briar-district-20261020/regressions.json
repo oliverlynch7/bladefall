@@ -1,0 +1,67 @@
+[
+  {
+    "suite": "test-briar-district.cjs",
+    "pass": true,
+    "output": "{\"checks\":2943,\"addedColliders\":79,\"addedModels\":157,\"retainedChests\":5,\"retainedEnemies\":28,\"pass\":true}\n"
+  },
+  {
+    "suite": "test-briar-journey.cjs",
+    "pass": true,
+    "output": "Briar mill: pressure/release, real obstacle blocking, owner arbitration, reset, disconnect/jump, weight completion, stale snapshot, delayed bridge collision, legacy states and lane bounds passed.\nMill sketch appears as a related clue only after discovery.\nSuperseded mill notices clear; discovered clues and permanent journal entries remain.\nMill fallback follows the active renderer, including a mid-level graphics switch.\n"
+  },
+  {
+    "suite": "test-briar-combat.cjs",
+    "pass": true,
+    "output": "75 Briar role, LOS, warning, cover, pressure, pursuit, interruption, reward, finite placement, boss edge and recovery checks passed.\nBrute phase 2/3 ground-wave variation and first-phase charge preserved.\n"
+  },
+  {
+    "suite": "test-briar-refinement.cjs",
+    "pass": true,
+    "output": "Briar: specific hunt, one-time reward, three-slot cap, respawn identity, discovered-only related clues pass.\n"
+  },
+  {
+    "suite": "test-briar-performance.cjs",
+    "pass": true,
+    "output": "Collision behavior and bounded navigation pass; far-walkway reads 62500 -> 0. Auto pixel budget/native override/GPU-query cache pass.\nLamp proximity changes intensity, never shader light count.\n"
+  },
+  {
+    "suite": "test-campaign-placement.cjs",
+    "pass": true,
+    "output": "Campaign footing: supported feet, nearby clearance, stacked floors, unresolved preservation, exemptions and stable patrol slots passed.\n"
+  },
+  {
+    "suite": "test-campaign-hunts.cjs",
+    "pass": true,
+    "output": "2567 repeatable hunt source,3-round lifecycle,group kill,save,reward and shared authority checks passed.\n"
+  },
+  {
+    "suite": "test-coop-chests.cjs",
+    "pass": true,
+    "output": "{\"checks\":44,\"passed\":true,\"scope\":\"Actual isolated chest functions and save records; browser rendering and Internet transport not covered by this suite.\"}\nMimic personal co-op reward identity, guest persistence and one-time collection pass.\n"
+  },
+  {
+    "suite": "test-save-safety.cjs",
+    "pass": true,
+    "output": "24 save normalization and isolated recovery checks passed.\n"
+  },
+  {
+    "suite": "test-journey-followthrough.cjs",
+    "pass": true,
+    "output": "564 journey camera, ceiling/floor, tutorial handoff and HP-display checks passed.\n"
+  },
+  {
+    "suite": "test-campaign-journey.cjs",
+    "pass": true,
+    "output": "Campaign journey: 48 coverage, collision and floor-aware guidance checks passed.\nIce crossing gives its concrete outcome.\nRendering modules share their asset and scene instances.\nCornice guidance selects a reachable ledge without overriding unrelated tasks.\nCampaign dressing stays out of voyages, challenges and beta maps.\nIn-world signage policy and removal contracts passed.\n"
+  },
+  {
+    "suite": "test-briar-reward-introduction.mjs",
+    "pass": true,
+    "output": "Coin coffer: 4056 finite vertices, 6 meshes, independent hinge/coins. Local spirit, stale-world safety and optional weapon-aware charge lessons pass.\n"
+  },
+  {
+    "suite": "test-npc-recordings.cjs",
+    "pass": true,
+    "output": "{\"casting\":50,\"recorded\":371,\"total\":371,\"complete\":50,\"sourceAndAudioHashes\":\"pass\"}\n"
+  }
+]

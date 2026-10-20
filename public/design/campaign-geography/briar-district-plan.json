@@ -1,0 +1,487 @@
+{
+  "revision": 2342,
+  "roads": [
+    {
+      "id": "villageMill",
+      "main": true,
+      "width": 140,
+      "points": [
+        [
+          0,
+          470
+        ],
+        [
+          0,
+          120
+        ],
+        [
+          120,
+          -420
+        ],
+        [
+          120,
+          -650
+        ],
+        [
+          280,
+          -830
+        ],
+        [
+          280,
+          -1090
+        ],
+        [
+          120,
+          -1280
+        ],
+        [
+          120,
+          -1450
+        ],
+        [
+          200,
+          -1560
+        ],
+        [
+          200,
+          -1900
+        ],
+        [
+          80,
+          -2030
+        ]
+      ]
+    },
+    {
+      "id": "westSupply",
+      "width": 125,
+      "points": [
+        [
+          -180,
+          -400
+        ],
+        [
+          -900,
+          -520
+        ],
+        [
+          -1450,
+          -640
+        ],
+        [
+          -1730,
+          -490
+        ],
+        [
+          -2200,
+          -490
+        ],
+        [
+          -2510,
+          -550
+        ]
+      ]
+    },
+    {
+      "id": "supplyWorkshop",
+      "width": 125,
+      "points": [
+        [
+          -2510,
+          -550
+        ],
+        [
+          -2380,
+          -520
+        ],
+        [
+          -2250,
+          -700
+        ],
+        [
+          -2160,
+          -880
+        ],
+        [
+          -1860,
+          -780
+        ],
+        [
+          -1460,
+          -790
+        ]
+      ]
+    },
+    {
+      "id": "workshopOrchard",
+      "width": 120,
+      "points": [
+        [
+          -1460,
+          -790
+        ],
+        [
+          -1170,
+          -850
+        ],
+        [
+          -1170,
+          -1440
+        ],
+        [
+          -1670,
+          -1440
+        ],
+        [
+          -2210,
+          -1340
+        ],
+        [
+          -2700,
+          -1380
+        ],
+        [
+          -2700,
+          -1450
+        ]
+      ]
+    },
+    {
+      "id": "orchardMill",
+      "width": 125,
+      "points": [
+        [
+          -2300,
+          -1340
+        ],
+        [
+          -2100,
+          -1510
+        ],
+        [
+          -1600,
+          -1600
+        ],
+        [
+          -900,
+          -1710
+        ],
+        [
+          -460,
+          -1520
+        ],
+        [
+          120,
+          -1450
+        ]
+      ]
+    },
+    {
+      "id": "granaryFront",
+      "width": 120,
+      "points": [
+        [
+          440,
+          350
+        ],
+        [
+          760,
+          360
+        ],
+        [
+          1150,
+          360
+        ],
+        [
+          1150,
+          230
+        ]
+      ]
+    },
+    {
+      "id": "pastureTower",
+      "width": 125,
+      "points": [
+        [
+          1150,
+          360
+        ],
+        [
+          1500,
+          360
+        ],
+        [
+          1550,
+          -300
+        ],
+        [
+          1800,
+          -530
+        ],
+        [
+          2030,
+          -760
+        ],
+        [
+          2350,
+          -960
+        ]
+      ]
+    },
+    {
+      "id": "towerMill",
+      "width": 125,
+      "points": [
+        [
+          1408,
+          -1810
+        ],
+        [
+          1000,
+          -1600
+        ],
+        [
+          500,
+          -1420
+        ],
+        [
+          120,
+          -1450
+        ]
+      ]
+    },
+    {
+      "id": "millSouth",
+      "width": 140,
+      "points": [
+        [
+          180,
+          -2310
+        ],
+        [
+          80,
+          -2450
+        ],
+        [
+          20,
+          -2570
+        ],
+        [
+          50,
+          -2700
+        ]
+      ]
+    }
+  ],
+  "banks": [
+    {
+      "id": "southwest",
+      "x": -1990,
+      "z": 560,
+      "w": 1980,
+      "d": 960,
+      "h": 260
+    },
+    {
+      "id": "southeast",
+      "x": 2250,
+      "z": 690,
+      "w": 1170,
+      "d": 700,
+      "h": 250
+    },
+    {
+      "id": "westHomeFields",
+      "x": -1950,
+      "z": -180,
+      "w": 1440,
+      "d": 300,
+      "h": 185
+    },
+    {
+      "id": "eastHomeFields",
+      "x": 2190,
+      "z": -20,
+      "w": 1020,
+      "d": 500,
+      "h": 205
+    },
+    {
+      "id": "westernWood",
+      "x": -2510,
+      "z": -3370,
+      "w": 760,
+      "d": 1020,
+      "h": 310
+    },
+    {
+      "id": "easternWood",
+      "x": 2090,
+      "z": -3450,
+      "w": 690,
+      "d": 890,
+      "h": 300
+    }
+  ],
+  "fences": [
+    {
+      "id": "westFieldNorth",
+      "a": [
+        -80,
+        -720
+      ],
+      "b": [
+        -80,
+        -965
+      ],
+      "height": 92
+    },
+    {
+      "id": "westFieldSouth",
+      "a": [
+        -80,
+        -1155
+      ],
+      "b": [
+        -80,
+        -1190
+      ],
+      "height": 92
+    },
+    {
+      "id": "eastField",
+      "a": [
+        490,
+        -700
+      ],
+      "b": [
+        490,
+        -1190
+      ],
+      "height": 92
+    },
+    {
+      "id": "westCommons",
+      "a": [
+        -920,
+        870
+      ],
+      "b": [
+        -920,
+        60
+      ],
+      "height": 94
+    },
+    {
+      "id": "eastCommons",
+      "a": [
+        840,
+        840
+      ],
+      "b": [
+        840,
+        440
+      ],
+      "height": 94
+    },
+    {
+      "id": "orchardEdge",
+      "a": [
+        -2860,
+        -1250
+      ],
+      "b": [
+        -2860,
+        -2570
+      ],
+      "height": 110
+    },
+    {
+      "id": "towerEdge",
+      "a": [
+        2710,
+        -1000
+      ],
+      "b": [
+        2710,
+        -2070
+      ],
+      "height": 110
+    }
+  ],
+  "jumps": [
+    {
+      "x": -2210,
+      "z": -1840,
+      "y": 164,
+      "w": 230,
+      "d": 240,
+      "start": true
+    },
+    {
+      "x": -1990,
+      "z": -1840,
+      "y": 192,
+      "w": 120,
+      "d": 110
+    },
+    {
+      "x": -1810,
+      "z": -1950,
+      "y": 224,
+      "w": 150,
+      "d": 120
+    },
+    {
+      "x": -1630,
+      "z": -1840,
+      "y": 252,
+      "w": 170,
+      "d": 170,
+      "reward": true
+    }
+  ],
+  "encounters": [
+    {
+      "id": "field-lane",
+      "purpose": "A lone raider at the fork, then a guard beside wagon cover.",
+      "at": [
+        120,
+        -550
+      ]
+    },
+    {
+      "id": "supply-raid",
+      "purpose": "Raiders occupy the stolen wagon; the caster stays behind the melee pair.",
+      "at": [
+        -2380,
+        -820
+      ]
+    },
+    {
+      "id": "pasture-watch",
+      "purpose": "A visible road guard and an airborne flank before the tower ascent.",
+      "at": [
+        2100,
+        -820
+      ]
+    },
+    {
+      "id": "orchard-ground",
+      "purpose": "Wildlife below the picking decks; the elevated reward is a traversal challenge.",
+      "at": [
+        -2480,
+        -2130
+      ]
+    }
+  ],
+  "districts": [
+    "Village commons",
+    "Raided field lane",
+    "Workshop and supply loop",
+    "Orchard picking decks",
+    "Granary and bell ridge",
+    "Mill working yard"
+  ],
+  "intent": "Keep the large landscape; replace empty invitations with visible planted boundaries, two purposeful loops, a quiet working mill and an optional varied roof/deck crossing. Existing quests and recorded dialogue remain."
+}

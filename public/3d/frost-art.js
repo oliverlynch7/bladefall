@@ -1,6 +1,6 @@
 import {updateLocalLights} from './scene-lights.js?v=2239';
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
-import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2342';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2342';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Frostfell: faceted opaque ice keeps the cave maze affordable in a browser. */

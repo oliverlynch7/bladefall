@@ -1,28 +1,28 @@
 import {buildTrialArt} from './trial-art3d.js?v=2315';
 import {attachGeographyArt,updateGeographyArt} from './campaign-geography-art.js?v=2187a';
-import {attachCampaignCraft,updateCampaignCraft} from './campaign-craft-scene.js?v=2197';
+import {attachCampaignCraft,updateCampaignCraft} from './campaign-craft-scene.js?v=2342';
 import {loadBriarTrees,briarTreesReady} from './briar-trees.js?v=2182f';
 import {buildBriarBetaArt} from './briar-beta-art.js?v=2236';
 window.__briarAssetsPreload=loadBriarTrees;
-import {buildPrisonArt} from './prison-art3d.js?v=2306';
+import {buildPrisonArt} from './prison-art3d.js?v=2342';
 import {claimSurface} from './surface-regions.js?v=1972';
-import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2239';
-import {buildLongAscent} from './long-ascent-art.js?v=2239';
-import {buildCastleGates} from './castle-gates-art.js?v=2239';
-import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2239';
-import {buildSkyLibrary} from './sky-library-art.js?v=2239';
-import {buildPalaceCourt} from './palace-courtyard-art.js?v=2239';
-import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2339';
-import {buildStorm,updateStorm} from './storm-art.js?v=2197';
-import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2255';
-import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2234b';
+import {buildFinalKing,updateFinalKing} from './final-king-art.js?v=2342';
+import {buildLongAscent} from './long-ascent-art.js?v=2342';
+import {buildCastleGates} from './castle-gates-art.js?v=2342';
+import {buildMarbleGuardian,updateMarbleOrb} from './marble-guardian-art.js?v=2342';
+import {buildSkyLibrary} from './sky-library-art.js?v=2342';
+import {buildPalaceCourt} from './palace-courtyard-art.js?v=2342';
+import {buildCoastHigh,updateCoastHigh} from './thunder-art.js?v=2342';
+import {buildStorm,updateStorm} from './storm-art.js?v=2342';
+import {wantsPortal,portalReady,loadPortal,buildPortal,portalMode} from './portal-art.js?v=2342';
+import {wantsOutskirts,outskirtsReady,loadOutskirts,buildOutskirts,updateOutskirts} from './outskirts-art.js?v=2342';
 import {buildWoodsRootArt} from './woods-root-art.js?v=2154';
 import {buildWoodsSignalArt} from './woods-signal-art.js?v=2181b';
-import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2308';
-import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2239';
-import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2239';
-import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2239';
-import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2197';
+import {wantsHubArt,hubArtReady,loadHubArt,buildHubArt,updateHubArt} from './hub-art.js?v=2342';
+import {wantsDeep,deepReady,loadDeep,buildDeep,updateDeep} from './deep-art.js?v=2342';
+import {wantsFrost,frostReady,loadFrost,buildFrost,updateFrost} from './frost-art.js?v=2342';
+import {wantsKeep,keepReady,loadKeep,buildKeep,updateKeep} from './keep-art.js?v=2342';
+import {wantsHollow,hollowReady,loadHollow,buildHollow,updateHollow} from './hollow-art.js?v=2342';
 /* ─────────────────────────────────────────────────────────────────────────────
    WORLD3D — draws the game's REAL levels with 3D art.
 

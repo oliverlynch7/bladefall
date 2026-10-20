@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {craftBuilder} from './campaign-craft-models.js?v=2187a';
+import {craftBuilder} from './campaign-craft-models.js?v=2342';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
 
 // Fitted mechanisms and route paving. This module never creates walkable ground.

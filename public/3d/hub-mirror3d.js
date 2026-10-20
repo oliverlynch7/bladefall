@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {craftModel} from './campaign-craft-models.js?v=2187a';
+import {craftModel} from './campaign-craft-models.js?v=2342';
 import {Reflector} from './jsm/objects/Reflector.js';
 export function makeHubMirror(width,height,options={}){
  const inspection=!!options.inspection,aspect=Math.max(.6,Math.min(2,window.innerWidth/Math.max(1,window.innerHeight))),size=inspection?1536:768;

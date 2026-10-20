@@ -1,4 +1,4 @@
-import './progression-model-preview.js?v=2278';
+import './progression-model-preview.js?v=2342';
 const $=id=>document.getElementById(id),ui=window.BFProgressCelebration,data=await fetch('./progression-preview-data.json?v=2278').then(r=>r.json()),classes=data.classes;
 let world={p:{hp:100,x:0,y:0,z:0}},mode='play',sequence=0,sound=null,ctx=null,voices=new Set();const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 for(const [id,c]of Object.entries(classes)){const o=document.createElement('option');o.value=id;o.textContent=c.disp;$('classSelect').append(o);}$('classSelect').value='mage';

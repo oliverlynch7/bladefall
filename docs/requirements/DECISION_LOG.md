@@ -2563,3 +2563,11 @@ Continuous-route repair plan: actual ordinary-input Homefields/Black Woods/Brute
 Clean final route completed on a second newly created Warrior with all lessons, nine actual tutorial kills, five story slides, eighteen hub stops, Homefields/Black Woods/four Brute stone counters/handlers/victory/hub and actual title reload. Level3/rank3/1016gold/BR-01 survived. No death, page restart, state grant or direct damage in this final route. Correction: stale sporeback advice observed in DOM was faded visually (opacity-based card) but left in accessibility content after cancellation; clear the text together with its timer/class at lifecycle transitions. Do not report it as proven persistent visible text.
 
 Final fight UI wording: an actual stone counter was mislabeled Cart impact. Use Charge stopped in the unvoiced boss status, covering both carts and stones; preserve the opening key, timing and damage budget.
+
+
+## U-BRIAR-DISTRICT-20261020 — approved spatial rebuild
+Rebuild Homefields village/farm/mill district and optional loops in the current campaign. Preserve overall bounds, story/quest IDs, existing recordings, millrace barrier, chest identities, starter trials and co-op ownership. Replace misleading empty invitations with visible natural/planted boundaries; author return routes, stairs, optional varied parkour and troop roles. Update visual blueprint and builder intent before integration. Validate physical routes including wrong turns, quest gates, old saves, scene isolation, camera, host/guest geometry and bounded rendering. Source USER_SOURCE_2026-10-20_BRIAR_DISTRICT.md. Status: implementing.
+
+
+## [2026-10-20] U-BRIAR-DISTRICT-20261020 implemented — v2.342
+Homefields route/boundary/optional-loop rebuild implemented; six planted enclosures, field-lane cover/roles, shallow bell stairs and west return, varied picking decks and preserved chest receipt.79 merged extra colliders, no extra trees/initial enemies/authored gear chests/overlapping ground. Existing mill/story/voice/save/trial/Black Woods/boss behavior retained.213 staged movement/interaction observations and native camera/stair samples;13 focused suites and371 voice hashes pass. Legacy100/1145 loads. Does not establish human discovery/fun, resolve the prior Orchard FPS complaint, or certify Internet co-op. Evidence docs/art-validation/briar-district-20261020/README.md.

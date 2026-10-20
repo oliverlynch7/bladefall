@@ -1160,11 +1160,12 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./campaign-patrols.js?v=2325"></script>
 <script src="./campaign-hunts.js?v=2325"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
-<script src="./briar-combat.js?v=2289"></script>
+<script src="./briar-combat.js?v=2342"></script>
 <script src="./campaign-elites.js?v=2337"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2319"></script>
 <script src="./briar-journey.js?v=2302"></script>
+<script src="./briar-district.js?v=2342"></script>
 <script src="./campaign-interaction.js?v=2185"></script>
 <script src="./hollow-cliffs.js?v=2318"></script>
 <script src="./lost-canyon.js?v=2319"></script>
@@ -1234,7 +1235,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.341.0-journey-followthrough';
+const VERSION3D='2.342.0-briar-district';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -4179,6 +4180,7 @@ function drawBriarStory(t){
  }
  BFHomeBellDefense.draw({G,state:s,bx},t);
  BFBriarJourney.fallback(G,bx);
+ BFBriarDistrict.fallback(G,bx);
  if(f['briar.depart']){const goal=G.portalPos;for(let j=0;j<3;j++){const x=goal.x-65+j*65,z=goal.z+110;bx(x,goal.y+21,z,16,30,12,j===1?'#a59b73':'#8b775c');bx(x,goal.y+43,z,12,12,12,'#cba581');}}
 }
 
@@ -5783,7 +5785,7 @@ function loadArea(){
   cancelPortalWarp();
   BFChestReveal.clear();
   clearStoryNotice();
- G.returnActive=null;G.pendingReturnItems=[];G.returnAdventure=null;G.returnAnimals=[];
+ G.briarDistrict=null;G.returnActive=null;G.pendingReturnItems=[];G.returnAdventure=null;G.returnAnimals=[];
   G.kingFinal=null;document.getElementById('finalCharge')?.remove();G.ascent=null;G.ascentWorkers=[];G.castleGates=null;G.library=null;G.court=null;G.thunder=null;G.shore=null;G.voyage=null;G.voyageLanded=false;document.getElementById("voyagehud")?.remove();G.cliffs=null;G.canyon=null;G.canyonPrisoners=[];G.keep=null;G.keepPrisoners=[];G.prison=null;G.peaks=null;G.iceCaves=null;G.iron=null;G.furnace=null;G.ironWorkers=[];
   const Z=curZone();
   /* THE ENDLESS DUNGEON PICKS ITS OWN FLOOR, and this function used to throw that away.
@@ -5803,7 +5805,7 @@ function loadArea(){
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
   if(inLongAscent())buildLongAscent();else if(inCastleGates())buildCastleGates();else if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else if(inWindingCliffs())buildWindingCliffs();else if(inLostCanyon())buildLostCanyon();else if(inBrokenWalls())buildBrokenWalls();else if(inPrison())buildPrison();else if(inSnowbound())buildSnowbound();else if(inIceCaves())buildIceCaves();else if(inIronHalls())buildIronHalls();else if(inGreatFurnace())buildGreatFurnace();else if(inShipwreck())buildShipwreck();else if(inThunderCliffs())buildThunderCliffs();else if(inPalaceCourtyard())buildPalaceCourtyard();else if(inSkyLibrary())buildSkyLibrary();else if(G.kingFinal||G.marbleArena||G.colossusArena){briarPending=null;G._storyEpoch=null;briarEpoch();}else{G.storyNpcs=[];G.storyObjects=[];}
-  if(isCampaignAdventure()){BFCampaignGeography.apply(G,Z.id);BFCampaignJourney.install(G);}
+  if(isCampaignAdventure()){BFCampaignGeography.apply(G,Z.id);BFCampaignJourney.install(G);BFBriarDistrict.install(G,{chestKey:chestRewardKey});}
   G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G,{spawn:spawnEnemy,support:enemySupport});BFCampaignHunts.setup(G,{host:!MP.guest(),book:briarBook,xp:characterXpAward,spawn:spawnEnemy,support:enemySupport,label:e=>e?foeName(e):null,clear:p=>{const q={...p};resolveObstacles(q,q.r,null,0);return Math.hypot(q.x-p.x,q.z-p.z)<2;}});if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;BFCampaignElites.setup(e,G.zone);const support=enemySupport(e);if(Number.isFinite(support))e.y=support;}}
   if(isCampaignAdventure()&&G.area>=0)BFBriarCombat.build(G,{spawn:spawnEnemy,support:enemySupport});
   if(isCampaignAdventure()&&G.area>=0)BFCampaignPlacement.settle(G,{floor:floorAt,resolve:resolveObstacles});
@@ -11259,6 +11261,7 @@ function nearestSurfacePoint(x,z,r=14){
 }
 function seatChest(ch){
   if(!ch) return;
+  if(G.briarDistrict&&typeof BFBriarDistrict!=='undefined')BFBriarDistrict.recoverLoot(G,ch);
   if(G.ascent){const y=floorAt(ch.x,ch.z,14,(ch.y||0)+30);if(y>-1e8)ch.y=y;return;}
   let h=surfaceHeightAt(ch.x,ch.z,14);
   if(h<-1e8){ const safe=nearestSurfacePoint(ch.x,ch.z,14); if(safe){ ch.x=safe.x; ch.z=safe.z; h=safe.y; } }
@@ -24977,8 +24980,8 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2339"></script>
-<script type="module" src="./progression-model-preview.js?v=2278"></script>
+<script type="module" src="./hero3d.js?v=2342"></script>
+<script type="module" src="./progression-model-preview.js?v=2342"></script>
 <script type="module" src="./social-hub.js?v=2322"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

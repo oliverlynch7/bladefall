@@ -8,7 +8,7 @@ function active(G){return !!G&&G.zone===0&&(G.area===0||G.area===1)&&!G.bonusAct
 function build(G,api){
  if(!active(G)||G.briarCombat)return;
  G.briarCombat={revision:1};
- if(G.area===0){
+ if(G.area===0&&!G.briarDistrict){
   // First meet one mobile raider, then a guard. Leave the homes and mill puzzle quiet.
   const opening=G.enemies.filter(e=>e.type==='grunt'&&!e.elite&&!e.homeRaid&&e.z>-650).sort((a,b)=>a.mid-b.mid).slice(0,2);
   for(const [i,e]of opening.entries())Object.assign(e,{x:i?230:110,z:i?-910:-520,sx:i?230:110,sz:i?-910:-520,briarRoleHint:i?'guard':'runner',briarEncounter:'village-watch'});

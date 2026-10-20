@@ -1,6 +1,6 @@
-import {buildHollowJourneyArt} from './hollow-journey-art.js?v=2194';
-import {craftReplacesDeco} from './campaign-craft-scene.js?v=2197';
-import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2187a';
+import {buildHollowJourneyArt} from './hollow-journey-art.js?v=2342';
+import {craftReplacesDeco} from './campaign-craft-scene.js?v=2342';
+import {upgradeCampaignKit} from './campaign-craft-kit.js?v=2342';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
 import {claimSurface} from './surface-regions.js?v=1972';
 /* Hollow Pass: warm sandstone canyon scenery over the authored collision surfaces. */

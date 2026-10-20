@@ -1,6 +1,6 @@
 import * as T from './three.module.js';
 import {campaignMaterial} from './campaign-materials.js?v=2187a';
-import {craftModel} from './campaign-craft-models.js?v=2187a';
+import {craftModel} from './campaign-craft-models.js?v=2342';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 // Static prison architecture uses the exact collision plan. Merge by material, not by prop.
 export function buildPrisonArt(plan){

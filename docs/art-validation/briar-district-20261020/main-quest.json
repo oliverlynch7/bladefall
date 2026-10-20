@@ -1,0 +1,184 @@
+{
+  "staged": true,
+  "checks": [
+    {
+      "name": "Walk 0,410",
+      "ok": true
+    },
+    {
+      "name": "Open thomas",
+      "ok": true
+    },
+    {
+      "name": "Walk -130,160",
+      "ok": true
+    },
+    {
+      "name": "Open mara",
+      "ok": true
+    },
+    {
+      "name": "Walk -340,-65",
+      "ok": true
+    },
+    {
+      "name": "Walk -410,-130",
+      "ok": true
+    },
+    {
+      "name": "Walk -505,-245",
+      "ok": true
+    },
+    {
+      "name": "Walk -370,-335",
+      "ok": true
+    },
+    {
+      "name": "Walk -180,-480",
+      "ok": true
+    },
+    {
+      "name": "Walk 230,-480",
+      "ok": true
+    },
+    {
+      "name": "Walk 230,-50",
+      "ok": true
+    },
+    {
+      "name": "Walk 440,-50",
+      "ok": true
+    },
+    {
+      "name": "Walk 440,-208",
+      "ok": true
+    },
+    {
+      "name": "Supplies collected",
+      "ok": true
+    },
+    {
+      "name": "Walk 440,-50",
+      "ok": true
+    },
+    {
+      "name": "Walk 230,-50",
+      "ok": true
+    },
+    {
+      "name": "Walk 230,-480",
+      "ok": true
+    },
+    {
+      "name": "Walk -180,-480",
+      "ok": true
+    },
+    {
+      "name": "Walk -190,80",
+      "ok": true
+    },
+    {
+      "name": "Open mara",
+      "ok": true
+    },
+    {
+      "name": "Mill quest active",
+      "ok": true
+    },
+    {
+      "name": "Walk 120,-420",
+      "ok": true
+    },
+    {
+      "name": "Walk 120,-650",
+      "ok": true
+    },
+    {
+      "name": "Walk 280,-830",
+      "ok": true
+    },
+    {
+      "name": "Walk 280,-1090",
+      "ok": true
+    },
+    {
+      "name": "Walk 120,-1280",
+      "ok": true
+    },
+    {
+      "name": "Walk 120,-1450",
+      "ok": true
+    },
+    {
+      "name": "Walk 200,-1560",
+      "ok": true
+    },
+    {
+      "name": "Walk 200,-1600",
+      "ok": true
+    },
+    {
+      "name": "Walk 200,-1880",
+      "ok": true
+    },
+    {
+      "name": "Crate holds sluice",
+      "ok": true
+    },
+    {
+      "name": "Walk 210,-1740",
+      "ok": true
+    },
+    {
+      "name": "Wheel freed",
+      "ok": true
+    },
+    {
+      "name": "Walk 0,-1990",
+      "ok": true
+    },
+    {
+      "name": "Walk 0,-2040",
+      "ok": true
+    },
+    {
+      "name": "Opening bridge remains a barrier",
+      "ok": true
+    },
+    {
+      "name": "Lowered bridge opens",
+      "ok": true
+    },
+    {
+      "name": "Walk 180,-2030",
+      "ok": true
+    },
+    {
+      "name": "Walk 180,-2200",
+      "ok": true
+    },
+    {
+      "name": "Walk 130,-2320",
+      "ok": true
+    },
+    {
+      "name": "Passed real mill crossing",
+      "ok": true
+    }
+  ],
+  "flags": {
+    "thomas.ready": true,
+    "event.briar.root.1": true,
+    "event.briar.root.2": true,
+    "event.briar.root.3": true,
+    "event.briar.dressings": true,
+    "mara.healing": true,
+    "briar.water": true,
+    "event.briar.mill.weighted": true,
+    "briar.jam": true,
+    "event.briar.jam": true,
+    "briar.bridge": true,
+    "event.briar.bridge": true
+  },
+  "errors": []
+}

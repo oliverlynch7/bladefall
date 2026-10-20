@@ -1,6 +1,6 @@
 import * as T from './three.module.js';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
-import {craftModel,craftBuilder} from './campaign-craft-models.js?v=2187a';
+import {craftModel,craftBuilder} from './campaign-craft-models.js?v=2342';
 import {beveledBoxGeometry} from './campaign-materials.js?v=2187a';
 
 // Upgrade every instance of each regional kit asset at load time. Preserve the

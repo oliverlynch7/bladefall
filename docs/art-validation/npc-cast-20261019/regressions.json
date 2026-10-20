@@ -1,0 +1,42 @@
+[
+  {
+    "command": "node scripts/test-npc-recordings.cjs",
+    "status": "pass",
+    "output": "{\"casting\":50,\"recorded\":371,\"total\":371,\"complete\":50,\"sourceAndAudioHashes\":\"pass\"}"
+  },
+  {
+    "command": "node scripts/test-npc-voice-review.cjs",
+    "status": "pass",
+    "output": "{\"characters\":50,\"authoredSpeakers\":50,\"clips\":150,\"coverage\":\"all\",\"reviewValidation\":\"pass\",\"sourceLines\":\"exact\",\"auditionClipsUnchanged\":true}"
+  },
+  {
+    "command": "node scripts/test-voice-content.cjs",
+    "status": "pass",
+    "output": "Voice manifest: shared fetch, current-text filtering and failure recovery passed."
+  },
+  {
+    "command": "node scripts/test-dialogue-endings.cjs",
+    "status": "pass",
+    "output": "94 ordinary NPC/preset paths end; primary Leave, legacy replay, optional quest, legitimate retry, final trigger, note preservation and speaker authority pass."
+  },
+  {
+    "command": "node scripts/test-dialogue-categories.cjs",
+    "status": "pass",
+    "output": "1447 category, single-path, retired-choice authority, side/lore access and sequential delivery checks passed."
+  },
+  {
+    "command": "node scripts/test-story-authority.cjs",
+    "status": "pass",
+    "output": "Story authority passed: run/revision/proximity/alive guards, owner-only decisions and close, paused world actions, once-only party reward eligibility."
+  },
+  {
+    "command": "python scripts/test-npc-voice-rotation.py",
+    "status": "pass",
+    "output": "{\"passed\": [\"normal_resume\", \"wrong_owner\", \"bad_backup\", \"stale_script\", \"paid_failure\"], \"network\": \"mocked; no credits used\"}"
+  },
+  {
+    "command": "node scripts/check-3d-inline.cjs",
+    "status": "pass",
+    "output": "Parsed 1 inline game script."
+  }
+]

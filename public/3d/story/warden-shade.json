@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "region": "regional",
+  "status": "current-canon regional guide",
+  "npcs": {
+    "warden_shade": {
+      "name": "Warden’s Shade",
+      "role": "A watchful spirit",
+      "start": "shade.outskirts"
+    }
+  },
+  "nodes": {
+    "shade.outskirts": {
+      "text": "The Legion is approaching Briar. The townspeople are doing what they can. Protect the supplies and help your neighbors prepare. Every person you help gives the town a better chance.",
+      "choices": [],
+      "voice": {
+        "speaker": "warden_shade",
+        "scene": "outskirts guidance",
+        "order": 1,
+        "status": "script-revised",
+        "direction": "Quiet, kind, practical guidance. No prophecy.",
+        "context": "Regional introduction. No ancestry or final identity revelation."
+      }
+    },
+    "shade.hollow": {
+      "text": "Free the canyon prisoners. Use cover when the Marksman aims.",
+      "choices": [],
+      "voice": {
+        "speaker": "warden_shade",
+        "scene": "hollow guidance",
+        "order": 2,
+        "status": "script-revised",
+        "direction": "Quiet, kind, practical guidance. No prophecy.",
+        "context": "Regional introduction. No ancestry or final identity revelation."
+      }
+    },
+    "shade.keep": {
+      "text": "Rescue the hidden prisoners. Their lift is the way out.",
+      "choices": [],
+      "voice": {
+        "speaker": "warden_shade",
+        "scene": "keep guidance",
+        "order": 3,
+        "status": "script-revised",
+        "direction": "Quiet, kind, practical guidance. No prophecy.",
+        "context": "Regional introduction. No ancestry or final identity revelation."
+      }
+    },
+    "shade.frost": {
+      "text": "Find Ellis in the ice caves. Three officers guard the exit.",
+      "choices": [],
+      "voice": {
+        "speaker": "warden_shade",
+        "scene": "frost guidance",
+        "order": 4,
+        "status": "script-revised",
+        "direction": "Quiet, kind, practical guidance. No prophecy.",
+        "context": "Regional introduction. No ancestry or final identity revelation."
+      }
+    },
+    "shade.ember": {
+      "text": "Shelter the workers, then stop the Legion's weapon line.",
+      "choices": [],
+      "voice": {
+        "speaker": "warden_shade",
+        "scene": "ember guidance",
+        "order": 5,
+        "status": "script-revised",
+        "direction": "Quiet, kind, practical guidance. No prophecy.",
+        "context": "Regional introduction. No ancestry or final identity revelation."
+      }
+    },
+    "shade.abyss": {
+      "text": "Repair the boat. Beyond the coast, a chained hydra needs your help.",
+      "choices": [],
+      "voice": {
+        "speaker": "warden_shade",
+        "scene": "abyss guidance",
+        "order": 6,
+        "status": "script-revised",
+        "direction": "Quiet, kind, practical guidance. No prophecy.",
+        "context": "Regional introduction. No ancestry or final identity revelation."
+      }
+    },
+    "shade.palace": {
+      "text": "Reach the knowledge orb. The palace guardian blocks your path.",
+      "choices": [],
+      "voice": {
+        "speaker": "warden_shade",
+        "scene": "palace guidance",
+        "order": 7,
+        "status": "script-revised",
+        "direction": "Quiet, kind, practical guidance. No prophecy.",
+        "context": "Regional introduction. No ancestry or final identity revelation."
+      }
+    },
+    "shade.castle": {
+      "text": "Climb to the Hollow Gate. The King waits at the summit.",
+      "choices": [],
+      "voice": {
+        "speaker": "warden_shade",
+        "scene": "castle guidance",
+        "order": 8,
+        "status": "script-revised",
+        "direction": "Quiet, kind, practical guidance. No prophecy.",
+        "context": "Regional introduction. No ancestry or final identity revelation."
+      }
+    }
+  },
+  "events": {}
+}

@@ -94,7 +94,7 @@
     speechSynthesis.speak(u);
    }catch(_){if(token===generation){speaking=false;el('hubVoiceStatus').textContent='Device speech is unavailable. Subtitles are still available.';unlock();}}
   }
-  if(allowed&&a.meta.dialogueVoice!==false&&node.recordedAudio){audio=new Audio(node.recordedAudio);audio.volume=Math.max(0,Math.min(1,a.meta.sfxVol??1));audio.onplaying=()=>{if(token===generation)speaking=true};audio.onpause=audio.onwaiting=()=>{if(token===generation)speaking=false};audio.onended=()=>{if(token===generation){speaking=false;unlock()}};audio.onerror=()=>{if(token===generation){speaking=false;audio=null;tts()}};audio.play().catch(()=>{if(token===generation){audio=null;speaking=false;el('hubVoiceStatus').textContent='Voice could not play. Subtitles are still available.';tts()}})}else tts();
+  if(allowed&&a.meta.dialogueVoice!==false&&node.recordedAudio){audio=new Audio(node.recordedAudio);audio.volume=Math.max(0,Math.min(1,a.meta.sfxVol??1));audio.onplaying=()=>{if(token===generation)speaking=true};audio.onpause=audio.onwaiting=()=>{if(token===generation)speaking=false};audio.onended=()=>{if(token===generation){speaking=false;unlock()}};audio.onerror=()=>{if(token===generation){speaking=false;audio=null;tts()}};audio.play().catch(()=>{if(token===generation){audio=null;speaking=false;el('hubVoiceStatus').textContent='Voice could not play. Subtitles are still available.';tts()}})}else if(!node.recordedAudio)tts();
  }
  async function open(n,a){
   if(active)close();const token=++generation;active={n,a,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');shell('<p>Opening conversation…</p>');

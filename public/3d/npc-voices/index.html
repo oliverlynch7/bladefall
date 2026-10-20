@@ -1,21 +1,32 @@
 <!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bladefall · NPC recordings</title>
 <style>
-:root{color-scheme:dark;font:16px/1.55 system-ui;background:#101c28;color:#edf0ed}body{max-width:1050px;margin:auto;padding:32px 20px}h1{font-family:Georgia,serif;color:#ffdc91;font-size:clamp(30px,6vw,48px);margin:0}a{color:#a8dbff}header{margin-bottom:28px}#summary{background:#203648;border:1px solid #68869c;padding:16px;border-radius:12px}details{border:1px solid #456278;border-radius:12px;margin:12px 0;background:#172a3a}summary{cursor:pointer;padding:16px;color:#ffe2a8;font-weight:650}article{padding:14px 18px;border-top:1px solid #344d61}p{margin:8px 0}audio{width:100%;max-width:600px;margin-top:8px}small{color:#a9bfce}label{display:block;margin:16px 0}input{padding:12px;font:inherit;border:1px solid #658298;border-radius:8px;background:#192d3e;color:white;width:min(90%,420px)}.pending{color:#e5ba8b}
+:root{color-scheme:dark;font:16px/1.55 system-ui;background:#101c28;color:#edf0ed}body{max-width:1050px;margin:auto;padding:32px 20px}h1{font-family:Georgia,serif;color:#ffdc91;font-size:clamp(30px,6vw,48px);margin:0}a{color:#a8dbff}header{margin-bottom:28px}#summary{background:#203648;border:1px solid #68869c;padding:16px;border-radius:12px}details{border:1px solid #456278;border-radius:12px;margin:12px 0;background:#172a3a}summary{cursor:pointer;padding:16px;color:#ffe2a8;font-weight:650}article{padding:14px 18px;border-top:1px solid #344d61}p{margin:8px 0}audio{width:100%;max-width:600px;margin-top:8px}small{color:#a9bfce}label{display:block;margin:16px 0}input{padding:12px;font:inherit;border:1px solid #658298;border-radius:8px;background:#192d3e;color:white;width:min(90%,420px)}.pending{color:#e5ba8b}button{cursor:pointer;font:inherit;font-weight:650;background:#efc069;color:#142331;border:1px solid #ffe2a8;border-radius:8px;padding:9px 14px}button:focus-visible,a:focus-visible{outline:3px solid #78d5ff;outline-offset:3px}.listen-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 18px}.preview-controls{display:flex;gap:20px;align-items:center;flex-wrap:wrap}.preview-controls input[type=checkbox]{width:auto}#playStatus{color:#b8e1fa}
 </style>
-<header><h1>The voices of Bladefall</h1><p>Your approved cast, with the lines currently recorded for the game.</p><a href="../npc-voice-preview/">Original casting auditions</a> · <a href="../">Play Bladefall</a></header>
-<div id="summary" role="status">Loading recording coverage…</div><label>Find a character <input id="search" type="search" placeholder="Thomas, Mara, Rift Keeper…"></label><main id="cast"></main>
+<header><h1>The voices of Bladefall</h1><p>Your approved voices, recorded for the game. No new casting decisions are needed.</p><a href="../npc-voice-preview/">Original casting auditions</a> · <a href="../">Play Bladefall</a></header>
+<div id="summary" role="status">Loading recording coverage…</div><label>Find a character <input id="search" type="search" placeholder="Thomas, Mara, Rift Keeper…"></label><div class="preview-controls"><label><input id="mute" type="checkbox"> Mute previews</label><button id="stopAll">Stop playback</button><span id="playStatus" role="status"></span></div><main id="cast"></main>
 <script>
-let current=null;
-document.addEventListener('play',e=>{if(e.target instanceof HTMLAudioElement){if(current&&current!==e.target)current.pause();current=e.target;}},true);
+let current=null,playlistToken=0;
+const mute=document.getElementById('mute'),playStatus=document.getElementById('playStatus');
+mute.checked=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)||/[?&]mute=1\b/.test(location.search);
+function stopPlayback(){playlistToken++;current?.pause();playStatus.textContent='Playback stopped.';}
+document.getElementById('stopAll').onclick=stopPlayback;
+mute.onchange=()=>document.querySelectorAll('audio').forEach(a=>a.muted=mute.checked);
+document.addEventListener('play',e=>{if(e.target instanceof HTMLAudioElement){if(current&&current!==e.target){playlistToken++;current.pause();}current=e.target;}},true);
+function playCharacter(details,name){
+ stopPlayback();const token=++playlistToken,tracks=[...details.querySelectorAll('audio')];let index=0;
+ const next=()=>{if(token!==playlistToken)return;const a=tracks[index++];if(!a){playStatus.textContent=name+' · all lines played.';return;}current=a;a.currentTime=0;playStatus.textContent=name+' · line '+index+' of '+tracks.length;a.addEventListener('ended',next,{once:true});a.play().catch(()=>{if(token===playlistToken){playlistToken++;playStatus.textContent='Could not play this line. Its individual player is available below.';}});};next();
+}
+
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-fetch('./manifest.json?v=2334').then(r=>{if(!r.ok)throw Error();return r.json()}).then(data=>{
- document.getElementById('summary').textContent=`${data.recordedLines} of ${data.totalLines} story lines recorded. ${data.characters.filter(c=>c.total&&c.recorded===c.total).length} characters complete. Pending lines still have readable dialogue. Warden’s Shade awaits a canon-safe script.`;
+fetch('./manifest.json?v=2335').then(r=>{if(!r.ok)throw Error();return r.json()}).then(data=>{
+ document.getElementById('summary').textContent=`${data.recordedLines} of ${data.totalLines} story lines recorded. ${data.characters.filter(c=>c.total&&c.recorded===c.total).length} characters complete. ${data.recordedLines===data.totalLines?'Every current NPC line is recorded.':'Pending lines still have readable dialogue.'}`;
  const root=document.getElementById('cast');
  for(const c of data.characters){const d=document.createElement('details');d.dataset.name=c.name.toLowerCase();d.innerHTML=`<summary>${escape(c.name)} · voice ${escape(c.option)} · ${c.recorded}/${c.total} lines</summary>`;
-  const rows=Object.values(data.lines).filter(l=>l.speaker===c.id);
+  const compare=document.createElement('a');compare.href='../npc-voice-preview/#'+encodeURIComponent(c.id);compare.textContent='Optional: hear the original A / B / C auditions';compare.style.display='block';compare.style.padding='12px 18px';d.append(compare);
+  const rows=Object.values(data.lines).filter(l=>l.speaker===c.id);if(rows.length){const tools=document.createElement('div');tools.className='listen-tools';const play=document.createElement('button');play.textContent='Play '+c.name+'’s lines';play.onclick=()=>playCharacter(d,c.name);tools.append(play);d.append(tools);}
   if(!rows.length)d.insertAdjacentHTML('beforeend','<article class="pending">Recording pending. Your casting choice is saved.</article>');
-  for(const row of rows){const article=document.createElement('article');article.innerHTML=`<small>${escape(row.id)}</small><p>${escape(row.text)}</p>`;const a=document.createElement('audio');a.controls=true;a.preload='none';a.src='./'+row.audio.split('/').at(-1);article.append(a);d.append(article);}root.append(d);
+  for(const row of rows){const article=document.createElement('article');article.innerHTML=`<small>${escape(row.id)}</small><p>${escape(row.text)}</p>`;const a=document.createElement('audio');a.controls=true;a.preload='none';a.muted=mute.checked;a.src='./'+row.audio.split('/').at(-1);a.setAttribute('aria-label',c.name+' · '+row.id);article.append(a);d.append(article);}d.addEventListener('toggle',()=>{if(d.open)for(const a of d.querySelectorAll('audio'))a.preload='metadata';else if(current&&d.contains(current))stopPlayback();});root.append(d);
  }
  document.getElementById('search').oninput=e=>{for(const d of root.children)d.hidden=!d.dataset.name.includes(e.target.value.toLowerCase().trim());};
 }).catch(()=>document.getElementById('summary').textContent='Recordings could not load. Please refresh to try again.');

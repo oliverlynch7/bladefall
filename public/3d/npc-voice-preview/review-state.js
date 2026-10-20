@@ -11,5 +11,10 @@
  }
  function state(row,c){const v=row?.votes||{};return c.options.some(p=>v[p.option]?.decision==='yes')?'approved':c.options.every(p=>v[p.option]?.decision==='no')?'rejected':'pending';}
  function summary(review,catalog){return ['BLADEFALL NPC VOICE REVIEW',catalog.revision,'Green lights are casting feedback, not authorization to generate every line.','',...catalog.characters.filter(c=>review.characters[c.id]&&(Object.keys(review.characters[c.id].votes||{}).length||review.characters[c.id].notes)).map(c=>{const r=review.characters[c.id];return `${c.name}: ${c.options.map(p=>`${p.option} ${r.votes[p.option]?.decision==='yes'?'GREEN':r.votes[p.option]?.decision==='no'?'RED':'undecided'}`).join(' · ')}${r.notes?'\nNotes: '+r.notes:''}`;})].join('\n');}
- const api={clean,state,summary};root.BFNPCReview=api;if(typeof module!=='undefined')module.exports=api;
+ function restore(raw,approved,catalog){
+  const base=clean(approved,catalog);
+  if(raw?.baselineRevision===approved.submittedRevision){const local=clean(raw,catalog);base.characters={...base.characters,...local.characters};}
+  return {...base,baselineRevision:approved.submittedRevision};
+ }
+ const api={clean,state,summary,restore};root.BFNPCReview=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

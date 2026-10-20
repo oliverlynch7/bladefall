@@ -1128,10 +1128,10 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./sprint-race.js?v=2255"></script>
 <link rel="stylesheet" href="./sprint-race.css?v=2255">
 <link rel="stylesheet" href="./hub-dialogue.css?v=2288">
-<script src="./voice-content.js?v=2334"></script>
+<script src="./voice-content.js?v=2335"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./render-motion.js?v=2304"></script>
-<script src="./hub-dialogue.js?v=2334"></script>
+<script src="./hub-dialogue.js?v=2335"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
 <script src="./hub-tour.js?v=2294"></script>
 <script src="./controller.js?v=2323"></script>
@@ -1233,7 +1233,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.334.1-npc-voices';
+const VERSION3D='2.335.0-npc-cast';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1455,32 +1455,64 @@ const STORY={
     hardcore:"One life. One descent. No age to relieve you, no blood to follow. The line would have called that the proper way.",
     hitless:"Untouched, start to finish — the way the Bladeborn always swore it could be done and never once managed. Ian would have wanted to see it."
   },
-  npc:{  // the Shade: a Bladeborn of an age past, still manning the post at each zone mouth. Lore + why the quests matter + a warning about the boss.
-    outskirts:{lore:["The Legion is approaching Briar. The townspeople are doing what they can.","Protect the supplies and help your neighbors prepare. Every person you help gives the town a better chance."],
-      why:"Mara needs supplies for the injured. Beyond the fields, the mill crossing leads toward the Black Woods.",
-      boss:"The Brute at the wood's end was a farmer's ox. Do not let what it has become reach you."},
-    hollow:{lore:["The wind you hear is the canyon trying to empty itself.","I posted watchers on the rims in my age. The rims are still why you'll live or die here."],
-      why:"The chargers breed in the nests — burn through them. The bones on the rims were my watchers. Bring them down for burial.",
-      boss:"The Marksman was my best archer. She still holds her post at the head of the pass. She will not miss twice."},
-    keep:{lore:["The Legion made this keep a prison. Its commander still follows the order to hold it.","What walks these halls wears armor you'll wear too, if you fall."],
-      why:"Find the hidden captives and restore their lift. The prison papers may explain who the Legion is hunting.",
-      boss:"The Fallen guards the release hall. He is Hollowed, and his orders leave no room for mercy. Watch his blade before you move."},
-    frost:{lore:["Cold this old isn't weather. It's the dream refusing to let anything move on.","A whole watch froze here in a single night. I couldn't reach them in time."],
-      why:"The frostlings carry cores of the old cold. Shatter them, and finish the cairn I never raised.",
-      boss:"The Sorcerer came here to study the ice. Around the fourth winter, it started studying him back."},
-    ember:{lore:["The mountain's furnace should have died with the mountain. The nightmare keeps it fed.","Everything down here wants to be lava when it grows up."],
-      why:"The emberlings shed shards of the core-fire. Quench them, and mark the ash altar so the way stays open behind you.",
-      boss:"The Colossus is not guarding the deep. It IS the deep. Bring it down joint by joint."},
-    abyss:{lore:["You are below every post any of us ever held. Even my death doesn't reach much deeper.","The last one — the one you've been following — fell past even this. The dark here isn't empty. It's attentive."],
-      why:"Banish what you can and take back the splinters — every shard of the rift you carry out is one he can't dream through.",
-      boss:"Past this point sleeps the King. He has been listening to you descend the whole way. Wake him, and there is no going back — only up, and through."},
-    palace:{lore:["None of us was ever posted here. The Sunspire kept itself — he kept it, for the day he woke.","The marble here remembers being carved. Do not turn your back on any of it."],
-      why:"Put down the risen guard and gather the gilded relics — the throne was hoarding them, and each is a piece of the way up.",
-      boss:"The Colossus is the throne's own statue. It has had centuries to practice standing up. End it before it finishes."},
-    castle:{lore:["This is the last gate. Past the towers there is only him — and only you, of all our blood, ever got this far.","There's nothing left to teach you. Whatever you've become on the way down — be exactly that."],
-      why:"Clear the towers as you climb. Every shadeling you cut is one less thing at your back when you reach the top.",
-      boss:"Break the cycle at the summit. Or become the next thing I have to warn somebody about."}
+  npc:{
+  "outskirts": {
+    "lore": [
+      "The Legion is approaching Briar. The townspeople are doing what they can. Protect the supplies and help your neighbors prepare. Every person you help gives the town a better chance."
+    ],
+    "why": "",
+    "boss": ""
+  },
+  "hollow": {
+    "lore": [
+      "Free the canyon prisoners. Use cover when the Marksman aims."
+    ],
+    "why": "",
+    "boss": ""
+  },
+  "keep": {
+    "lore": [
+      "Rescue the hidden prisoners. Their lift is the way out."
+    ],
+    "why": "",
+    "boss": ""
+  },
+  "frost": {
+    "lore": [
+      "Find Ellis in the ice caves. Three officers guard the exit."
+    ],
+    "why": "",
+    "boss": ""
+  },
+  "ember": {
+    "lore": [
+      "Shelter the workers, then stop the Legion's weapon line."
+    ],
+    "why": "",
+    "boss": ""
+  },
+  "abyss": {
+    "lore": [
+      "Repair the boat. Beyond the coast, a chained hydra needs your help."
+    ],
+    "why": "",
+    "boss": ""
+  },
+  "palace": {
+    "lore": [
+      "Reach the knowledge orb. The palace guardian blocks your path."
+    ],
+    "why": "",
+    "boss": ""
+  },
+  "castle": {
+    "lore": [
+      "Climb to the Hollow Gate. The King waits at the summit."
+    ],
+    "why": "",
+    "boss": ""
   }
+}
 };
 function storyText(line){
   const name=(meta.heroName||'').trim()||'the last Bladeborn';
@@ -1532,22 +1564,23 @@ function placeShade(x,z){
   if(!(G.area===0 || (G.area<0 && Z.areas.length===0))) return;   // only at the zone's front door
   G.npc={x,z,t:0,talked:false};
 }
+let shadeVoiceBook=null;
+const shadeVoiceReady=loadStoryBook('warden-shade').then(book=>(shadeVoiceBook=book)).catch(()=>null);
 function openShade(){
-  const Z=curZone(), N=STORY.npc[Z.id]; if(!N) return;
-  document.getElementById('toast').classList.remove('show');
-  G.npc.talked=true; meta.shadeSeen=meta.shadeSeen||{}; meta.shadeSeen[Z.id]=1; persistGlobal();
-  mode='menu'; SFX.magic('void');
-  const qs=areaQuests(), qrows=qs.length?qs.map(q=>`<div class="qbq"><span class="qbico"></span><span>${q.d}</span></div>`).join(''):'<div class="qbq" style="opacity:.6"><span class="qbico"></span><span>No errands here — only the fight ahead.</span></div>';
-  showOverlayHTML(`<div class="card" data-dialogue-menu style="--npc-accent:#c47bff"><div class="npcintro">
-    ${npcPortrait('shade')}<div class="npcidentity"><p class="ovsub">A SHADE OF THE BLADEBORN</p><h2 class="ovh">Warden’s Shade</h2>
-    <p class="npcrole">${Z.name} · Fallen Warden</p><p class="npcline">“${N.lore[0]}”</p></div></div>
-    <div style="text-align:left;font-size:16px;line-height:1.78;color:#dfe4ec;margin:8px 0 4px">
-      ${N.lore.slice(1).map(l=>`<p style="margin:0 0 12px;font-style:italic;color:#c9cfda">“${l}”</p>`).join('')}
-      <p style="margin:0 0 12px">“${N.why}”</p>
-      <p style="margin:0;color:#f0a6a6;font-weight:600">“${N.boss}”</p></div>
-    <div class="qhead"><span class="qbico"></span>Your Orders</div>${qrows}
-    <button class="bigbtn" id="shadeGo" style="margin-top:16px">I'll see it done</button></div>`);
-  document.getElementById('shadeGo').onclick=resumePlay;BFHubDialogue.selectFirst(document.querySelector('[data-dialogue-menu]'));
+  if(!G?.npc)return;
+  const zone=curZone().id,n=G.npc,id='shade.'+zone;
+  G.npc.talked=true;meta.shadeSeen=meta.shadeSeen||{};meta.shadeSeen[zone]=1;persistGlobal();
+  mode='menu';releaseKeyboard();showGameUI(false);
+  showOverlayHTML('<div class="card" id="shadeLoading"><h2>Warden’s Shade</h2><p>Opening conversation…</p><button class="bigbtn" id="shadeGo">Leave conversation · Q</button></div>');
+  document.getElementById('shadeGo').onclick=resumePlay;
+  shadeVoiceReady.then(book=>{
+    if(!G||G.npc!==n||curZone().id!==zone||mode!=='menu'||!document.getElementById('shadeLoading'))return;
+    if(!book?.nodes[id]){document.querySelector('#shadeLoading p').textContent=STORY.npc[zone]?.lore?.join(' ')||'Take care on the road ahead.';return;}
+    BFHubDialogue.present({...n,id:'warden_shade',name:'Warden’s Shade'},{meta,location:curZone().name,eye:()=>G.eye?{...G.eye}:null,player:()=>G.p,
+      enter:()=>{mode='npc';showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},
+      leave:()=>resumePlay(),requestClose:()=>BFHubDialogue.close(false,true),choose:()=>{}
+    },book,{lineId:id,text:book.nodes[id].text,choices:[],lastChoice:''},true);
+  });
 }
 function zoneCardMaybe(){                 // one card the FIRST time a zone is entered this save
   if(!G||G.trial||G.side||G.area<0) return;

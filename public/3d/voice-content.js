@@ -3,7 +3,7 @@
 let manifestPromise=null,manifestUntil=0;
 let castPromise=null;
 function castManifest(){
- if(!castPromise)castPromise=fetch('./npc-voices/manifest.json?v=2334')
+ if(!castPromise)castPromise=fetch('./npc-voices/manifest.json?v=2335')
   .then(r=>r.ok?r.json():null).catch(()=>{castPromise=null;return null});
  return castPromise;
 }

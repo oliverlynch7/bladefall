@@ -26,3 +26,7 @@ Main/side quests, hunt definitions, hub-return requests, NPC coordinates, dialog
 ## Honest limits
 
 Physical journey tests stage quest gates open and clear enemies; they do not establish full quest completion, combat pacing or fun. Existing quest/hunt/return/shard/story suites cover state preservation. Shared geometry and authority checks pass, but no live Internet co-op playtest was performed. Human playtesting remains necessary for pacing, discovery difficulty and aesthetic judgment. The initial browser frame wait stalled; explicitly driving real frames/loading in a fresh isolated tab resolved the QA wait without stubbing WebGL or bypassing loading. Existing coast/cage route annotation height discrepancies are documented in browser.json.
+
+## Publication
+
+Code 7cd6d036 deployed successfully as bc77d8be. Eleven public resources match exact committed blobs. Fresh native muted public title reports2.357.0/16plans and both2357modules with no errors. Published blueprint selector renders correctly; all16 local selector entries also render. See production.json/public-browser.json/plan-controls.json. Mirror code baa4cf15.

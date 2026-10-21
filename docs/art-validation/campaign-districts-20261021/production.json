@@ -1,0 +1,107 @@
+{
+  "commit": "7cd6d036454eceb071db4ff22f95013f2f6dac19",
+  "version": "2.357.0-campaign-districts",
+  "deployment": "bc77d8be-f4e1-4ddb-b3ce-a698f44c4dc9",
+  "check": "success",
+  "resources": [
+    {
+      "file": "public/3d/index.html",
+      "url": "https://bladefall.pages.dev/3d/?verify=2357-release",
+      "http": 200,
+      "bytes": 2405954,
+      "sha256": "4120f8ab6c152cdfd40ae8a48d1001e4888461ee5495b167bd323aec4cc93383",
+      "expected": "4120f8ab6c152cdfd40ae8a48d1001e4888461ee5495b167bd323aec4cc93383",
+      "matches": true
+    },
+    {
+      "file": "public/3d/campaign-district-data.js",
+      "url": "https://bladefall.pages.dev/3d/campaign-district-data.js?verify=2357-release",
+      "http": 200,
+      "bytes": 15035,
+      "sha256": "2923b4c1aaad4f9ead519358e5124e000b9f53c69def549e14838fe3ce2165e2",
+      "expected": "2923b4c1aaad4f9ead519358e5124e000b9f53c69def549e14838fe3ce2165e2",
+      "matches": true
+    },
+    {
+      "file": "public/3d/campaign-districts.js",
+      "url": "https://bladefall.pages.dev/3d/campaign-districts.js?verify=2357-release",
+      "http": 200,
+      "bytes": 6027,
+      "sha256": "3ddbf1215df6b1c947651a42764efe073cbcb15c8acdf1fe876b8271c0a0aa47",
+      "expected": "3ddbf1215df6b1c947651a42764efe073cbcb15c8acdf1fe876b8271c0a0aa47",
+      "matches": true
+    },
+    {
+      "file": "public/design/campaign-geography/restructure-plan.json",
+      "url": "https://bladefall.pages.dev/design/campaign-geography/restructure-plan.json?verify=2357-release",
+      "http": 200,
+      "bytes": 46484,
+      "sha256": "e08aca5741d1f0b2c4a7a5bb733f2240048106f38914aac1f0b15a01e8ce9e14",
+      "expected": "e08aca5741d1f0b2c4a7a5bb733f2240048106f38914aac1f0b15a01e8ce9e14",
+      "matches": true
+    },
+    {
+      "file": "public/design/campaign-geography/restructure.html",
+      "url": "https://bladefall.pages.dev/design/campaign-geography/restructure.html?verify=2357-release",
+      "http": 200,
+      "bytes": 2679,
+      "sha256": "6c23318368d7d0f50289307c92bbbf173950edc1f3e4abe2ea2adab04ecf7fcf",
+      "expected": "6c23318368d7d0f50289307c92bbbf173950edc1f3e4abe2ea2adab04ecf7fcf",
+      "matches": true
+    },
+    {
+      "file": "public/design/campaign-geography/restructure.js",
+      "url": "https://bladefall.pages.dev/design/campaign-geography/restructure.js?verify=2357-release",
+      "http": 200,
+      "bytes": 3493,
+      "sha256": "7794f422c2ed30563fca557ccd5b666d62ecc70e57f188eaca00c7d48a2648b8",
+      "expected": "7794f422c2ed30563fca557ccd5b666d62ecc70e57f188eaca00c7d48a2648b8",
+      "matches": true
+    },
+    {
+      "file": "public/design/campaign-geography/index.html",
+      "url": "https://bladefall.pages.dev/design/campaign-geography/index.html?verify=2357-release",
+      "http": 200,
+      "bytes": 5518,
+      "sha256": "00a4f4cbc277f77f74f8ad6cfb9de4084547f1450957d3318e235ff5c9eb3fa4",
+      "expected": "00a4f4cbc277f77f74f8ad6cfb9de4084547f1450957d3318e235ff5c9eb3fa4",
+      "matches": true
+    },
+    {
+      "file": "public/design/campaign-geography/blueprints.js",
+      "url": "https://bladefall.pages.dev/design/campaign-geography/blueprints.js?verify=2357-release",
+      "http": 200,
+      "bytes": 11771,
+      "sha256": "1105e96b2bce88ef2d85a68712f04fcef44c3e9761d5fd025be6e5328aaee360",
+      "expected": "1105e96b2bce88ef2d85a68712f04fcef44c3e9761d5fd025be6e5328aaee360",
+      "matches": true
+    },
+    {
+      "file": "public/design/campaign-geography/layout-data.json",
+      "url": "https://bladefall.pages.dev/design/campaign-geography/layout-data.json?verify=2357-release",
+      "http": 200,
+      "bytes": 532779,
+      "sha256": "28f913815a635cb47dac3952487c146a790f1a09a4e72060d77b2101def96e16",
+      "expected": "28f913815a635cb47dac3952487c146a790f1a09a4e72060d77b2101def96e16",
+      "matches": true
+    },
+    {
+      "file": "public/design/campaign-geography/restructure-shots/keep-2357.png",
+      "url": "https://bladefall.pages.dev/design/campaign-geography/restructure-shots/keep-2357.png?verify=2357-release",
+      "http": 200,
+      "bytes": 180863,
+      "sha256": "4fb7bcfcd5fe3f5583f540e6b4d12f70b9baf4a208bab7f93e1248deb7de4f09",
+      "expected": "4fb7bcfcd5fe3f5583f540e6b4d12f70b9baf4a208bab7f93e1248deb7de4f09",
+      "matches": true
+    },
+    {
+      "file": "public/design/campaign-geography/restructure-shots/woods-2357.png",
+      "url": "https://bladefall.pages.dev/design/campaign-geography/restructure-shots/woods-2357.png?verify=2357-release",
+      "http": 200,
+      "bytes": 136535,
+      "sha256": "9f657607eef58b1f11b54ba03c939a773f17500fbfa37ffbc17c43d5e5602c37",
+      "expected": "9f657607eef58b1f11b54ba03c939a773f17500fbfa37ffbc17c43d5e5602c37",
+      "matches": true
+    }
+  ]
+}

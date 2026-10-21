@@ -3900,3 +3900,7 @@ Repaired overhead camera collapsing into the hero near the mill using collision-
 
 ## [2026-10-20] v2.342.0 — Briar Homefields spatial rebuild
 Connected optional circuits, explicit field lane/cover/encounter placement, six planted boundary plots,14 shallow bell approach treads and24-tread west return, three varied picking-deck jumps for an existing chest. Original chest key retained; legacy enemy drops in closed plots recover to roads.79 merged extra colliders, no extra initial enemies/gear chests/trees/ground, bounded material-merged models and fallback visuals. Working mill, protected water, story/voices/saves/trials/Black Woods/boss preserved.213 staged actual-game movement/quest observations, native stair/default-camera samples,13 passing suites and371 recording hashes; old100/1145 fixture loads. No human-fun, Internet co-op or FPS-resolution claim. Evidence docs/art-validation/briar-district-20261020/README.md; preview /design/campaign-geography/briar-district.html.
+
+
+## [2026-10-21] v2.343 - runtime and party safety
+Cache campaign/Keep spatial cell centers and avoid static batch transform recomposition without changing scenery detail or culling distance. Remove duplicate unscoped boat failure wipe; bind revival/wipes to current scene and protect hub/PvP from combat wipes. Native Orchard/drain traces and actual two-client serialized relay, legacy save and focused regressions recorded in docs/art-validation/runtime-party-20261021/. Original severe intermittent frame drop and real Internet co-op remain unverified.

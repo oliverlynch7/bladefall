@@ -1,0 +1,1 @@
+User: "Yeah go ahead" after recommendation: performance first, then co-op reliability. Accepted scope: measure Orchard and Ruined Keep water rendering/collision/effects/loading on repeatable movement; repair confirmed causes; test co-op deaths, revives, shared chests, quests and return-to-hub. Black Woods redesign follows separate player feedback.

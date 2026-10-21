@@ -206,11 +206,13 @@ export function attachCampaignCraft(parent,w,counts){
   }
  }
  const journey=buildCampaignJourneyArt(w);if(journey)root.add(journey);
+ // Static wrappers remain identity; moving props use the separate animated list.
+ // Instance matrices and automatic world matrices still support cutaways/parenting.
  const dummy=new T.Object3D();let triangles=0;
  for(const {cell,r,list}of bins.values()){
   const mesh=new T.InstancedMesh(r.geo,r.material,list.length);mesh.name='Craft '+list[0].row.name;mesh.castShadow=true;mesh.receiveShadow=true;
   list.forEach(({matrix,row},i)=>{mesh.setMatrixAt(i,matrix);if(row.name!=='farm-stair')trackCampaignOccluder(occluders,mesh,i,matrix);});mesh.instanceMatrix.needsUpdate=true;mesh.computeBoundingSphere();root.add(mesh);
-  const broad=list.some(({row})=>row.options.grass||row.name==='farm-stair');groups.push({mesh,cell,broad});triangles+=r.tri*list.length;
+  const broad=list.some(({row})=>row.options.grass||row.name==='farm-stair'),[cx,cz]=cell.split(',').map(n=>(+n+.5)*500);mesh.matrixAutoUpdate=false;groups.push({mesh,cell,cx,cz,broad});triangles+=r.tri*list.length;
  }
  counts.craft={theme,models:items.length,triangles:triangles+animated.reduce((sum,a)=>sum+a.row.triangles,0),drawCalls:bins.size+animated.reduce((n,a)=>n+a.node.children.length,0),items,visibleDrawCalls:0};
  active={root,journey,world:w,counts:counts.craft,items,animated,occluders,groups,keys,cache:craftCacheStats()};
@@ -225,7 +227,7 @@ export function attachCampaignCraft(parent,w,counts){
 export function updateCampaignCraft(w){
  if(!active)return;const a=active,p=w.p,game=window.__BF3?.G;if(!p||!game)return;
  a.journey?.userData.update?.();let calls=0;const range=window.__BF_META?.().quality==='low'?850:1300;
- for(const q of a.groups){const [x,z]=q.cell.split(',').map(n=>(+n+.5)*500),s=q.broad?q.mesh.boundingSphere:null;q.mesh.visible=s?Math.hypot(s.center.x-p.x,s.center.z-p.z)<range+s.radius:Math.hypot(x-p.x,z-p.z)<range+360;if(q.mesh.visible)calls++;}
+ for(const q of a.groups){const s=q.broad?q.mesh.boundingSphere:null,x=s?s.center.x:q.cx,z=s?s.center.z:q.cz,r=range+(s?s.radius:360);q.mesh.visible=(x-p.x)**2+(z-p.z)**2<r*r;if(q.mesh.visible)calls++;}
  for(const q of a.animated){q.node.visible=true;q.step(q.node,w,game);q.node.visible=q.node.visible&&Math.hypot(q.node.position.x-p.x,q.node.position.z-p.z)<range+400;if(q.node.visible)calls+=q.node.children.length;}
  updateCampaignOccluders(a.occluders,w);a.counts.visibleDrawCalls=calls;if(window.__CAMPAIGN_CRAFT)window.__CAMPAIGN_CRAFT.visibleDrawCalls=calls;
 }

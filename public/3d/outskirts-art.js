@@ -73,7 +73,7 @@ function builder(root){
         const col=new THREE.Color();
         for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);
           if(d.color){col.set(d.color);col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b);}else col.copy(white);m.setColorAt(i,col)}
-        m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.frustumCulled=true;m.castShadow=!['tile','grass','crop'].includes(name);m.receiveShadow=true;m.userData.tri=rec.tri*list.length;g.add(m);triangles+=m.userData.tri;instances+=list.length;
+        m.matrixAutoUpdate=false;m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.frustumCulled=true;m.castShadow=!['tile','grass','crop'].includes(name);m.receiveShadow=true;m.userData.tri=rec.tri*list.length;g.add(m);triangles+=m.userData.tri;instances+=list.length;
       }
       for(const s of structures){s.group=groups.get(s.id);if(s.group)s.group.userData.obstacle=s.o}
       for(const g of groups.values()){

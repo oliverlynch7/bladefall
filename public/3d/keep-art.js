@@ -204,9 +204,9 @@ export function buildKeep(scene,w){
   }
   const groups=new Map();let triangles=0,instances=0;
   for(const {cell,name,finish,list} of bins.values()){
-    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,finish==='flagstone'?floorMaterial:finish==='wood'?woodMaterial:finish==='stone'?rockMaterial:finish==='masonry'?material:name==='banner'?bannerMaterial:['timber','crate'].includes(name)?woodMaterial:['grille','brazier'].includes(name)?metalMaterial:name==='rubble'?rockMaterial:material,list.length),col=new THREE.Color();m.name='Keep '+name;
+    if(!groups.has(cell)){const g=new THREE.Group();g.userData.cell=cell;const [cx,cz]=cell.split(',').map(n=>(+n+.5)*CHUNK);g.userData.center={x:cx,z:cz};groups.set(cell,g);root.add(g)}const rec=kit.get(name),m=new THREE.InstancedMesh(rec.geo,finish==='flagstone'?floorMaterial:finish==='wood'?woodMaterial:finish==='stone'?rockMaterial:finish==='masonry'?material:name==='banner'?bannerMaterial:['timber','crate'].includes(name)?woodMaterial:['grille','brazier'].includes(name)?metalMaterial:name==='rubble'?rockMaterial:material,list.length),col=new THREE.Color();m.name='Keep '+name;
     for(let i=0;i<list.length;i++){const d=list[i];dummy.position.set(d.x,d.y,d.z);dummy.scale.set(d.sx,d.sy,d.sz);dummy.rotation.set(0,d.rot,0);dummy.updateMatrix();m.setMatrixAt(i,dummy.matrix);col.set(d.color||'#ffffff');if(d.color){col.r/=Math.max(.015,rec.mean.r);col.g/=Math.max(.015,rec.mean.g);col.b/=Math.max(.015,rec.mean.b)}m.setColorAt(i,col);if(d.source){if(!occluders.has(d.source))occluders.set(d.source,{o:d.source,parts:[],hidden:false});occluders.get(d.source).parts.push({mesh:m,index:i,matrix:dummy.matrix.clone()});}}
-    m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.castShadow=name!=='banner'&&name!=='timber';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
+    m.instanceMatrix.needsUpdate=true;m.instanceColor.needsUpdate=true;m.computeBoundingSphere();m.matrixAutoUpdate=false;m.castShadow=name!=='banner'&&name!=='timber';m.receiveShadow=true;m.userData.tri=list.length*rec.tri;groups.get(cell).add(m);triangles+=m.userData.tri;instances+=list.length;
   }
   for(const s of structures)if(groups.has(s.cell))groups.get(s.cell).userData.obstacle=s.o;
   scene.traverse(o=>{if(o.isLight){if(o.userData._w3dOrig==null)o.userData._w3dOrig=o.intensity;o.intensity=o.userData._w3dOrig*(o.isAmbientLight?.72:.15)}});
@@ -234,7 +234,7 @@ export function updateKeep(w){
     for(const rib of rig.ribs){rib.scale.y=ramHeight;rib.position.y=ramCenter;}
     const color=stopped?'#9fe6b6':state?.warning?'#ffd15a':state?.down?'#ef7660':'#85a3a7';for(const lamp of rig.lamps){lamp.color.set(color);lamp.emissive.set(color);}
   }a.presses.handle.rotation.x=stopped?-.8:.4;a.presses.brakeLamp.color.set(stopped?'#9fe6b6':'#d79861');a.presses.brakeLamp.emissive.set(stopped?'#397954':'#6e321b');}
-  for(const [cell,g] of a.groups){const o=g.userData.obstacle,[cx,cz]=o?[o.x,o.z]:cell.split(',').map(n=>(+n+.5)*CHUNK);g.visible=Math.hypot(cx-p.x,cz-p.z)<range+CHUNK*.72;
+  for(const g of a.groups.values()){const o=g.userData.obstacle,center=o||g.userData.center,r=range+CHUNK*.72;g.visible=(center.x-p.x)**2+(center.z-p.z)**2<r*r;
     if(g.visible&&o&&w.eye&&p.y<o.h-5&&window.__BF_META?.().camMode!=='fps')for(let t=.08;t<.95;t+=.08){const x=w.eye.x+(p.x-w.eye.x)*t,z=w.eye.z+(p.z-w.eye.z)*t;if(Math.abs(x-o.x)<o.w/2+5&&Math.abs(z-o.z)<o.d/2+5){g.visible=false;break;}}
     if(g.visible)for(const m of g.children){tris+=m.userData.tri;calls++}
   }

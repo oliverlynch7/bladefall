@@ -1235,7 +1235,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.342.0-briar-district';
+const VERSION3D='2.343.0-runtime-party';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3592,7 +3592,7 @@ function voyageTick(dt){if(!G.voyage)return;const C=BFShipCrossing,v=G.voyage;
    if(e.type==='boarding'){for(let i=0;i<3;i++){const q=spawnEnemy(i===2?'caster':'grunt',-65+i*65,-180+i*20,false);Object.assign(q,{y:16,active:true,dropT:0,shipBoarder:e.wave});}toast('Boarders! Clear the deck with your weapons.');}
    else if(e.type==='shelter')toast(e.swapped?'Sheltered water - trade helm and deck roles.':'Sheltered water - repair before continuing.');
    else if(e.type==='hull-hit'){G.shake=5;playFx('heavyhit');}
-   else if(e.type==='failed'){if(MP.active){for(const c of MP.conns)c.send({t:'wipe'});MP.doWipe();}else die();}
+   else if(e.type==='failed'){if(MP.active)MP.doWipe();else die();}
    else if(e.type==='landed'){G.voyageLanded=true;G.qs['sc.crossing']=1;nextArea();musicCue('ship_arrival');return;}
   }
  }
@@ -15355,7 +15355,7 @@ const MP={
         if(G?.hub&&!G.riftHall&&!!G.sparringRoom!==enter&&mode==='play'&&q&&q.zone===this.zone&&n&&!q.dead&&!q.downed&&q.hp>0&&Math.abs((q.ty||0)-(n.y||0))<65&&Math.hypot(q.tx-n.x,q.tz-n.z)<130){if(enter)enterSparringRoom();else enterWaystation();}
       }
       else if(d.t==='riftRoom'){const q=this.peers[c._pid],n=G?.hubNpcs?.find(n=>n.id===(d.hall?'rifthall':'riftexit'));if(G?.hub&&mode==='play'&&q&&n&&!q.dead&&!q.downed&&(q.hp==null||q.hp>0)&&Math.abs((q.ty||0)-(n.y||0))<65&&Math.hypot(q.tx-n.x,q.tz-n.z)<130)travelRiftHall(!!d.hall);}
-      else if(d.t==='revive'){ if(!d.scene||d.scene===this.combatScene())this.routeRevive(d.id,c._pid); }   // host relays a revive to the target (or applies to itself)
+      else if(d.t==='revive'){ if(d.scene===this.combatScene())this.routeRevive(d.id,c._pid); }   // host relays a revive to the target (or applies to itself)
       else if(d.t==='pcontrol'){this.routeCombatMessage({...d,by:c._pid});}
       else if(d.t==='presult'){this.routeCombatMessage({...d,by:c._pid});}
       else if(d.t==='pdmg'){ this.routePvp({...d,by:c._pid}); }           // host relays PvP damage to the target
@@ -15465,8 +15465,8 @@ const MP={
         if(this.peers[s.id]) this.applyPos(this.peers[s.id],s); else this.peers[s.id]=this.mkPeer(s); });
       for(const id in this.peers){ if(!live[id]) delete this.peers[id]; }
       if(d.en){this.applyEnemies(d.en, d.ek);if(G?.bruteArena&&d.bruteWaves)syncOrchardWaves(d.bruteWaves);}if(d.story)briarApply(d.story);if(d.chests)applyCoopChests(d.chests);if(d.trialProgress)applyTrialProgress(d.trialProgress); }
-    else if(d.t==='revive'){ if(d.id===this.myId&&(!d.scene||d.scene===this.combatScene())) this.reviveSelf('An ally pulled you up!'); }
-    else if(d.t==='wipe'){ if(!d.scene||d.scene===this.combatScene())this.doWipe(); }
+    else if(d.t==='revive'){ if(d.id===this.myId&&d.scene===this.combatScene()) this.reviveSelf('An ally pulled you up!'); }
+    else if(d.t==='wipe'){ if(d.scene===this.combatScene())this.doWipe(); }
     else if(d.t==='pcontrol'){if(d.id===this.myId)this.takePvpControl(d);}
     else if(d.t==='hitResult'){this.takeHitResult(d);}
     else if(d.t==='presult'){if(d.id===this.myId)this.takePvpResult(d);}
@@ -15837,7 +15837,7 @@ const MP={
     if(id===this.myId)return this.reviveSelf('An ally pulled you up!')===true;
     const c=this.conns.find(x=>x._pid===id&&x.open);if(c){try{c.send({t:'revive',id,scene:this.combatScene()});return true;}catch(e){}}return false; },
   doWipe(){
-    if(this._wiped)return;this._wiped=true;this.rescue=null;
+    if(!G?.p||G.hub||this.pvp||this._wiped)return;this._wiped=true;this.rescue=null;
     if(this.isHost)for(const c of this.conns)if(c.open)try{c.send({t:'wipe',scene:this.combatScene()});}catch(e){}
     if(G?.p){Object.assign(G.p,{downed:false,spectating:false,dead:true,hp:0,downT:0});delete G._spectatorCam;}
     try{toast('The party has fallen — retry together.');die();}catch(e){}
@@ -24965,7 +24965,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
 </script>
 <!-- Optional 3D hero layer. Loads after the game, shares its WebGL context, and is OFF by
      default (window.HERO3D.on=true). If this file fails to load the game is unaffected. -->
-<script type="importmap">{"imports":{"three":"./three.module.js","./jsm/loaders/GLTFLoader.js":"./jsm/loaders/GLTFLoader.js?v=2254","three/addons/":"./jsm/","./mob3d.js?v=2104":"./mob3d.js?v=2339","./mob3d.js?v=2216":"./mob3d.js?v=2339","./companion3d.js?v=2073":"./companion3d.js?v=2259","./companion3d.js?v=2226e":"./companion3d.js?v=2259","./mob3d.js?v=2233a":"./mob3d.js?v=2339","./mob3d.js?v=2311":"./mob3d.js?v=2339"}}</script>
+<script type="importmap">{"imports":{"./outskirts-art.js?v=2342":"./outskirts-art.js?v=2343","./keep-art.js?v=2342":"./keep-art.js?v=2343","./campaign-craft-scene.js?v=2342":"./campaign-craft-scene.js?v=2343","three":"./three.module.js","./jsm/loaders/GLTFLoader.js":"./jsm/loaders/GLTFLoader.js?v=2254","three/addons/":"./jsm/","./mob3d.js?v=2104":"./mob3d.js?v=2339","./mob3d.js?v=2216":"./mob3d.js?v=2339","./companion3d.js?v=2073":"./companion3d.js?v=2259","./companion3d.js?v=2226e":"./companion3d.js?v=2259","./mob3d.js?v=2233a":"./mob3d.js?v=2339","./mob3d.js?v=2311":"./mob3d.js?v=2339"}}</script>
 <script type="module">
   /* Exposed on window rather than imported by the game code: the game lives in a classic,
      non-module script tag and so cannot use `import`. Same bridge pattern as __BF_WORLD.

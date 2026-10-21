@@ -1,0 +1,161 @@
+{
+  "samples": [
+    {
+      "label": "orchard-before",
+      "frames": 1271,
+      "spanMs": 8333.6,
+      "frameGapP95Ms": 11.100000000002185,
+      "frameGapMaxMs": 11.30000000000291,
+      "above50ms": 0,
+      "cpuMeanMs": 5.655704170535813,
+      "cpuP95Ms": 7.199999988079071,
+      "xRange": [
+        -1914.652249100449,
+        -1170
+      ],
+      "yRange": [
+        0,
+        0
+      ],
+      "zRange": [
+        -1440,
+        -1440
+      ],
+      "visible": {
+        "built": "campaign||0|plains|0|false|||||||||1346|outskirts|-250,-1302;2580,-1970;440,-1040",
+        "craft": 79,
+        "drawCalls": 308,
+        "err": null,
+        "triangles": 137988
+      },
+      "staticBatches": null
+    },
+    {
+      "label": "orchard-after",
+      "frames": 1534,
+      "spanMs": 8578,
+      "frameGapP95Ms": 5.600000000005821,
+      "frameGapMaxMs": 38.799999999995634,
+      "above50ms": 0,
+      "cpuMeanMs": 3.933767926506455,
+      "cpuP95Ms": 4.800000011920929,
+      "xRange": [
+        -1910.0027826053208,
+        -1170
+      ],
+      "yRange": [
+        0,
+        0
+      ],
+      "zRange": [
+        -1440,
+        -1440
+      ],
+      "visible": {
+        "built": "campaign||0|plains|0|false|||||||||1346|outskirts|-250,-1302;2580,-1970;440,-1040",
+        "craft": 79,
+        "drawCalls": 308,
+        "err": null,
+        "triangles": 137988
+      },
+      "staticBatches": {
+        "fixed": 459,
+        "total": 459
+      }
+    },
+    {
+      "label": "orchard-long-after",
+      "frames": 4917,
+      "spanMs": 27417.300000000003,
+      "frameGapP95Ms": 5.600000000005821,
+      "frameGapMaxMs": 16.69999999999709,
+      "above50ms": 0,
+      "cpuMeanMs": 3.831848688003904,
+      "cpuP95Ms": 4.800000011920929,
+      "xRange": [
+        -2009.089931991571,
+        -1170.462374249149
+      ],
+      "yRange": [
+        0,
+        0
+      ],
+      "zRange": [
+        -1440,
+        -1440
+      ],
+      "visible": {
+        "built": "campaign||0|plains|0|false|||||||||1346|outskirts|-250,-1302;2580,-1970;440,-1040",
+        "craft": 79,
+        "drawCalls": 308,
+        "err": null,
+        "triangles": 137988
+      },
+      "staticBatches": null
+    },
+    {
+      "label": "keep-water-before",
+      "frames": 934,
+      "spanMs": 5183.5,
+      "frameGapP95Ms": 5.600000000005821,
+      "frameGapMaxMs": 5.799999999995634,
+      "above50ms": 0,
+      "cpuMeanMs": 2.2970021413020967,
+      "cpuP95Ms": 2.800000011920929,
+      "xRange": [
+        1650,
+        1650
+      ],
+      "yRange": [
+        80,
+        80
+      ],
+      "zRange": [
+        -3915.258468031107,
+        -3700
+      ],
+      "visible": {
+        "built": "campaign||5|ruins|1|false||dungeons|||||||226|keep|-380,-650;690,-2275;0,-3630",
+        "craft": 85,
+        "drawCalls": 96,
+        "err": null,
+        "triangles": 72847
+      },
+      "staticBatches": null
+    },
+    {
+      "label": "keep-water-after",
+      "frames": 3563,
+      "spanMs": 19789.300000000003,
+      "frameGapP95Ms": 5.600000000005821,
+      "frameGapMaxMs": 5.80000000000291,
+      "above50ms": 0,
+      "cpuMeanMs": 2.156890260698151,
+      "cpuP95Ms": 2.699999988079071,
+      "xRange": [
+        1650,
+        1650
+      ],
+      "yRange": [
+        80,
+        80
+      ],
+      "zRange": [
+        -3913.741621538172,
+        -3700
+      ],
+      "visible": {
+        "built": "campaign||5|ruins|1|false||dungeons|||||||226|keep|-380,-650;690,-2275;0,-3630",
+        "craft": 83,
+        "drawCalls": 96,
+        "err": null,
+        "triangles": 72847
+      },
+      "staticBatches": {
+        "fixed": 552,
+        "total": 552
+      }
+    }
+  ],
+  "limits": "Native held keys from staged starts, combat held, high-quality shoulder view on this PC. No sustained user stutter reproduced; timing noise and refresh caps prevent a certified FPS improvement claim. Synthetic updater timing measures one function, not whole-game speed."
+}

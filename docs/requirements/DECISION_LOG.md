@@ -2577,3 +2577,11 @@ Homefields route/boundary/optional-loop rebuild implemented; six planted enclosu
 User approves performance first, then co-op reliability while playtesting Briar. Measure native frame and CPU work near Orchard and Keep water; fix demonstrated bottlenecks while retaining visual detail, physics, saves, recordings, trials and recent district layout. Follow with adversarial transition/death/revive/chest/quest/hub checks. Separate isolated handlers and staged browser checks from real Internet co-op and subjective pacing. No paid audio or new layout work.
 
 U-PERF-PARTY-20261021 implementation: v2.343 caches scenery cell coordinates and freezes static instanced-wrapper local transforms, retaining meshes/materials/ranges/animated mechanisms. Single scene-bound boat failure wipe; reject unscoped/wrong-scene revive/wipes; hub/PvP refuse combat wipes. Two actual clients over local serialized relay pass16 chest/transition/hub/revive checks. Native longer Orchard4917frames/27.42s and drain3563frames/19.79s show no50ms gaps in these windows; legacy100/1145 retained. Original severe intermittent stutter remains unconfirmed, and Internet co-op is not certified. Evidence docs/art-validation/runtime-party-20261021/. No paid audio/content/save-schema changes.
+
+
+## U-NPC-LOOKS-20261021
+Custom NPC skins approved. Grounded source and plan: requirements/USER_SOURCE_2026-10-21_NPC_APPEARANCES.md. Preserve base rigs, story, recordings, saves and interactions; explicit role-based outfits with bounded, bone-attached details and shared gallery/runtime factory. Implementation in progress.
+
+
+## U-NPC-LOOKS-20261021 implemented — v2.344.0
+48 named NPC appearances and16 escort variants now use explicit role-based palettes, fitted clothing/tools and face details. Shared gameplay/gallery factory; natural civilian faces, retained mentor masks, bone-attached props, merged batches and512px NPC maps. Special King/Orb models retained.11 suites,64 actual GLTF pose/resource checks and staged legacy100/1145 hub/Briar/Keep/return checks pass. Representative visual inspection, not every-angle clipping or Internet co-op certification. No story/voice/save-schema/balance/layout changes or paid generation. Evidence docs/art-validation/npc-outfits-20261021/.

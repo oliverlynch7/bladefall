@@ -1235,7 +1235,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.343.0-runtime-party';
+const VERSION3D='2.344.0-npc-wardrobe';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -18627,6 +18627,7 @@ function openDevPreviews(){
  mode='menu';showGameUI(false);
  showOverlayHTML(`<div class="card narrow"><p class="ovkicker">Development</p><h2 class="ovh">Design Previews</h2><p class="ovsub">Preview class skins, compare HUD ideas, or explore beta levels and maps.</p>
  <a class="bigbtn" style="display:block;text-decoration:none" href="/3d/class-skins.html">Class wardrobe · preview all 17 classes</a>
+ <a class="bigbtn" style="display:block;text-decoration:none" href="/3d/npc-wardrobe.html">Meet the people · NPC outfit previews</a>
  <a class="bigbtn" style="display:block;text-decoration:none" href="/design/hud-preview/">HUD designs · compare three layouts</a>
  <a class="bigbtn" style="display:block;text-decoration:none" href="/design/campaign-geography/">Campaign blueprints · all 16 level halves</a>
  <a class="bigbtn" style="display:block;text-decoration:none" href="/3d/?devbriar=1">Play Briar Town remake beta</a>
@@ -24965,7 +24966,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
 </script>
 <!-- Optional 3D hero layer. Loads after the game, shares its WebGL context, and is OFF by
      default (window.HERO3D.on=true). If this file fails to load the game is unaffected. -->
-<script type="importmap">{"imports":{"./outskirts-art.js?v=2342":"./outskirts-art.js?v=2343","./keep-art.js?v=2342":"./keep-art.js?v=2343","./campaign-craft-scene.js?v=2342":"./campaign-craft-scene.js?v=2343","three":"./three.module.js","./jsm/loaders/GLTFLoader.js":"./jsm/loaders/GLTFLoader.js?v=2254","three/addons/":"./jsm/","./mob3d.js?v=2104":"./mob3d.js?v=2339","./mob3d.js?v=2216":"./mob3d.js?v=2339","./companion3d.js?v=2073":"./companion3d.js?v=2259","./companion3d.js?v=2226e":"./companion3d.js?v=2259","./mob3d.js?v=2233a":"./mob3d.js?v=2339","./mob3d.js?v=2311":"./mob3d.js?v=2339"}}</script>
+<script type="importmap">{"imports":{"./hero3d.js?v=2342":"./hero3d.js?v=2344","./outskirts-art.js?v=2342":"./outskirts-art.js?v=2343","./keep-art.js?v=2342":"./keep-art.js?v=2343","./campaign-craft-scene.js?v=2342":"./campaign-craft-scene.js?v=2343","three":"./three.module.js","./jsm/loaders/GLTFLoader.js":"./jsm/loaders/GLTFLoader.js?v=2254","three/addons/":"./jsm/","./mob3d.js?v=2104":"./mob3d.js?v=2339","./mob3d.js?v=2216":"./mob3d.js?v=2339","./companion3d.js?v=2073":"./companion3d.js?v=2259","./companion3d.js?v=2226e":"./companion3d.js?v=2259","./mob3d.js?v=2233a":"./mob3d.js?v=2339","./mob3d.js?v=2311":"./mob3d.js?v=2339"}}</script>
 <script type="module">
   /* Exposed on window rather than imported by the game code: the game lives in a classic,
      non-module script tag and so cannot use `import`. Same bridge pattern as __BF_WORLD.

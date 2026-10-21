@@ -18,7 +18,7 @@ import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
 import {syncCosmetics,disposeCosmetics,cosmeticStats} from './cosmetic3d.js?v=2227a';
 import {PALMS,WEAPON_GRIPS,attachGrip,restoreGripPose,captureGripPose,poseWeaponGrip,armTo} from './weapon-grips.js?v=2108';
 import {syncRiftShards} from './rift-shard3d.js?v=1997';
-import {syncNpcs} from './npc3d.js?v=2309';
+import {syncNpcs} from './npc3d.js?v=2344';
 import {syncProjectiles} from './projectile3d.js?v=2330f';
 import {syncCompanions,companionPortrait,hideRiddenDragon} from './companion3d.js?v=2259';
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -1409,7 +1409,7 @@ function repaintTexture(srcTex, skin){
   const cvs = document.createElement('canvas');
   cvs.width = img.width; cvs.height = img.height;
   const ctx = cvs.getContext('2d', { willReadFrequently:true });
-  ctx.drawImage(img, 0, 0);
+  ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
   const data = ctx.getImageData(0,0,cvs.width,cvs.height), px = data.data;
   const metal = hexRGB(skin.armor||skin.metal), leather = hexRGB(skin.leather), lift = skin.lift || 1.0;
   for(let i=0;i<px.length;i+=4){

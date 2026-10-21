@@ -3904,3 +3904,7 @@ Connected optional circuits, explicit field lane/cover/encounter placement, six 
 
 ## [2026-10-21] v2.343 - runtime and party safety
 Cache campaign/Keep spatial cell centers and avoid static batch transform recomposition without changing scenery detail or culling distance. Remove duplicate unscoped boat failure wipe; bind revival/wipes to current scene and protect hub/PvP from combat wipes. Native Orchard/drain traces and actual two-client serialized relay, legacy save and focused regressions recorded in docs/art-validation/runtime-party-20261021/. Original severe intermittent frame drop and real Internet co-op remain unverified.
+
+
+## U-NPC-LOOKS-20261021 implemented — v2.344.0
+48 named NPC appearances and16 escort variants now use explicit role-based palettes, fitted clothing/tools and face details. Shared gameplay/gallery factory; natural civilian faces, retained mentor masks, bone-attached props, merged batches and512px NPC maps. Special King/Orb models retained.11 suites,64 actual GLTF pose/resource checks and staged legacy100/1145 hub/Briar/Keep/return checks pass. Representative visual inspection, not every-angle clipping or Internet co-op certification. No story/voice/save-schema/balance/layout changes or paid generation. Evidence docs/art-validation/npc-outfits-20261021/.

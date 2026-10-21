@@ -1,0 +1,68 @@
+[
+  {
+    "suite": "test-npc-costumes.mjs",
+    "passed": true,
+    "output": "{\"passed\":true,\"checks\":10752,\"profiles\":64,\"maxBatches\":11,\"maxTriangles\":4864,\"report\":[{\"id\":\"thomas\",\"model\":\"Monk\",\"detail\":\"father\",\"meshes\":7,\"triangles\":2004,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"mara\",\"model\":\"Ranger\",\"detail\":\"medic\",\"meshes\":8,\"triangles\":2188,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"gus\",\"model\":\"Monk\",\"detail\":\"carpenter\",\"meshes\":9,\"triangles\":1192,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"lewis\",\"model\":\"Ranger\",\"detail\":\"scout\",\"meshes\":7,\"triangles\":952,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"beth\",\"model\":\"Ranger\",\"detail\":\"shepherd\",\"meshes\":7,\"triangles\":1952,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"bethBrother\",\"model\":\"Monk\",\"detail\":\"shepherdBoy\",\"meshes\":8,\"triangles\":3012,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"grant\",\"model\":\"Warrior\",\"detail\":\"guard\",\"meshes\":7,\"triangles\":696,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"felix\",\"model\":\"Rogue\",\"detail\":\"locksmith\",\"meshes\":9,\"triangles\":3312,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"roland\",\"model\":\"Monk\",\"detail\":\"armorer\",\"meshes\":7,\"triangles\":1956,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"cross\",\"model\":\"Warrior\",\"detail\":\"hollowOfficer\",\"meshes\":6,\"triangles\":1644,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"ellis\",\"model\":\"Wizard\",\"detail\":\"researcher\",\"meshes\":9,\"triangles\":3256,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"hugo\",\"model\":\"Ranger\",\"detail\":\"explorer\",\"meshes\":8,\"triangles\":4864,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"ian\",\"model\":\"Monk\",\"detail\":\"spiritKnight\",\"meshes\":6,\"triangles\":1308,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"pike\",\"model\":\"Warrior\",\"detail\":\"overseer\",\"meshes\":8,\"triangles\":1908,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"martin\",\"model\":\"Monk\",\"detail\":\"organizer\",\"meshes\":8,\"triangles\":1772,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"caleb\",\"model\":\"Monk\",\"detail\":\"escapee\",\"meshes\":7,\"triangles\":1712,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"skip\",\"model\":\"Ranger\",\"detail\":\"climber\",\"meshes\":8,\"triangles\":3256,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"quartermaster\",\"model\":\"Monk\",\"detail\":\"merchant\",\"meshes\":8,\"triangles\":2516,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"anvil\",\"model\":\"Monk\",\"detail\":\"smith\",\"meshes\":9,\"triangles\":1740,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"keeper\",\"model\":\"Cleric\",\"detail\":\"tailor\",\"meshes\":8,\"triangles\":2544,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"drillmaster\",\"model\":\"Warrior\",\"detail\":\"trainer\",\"meshes\":6,\"triangles\":720,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"beastkeeper\",\"model\":\"Ranger\",\"detail\":\"handler\",\"meshes\":7,\"triangles\":2552,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"flint\",\"model\":\"Monk\",\"detail\":\"captiveSmith\",\"meshes\":8,\"triangles\":1144,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"jack\",\"model\":\"Ranger\",\"detail\":\"repairer\",\"meshes\":8,\"triangles\":2140,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"miles\",\"model\":\"Monk\",\"detail\":\"servant\",\"meshes\":7,\"triangles\":3220,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"ward\",\"model\":\"Warrior\",\"detail\":\"yardOfficer\",\"meshes\":6,\"triangles\":1644,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"ruth\",\"model\":\"Ranger\",\"detail\":\"refugee\",\"meshes\":8,\"triangles\":2344,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"grace\",\"model\":\"Ranger\",\"detail\":\"caretaker\",\"meshes\":7,\"triangles\":2924,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"victor\",\"model\":\"Warrior\",\"detail\":\"palaceGuard\",\"meshes\":6,\"triangles\":1308,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"walter\",\"model\":\"Monk\",\"detail\":\"mason\",\"meshes\":8,\"triangles\":1448,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"sly\",\"model\":\"Rogue\",\"detail\":\"thief\",\"meshes\":8,\"triangles\":3024,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"riftkeeper\",\"model\":\"Cleric\",\"detail\":\"rift\",\"meshes\":9,\"triangles\":1144,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"mentor_berserker\",\"model\":\"Warrior\",\"detail\":\"berserker\",\"meshes\":7,\"triangles\":2292,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"mentor_ninja\",\"model\":\"Rogue\",\"detail\":\"ninja\",\"meshes\":6,\"triangles\":720,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"mentor_reaper\",\"model\":\"Rogue\",\"detail\":\"reaper\",\"meshes\":8,\"triangles\":736,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"mentor_chronomancer\",\"model\":\"Wizard\",\"detail\":\"chronomancer\",\"meshes\":8,\"triangles\":1176,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"mentor_pirate\",\"model\":\"Rogue\",\"detail\":\"pirate\",\"meshes\":10,\"triangles\":2112,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"mentor_paladin\",\"model\":\"Cleric\",\"detail\":\"paladin\",\"meshes\":7,\"triangles\":1344,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"mentor_necromancer\",\"model\":\"Wizard\",\"detail\":\"necromancer\",\"meshes\":8,\"triangles\":2240,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"mentor_pyromancer\",\"model\":\"Wizard\",\"detail\":\"pyromancer\",\"meshes\":8,\"triangles\":1736,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"otto\",\"model\":\"Monk\",\"detail\":\"boatbuilder\",\"meshes\":8,\"triangles\":2140,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"rose\",\"model\":\"Rogue\",\"detail\":\"captain\",\"meshes\":11,\"triangles\":2308,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"hugh\",\"model\":\"Wizard\",\"detail\":\"archivist\",\"meshes\":8,\"triangles\":2008,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"simon\",\"model\":\"Ranger\",\"detail\":\"librarian\",\"meshes\":8,\"triangles\":1916,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"heath\",\"model\":\"Ranger\",\"detail\":\"mountaineer\",\"meshes\":8,\"triangles\":4576,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"abe\",\"model\":\"Monk\",\"detail\":\"fisher\",\"meshes\":9,\"triangles\":2852,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"dash\",\"model\":\"Rogue\",\"detail\":\"scavenger\",\"meshes\":8,\"triangles\":2644,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"shade\",\"model\":\"Warrior\",\"detail\":\"shade\",\"meshes\":6,\"triangles\":684,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"ascent_worker_a\",\"model\":\"Monk\",\"detail\":\"servant\",\"meshes\":7,\"triangles\":3220,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"ascent_worker_b\",\"model\":\"Ranger\",\"detail\":\"repairer\",\"meshes\":8,\"triangles\":2140,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"iron_worker0\",\"model\":\"Monk\",\"detail\":\"captiveSmith\",\"meshes\":8,\"triangles\":1144,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"iron_worker1\",\"model\":\"Rogue\",\"detail\":\"refugee\",\"meshes\":9,\"triangles\":2816,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"iron_worker2\",\"model\":\"Ranger\",\"detail\":\"repairer\",\"meshes\":8,\"triangles\":2140,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"prison_escape0\",\"model\":\"Monk\",\"detail\":\"escapee\",\"meshes\":7,\"triangles\":1712,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"prison_escape1\",\"model\":\"Ranger\",\"detail\":\"refugee\",\"meshes\":8,\"triangles\":2344,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"prison_escape2\",\"model\":\"Rogue\",\"detail\":\"escapee\",\"meshes\":8,\"triangles\":2184,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"prison_escape3\",\"model\":\"Monk\",\"detail\":\"refugee\",\"meshes\":8,\"triangles\":2344,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"keep_escape0\",\"model\":\"Monk\",\"detail\":\"escapee\",\"meshes\":7,\"triangles\":1712,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"keep_escape1\",\"model\":\"Ranger\",\"detail\":\"refugee\",\"meshes\":8,\"triangles\":2344,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"keep_escape2\",\"model\":\"Rogue\",\"detail\":\"escapee\",\"meshes\":8,\"triangles\":2184,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"canyon_south\",\"model\":\"Monk\",\"detail\":\"escapee\",\"meshes\":7,\"triangles\":1712,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"canyon_north\",\"model\":\"Monk\",\"detail\":\"refugee\",\"meshes\":8,\"triangles\":2344,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"canyon_north_b\",\"model\":\"Ranger\",\"detail\":\"refugee\",\"meshes\":8,\"triangles\":2344,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]},{\"id\":\"canyon_extra\",\"model\":\"Monk\",\"detail\":\"escapee\",\"meshes\":7,\"triangles\":1712,\"anchors\":[\"Torso\",\"Hips\",\"Head\"]}]}",
+    "stderr": ""
+  },
+  {
+    "suite": "test-npc-scene-ownership.mjs",
+    "passed": true,
+    "output": "59 NPC scene ownership, legitimate Thomas, mode exclusion, lifecycle, immutable roster and stage cleanup checks passed.",
+    "stderr": ""
+  },
+  {
+    "suite": "test-npc-labels.cjs",
+    "passed": true,
+    "output": "{\"checks\":117,\"passed\":true,\"renderDpr\":[0.5,0.66,1,1.25,1.5,2],\"roles\":[\"host\",\"guest\"]}",
+    "stderr": ""
+  },
+  {
+    "suite": "test-npc-names.cjs",
+    "passed": true,
+    "output": "17 NPC identity, occlusion, crowding and lifecycle checks passed.",
+    "stderr": ""
+  },
+  {
+    "suite": "test-face-options.cjs",
+    "passed": true,
+    "output": "PASS face defaults, bounds and randomized offset limits",
+    "stderr": ""
+  },
+  {
+    "suite": "test-chess-choreography.mjs",
+    "passed": true,
+    "output": "PASS choreography: castling moves both pieces; en passant removes correct pawn; promotion survives transition; no duplicate pieces or non-finite geometry",
+    "stderr": ""
+  },
+  {
+    "suite": "test-social-chess.mjs",
+    "passed": true,
+    "output": "PASS: illegal move, checkmate, castling, en passant, underpromotion, insufficient material, stalemate, repetition, fifty-move claim",
+    "stderr": ""
+  },
+  {
+    "suite": "test-hub-recovery.cjs",
+    "passed": true,
+    "output": "{\"checks\":257,\"passed\":true}",
+    "stderr": ""
+  },
+  {
+    "suite": "test-save-safety.cjs",
+    "passed": true,
+    "output": "24 save normalization and isolated recovery checks passed.",
+    "stderr": ""
+  },
+  {
+    "suite": "test-render-warmup.mjs",
+    "passed": true,
+    "output": "Off-camera preparation restores visibility, culling, viewport and shadow state after success or failure.",
+    "stderr": ""
+  },
+  {
+    "suite": "test-npc-recordings.cjs",
+    "passed": true,
+    "output": "{\"casting\":50,\"recorded\":371,\"total\":371,\"complete\":50,\"sourceAndAudioHashes\":\"pass\"}",
+    "stderr": ""
+  }
+]

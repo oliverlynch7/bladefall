@@ -1,0 +1,61 @@
+{
+  "version": "2.345.0-loot-banner",
+  "legacyCharacter": {
+    "name": "First Journey QA",
+    "level": 4,
+    "startingGold": 1145,
+    "isolatedStorage": true
+  },
+  "checks": {
+    "revealLifecycle": 125,
+    "lootTransactions": 22,
+    "syntax": "adventure-hud.js passes node --check",
+    "actualChest": "normal and reduced motion; bagDelta1; duplicate open rejected; muted"
+  },
+  "layouts": [
+    {
+      "viewport": [
+        1920,
+        1080
+      ],
+      "banner": [
+        620,
+        12,
+        680,
+        118.39
+      ]
+    },
+    {
+      "viewport": [
+        1280,
+        720
+      ],
+      "banner": [
+        370,
+        12,
+        540,
+        118.39
+      ],
+      "overflow": false
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "longNameBanner": [
+        12,
+        153.44,
+        366,
+        126.89
+      ],
+      "identityBottom": 143.44,
+      "overflow": false
+    }
+  ],
+  "boss": {
+    "bossBottom": 64,
+    "bannerTop": 100
+  },
+  "scope": "No reward, save schema, inventory, timing, SFX or balance changes. Responsive browser layout is checked, not human playtest certification."
+}

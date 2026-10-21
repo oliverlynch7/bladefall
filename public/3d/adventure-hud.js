@@ -55,7 +55,7 @@
   if(d.kind==='weapon')rows=row('Damage',old?.dmg,o.dmg)+row('Delay · lower is faster',old?.cd,o.cd,true);
   else if(d.kind==='armor')rows=row('Defense',old?.defense,o.defense);
   const names={hp:'Max HP',def:'Bonus defense',powerMul:'Damage %',magPowerMul:'Magic damage %',speedMul:'Move speed %',atkSpeedMul:'Attack speed %',crit:'Crit chance %',lifesteal:'Lifesteal %',dodgeMul:'Dodge recovery %',cdr:'Skill recovery %',goldFind:'Gold found %'};
-  const totals=it=>{const out={};for(const af of it?.affixes||[])out[af.stat]=(out[af.stat]||0)+(Number(af.val)||0);return out;},before=totals(old),after=totals(o);
+  const totals=it=>{const out={};for(const af of it?.affixes||[]){if(!af.stat)continue;out[af.stat]=(out[af.stat]||0)+(Number(af.val)||0);}return out;},before=totals(old),after=totals(o);
   for(const stat of new Set([...Object.keys(before),...Object.keys(after)])){const n=['hp','def'].includes(stat)?1:100;rows+=row(names[stat]||stat,Math.round((before[stat]||0)*n*10)/10,Math.round((after[stat]||0)*n*10)/10);}
   const effects=it=>[...(it?.affixes||[]).map(x=>x.label),it?.el?it.el+' element':'',it?.lifesteal?Math.round(it.lifesteal*100)+'% lifesteal':''].filter(Boolean).join(' · ')||'None';
   rows+='<div class="loot-effects"><span>Found: '+esc(effects(o))+'</span><span>Equipped: '+esc(effects(old))+'</span></div>';

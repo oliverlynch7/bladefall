@@ -1134,11 +1134,11 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./loading.js?v=2292"></script>
 <script src="./sprint-race.js?v=2255"></script>
 <link rel="stylesheet" href="./sprint-race.css?v=2255">
-<link rel="stylesheet" href="./hub-dialogue.css?v=2348">
+<link rel="stylesheet" href="./hub-dialogue.css?v=2354">
 <script src="./voice-content.js?v=2336"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./render-motion.js?v=2304"></script>
-<script src="./hub-dialogue.js?v=2348"></script>
+<script src="./hub-dialogue.js?v=2354"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
 <script src="./hub-tour.js?v=2294"></script>
 <script src="./controller.js?v=2323"></script>
@@ -1188,7 +1188,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./long-ascent.js?v=2185"></script>
 <script src="./final-king.js?v=2338"></script>
 <script src="./return-adventures.js?v=2038"></script>
-<script src="./return-visits.js?v=2317"></script>
+<script src="./return-visits.js?v=2354"></script>
 <script src="./palace-courtyard.js?v=2317"></script>
 <script src="./dragon-rescue.js?v=2183b"></script>
 <script src="./dragon-combat.js?v=2024"></script>
@@ -1243,7 +1243,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.353.0-abyssal-heart-pulse';
+const VERSION3D='2.354.0-hub-npc-access';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3421,10 +3421,10 @@ function inBrokenWalls(){return isCampaignAdventure()&&G.zone===2&&G.area===0;}
 function inLostCanyon(){return isCampaignAdventure()&&G.zone===1&&G.area===1;}
 function inWindingCliffs(){return isCampaignAdventure()&&G.zone===1&&G.area===0;}
 function inReturnHub(){return !!(G?.hub&&!G.riftHall&&!G.sparringRoom&&!IN_ARENA);}
-function returnHubInfo(n){if(n?.id==='thomas'&&window.BFSocial?.npcPose('thomas'))return null;return BFReturnVisits.info(n,meta);}
-function syncReturnHubNpcs(){if(!inReturnHub())return;const s=adventureStoryState();if(s.flags['rv.eligible.keepsake']&&!G.hubNpcs.some(n=>n.id==='thomas'))G.hubNpcs.push({id:'thomas',name:'Thomas',role:'A piece of home',c1:'#665442',c2:'#c7aa76',x:300,z:350,y:0,direct:true,verb:'Talk to Thomas',open:()=>openReturnRequest(G.hubNpcs.find(n=>n.id==='thomas'))});G.storyNpcs=G.hubNpcs.filter(n=>Object.values(BFReturnVisits.defs).some(q=>q.npc===n.id));}
+function returnHubInfo(n){if(n?.id==='thomas'&&window.BFSocial?.npcPose('thomas'))return null;return BFReturnVisits.info(n,meta,MP.guest()?G?.storyState:null);}
+function syncReturnHubNpcs(){if(!inReturnHub())return;const s=adventureStoryState();if(s.flags['rv.eligible.keepsake']&&!G.hubNpcs.some(n=>n.id==='thomas'))G.hubNpcs.push({id:'thomas',name:'Thomas',role:'A piece of home',c1:'#665442',c2:'#c7aa76',x:300,z:350,y:0,questOnly:true,verb:'Talk to Thomas',open:()=>openNpcTalk(G.hubNpcs.find(n=>n.id==='thomas'))});G.storyNpcs=G.hubNpcs.filter(n=>Object.values(BFReturnVisits.defs).some(q=>q.npc===n.id));}
 function setupReturnHub(){if(!inReturnHub())return;G.storyState=BFStoryState.create();G.storyClaims={};G.storyObjects=[];G._storyEpoch=null;briarEpoch();BFReturnVisits.seedHub(G.storyState,meta);syncReturnHubNpcs();}
-function openReturnRequest(n){if(!inReturnHub()||!n||!returnHubInfo(n))return;BFHubDialogue.close();if(mode==='menu'){showOverlay(false);resumePlay();}briarRequest('open',{npc:n.id});}
+function openReturnRequest(n){if(!inReturnHub()||!n||n.id==='thomas'&&window.BFSocial?.npcPose('thomas')||!BFReturnVisits.entries(n,meta,MP.guest()?G?.storyState:null).some(q=>q.status!=='locked'))return;BFHubDialogue.close();if(mode==='menu'){showOverlay(false);resumePlay();}briarRequest('open',{npc:n.id});}
 function syncReturnField(){if(!isCampaignAdventure())return;const s=adventureStoryState();if(!G.returnActive)G.returnActive=BFReturnVisits.active(G,meta);if(!MP.guest())for(const id of G.returnActive)s.flags['rv.active.'+id]=true;G.storyObjects=(G.storyObjects||[]).filter(o=>!o.returnObject).concat(BFReturnVisits.fieldObjects(G.returnActive));BFReturnAdventures.sync({G,s,seg:vseg,plat:vplat});BFReturnVisits.sync({G,s,meta,plat:vplat});}
 function applyReturnReward(id,reward){const key=id.split('.').pop(),q=BFReturnVisits.defs[key];if(!q)return false;meta.returnVisits=BFReturnVisits.normalize(meta.returnVisits);
  if(reward.kind==='return_accept'){if(!meta.returnVisits[key])meta.returnVisits[key]='accepted';if(inReturnHub())persist();return true;}
@@ -3462,7 +3462,7 @@ function campaignParty(living=false){return (MP.active?[MP.myId,...MP.conns.filt
 function campaignWorldLive(){return mode==='play'||MP.active&&!!liveMenuWorld&&liveMenuWorld===G&&['pause','menu','journal','mirror','upgrade','npc','inspection','chess'].includes(mode);}
 function briarReceive(request,actor,position){
  if(!inBriarStory()||!briarBook||(MP.active&&!MP.isHost))return false;
- const s=adventureStoryState(),party=campaignParty();position=campaignActor(actor);
+ const stored=adventureStoryState(),s=inReturnHub()&&request?.event?.type==='open'&&!stored.conversation?BFReturnVisits.seedHub(checkpointClone(stored),meta):stored,party=campaignParty();position=campaignActor(actor);
  if(!position||!party.includes(actor)){if(MP.active)for(const c of MP.conns)if(c.open&&c._pid===actor)try{c.send({t:'story',story:briarPacket(),ack:request?.event?.id});}catch{}return false;}
  const gripBusy=inSkyLibrary()&&request?.event?.type==='world'&&request.event.key==='sl.display.grip'&&G.library.gripOwner&&G.library.gripOwner!==actor;
  const winchBusy=inPrison()&&request?.event?.type==='world'&&request.event.key==='kd.lift.winch'&&G.prison.winch.owner&&G.prison.winch.owner!==actor;
@@ -3564,7 +3564,7 @@ function briarSync(){
  if(v)v.revision=s.revision;
  if(n&&(G.kingFinal||s.conversation.owner===briarId()||G._storyViewing===n.id)){
   const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);
-  BFHubDialogue.present(n,{meta,location:inReturnHub()?'WAYSTATION':G.kingFinal?(G.kingFinal.void?'THE ABYSSAL VOID':'THE KING’S HALL'):inLongAscent()?'LONG ASCENT':inCastleGates()?'CASTLE GATES':G.marbleArena?'THE ORB CHAMBER':inSkyLibrary()?'SKY LIBRARY':inPalaceCourtyard()?'PALACE COURTYARD':inThunderCliffs()?'THUNDER CLIFFS':inShipwreck()?'SHIPWRECK SHORE':inGreatFurnace()?'THE GREAT FURNACE':inIronHalls()?'IRON HALLS':inIceCaves()?'DEEP ICE CAVES':inSnowbound()?'SNOWBOUND PEAKS':inPrison()?'THE DUNGEONS':inBrokenWalls()?'BROKEN WALLS':inLostCanyon()?'LOST CANYON':inWindingCliffs()?'WINDING CLIFFS':G.riftMentor?'CLASS TRAINING':G.riftHall?'RIFT HALL':inBlackWoods()?'BLACK WOODS':'BRIAR TOWN',leaveLabel:'Leave conversation',eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
+  BFHubDialogue.present(n,{meta,location:inReturnHub()?'WAYSTATION':G.kingFinal?(G.kingFinal.void?'THE ABYSSAL VOID':'THE KING’S HALL'):inLongAscent()?'LONG ASCENT':inCastleGates()?'CASTLE GATES':G.marbleArena?'THE ORB CHAMBER':inSkyLibrary()?'SKY LIBRARY':inPalaceCourtyard()?'PALACE COURTYARD':inThunderCliffs()?'THUNDER CLIFFS':inShipwreck()?'SHIPWRECK SHORE':inGreatFurnace()?'THE GREAT FURNACE':inIronHalls()?'IRON HALLS':inIceCaves()?'DEEP ICE CAVES':inSnowbound()?'SNOWBOUND PEAKS':inPrison()?'THE DUNGEONS':inBrokenWalls()?'BROKEN WALLS':inLostCanyon()?'LOST CANYON':inWindingCliffs()?'WINDING CLIFFS':G.riftMentor?'CLASS TRAINING':G.riftHall?'RIFT HALL':inBlackWoods()?'BLACK WOODS':'BRIAR TOWN',leaveLabel:'Leave conversation',hubMenu:inReturnHub()?()=>{if(inReturnHub()&&G.hubNpcs.includes(n))openNpcTalk(n);}:null,eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
    enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
    leave:()=>{if(mode==='npc')resumePlay();},requestClose:()=>{G._storyViewing=null;briarRequest('close');},choose:(line,choice)=>choice.startsWith('__hunt_')?briarRequest('hunt',{line,npc:v.npc,action:choice==='__hunt_claim'?'claim':'accept'}):briarRequest('choose',{line,choice})},briarBook,v,owner===briarId());
  }else if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
@@ -3577,7 +3577,7 @@ function briarInteract(){
  const consider=(o,label,act)=>{const dx=o.x-p.x,dz=o.z-p.z,d=Math.hypot(dx,dz);if(d>(o.range||108)||Math.abs((o.y||0)-p.y)>65||!BFCampaignInteraction.reachable(G,p,o))return;if(o.bounds&&(p.x<o.bounds.minX||p.x>o.bounds.maxX||p.z<o.bounds.minZ||p.z>o.bounds.maxZ))return;const k=d-45*Math.max(0,(dx*Math.sin(yaw)+dz*Math.cos(yaw))/(d||1));if(k<score){score=k;best={anchorNpc:(G.storyNpcs||[]).includes(o)?o:null,x:o.x,z:o.z,y:(o.y||0)+BFCampaignObjects.anchor(o),label,act};}};
  if(inLongAscent()&&G.ascent.lift)for(const y of [250,1250])consider({x:1420,z:-170,y,range:110},y===250?'Ride service lift up':'Ride service lift down',()=>BFLongAscent.ride(G,y===250));
  if(inThunderCliffs()&&G.thunder.lift)for(const y of [40,340])consider({x:-300,z:-650,y,range:115},y===40?'Ride lift up':'Ride lift down',()=>BFThunderCliffs.ride(G,y===40));
- for(const n of G.storyNpcs||[])if((n.id!=='thomas'||inBriar()||inReturnHub())&&!(n.id==='thomas'&&window.BFSocial?.npcPose('thomas'))&&(G?.kingFinal||inLongAscent()||inCastleGates()||G?.marbleArena||inSkyLibrary()||inPalaceCourtyard()||inThunderCliffs()||inShipwreck()||inGreatFurnace()||inIronHalls()||inIceCaves()||inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||briarBook.npcs[n.id]&&BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>inReturnHub()&&n.open&&!n.direct?openNpcTalk(n):briarRequest('open',{npc:n.id}));
+ for(const n of G.storyNpcs||[])if((n.id!=='thomas'||inBriar()||inReturnHub())&&!(n.id==='thomas'&&window.BFSocial?.npcPose('thomas'))&&(G?.kingFinal||inLongAscent()||inCastleGates()||G?.marbleArena||inSkyLibrary()||inPalaceCourtyard()||inThunderCliffs()||inShipwreck()||inGreatFurnace()||inIronHalls()||inIceCaves()||inSnowbound()||inPrison()||inBrokenWalls()||inLostCanyon()||inWindingCliffs()||inBlackWoods()||n.id==='gus'||!s.flags['briar.depart'])&&(!briarBook||briarBook.npcs[n.id]&&BFStoryState.matches(s,briarBook.npcs[n.id].when)))consider(n,'Talk to '+n.name,()=>inReturnHub()&&n.open?openNpcTalk(n):briarRequest('open',{npc:n.id}));
  if(inShipwreck()&&!s.flags['sc.code.open']){const ballista=G.storyObjects.find(o=>o.key==='sc.ballista');if(ballista)consider(ballista,ballista.label,()=>BFShipwreckShore.openAim(G,{getState:adventureStoryState,enter:()=>{releaseKeyboard();mode='inspection';showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},resume:()=>{if(mode==='inspection')resumePlay();},fire:()=>briarRequest('world',{key:'sc.code.fire'})}));}
  if(briarBook)for(const o of briarObjects())if(!s.flags['event.'+o.key]&&!['sc.ballista','sc.code.fire'].includes(o.key)){const ready=o.available&&BFStoryState.matches(s,briarBook.events[o.key]?.when),gripBusy=o.key==='sl.display.grip'&&G.library.gripOwner&&G.library.gripOwner!==briarId(),winchBusy=o.key==='kd.lift.winch'&&(G.prison?.remote?.winchOwner||G.prison?.winch?.owner)&&(G.prison?.remote?.winchOwner||G.prison?.winch?.owner)!==briarId(),millBusy=['briar.water','briar.mill.reset'].includes(o.key)&&G.briarMill?.owner&&G.briarMill.owner!==briarId();consider(o,millBusy?'Crate in use by ally':gripBusy?'Reflector in use by ally':winchBusy?'Winch in use by ally':ready?o.label:o.key==='sc.hull.release'?'Wait for the gold mark':'Inspect · '+o.label,()=>{if(millBusy){toast('Your ally is moving the crate.');return;}if(gripBusy){toast('Your ally is moving the reflector.');return;}if(winchBusy){toast('Your ally is turning the winch.');return;}if(ready)briarRequest('world',{key:o.key});else{if(o.key==='sc.hull.release'){BFShipwreckShore.hullMiss(G);toast(o.blockedText);return;}const text=o.blockedText||(o.available?'This may be useful later. Follow your current task, then return here.':'This needs another step first. Check the current task in your journal.');BFJournalNotice.push({id:'inspect.'+o.key,kind:'Not ready yet',title:o.label,text});toast(text);}});}
  return best;
@@ -19130,11 +19130,11 @@ function enterWaystation(riftHall=false){
   // grouped by purpose: WEST BAY = Exchange, EAST BAY = War Yard, centre = quests/mirror,
   // and the new SOUTH ANNEX = the Abyss plus the repeatable parkour trial.
   G.hubNpcs=[
-    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',prop:'counter',x:-548,z:-60,c1:'#6e5226',c2:'#e8a33d',open:()=>openShop(wsResume)},
-    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:-548,z:150,open:()=>openForge(wsResume)},
-    {id:'keeper',ic:'🧥',name:'The Stylist',role:'Style & appearance',prop:'barber',x:-350,z:40,c1:'#3a2a55',c2:'#b06bff',open:()=>openWardrobe(wsResume)},
-    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:()=>openTrainer(wsResume)},
-    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:()=>openBeastkeeper(wsResume)},
+    {id:'quartermaster',ic:'🛒',name:'Quartermaster',role:'Shop',prop:'counter',x:-548,z:-60,c1:'#6e5226',c2:'#e8a33d',open:back=>openShop(back||wsResume)},
+    {id:'anvil',ic:'🔨',name:'The Smith',role:'Fuse gear',prop:'anvil',x:-548,z:150,open:back=>openForge(back||wsResume)},
+    {id:'keeper',ic:'🧥',name:'The Stylist',role:'Style & appearance',prop:'barber',x:-350,z:40,c1:'#3a2a55',c2:'#b06bff',open:back=>openWardrobe(back||wsResume)},
+    {id:'drillmaster',ic:'⚔️',name:'Drillmaster',role:'Classes & Trials',prop:'booth',x:548,z:-60,c1:'#5e2a24',c2:'#e8453d',open:back=>openTrainer(back||wsResume)},
+    {id:'beastkeeper',ic:'🐾',name:'Beastkeeper',role:'Companions',prop:'beast',x:548,z:150,c1:'#3a2f1e',c2:'#c9a86a',open:back=>openBeastkeeper(back||wsResume)},
     {id:'sparring',ic:'🚪',name:'Sparring Room',role:'Isolated combat training',prop:'sparringdoor',verb:'Enter the Sparring Room',direct:true,x:560,z:500,open:()=>enterSparringRoom()},
     {id:'mirror',ic:'🪞',name:'The Mirror',role:'Inspect yourself',prop:'mirror',x:400,z:500,open:()=>openMirror(wsResume)},
     {id:'chest',ic:'🎒',name:'Your Bag',role:'Storage',prop:'chest',verb:'Open your bag',direct:true,x:-607,z:45,open:()=>openBag(wsResume)},
@@ -19267,10 +19267,11 @@ function enterWaystation(riftHall=false){
 }
 // Hub services use the same authored, recordable lines as the Voice Studio.
 function openNpcTalk(n,granted=false){
- if(!granted&&MP.active&&window.BFSocial&&['quartermaster','anvil','keeper','drillmaster','beastkeeper'].includes(n.id)){BFSocial.requestTalk(n);return;}
- if(!['quartermaster','anvil','keeper','drillmaster','beastkeeper'].includes(n.id)){n.open();return;}
+ if(inReturnHub()&&G.storyState?.conversation?.npc===n.id){briarRequest('open',{npc:n.id});return;}
+ if(!granted&&MP.active&&window.BFSocial&&['quartermaster','anvil','keeper','drillmaster','beastkeeper','thomas'].includes(n.id)){BFSocial.requestTalk(n);return;}
+ if(!['quartermaster','anvil','keeper','drillmaster','beastkeeper','thomas'].includes(n.id)){n.open();return;}
  BFHubDialogue.open(n,{
-  meta,save:persist,returnInfo:returnHubInfo,returnQuest:openReturnRequest,player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,
+  meta,save:persist,returnInfo:returnHubInfo,returnEntries:n=>BFReturnVisits.entries(n,meta,MP.guest()?G?.storyState:null),returnQuest:openReturnRequest,openService:()=>{const world=G;n.open(()=>{if(G===world&&inReturnHub())openNpcTalk(n);else wsResume();});},player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,
   enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
   leave:service=>{if(service){mode='menu';showGameUI(false);}else resumePlay();}
  });
@@ -24972,7 +24973,7 @@ function awardChessCape(){
 }
 window.__BF_SOCIAL_API={awardChessCape,g:()=>G,mp:()=>MP,meta:()=>meta,box:bx,project:(x,y,z)=>{const p=project(x,y,z);return p?{x:p[0],y:p[1]}:null;},openTalk:n=>openNpcTalk(n,true),
  enter:m=>{releaseKeyboard();mode=m;showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},resume:resumePlay,
- listen:(n,line)=>BFHubDialogue.listen(n,{meta,player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,enter:()=>{mode='npc';releaseKeyboard();showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},leave:()=>resumePlay()},line)};
+ listen:(n,line)=>{if(inReturnHub()&&G.storyState?.conversation?.npc===n.id){G._storyViewing=n.id;briarSync();return;}BFHubDialogue.listen(n,{meta,player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,enter:()=>{mode='npc';releaseKeyboard();showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},leave:()=>resumePlay()},line);}};
 window.__BF_MAP_PARTY=()=>({shards:meta.secretSense&&isCampaignAdventure()?G?.shardSenseTargets||[]:[],heading:meta.camMode==='far'?Math.atan2(VIEW[2],VIEW[10])+Math.PI:G?.camYaw,peers:MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G?.area):[]});
 function devBeta(){return G?.devBriar?BFBriarBeta:BFKeepBeta;}
 const betaApi={

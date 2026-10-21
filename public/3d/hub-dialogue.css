@@ -33,3 +33,14 @@
 #hubDialogue .hub-voice-controls button{min-height:34px;padding:6px 10px;font-size:12px;background:#213b46;border-color:#91c7da77;white-space:nowrap}
 #hubDialogue #hubVoiceStatus{color:#bed6dc;font:500 11px/1.4 system-ui;letter-spacing:0}
 #hubDialogue .hub-greeting{font-size:16px;line-height:1.5;color:#e7e9db;margin:8px 0}
+
+/* Quest access has a stable place even before unlock or after completion. */
+#hubDialogue .hub-quest-status{margin:0;color:#b9cfc8;font:14px/1.5 system-ui}
+#hubDialogue .hub-quest-status b,#hubDialogue .hub-quest-status span{display:block}
+#hubDialogue .hub-quest-status b{color:#e6efdc;margin-bottom:3px}
+#hubDialogue [data-quest-status="ready"]{border-width:2px}
+#hubDialogue #hubTopics{display:block;width:100%;margin-bottom:10px}
+#hubDialogue #hubLanding{gap:8px;margin:12px 0}
+#hubDialogue #hubLanding .dialogue-group{padding:10px;gap:6px}
+#hubDialogue #hubLanding .dialogue-group button:not(.hub-service-primary){padding:9px 12px}
+@media(min-width:651px){#hubDialogue .hub-dialogue-panel:has(#hubLanding){max-height:calc(100dvh - 48px);padding:20px}}

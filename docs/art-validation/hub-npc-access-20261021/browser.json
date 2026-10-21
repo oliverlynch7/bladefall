@@ -1,0 +1,98 @@
+{
+  "version": "2.354.0-hub-npc-access",
+  "legacySave": "canyon-arrival-before.json / First Journey QA / level 4 / 1145 gold",
+  "isolation": "in-memory localStorage/sessionStorage; no player saves changed",
+  "services": [
+    {
+      "npc": "quartermaster",
+      "shopAndBack": true,
+      "ignoredOldLoreCursor": true
+    },
+    {
+      "npc": "anvil",
+      "shopAndBack": true,
+      "ignoredOldLoreCursor": true
+    },
+    {
+      "npc": "keeper",
+      "shopAndBack": true,
+      "ignoredOldLoreCursor": true
+    },
+    {
+      "npc": "drillmaster",
+      "shopAndBack": true,
+      "ignoredOldLoreCursor": true
+    },
+    {
+      "npc": "beastkeeper",
+      "offerAcceptShopBack": true,
+      "readyAfterStaleCursor": true,
+      "turnInCompleted": true
+    },
+    {
+      "npc": "thomas",
+      "questOnly": true,
+      "acceptedReminderAndBack": true
+    },
+    {
+      "simulatedListenerDeparture": {
+        "mode": "play",
+        "owner": "qa-peer",
+        "peer": {
+          "area": 0,
+          "hall": false,
+          "hp": 100,
+          "last": -99.9,
+          "tx": 555,
+          "ty": 0,
+          "tyaw": 0,
+          "tz": 65,
+          "x": 555,
+          "y": 0,
+          "yaw": 0,
+          "z": 65,
+          "zone": 0
+        },
+        "viewing": null
+      }
+    }
+  ],
+  "beastkeeper": {
+    "offerAcceptAndBack": true,
+    "shopAndBack": true,
+    "readyFromStaleOffer": true,
+    "turnInAndBack": true,
+    "completedReview": true
+  },
+  "keyboard": {
+    "sSelectsQuest": true,
+    "eOpensQuest": true
+  },
+  "layout": {
+    "desktop1920": {
+      "panelFits": true,
+      "leaveVisible": true,
+      "scrollNotRequired": true
+    },
+    "narrow390": {
+      "noHorizontalOverflow": true,
+      "panelWithinViewport": true,
+      "internalScroll": true
+    }
+  },
+  "errors": [],
+  "limits": [
+    "Co-op owner/listener tested with a simulated connected peer, not a live two-person WebRTC session.",
+    "Earlier incomplete simulated peer lacked target coordinates and was correctly treated as disconnected; final complete peer test preserved owner conversation."
+  ],
+  "tests": {
+    "hubAccess": 120,
+    "recordedVoice": 33,
+    "dialogueCategories": 1447,
+    "dialogueEndings": 94,
+    "hubTransitions": 33,
+    "hubRecovery": 257,
+    "returnVisits": "pass",
+    "inlineSyntax": "pass"
+  }
+}

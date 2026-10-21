@@ -13,7 +13,24 @@ const supplyLedges=[
   {x:-1785,z:-3815,h:244,w:132,d:112}
 ];
 function normalize(v){const out={};for(const id of Object.keys(defs))if(['accepted','ready','done'].includes(v?.[id]))out[id]=v[id];return out;}
-function info(n,meta){const pair=Object.entries(defs).find(([id,q])=>q.npc===n.id&&(root.BFReturnAdventures.eligible(q,meta)||meta.returnVisits?.[id])&&meta.returnVisits?.[id]!=='done');if(!pair)return null;const [id,q]=pair,status=meta.returnVisits?.[id];return {id,...q,status,label:status==='ready'?(q.report?'Report: ':'Deliver: ')+q.title:status==='accepted'?'About: '+q.title:'New request: '+q.title,fresh:status!=='accepted'};}
+// In co-op the guest reads the host's quest flags, never its unrelated solo progress.
+function entries(n,meta,state){
+ const stored=normalize(meta.returnVisits);
+ return Object.entries(defs).filter(([,q])=>q.npc===n.id).map(([id,q])=>{
+  const shared=state?.flags&&Object.prototype.hasOwnProperty.call(state.flags,'rv.eligible.'+id);
+  const saved=shared?['done','ready','accepted'].find(k=>state.flags['rv.'+k+'.'+id]):stored[id];
+  const eligible=shared?state.flags['rv.eligible.'+id]:root.BFReturnAdventures.eligible(q,meta);
+  const status=saved||(eligible?'available':'locked'),region=q.unlockRegion||q.region;
+  const place={outskirts:'Briar Town',keep:'Ruined Keep',ember:'Emberdeep'}[region]||region;
+  const label=status==='ready'?'Turn in: '+q.title:status==='accepted'?'In progress: '+q.title:
+   status==='done'?'Completed: '+q.title:status==='locked'?'Complete '+place+' to unlock this request.':'New quest: '+q.title;
+  return {id,...q,status,label,fresh:['available','ready'].includes(status)};
+ });
+}
+function info(n,meta,state){
+ const order={ready:0,available:1,accepted:2};
+ return entries(n,meta,state).filter(q=>q.status in order).sort((a,b)=>order[a.status]-order[b.status])[0]||null;
+}
 function seedHub(s,meta){for(const [id,q]of Object.entries(defs)){s.flags['rv.eligible.'+id]=!!(root.BFReturnAdventures.eligible(q,meta)||meta.returnVisits?.[id]);for(const flag of ['accepted','ready','done'])s.flags['rv.'+flag+'.'+id]=meta.returnVisits?.[id]===flag;s.cursors[q.npc]=meta.returnVisits?.[id]?{npc:q.npc,node:'rv.'+id+'.'+(meta.returnVisits[id]==='accepted'?'wait':meta.returnVisits?.[id]==='ready'?'deliver':'thanks'),lastChoice:''}:{npc:q.npc,node:'rv.'+id+'.offer',lastChoice:''};}return s;}
 function active(G,meta){return Object.keys(defs).filter(id=>{const q=defs[id];return G.zone===q.zone&&G.area===q.area&&meta.returnVisits?.[id]==='accepted';});}
 function fieldObjects(ids){const o=(key,label,x,z,y,kind)=>({key,label,x,z,y,kind,returnObject:true});let out=[];
@@ -77,5 +94,5 @@ function draw({G,bx,ring},t){if(!G?.storyObjects)return;drawSupplyHoist({G,bx,ri
   if(o.kind==='pattern'){if(taken)continue;bx(o.x,y+24,o.z,92,45,64,'#34373b',null,1);bx(o.x,y+49,o.z,68,5,42,'#b09561',null,1);continue;}
   bx(o.x,y+28,o.z,22,56,22,'#66554a',null,1);ring(o.x,y+58,o.z,30,c,1);
 }}
-const api={defs,normalize,info,seedHub,active,fieldObjects,available,tasks,sync,draw,supplyLedges,SUPPLY_CLUE};root.BFReturnVisits=api;if(typeof module!=='undefined')module.exports=api;
+const api={defs,normalize,entries,info,seedHub,active,fieldObjects,available,tasks,sync,draw,supplyLedges,SUPPLY_CLUE};root.BFReturnVisits=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

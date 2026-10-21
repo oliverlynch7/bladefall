@@ -1,0 +1,60 @@
+{
+  "version": "2.355.0-reaper-whirlwind",
+  "rig": {
+    "passed": true,
+    "poses": 738,
+    "restoreChecks": 738,
+    "skins": 3,
+    "standingAndMoving": true,
+    "maxSupportErrorMetres": 1.1658538755750435e-7,
+    "maxGripAdjustmentMetres": 0.4158238687029703,
+    "thirdHitRootAnglesVerifiedAt": [
+      0.15,
+      0.3,
+      0.43,
+      0.6,
+      0.76,
+      0.95
+    ],
+    "maxAngleErrorRadians": 2.9802322387695312e-8,
+    "thirdHitDodgeCancellation": true,
+    "restoredRootAngle": 0
+  },
+  "game": {
+    "bodySeen": true,
+    "cameraPreserved": true,
+    "dodgeCanceled": true,
+    "gold": 1145,
+    "headingPreserved": true,
+    "level": 4,
+    "maxRootError": 0,
+    "maxVfx": 3930,
+    "mode": "play",
+    "rows": [
+      {
+        "combo": 0,
+        "effect": 0,
+        "expected": 0,
+        "network": 0
+      },
+      {
+        "combo": 1,
+        "effect": 1,
+        "expected": 1,
+        "network": 1
+      },
+      {
+        "combo": 2,
+        "effect": 2,
+        "expected": 2,
+        "network": 2
+      }
+    ]
+  },
+  "errors": {
+    "preview": [],
+    "game": []
+  },
+  "isolation": "Pre-change legacy save in memory only. No user save changes. Co-op attack packets and visual event steps checked; no live remote-peer session.",
+  "testSetupNotes": "Initial rank-10 test fixture lacked choice selections and opened an upgrade overlay; corrected to rank 1 before final running-game verification."
+}

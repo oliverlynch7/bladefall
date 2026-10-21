@@ -3976,3 +3976,9 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 
 ## [Codex | 2026-10-21] Ian's Blade name (v2.354.1)
 - Replaced hidden ??? name with Ian's Blade in all completion states. Refresh old relic names in equipped, bag and bank copies; acquisition/stats/progress unchanged.
+
+
+## [Codex | 2026-10-21] Reaper whirlwind finisher (v2.355.0)
+- Replaced the third basic-combo downward chop with one complete body turn and a near-horizontal scythe slice. Both palms follow the shared blade path; the crescent trail circles the character. Armature restores exactly without changing character/camera facing.
+- First two attacks, charged throw, attack timing, damage/hitboxes and colored soul effects preserved. Updated actual hero, fallback and interactive combo preview cache versions.
+-303 pose/606 effect and201 circular-path samples pass; native738 rig/restore samples across3skins and standing/moving pass. Actual isolated legacy-save game checks combo/effect/co-op packet steps, body/VFX, heading/camera retention and dodge cancellation. No captured errors; no live remote-peer claim or user save changes.

@@ -2641,3 +2641,7 @@ User: Standardize hub NPC shop/service and questline access; questlines cannot r
 
 ## U-IANS-BLADE-NAME-20261021
 User: ??? Blade should say Ian's Blade. Inspection: iansBladeName hides the name until iansComplete; saved weapon names are not refreshed. Plan: always display Ian's Blade, normalize that relic's saved name in equipped/bag/banked copies; preserve acquisition, stats, forge costs and all save progress. Verify both completion states, an old named copy and real legacy-save shop.
+
+
+## U-REAPER-WHIRLWIND-FINISHER-20261021
+User: The third swing in Reaper's three-hit combo should be a whirlwind swing-around slice. Inspection: current third pose raises scythe then chops down; two-hand IK and sampled blade trail already share reaper-combo. Actual Rogue rig has a CharacterArmature root containing mesh and skeleton. Plan: replace only third pose with waist/chest-height outward two-hand hold and one complete cosmetic body turn; rotate shared grip/shaft/blade sampling with that turn so trail follows the actual blade. Restore armature exactly on interruption and keep player/camera yaw and combat damage/timing unchanged. Preserve first two strikes, charged throw and class aura. Update fallback, preview naming/cache versions. Verify continuous full-circle path, grip/restoration, all3skins idle/moving in real preview plus actual legacy-save attack/co-op packet; muted tests, no save changes.

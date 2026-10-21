@@ -1214,7 +1214,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <link rel="stylesheet" href="./party-feedback.css?v=2297"><script src="./party-feedback.js?v=2297"></script>
 <script src="./party-navigation.js?v=2318"></script>
 <script src="./skill-motion.js?v=2328"></script><script src="./weapon-actions.js?v=2333d"></script>
-<script src="./reaper-combo.js?v=2332c"></script>
+<script src="./reaper-combo.js?v=2355"></script>
 <script src="./combat-art.js?v=2333d"></script>
 <script src="./hostile-art.js?v=1978"></script>
 <link rel="stylesheet" href="./chest-reveal.css?v=2345">
@@ -1243,7 +1243,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.354.1-ians-blade-name';
+const VERSION3D='2.355.0-reaper-whirlwind';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -21697,6 +21697,7 @@ function drawHero3(p,t,preview){
   const leg=Math.sin(p.runAnim||0)*(moving?0.55:0), bob=(moving?Math.abs(Math.sin((p.runAnim||0)*2))*1.4:Math.sin(t*2)*0.7);
   if(p.invuln>0 && Math.floor(p.invuln*20)%2===0 && !preview && !p.dead) return;
   pushM(); mv(p.x,p.y+bob,p.z); rotY(p.yaw);
+  if(p.weapon?.art==='scythe'&&p.swingCombo===2&&p.atkTimer>0&&window.BFReaperCombo)rotY(BFReaperCombo.sample(2,1-p.atkTimer/BFReaperCombo.active[2]).spin);
   if(p.dead && !preview){ const dd=Math.max(0,Math.min(1,(performance.now()-(G.deathWall||performance.now()))/550)); rotZ(dd*1.5); mv(0,-dd*15,-dd*6); }   // death collapse: tip over + sink (wall-clock; sim is frozen)
   if(p.dodgeTimer>0){ /* dash tilt */ rotX(0.28); }
   // legs (hip pivot)
@@ -21727,8 +21728,8 @@ function drawHero3(p,t,preview){
     else if(M.shape==='slam'){ rotX(-2.6+prog*3.2); }                                    // overhead crash straight down (radial slam)
     else if(w.art==='great'){ rotX(-2.4+prog*2.8); rotZ(0.2); }                          // towering overhead cleave
     else if(w.art==='axe'){ rotX(-2.25+prog*3.0); rotZ(0.2); }                           // overhead DOWNWARD chop (like swinging a real axe), raised high then driven straight down
-    else if(w.art==='scythe'){                                                            // grass-cutting reaps: two flat horizontal side-swipes, then an overhead magic chop
-      if(p.swingCombo===2){ rotX(-2.5+prog*3.0); rotZ(0.15); }                            // finisher: raise high, bring it straight down
+    else if(w.art==='scythe'){                                                            // grass-cutting reaps: two flat horizontal side-swipes, then a full-circle whirlwind slice
+      if(p.swingCombo===2){ rotX(-.28); rotZ(.18); rotY(.2); }                           // finisher: hold the scythe out as the full body turns
       else if(p.swingCombo===1){ rotX(-0.28); rotZ(-0.12); rotY(-1.95+prog*3.9); }        // 2nd: flat horizontal return sweep, LEFT → right
       else { rotX(-0.28); rotZ(0.12); rotY(1.95-prog*3.9); } }                            // 1st (main): a wide flat horizontal side-swipe in front, RIGHT → left — like scything grass
     else { rotX(-1.9+prog*2.4); rotZ(0.6-prog*1.0); rotY((0.4-prog)*0.9); }              // sword: sweeping diagonal cut, high-right → low-left
@@ -25025,7 +25026,7 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2344"></script>
+<script type="module" src="./hero3d.js?v=2355"></script>
 <script type="module" src="./progression-model-preview.js?v=2342"></script>
 <script type="module" src="./social-hub.js?v=2350"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data

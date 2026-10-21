@@ -13,7 +13,8 @@ export class ChessRoom{
   if(c.type==='leave'||c.type==='lobby'){const old=this.sessions.get(this.views[pid]?.gameId);if(old)old.rev++;delete this.views[pid];if(c.type==='leave'){
    // Leaving the table lets Thomas return to his quests without discarding the game.
    // A spectator leaving, or opening the opponents lobby, must not evict the owner.
-   if(old?.kind==='thomas'&&old.owner===pid&&this.tableGameId===old.key){old.pause();this.tableGameId=null;this.thomasArrival=null;}
+   const reserved=this.sessions.get(this.tableGameId);
+   if(reserved?.kind==='thomas'&&reserved.owner===pid){reserved.pause();this.tableGameId=null;this.thomasArrival=null;}
    for(const [to,from]of Object.entries(this.invites))if(to===pid||from===pid)delete this.invites[to];
   }return true;}
   if(!this.valid(pid))return false;const active=this.tableGame();

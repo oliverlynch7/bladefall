@@ -1,9 +1,10 @@
 import {waystationScene} from './npc-roster.js?v=2309';
 import {thomasHardVictory} from './chess-rewards.js?v=2227a';
+import {chessApproach} from './chess-approach.js?v=2349';
 import {chessSeat,chessCompanion,chessHistoryFromSAN} from './chess-presentation.js?v=2226e';
 import './chess-pieces.js?v=2322';
 import {ChessOpponent} from './chess-opponent.mjs?v=2119';
-import {ChessRoom} from './chess-room.mjs?v=2305';
+import {ChessRoom} from './chess-room.mjs?v=2349';
 import {createChessTable} from './chess-table.js?v=2322';
 const A=window.__BF_SOCIAL_API,table={x:300,z:390},cost=1000,botId='chess-thomas';
 let opened=false,origin=null,parkedPet=null,remote=null,remoteAt=0,talks={},pendingTalk=null,lastTalk='',talkRev=0,wasCoop=false,lastView='',lastDisplay='',lastLobby='',ambientGame='duel',nextRewardAttempt=0;
@@ -66,7 +67,7 @@ function lobby(){if(!opened)return;send({type:'lobby'});syncView();}
 function close(){if(!opened)return;send({type:'leave'});opened=false;lastView='';lastDisplay='';lastLobby='';document.getElementById('chessLobby')?.remove();document.body.classList.remove('chess-view');restorePet();tableView.close();if(A.g()?.p){A.g().p.sitting=false;if(origin?.g===A.g())Object.assign(A.g().p,{x:origin.x,y:origin.y,z:origin.z});}origin=null;A.resume();}
 function reset(){close();visitor=null;room.dispose();room=makeRoom();remote=null;talks={};pendingTalk=null;lastTalk='';talkRev=0;nextRewardAttempt=0;lastView='';lastDisplay='';lastLobby='';window.BFChessPieces?.hide();}
 function render(){if(opened&&current()){tableView.render();parkPet();}}
-function interaction(){const st=tableState(),watch=st?.kind==='thomas'&&st.owner!==id();return !opened&&isHub()&&owned()&&Math.hypot(A.g().p.x-table.x,A.g().p.z-table.z)<135?{...table,y:105,label:watch?'Watch '+name(st.owner)+' vs Thomas':st?.owner===id()?'Resume chess with Thomas':A.mp().active?'Sit down · Play a friend':'Play chess with Thomas',act:open}:null;}
+function interaction(){const st=tableState(),watch=st?.kind==='thomas'&&st.owner!==id(),g=A.g();return !opened&&isHub()&&owned()&&chessApproach(g.p,table,g.hubNpcs?.find(n=>n.id==='thomas'))?{...table,y:105,label:watch?'Watch '+name(st.owner)+' vs Thomas':st?.owner===id()?'Resume chess with Thomas':A.mp().active?'Sit down · Play a friend':'Play chess with Thomas',act:open}:null;}
 function draw(){if(isHub()&&owned())tableView.draw();else window.BFChessPieces?.hide();}
 function ambientState(){const all=games(),st=tableState();return st?(current()?.gameId===st.gameId?displayState():st):displayState()||all[ambientGame]||all.duel;}
 function peerVisible(q){const st=current();return !opened||!st||!q.sitting||Object.values(st.seats).includes(q.id);}

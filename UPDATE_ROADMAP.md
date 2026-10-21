@@ -3935,3 +3935,9 @@ NPC release verification correction: v2.344.1 uses an explicit hero3d.js?v=2344 
 - Hub service landings now show/play their existing brief greeting while keeping the main service focused and immediately usable. No new dialogue wording or quest-state paths.
 - NPC voices have an independent saved volume slider, default85%, instead of inheriting quiet combat effects. Master/QA mute and explicit voice preferences remain respected. Missing initial attachments are retried per line; changed runtime wording cannot reuse the wrong recording.
 -33 playback/recovery,1447 category,94 ending,29 title/settings and16 fanfare checks pass, plus the manifest failure/retry suite. Real muted native media tests on a legacy character cover Smith greeting/lore, Thomas campaign progression, replay/leave, trusted unlock, snapshot continuity and saved volume. All371 existing recording hashes remain unchanged;9 locally revised punctuation/encoding lines retain strict fallback protection. No ElevenLabs credits used. Screenshot public/design/dialogue/npc-voice-2348.png.
+
+
+## [Codex | 2026-10-21] Thomas bench and chess approaches (v2.349.0)
+- Purchased chess no longer steals interaction across an omnidirectional135-unit circle. Bench side keeps normal Thomas quest conversations; far side of table offers play/watch/resume, independent of facing. Reach110 and vertical tolerance65 prevent distant or through-floor triggers.
+- Explicitly leaving a Thomas game now releases the physical table and lets him walk home. Retains/pauses the private game; resume preserves the position. Opponents lobby retains its reservation and a watcher leaving cannot evict the owner.
+-28 approach/prompt,393 shared-room/authority/history and33 presentation checks pass. Real muted legacy-save browser checks cover actual quest conversation, far-side chess entry and returning to bench dialogue after leaving. No save schema changes.

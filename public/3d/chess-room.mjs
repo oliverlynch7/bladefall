@@ -10,7 +10,12 @@ export class ChessRoom{
  activateThomas(pid,s){this.occupy(s,pid);this.views[pid]={gameId:s.key,watching:false};this.thomasArrival={gameId:s.key,at:this.now(),duration:2200};s.pause();return true;}
  command(pid,c){
   if(!c||typeof c.type!=='string'||typeof pid!=='string')return false;
-  if(c.type==='leave'||c.type==='lobby'){const old=this.sessions.get(this.views[pid]?.gameId);if(old)old.rev++;delete this.views[pid];if(c.type==='leave')for(const [to,from]of Object.entries(this.invites))if(to===pid||from===pid)delete this.invites[to];return true;}
+  if(c.type==='leave'||c.type==='lobby'){const old=this.sessions.get(this.views[pid]?.gameId);if(old)old.rev++;delete this.views[pid];if(c.type==='leave'){
+   // Leaving the table lets Thomas return to his quests without discarding the game.
+   // A spectator leaving, or opening the opponents lobby, must not evict the owner.
+   if(old?.kind==='thomas'&&old.owner===pid&&this.tableGameId===old.key){old.pause();this.tableGameId=null;this.thomasArrival=null;}
+   for(const [to,from]of Object.entries(this.invites))if(to===pid||from===pid)delete this.invites[to];
+  }return true;}
   if(!this.valid(pid))return false;const active=this.tableGame();
   if(c.type==='join'||c.type==='sit'){
    if(active?.kind==='thomas'){if(active.owner===pid){this.views[pid]={gameId:active.key,watching:false};return true;}return this.watch(pid,active);}

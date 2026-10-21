@@ -60,7 +60,7 @@
  body:has(#bosshpwrap.on:not(.officer-team):not(.prison-boss)) #chest-reveal.settled{top:calc(env(safe-area-inset-top) + 100px)}
 }
 @media(min-width:900px) and (max-width:1100px){
- #chest-reveal.settled{top:calc(env(safe-area-inset-top) + 168px);width:min(620px,calc(100vw - 48px))}
+ #chest-reveal.settled{top:calc(env(safe-area-inset-top) + 168px);width:min(620px,calc(100vw - 520px))}
  body:has(#bosshpwrap.on) #chest-reveal.settled{top:calc(env(safe-area-inset-top) + 246px)}
 }
 @media(max-width:899px) and (orientation:landscape){

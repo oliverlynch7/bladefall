@@ -1,4 +1,5 @@
 import * as T from './three.module.js';
+import {chestExit} from './chest-exit.js?v=2351';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 
 // Shared, baked coffers. Brown timber is the foundation at EVERY rarity; the
@@ -296,4 +297,5 @@ export function animateChest(rec,ch,dt){
  rec.opening=ch.opened?Math.min(1,rec.opening+step/.65):0;
  rec.lid.rotation.x=-1.85*(1-Math.pow(1-rec.opening,3))-(ch.opened?0:(ch._br||0)*.045);
  rec.root.position.set(ch.x+(ch._shove||0),ch.y||0,ch.z);
+ return chestExit(rec,!!ch.opened,dt);
 }

@@ -8,7 +8,8 @@ for(const [key,type]of Object.entries(expected)){
  const scene=new T.Scene(),o={key,x:150,y:180,z:-500},g={zone:1,area:0,p:{x:150,y:180,z:-500},storyState:{flags:{}},storyObjects:[o]};window.__BF3.G=g;syncCampaignObjects(scene);
  scene.updateMatrixWorld(true);const node=scene.getObjectByName(key),item=node.children[0],bounds=new T.Box3().setFromObject(item);ok(key+' visible',node.visible&&D.drawn(o));ok(key+' grounded',Math.abs(bounds.min.y-180)<.001);ok(key+' finite bounded detail',item.userData.triangles>100&&item.userData.triangles<100000);
  g.storyState.flags['event.'+(spec.openKey||key)]=true;for(let i=0;i<50;i++)syncCampaignObjects(scene,.016);
- const stats=window.__CAMPAIGN_OBJECT_STATS.items.find(q=>q.key===key);ok(key+' lid opens',stats.opening>.99);ok(key+' chest remains after claiming',item.visible);
+ const stats=window.__CAMPAIGN_OBJECT_STATS.items.find(q=>q.key===key);ok(key+' lid opens',stats.opening>.99);ok(key+' briefly holds open before disappearing',item.visible);
+ for(let i=0;i<60;i++)syncCampaignObjects(scene,.016);ok(key+' claimed model disappears',!item.visible);ok(key+' hidden model still suppresses placeholder',D.drawn(o));
  Object.assign(g.p,{x:99999,z:99999});syncCampaignObjects(scene);ok(key+' culled body not replaced by old fallback',!node.visible&&D.drawn(o));
 }
 {

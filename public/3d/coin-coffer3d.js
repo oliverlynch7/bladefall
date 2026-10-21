@@ -1,4 +1,5 @@
 import * as T from './three.module.js';
+import {chestExit} from './chest-exit.js?v=2351';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 // A small, flat-lidded savings coffer. Timber and iron, never a rarity crown or gemstone.
 let template;
@@ -22,4 +23,4 @@ function build(){
  root.userData.currencyOnly=true;root.userData.triangles=0;root.traverse(n=>{if(n.isMesh)root.userData.triangles+=(n.geometry.index?.count||n.geometry.attributes.position.count)/3;});return root;
 }
 export function createCoinCoffer(){template||=build();const root=template.clone(true);return {root,lid:root.getObjectByName('Coin coffer hinged lid'),coins:root.getObjectByName('Saved coins'),opening:0};}
-export function animateCoinCoffer(rec,opened,dt){rec.opening=opened?Math.min(1,rec.opening+Math.max(0,Math.min(.1,dt||0))/.6):0;rec.lid.rotation.x=-1.75*(1-(1-rec.opening)**3);rec.coins.visible=!opened;}
+export function animateCoinCoffer(rec,opened,dt){rec.opening=opened?Math.min(1,rec.opening+Math.max(0,Math.min(.1,dt||0))/.6):0;rec.lid.rotation.x=-1.75*(1-(1-rec.opening)**3);rec.coins.visible=!opened;return chestExit(rec,!!opened,dt);}

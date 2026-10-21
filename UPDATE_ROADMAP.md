@@ -3949,3 +3949,9 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 - Both3D and flat boards accept any other square from an owned piece while waiting, including blocked paths, friendly occupied recapture squares and currently illegal geometry. Normal-turn moves stay strict. Queues execute only if legal in the actual next position; otherwise cancel safely.
 - Preserved round/seat/clock/result/animation guards, latest-revision commands and one-shot execution. Purple queued highlights plus a concise conditional-play note; no63-square legal-highlight flood.
 -835 premove,72 input-window,397 room and28 approach checks pass. Real muted legacy-save browser verifies click/drag on both boards, invalid cancellation, empty-future/occupied captures auto-executing once and Cancel. Two locally simulated seats, not a live remote-peer test. Screenshot public/design/chess/premove-2350.png.
+
+
+## [Codex | 2026-10-21] Opened chest visual cleanup (v2.351.0)
+- Standard loot chests, authored reward chests, gold coffers and prison cache finish their lid opening, briefly hold, then shrink away. Already-claimed models load hidden; fallback no longer leaves permanent opened shells. Hidden actor records prevent rebuild flicker; scene removal still detaches them.
+- Per-actor scales preserve enlarged/custom models and shared materials stay untouched, so unopened neighbors and other players' personal claims remain independent. Authored supports/quest mechanisms and all loot/save transactions unchanged. Refreshed renderer dependency cache paths.
+-60 exit/model/prop/fallback,133 authored,44 co-op claim plus mimic and22 transaction checks pass. Real muted legacy-save browser verifies3 actual opens, no duplicate loot, hidden claimed models and2 unchanged unopened neighbors. No captured errors; no live WebRTC session. Evidence docs/art-validation/chest-cleanup-20261021.

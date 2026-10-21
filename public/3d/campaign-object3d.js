@@ -187,8 +187,8 @@ export function syncCampaignObjects(scene,dt=1/60){
   for(const alias of a.aliases)drawn.add(alias);
   if(!node.visible)continue; // A culled owned model must not resurrect its old placeholder.
   const opened=!!g.storyState?.flags?.['event.'+(spec.openKey||o.key)];
-  if(a.coffer)animateCoinCoffer(a.coffer,opened,dt);if(a.chest)animateChest(a.chest,{x:0,y:0,z:0,opened},dt);
-  item.visible=!defs.taken(o,g.storyState);if(spec.mechanism)poseQuestMechanism(item,!!(g.storyState?.flags?.['event.'+o.key]||g.storyState?.flags?.[o.key]),dt);drawn.add(o);visible++;
+  const chestVisible=a.coffer?animateCoinCoffer(a.coffer,opened,dt):a.chest?animateChest(a.chest,{x:0,y:0,z:0,opened},dt):true;
+  item.visible=chestVisible&&!defs.taken(o,g.storyState);if(spec.mechanism)poseQuestMechanism(item,!!(g.storyState?.flags?.['event.'+o.key]||g.storyState?.flags?.[o.key]),dt);drawn.add(o);visible++;
   node.traverseVisible(n=>{if(n.isMesh){meshes++;triangles+=(n.geometry.index?.count||n.geometry.attributes.position.count)/3;}});
  }
  window.__campaignObjectDrawn=drawn;window.__CAMPAIGN_OBJECT_STATS={total:actors.length,visible,triangles,meshes,templates:templates.size,items:actors.filter(a=>a.node.visible).map(a=>({key:a.o.key,model:a.spec.model,collected:!a.item.visible,opening:a.chest?.opening??a.coffer?.opening??0,aliases:a.aliases.map(o=>o.key),meshes:a.item.children.length,triangles:a.item.userData.triangles}))};

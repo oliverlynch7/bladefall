@@ -118,14 +118,14 @@ function syncPropsInner(scene, dt){
 }
 
 function syncChests(chests,dt){
- PROP3D.ready=true;const seen=new Set();
+ PROP3D.ready=true;const seen=new Set();let visible=0;
  for(const ch of chests){if(!ch)continue;window.__BF3?.prepareChest(ch);seen.add(ch);let rec=_actors.get(ch);
   if(rec&&rec.rarity!==ch.rarity){rec.root.removeFromParent();_actors.delete(ch);rec=null;}
   if(!rec){rec=createChestActor(ch.rarity||'common');rec.rarity=ch.rarity;_group.add(rec.root);_actors.set(ch,rec);if(ch.opened)rec.opening=1;}
-  animateChest(rec,ch,dt);
+  if(animateChest(rec,ch,dt))visible++;
  }
  for(const [ch,rec]of _actors)if(!seen.has(ch)){rec.root.removeFromParent();_actors.delete(ch);}
- _box={w:32,d:24,h:25,footY:0};PROP3D.chests=seen.size;return true;
+ _box={w:32,d:24,h:25,footY:0};PROP3D.chests=visible;return true;
 }
 
 function syncKeys(keys){

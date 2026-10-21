@@ -1,0 +1,140 @@
+{
+  "dogs": 2,
+  "objects": [
+    "rv.tracks.start",
+    "rv.tracks.hoof",
+    "rv.tracks.paw",
+    "rv.tracks.snare",
+    "rv.tracks.cage"
+  ],
+  "ok": true,
+  "results": [
+    {
+      "at": [
+        -2507,
+        -2023,
+        0
+      ],
+      "name": "trail",
+      "ok": true,
+      "target": [
+        -2520,
+        -2020,
+        0
+      ]
+    },
+    {
+      "at": [
+        -2810,
+        -1875,
+        0
+      ],
+      "name": "trail",
+      "ok": true,
+      "target": [
+        -2820,
+        -1870,
+        0
+      ]
+    },
+    {
+      "at": [
+        -3058,
+        -1756,
+        0
+      ],
+      "name": "trail",
+      "ok": true,
+      "target": [
+        -3070,
+        -1750,
+        0
+      ]
+    },
+    {
+      "at": [
+        -3341,
+        -1508,
+        0
+      ],
+      "name": "trail",
+      "ok": true,
+      "target": [
+        -3350,
+        -1500,
+        0
+      ]
+    },
+    {
+      "at": [
+        -2948,
+        -1925,
+        0
+      ],
+      "name": "cage",
+      "ok": true,
+      "target": [
+        -2960,
+        -1930,
+        0
+      ]
+    },
+    {
+      "at": [
+        -3030,
+        -1982,
+        22
+      ],
+      "name": "cage",
+      "ok": true,
+      "target": [
+        -3040,
+        -1990,
+        22
+      ]
+    },
+    {
+      "at": [
+        -3123,
+        -2042,
+        78
+      ],
+      "name": "cage",
+      "ok": true,
+      "target": [
+        -3120,
+        -2040,
+        48
+      ]
+    },
+    {
+      "at": [
+        -3192,
+        -2090,
+        100
+      ],
+      "name": "cage",
+      "ok": true,
+      "target": [
+        -3200,
+        -2100,
+        76
+      ]
+    },
+    {
+      "at": [
+        -3280,
+        -2171,
+        100
+      ],
+      "name": "cage",
+      "ok": true,
+      "target": [
+        -3290,
+        -2180,
+        100
+      ]
+    }
+  ],
+  "note": "Existing overlapping cage landings put the fourth annotated 76-high waypoint at actual floor 100; 30-unit source-height tolerance, no skip/teleport between targets."
+}

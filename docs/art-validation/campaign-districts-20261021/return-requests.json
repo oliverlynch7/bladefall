@@ -1,0 +1,98 @@
+[
+  {
+    "active": [
+      "tracks"
+    ],
+    "area": "0.1",
+    "id": "tracks",
+    "objects": [
+      {
+        "key": "rv.tracks.start",
+        "push": 0
+      },
+      {
+        "key": "rv.tracks.hoof",
+        "push": 0
+      },
+      {
+        "key": "rv.tracks.paw",
+        "push": 0
+      },
+      {
+        "key": "rv.tracks.snare",
+        "push": 0
+      },
+      {
+        "key": "rv.tracks.cage",
+        "push": 0
+      }
+    ]
+  },
+  {
+    "active": [
+      "keepsake"
+    ],
+    "area": "0.0",
+    "id": "keepsake",
+    "objects": [
+      {
+        "key": "rv.keepsake.clue",
+        "push": 0
+      },
+      {
+        "key": "rv.keepsake.pot",
+        "push": 0
+      },
+      {
+        "key": "rv.keepsake.take",
+        "push": 0
+      }
+    ]
+  },
+  {
+    "active": [
+      "pattern"
+    ],
+    "area": "4.0",
+    "id": "pattern",
+    "objects": [
+      {
+        "key": "rv.pattern.note",
+        "push": 0
+      },
+      {
+        "key": "rv.pattern.cool",
+        "push": 0
+      },
+      {
+        "key": "rv.pattern.clamp",
+        "push": 0
+      },
+      {
+        "key": "rv.pattern.take",
+        "push": 0
+      }
+    ]
+  },
+  {
+    "active": [
+      "supplies"
+    ],
+    "area": "2.0",
+    "id": "supplies",
+    "objects": [
+      {
+        "key": "rv.supplies.note",
+        "push": 0
+      },
+      {
+        "key": "rv.supplies.release",
+        "push": 0
+      },
+      {
+        "key": "rv.supplies.take",
+        "push": 0
+      }
+    ]
+  }
+]

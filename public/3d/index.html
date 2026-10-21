@@ -1165,6 +1165,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./story-state.js?v=2288"></script>
 <script src="./campaign-placement.js?v=2183a"></script>
 <script src="./campaign-geography.js?v=2356"></script>
+<script src="./campaign-district-data.js?v=2357"></script>
+<script src="./campaign-districts.js?v=2357"></script>
 <script src="./campaign-patrols.js?v=2325"></script>
 <script src="./campaign-hunts.js?v=2325"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
@@ -1243,7 +1245,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.356.0-black-woods-dog-rescue';
+const VERSION3D='2.357.0-campaign-districts';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5835,7 +5837,7 @@ function loadArea(){
   cancelPortalWarp();
   BFChestReveal.clear();
   clearStoryNotice();
- G.briarDistrict=null;G.returnActive=null;G.pendingReturnItems=[];G.returnAdventure=null;G.returnAnimals=[];
+ G.briarDistrict=null;G.campaignDistrict=null;G.returnActive=null;G.pendingReturnItems=[];G.returnAdventure=null;G.returnAnimals=[];
   G.kingFinal=null;document.getElementById('finalCharge')?.remove();G.ascent=null;G.ascentWorkers=[];G.castleGates=null;G.library=null;G.court=null;G.thunder=null;G.shore=null;G.voyage=null;G.voyageLanded=false;document.getElementById("voyagehud")?.remove();G.cliffs=null;G.canyon=null;G.canyonPrisoners=[];G.keep=null;G.keepPrisoners=[];G.prison=null;G.peaks=null;G.iceCaves=null;G.iron=null;G.furnace=null;G.ironWorkers=[];
   const Z=curZone();
   /* THE ENDLESS DUNGEON PICKS ITS OWN FLOOR, and this function used to throw that away.
@@ -5855,7 +5857,7 @@ function loadArea(){
   if(G.area<0){ G.areaSeed=97+G.zone*11; G.areaName=Z.boss.name; loadStage(Z.boss.stage); }
   else { const a=Z.areas[G.area]; G.areaSeed=(a.seed||1)+G.zone*17+G.area*3; G.areaName=a.name; loadStage(a.stage); }
   if(inLongAscent())buildLongAscent();else if(inCastleGates())buildCastleGates();else if(inBriar())buildBriarOpening();else if(inBlackWoods())buildBlackWoods();else if(inWindingCliffs())buildWindingCliffs();else if(inLostCanyon())buildLostCanyon();else if(inBrokenWalls())buildBrokenWalls();else if(inPrison())buildPrison();else if(inSnowbound())buildSnowbound();else if(inIceCaves())buildIceCaves();else if(inIronHalls())buildIronHalls();else if(inGreatFurnace())buildGreatFurnace();else if(inShipwreck())buildShipwreck();else if(inThunderCliffs())buildThunderCliffs();else if(inPalaceCourtyard())buildPalaceCourtyard();else if(inSkyLibrary())buildSkyLibrary();else if(G.kingFinal||G.marbleArena||G.colossusArena){briarPending=null;G._storyEpoch=null;briarEpoch();}else{G.storyNpcs=[];G.storyObjects=[];}
-  if(isCampaignAdventure()){BFCampaignGeography.apply(G,Z.id);BFCampaignJourney.install(G);BFBriarDistrict.install(G,{chestKey:chestRewardKey});}
+  if(isCampaignAdventure()){BFCampaignGeography.apply(G,Z.id);BFCampaignDistricts.install(G);BFCampaignJourney.install(G);BFBriarDistrict.install(G,{chestKey:chestRewardKey});}
   G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G,{spawn:spawnEnemy,support:enemySupport});BFCampaignHunts.setup(G,{host:!MP.guest(),book:briarBook,xp:characterXpAward,spawn:spawnEnemy,support:enemySupport,label:e=>e?foeName(e):null,clear:p=>{const q={...p};resolveObstacles(q,q.r,null,0);return Math.hypot(q.x-p.x,q.z-p.z)<2;}});if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;BFCampaignElites.setup(e,G.zone);const support=enemySupport(e);if(Number.isFinite(support))e.y=support;}}
   if(isCampaignAdventure()&&G.area>=0)BFBriarCombat.build(G,{spawn:spawnEnemy,support:enemySupport});
   if(isCampaignAdventure()&&G.area>=0)BFCampaignPlacement.settle(G,{floor:floorAt,resolve:resolveObstacles});
@@ -6149,7 +6151,8 @@ function abandonTrial(){if(MP.active&&G?.trialSession){if(MP.guest()){MP.hostCon
 // Authored shard placements are staged without replacing legacy trial access until complete.
 // Pending IDs stay on G, never in autosave; only a completed half commits them to meta.
 const RIFT_SHARD_HELP='Five matching Rift Shards rebuild a training rift, where you can learn a new fighting style. Complete saved sets automatically open their portals in the Waystation’s Rift Hall. Search both parts of a region: some shards are hidden, and others are rewards for helping people or solving puzzles. Finish this part to save the shards you carry. If you die or leave first, you lose only the unsaved ones. In co-op, each player must collect crystals found in the world; quest rewards go to both players.';
-function worldRiftShards(senseLocked=false){
+function worldRiftShards(senseLocked=false){return BFCampaignDistricts.shards(G,baseWorldRiftShards(senseLocked));}
+function baseWorldRiftShards(senseLocked=false){
  const state=senseLocked?{...adventureStoryState(),flags:new Proxy({},{get:()=>true})}:adventureStoryState();
  if(G?.colossusArena)return BFFurnaceColossus.shards(G);
  if(inLongAscent())return BFLongAscent.shards(state);

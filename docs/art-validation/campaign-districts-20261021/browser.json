@@ -1,0 +1,31 @@
+{
+  "version": "2.357.0-campaign-districts",
+  "browser": "Native Chrome 3, muted localhost:4377, isolated in-memory storage fixture; no player save changes",
+  "legacySave": "First Journey QA, warrior level 4, XP 52, gold 1145",
+  "maps": 16,
+  "builtModels": 320,
+  "mainRoutes": 43,
+  "mainRouteWaypoints": 201,
+  "newClimbs": 9,
+  "landings": 39,
+  "concealedRecess": "RK-05: all 3 corridor legs, single collection, boss isolation, hub banking and saved reload pass",
+  "returnRequests": {
+    "tracks": 5,
+    "keepsake": 3,
+    "pattern": 4,
+    "supplies": 3
+  },
+  "nativeErrors": [],
+  "scope": "Planned all 16 halves; Homefields retains its completed prior district. Selective geometry changes elsewhere, largest perimeter changes in Black Woods, freight banks, Keep outer wards and siege front. Boss arenas, hub, trials and side modes excluded.",
+  "observedQaAdjustments": [
+    "Automatic requestAnimationFrame wait stalled in old QA tab. A fresh isolated tab plus actual renderFrame/BF_LOADING ticks reaches ready in all sections; no renderer/loading requirements bypassed.",
+    "Coast cave waypoint 2230,-1950 is at height 59 on an existing overlapping ramp, not its annotated 0; literal annotation also fails without the new district adapter. Used height 60.",
+    "Dog cage route annotated 76 overlaps existing 100-high final landing. Movement reaches both dogs; source-height tolerance 30, no teleport between targets."
+  ],
+  "limits": [
+    "Journey routes use staged-open quest flags and cleared enemies, debug placement only at each route start. These are physical access checks, not an end-to-end campaign playthrough.",
+    "Quest/shard gates, stable identities, placement and host-authority regressions pass. Live Internet two-player play was not exercised.",
+    "No human fun or pacing judgment, class-by-class speedrun, or device FPS benchmark claimed.",
+    "Screenshot/model triangle counters are one-camera observations, not global performance guarantees."
+  ]
+}

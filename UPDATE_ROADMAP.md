@@ -3989,3 +3989,11 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 - Restored direct discovery of the existing two-dog rescue without prior Beastkeeper acceptance or clue-reading; clear0/2progress and immediate saved turn-in.
 - Rerouted the forest bank that physically blocked the western trail; permanent route geometry stays consistent across co-op quest histories. Completed rescues stay completed.
 - Verified241 focused checks, related regressions, actual collision traversal, both rescue orders, immediate hub return/turn-in and Beth’s separate dog-reward rescue in muted isolated Chrome with an old save. No live Internet co-op test.
+
+
+## [Codex | 2026-10-21] Campaign districts and harder shard expeditions - v2.357.0
+
+- [x] Authored plans for all16 campaign halves before build; retained Homefields prior district. Added38 fitted terrain/building footprints, actual empty-space contour replacements in Black Woods/freight banks/Keep outer wards/siege front and low palace planted-bed walls. Existing craft kits/trees reused, large map bounds retained.
+- [x] Nine authored optional shard climbs plus one concealed turning recess. Source quest identities, NPCs, hub requests, hunts, shard IDs/gates, dialogue/voices and saves preserved. Shared geometry is independent of personal quest history; boss/trial/side modes excluded.
+- [x] Real muted legacy-save browser:16 sections ready,320 expected models built,43 staged-open routes/201 waypoints,9 climbs/39 landings, both dog paths and all4 accepted hub requests accessible. Shard banks and survives reload.1148 focused checks plus21 related suites and inline syntax pass. Human pacing/fun and live remote co-op still need playtesting.
+- [x] Review plans: /design/campaign-geography/restructure.html. Native evidence: docs/art-validation/campaign-districts-20261021/.

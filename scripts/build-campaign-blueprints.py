@@ -171,6 +171,9 @@ def main():
     maps=[]
     for r,plan in zip(after,PLANS):
         z,a=r['zone'],r['area'];assert z*2+a==len(maps)
+        district=next((m for m in json.loads((OUT/'restructure-plan.json').read_text(encoding='utf-8'))['maps'] if m['zone']==z and m['area']==a),None)
+        if district:
+            plan={**plan,'idea':district['intent'],'review':'District plan '+str(2357)+': '+district['title']+'. Captured geometry must be reviewed against the plan; authored intent does not prove traversal or fun.'}
         assert r['bounds']==old[z,a]['bounds'], 'Map scale changed'
         if z==0:r['paths']={**r['paths'],**briar_paths(r)}
         if (z,a)==(1,1):r['paths']={**r['paths'],**canyon_paths()}
@@ -186,6 +189,12 @@ def main():
         paths=[]
         for key,ps in r['paths'].items():
             if ps:paths.append(dict(id=key,main=key in plan['main'],points=[[round(n,1) for n in p] for p in ps]))
+        expedition=district and (district.get('climb') or district.get('search'))
+        if expedition:
+            route=([expedition['start']]+[q[:3] for q in expedition['steps']]) if expedition.get('steps') else expedition['path']
+            paths.append(dict(id=expedition['name'],main=False,points=route))
+            x,z,y=route[-1]
+            points.append(dict(id=expedition['id'],label=expedition['name'],note=expedition['intent'],group='branches',number='R',x=x,z=z,y=y))
         assert all(k in r['paths'] for k in plan['main'])
         maps.append(dict(id=f'{z}-{a}',title=plan['title'],zone=z,area=a,bounds=r['bounds'],
             idea=plan['idea'],protect=plan['protect'],review=plan['review'],points=points,paths=paths,rooms=rooms,
@@ -193,7 +202,7 @@ def main():
             enemies=r['enemies'],source={'file':plan['module'],'sha256':hashlib.sha256(source.read_bytes().replace(b'\r\n',b'\n')).hexdigest()},
             heightMax=max([o.get('y',0) or 0 for o in rooms]+[0]),
             pathNote='Lines follow authored route centers, including slopes, jumps and initially locked passages. A line is not proof of an open walking route.'))
-    data=dict(version='2.197.0-campaign-journeys',date='2026-10-14',beforeCommit='9d143bd1',
+    data=dict(version='2.357.0-campaign-districts',date='2026-10-21',beforeCommit='9d143bd1',
               status='Initial-state geometry review with authored design intent. Not a human playtest or a complete quest walkthrough.',maps=maps)
     (OUT/'layout-data.json').write_text(json.dumps(data,separators=(',',':'),ensure_ascii=False),encoding='utf-8')
     print(f'Built {len(maps)} maps; {(OUT/"layout-data.json").stat().st_size:,} bytes; bounds unchanged.')

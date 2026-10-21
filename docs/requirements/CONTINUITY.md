@@ -3230,3 +3230,5 @@ User: ??? Blade should say Ian's Blade. Inspection: iansBladeName hides the name
 
 
 U-IANS-BLADE-NAME implemented v2.354.1: canonical name always shown, including existing equipped/stash/banked relic copies. Real muted legacy-save browser confirms both completion states, old-name normalization with unchanged damage and actual shop row. Inline syntax passes; no new tests for this small label correction. Evidence docs/art-validation/ians-blade-name-20261021/browser.json. No user saves changed.
+
+Ian's Blade name production verified:ce213e0a, v2.354.1. Cloudflare check succeeds; public index and screenshot match committed bytes. Mirror3205e29b.

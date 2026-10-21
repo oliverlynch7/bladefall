@@ -33,4 +33,8 @@ No severe-stutter resolution, all-device FPS gain, real Internet co-op, unassist
 
 ## Publication
 
-Pending deployment verification.
+Code commit cb009114771fcba30f798b0a6c793d62c9a42815 is live at https://bladefall.pages.dev/3d/?verify=2343-runtime-party. The GitHub integration did not create a build, so the existing Wrangler connection published the committed public/functions/config tree. The first archive inherited Windows line endings; they were equivalent but failed byte-hash comparison. The final LF-preserving archive matches all4224 original Git blobs, contains no .qa/untracked files, and deployed as https://725eff04.bladefall.pages.dev. Hosting configuration and access were preserved.
+
+export-verification.json records every exported Git object; deployment.json confirms all six selected public asset hashes match committed bytes. live-startup.json confirms the public v2.343 title screen, ready hero renderer, exactly one of each updated shared module at v2343, no renderer error and no warning/error logs. The first immediate startup probe ran before imports finished, and a diagnostic expression had an escaping error; neither is presented as a game failure. The retained check waits for actual renderer readiness.
+
+The task patch was mirrored to the queue checkout while preserving unrelated work. The missing GitHub build trigger itself was not changed; check it on the next release rather than assuming automatic deployment works.

@@ -1055,7 +1055,7 @@ body.reading-large .card p,body.reading-large .bodesc,body.reading-large .sdesc,
 body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.dragon-riding #bSk2,body.dragon-riding #bSk3{opacity:.4;filter:grayscale(.8)}
 #dragonFlight[hidden]{display:none}#dragonFlight strong{display:block;font-size:15px}#dragonFlight progress{display:block;width:100%;height:12px;margin:7px 0;accent-color:#f7c15b}#dragonFlight small{display:block;color:#d3e6e5;margin:5px 0;line-height:1.5}#dragonFlight button{border:1px solid #d9b46e;border-radius:6px;background:#e3b659;color:#1d2025;padding:6px 12px;cursor:pointer;font-weight:bold}
 </style>
-<link rel="stylesheet" href="./bag-menu.css?v=2238">
+<link rel="stylesheet" href="./bag-menu.css?v=2352">
 <link rel="stylesheet" href="./adventure-hud.css?v=2340">
 <script src="./adventure-hud.js?v=2345"></script>
 <style>.randomize-dice{display:inline-block;width:30px;height:30px;object-fit:contain;vertical-align:middle;margin-inline-end:6px;pointer-events:none;image-rendering:pixelated;flex-shrink:0}#arBotClsRand .randomize-dice{width:26px;height:26px;margin:0}</style>
@@ -1235,7 +1235,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.351.0-opened-chest-cleanup';
+const VERSION3D='2.352.0-bag-sell-actions';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5561,7 +5561,7 @@ function openBag(back,keepOpen=false){
     return `<span class="gd">Equipped: ${htmlSafe(current?.name||'Empty')}${current?.affixes?.length?' · '+htmlSafe(current.affixes.map(a=>a.label).join(', ')):''}</span>`;};
   const rows=order.map(({entry:it,index:i,item:o})=>{const w=it.weapon,off=!!w&&(!classFamilyOk(normWeapon(checkpointClone(w)))||monkBlocksWeapons(w)),locked=!bagLevelOk(o),rc=RARITY[o.rarity]?.color||'#aab3c7';
     const info=w?weapInfoLine(w):(o.affixes||[]).map(a=>a.label).join(' · ');
-    return `<article class="gearrow bagitem" style="--spine:${rc}"><img class="bagav" src="${itemAv(o)}" alt=""><div class="bagitemcopy"><div class="gn" style="color:${rc}">${htmlSafe(o.name)}${w?.up?' +'+w.up:''}</div><div class="gd">${RARITY[o.rarity]?.name||''} · ${w?(info||weapFamily(w)):slotLabel(o.slot)+(info?' · '+htmlSafe(info):'')}</div>${compare(it,o)}${off?'<span class="bagrestriction">For another class</span>':locked?`<span class="bagrestriction">Unlocks at character level ${rarityReq(o.rarity)}</span>`:''}</div><div class="bagitemactions"><button class="bigbtn buybtn" data-eq="${i}" ${off||locked?'disabled':''}>${off?'Other class':locked?'Lv '+rarityReq(o.rarity):'Equip'}</button><button class="bagSell" data-sl="${i}" aria-label="Sell ${htmlSafe(o.name)} for ${itemGold(o)} gold">Sell · ${itemGold(o)}g</button></div></article>`;
+    return `<article class="gearrow bagitem" style="--spine:${rc}"><img class="bagav" src="${itemAv(o)}" alt=""><div class="bagitemcopy"><div class="gn" style="color:${rc}">${htmlSafe(o.name)}${w?.up?' +'+w.up:''}</div><div class="gd">${RARITY[o.rarity]?.name||''} · ${w?(info||weapFamily(w)):slotLabel(o.slot)+(info?' · '+htmlSafe(info):'')}</div>${compare(it,o)}${off?'<span class="bagrestriction">For another class</span>':locked?`<span class="bagrestriction">Unlocks at character level ${rarityReq(o.rarity)}</span>`:''}</div><div class="bagitemactions"><button class="bigbtn buybtn" data-eq="${i}" ${off||locked?'disabled':''}>${off?'Other class':locked?'Lv '+rarityReq(o.rarity):'Equip'}</button><button class="bagSell" data-sl="${i}" aria-label="Sell ${htmlSafe(o.name)} for ${itemGold(o)} gold">Sell · ${itemGold(o).toLocaleString()} G</button></div></article>`;
   }).join('')||`<div class="bagempty"><b>${_bagView.slot?'No ready replacements':counts.all?'No items in this category':'Your bag is empty'}</b><p>${_bagView.slot?(_bagView.slot==='weapon'&&HR?.weapon?.intrinsic?'Your class uses a built-in weapon. Change classes to use other weapons.':'Try turning off Ready to equip only or choose another slot.'):'Open chests to find equipment. Every category stays available here.'}</p></div>`;
   const browseTitle=_bagView.slot?(_bagView.slot==='weapon'?'Weapon':slotLabel(_bagView.slot))+' replacements':'Your inventory';
   const eq=HR||{weapon:null,gear:{}};

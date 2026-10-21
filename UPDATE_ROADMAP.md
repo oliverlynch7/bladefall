@@ -3955,3 +3955,8 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 - Standard loot chests, authored reward chests, gold coffers and prison cache finish their lid opening, briefly hold, then shrink away. Already-claimed models load hidden; fallback no longer leaves permanent opened shells. Hidden actor records prevent rebuild flicker; scene removal still detaches them.
 - Per-actor scales preserve enlarged/custom models and shared materials stay untouched, so unopened neighbors and other players' personal claims remain independent. Authored supports/quest mechanisms and all loot/save transactions unchanged. Refreshed renderer dependency cache paths.
 -60 exit/model/prop/fallback,133 authored,44 co-op claim plus mimic and22 transaction checks pass. Real muted legacy-save browser verifies3 actual opens, no duplicate loot, hidden claimed models and2 unchanged unopened neighbors. No captured errors; no live WebRTC session. Evidence docs/art-validation/chest-cleanup-20261021.
+
+
+## [Codex | 2026-10-21] Readable bag sell actions (v2.352.0)
+- Each equipment card now has equal-width44px-high Equip and Sell buttons side by side below its details. Equip retains gold; Sell uses contrasting sage green with a border, visible focus and explicit localized Sell · N G label.
+- Sale/equip entry identity and transaction handlers unchanged. Real muted legacy-save browser verifies1920/1000/390px layouts, no clipping/overflow, same-row44px buttons,75G sale increasing1145→1220 and removing only that item, and subsequent Iron Longsword Equip. No new unit tests for this presentation change. Screenshot public/design/bag/sell-actions-2352.png.

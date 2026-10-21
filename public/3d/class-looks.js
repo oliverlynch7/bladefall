@@ -231,7 +231,7 @@ const catalog={
    "accent": "#cf9bff",
    "inlay": "#cf9bff",
    "lift": 1.15,
-   "detail": "Carved pale ribs, violet soul clasp and a pointed hood crown."
+   "detail": "Carved pale ribs, violet soul clasp and an unobstructed cloth hood."
   },
   {
    "name": "Veil Sovereign",

@@ -1,7 +1,7 @@
 import {syncCombatArt} from './combat-art-three.js?v=2330f';
 import {applySkillPose,restoreSkillPose} from './skill-motion3d.js?v=2328';
 import * as T from './three.module.js';
-import {createClassDisplay} from './hero3d.js?v=2342';
+import {createClassDisplay} from './hero3d.js?v=2358';
 const $=id=>document.getElementById(id),canvas=$('view'),renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.outputColorSpace=T.SRGBColorSpace;
 const scene=new T.Scene();scene.background=new T.Color('#142633');const camera=new T.PerspectiveCamera(36,1,.01,80);scene.add(new T.HemisphereLight('#e5f5ff','#7c7256',2.3));const light=new T.DirectionalLight('#fff0cf',2.9);light.position.set(-3,6,5);scene.add(light);scene.add(new T.GridHelper(8,16,'#657b7d','#2d444b'));
 const list=await fetch('./skill-motion-catalog.json?v=2330f').then(r=>r.json());Object.assign(window.BFSkillMotion.profiles,Object.fromEntries(list.map(p=>[p.id,p])));

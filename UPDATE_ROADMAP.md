@@ -3997,3 +3997,10 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 - [x] Nine authored optional shard climbs plus one concealed turning recess. Source quest identities, NPCs, hub requests, hunts, shard IDs/gates, dialogue/voices and saves preserved. Shared geometry is independent of personal quest history; boss/trial/side modes excluded.
 - [x] Real muted legacy-save browser:16 sections ready,320 expected models built,43 staged-open routes/201 waypoints,9 climbs/39 landings, both dog paths and all4 accepted hub requests accessible. Shard banks and survives reload.1148 focused checks plus21 related suites and inline syntax pass. Human pacing/fun and live remote co-op still need playtesting.
 - [x] Review plans: /design/campaign-geography/restructure.html. Native evidence: docs/art-validation/campaign-districts-20261021/.
+
+
+## [Codex | 2026-10-21] Natural Paladin/Rogue class heads - v2.358.0
+
+- [x] Removed the oversized flattened Paladin face replacement, preserving the real face mesh/hair and consistent skin across face, neck and sides. Earned solar halos remain.
+- [x] Removed Ninja/Reaper rigid mask overlays and Reaper forehead blade; verified all3tiers of all3Rogue-based classes keep their source hood. Armor, colors, auras and unlocks retained.
+- [x]222focused source-geometry/restoration checks;51-look/4080-pose/204-rank-gate audit; native12combo/576sample and legacy-save actual character validation pass. Cache refresh covers game and all dependent previews. Evidence docs/art-validation/class-head-fit-20261021/.

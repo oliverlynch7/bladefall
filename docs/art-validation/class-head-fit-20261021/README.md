@@ -1,0 +1,9 @@
+# Natural class heads - 2.358.0
+
+The owner reported geometric shapes over Paladin and some Rogue-based heads. Native before screenshots reproduced an oversized flattened Paladin face disk and rigid Ninja jaw/eye overlay. Removing everything blindly would expose the original Cleric metal-colored face and dark neck, so the fix preserves source geometry and recolors its connected front/side/neck triangles to consistent opaque skin. Native white hair stays intact. Original geometry, normals, UVs and skin weights remain exact. Skin overrides are owned and restored on tier/class changes.
+
+Ninja and Reaper keep their original fitted cloth masks and hoods without an additional polygon plate. Reaper's forehead blade is removed. Bladedancer has no added head geometry and its hood remains intact. Body armor, Paladin halos, legendary effects, class colors, weapons, customization and saved unlocks are retained. Reaper's outfit description no longer advertises the removed hood crown. All affected import cache versions updated.
+
+Verification:222 real-source geometry/material/restoration checks; full51-look audit/4080 pose samples/204 unlock gates; native12 affected class/tier combinations with576 idle/run/attack samples and12 front/side/rear captures. Native actual game on an isolated legacy-save fixture verifies all12 class/tier switches, expected head fitting counts, no renderer errors and level4/gold1145 retained. No user save edits. Browser screenshots synchronize two actual foreground frames; earlier background capture attempts were stale and replaced. Native fixtures are untracked and not shipped. No live remote co-op session was performed; the shared local/peer display code uses the same corrected fitting builder.
+
+See browser.json, native-rigs.json, legacy-world.json, capture-views.json and rigs.json. Native source comparison tested recoloring versus hiding the original front; recoloring kept the source facial detail and avoided a blank head.

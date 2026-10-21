@@ -1,0 +1,22 @@
+{
+  "version": "2.358.0-natural-class-heads",
+  "classes": [
+    "paladin",
+    "ninja",
+    "reaper",
+    "bladedancer"
+  ],
+  "nativeCombinations": 12,
+  "nativeAnimationSamples": 576,
+  "views": "12 frame-synchronized front/side/back screenshots; Chrome Page.bringToFront restores actual RAF before capture, avoiding stale background frames",
+  "focusedChecks": 222,
+  "allClassAudit": {
+    "combinations": 51,
+    "frames": 4080,
+    "rankGates": 204
+  },
+  "legacy": "Isolated in-memory pre-change save; level4/gold1145 retained across actual class and tier switches. Real user saves untouched.",
+  "errors": [],
+  "scope": "Paladin source face/side/neck repainted with a consistent opaque skin material, retaining native geometry, normals, UVs, skin weights and white hair. No replacement face sphere. Ninja/Reaper extra jaw plates removed; Reaper forehead blade removed. Bladedancer source hood verified unchanged. Armor, earned Paladin halos and auras retained. Shared renderer used for local/peer/portraits; no live remote co-op test.",
+  "cache": "Game, wardrobe, NPC wardrobe, progression, skill, weapon and Reaper preview imports updated together."
+}

@@ -1,6 +1,6 @@
 /* One still image per outfit. No extra live renderer or animation loop during combat. */
 let T,createClassDisplay;
-async function imports(){if(T)return;const mods=await Promise.all([import('./three.module.js'),import('./hero3d.js?v=2342')]);T=mods[0];createClassDisplay=mods[1].createClassDisplay;}
+async function imports(){if(T)return;const mods=await Promise.all([import('./three.module.js'),import('./hero3d.js?v=2358')]);T=mods[0];createClassDisplay=mods[1].createClassDisplay;}
 const cache=new Map();let serial=Promise.resolve();
 function image(container,url,name){if(!container.isConnected)return;const img=document.createElement('img');img.alt=name;img.src=url;container.replaceChildren(img);container.dataset.ready='true';}
 function snapshot(container,cid,tier){

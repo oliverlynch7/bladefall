@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import './hero3d.js?v=2344';
+import './hero3d.js?v=2358';
 import {buildNpcActor} from './npc3d.js?v=2344';
 import {loadKitModel} from './mob3d.js?v=2339';
 import {NPC_LOOKS} from './npc-looks.js?v=2344';

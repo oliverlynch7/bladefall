@@ -1,0 +1,282 @@
+[
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL"
+    ],
+    "animated": 0,
+    "aura": null,
+    "class": "paladin",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "paladin:0",
+    "meshes": 7,
+    "samples": 48,
+    "tier": 0,
+    "triangles": 1896
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL",
+      "LowerArmR",
+      "LowerLegR",
+      "LowerArmL",
+      "LowerLegL"
+    ],
+    "animated": 0,
+    "aura": null,
+    "class": "paladin",
+    "eyes": 15,
+    "headFittingMeshes": 1,
+    "key": "paladin:1",
+    "meshes": 18,
+    "samples": 48,
+    "tier": 1,
+    "triangles": 3440
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL",
+      "LowerArmR",
+      "LowerLegR",
+      "LowerArmL",
+      "LowerLegL"
+    ],
+    "animated": 0,
+    "aura": {
+      "drawCalls": 4,
+      "motes": 12,
+      "motif": "Ivory-gold sun wings",
+      "triangles": 122
+    },
+    "class": "paladin",
+    "eyes": 15,
+    "headFittingMeshes": 2,
+    "key": "paladin:2",
+    "meshes": 31,
+    "samples": 48,
+    "tier": 2,
+    "triangles": 8174
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL"
+    ],
+    "animated": 0,
+    "aura": null,
+    "class": "ninja",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "ninja:0",
+    "meshes": 8,
+    "samples": 48,
+    "tier": 0,
+    "triangles": 320
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL",
+      "LowerArmR",
+      "LowerLegR",
+      "LowerArmL",
+      "LowerLegL"
+    ],
+    "animated": 0,
+    "aura": null,
+    "class": "ninja",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "ninja:1",
+    "meshes": 15,
+    "samples": 48,
+    "tier": 1,
+    "triangles": 1328
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL",
+      "LowerArmR",
+      "LowerLegR",
+      "LowerArmL",
+      "LowerLegL"
+    ],
+    "animated": 0,
+    "aura": {
+      "drawCalls": 4,
+      "motes": 12,
+      "motif": "Scarlet afterimage slashes",
+      "triangles": 42
+    },
+    "class": "ninja",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "ninja:2",
+    "meshes": 30,
+    "samples": 48,
+    "tier": 2,
+    "triangles": 2874
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL"
+    ],
+    "animated": 0,
+    "aura": null,
+    "class": "reaper",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "reaper:0",
+    "meshes": 8,
+    "samples": 48,
+    "tier": 0,
+    "triangles": 672
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL",
+      "LowerArmR",
+      "LowerLegR",
+      "LowerArmL",
+      "LowerLegL"
+    ],
+    "animated": 0,
+    "aura": null,
+    "class": "reaper",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "reaper:1",
+    "meshes": 12,
+    "samples": 48,
+    "tier": 1,
+    "triangles": 2892
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL",
+      "LowerArmR",
+      "LowerLegR",
+      "LowerArmL",
+      "LowerLegL"
+    ],
+    "animated": 0,
+    "aura": {
+      "drawCalls": 4,
+      "motes": 12,
+      "motif": "Violet soul mantle",
+      "triangles": 66
+    },
+    "class": "reaper",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "reaper:2",
+    "meshes": 26,
+    "samples": 48,
+    "tier": 2,
+    "triangles": 4792
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL"
+    ],
+    "animated": 0,
+    "aura": null,
+    "class": "bladedancer",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "bladedancer:0",
+    "meshes": 12,
+    "samples": 48,
+    "tier": 0,
+    "triangles": 1056
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL",
+      "LowerArmR",
+      "LowerLegR",
+      "LowerArmL",
+      "LowerLegL"
+    ],
+    "animated": 0,
+    "aura": null,
+    "class": "bladedancer",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "bladedancer:1",
+    "meshes": 19,
+    "samples": 48,
+    "tier": 1,
+    "triangles": 2608
+  },
+  {
+    "anchors": [
+      "Torso",
+      "Hips",
+      "Head",
+      "UpperArmR",
+      "UpperArmL",
+      "LowerArmR",
+      "LowerLegR",
+      "LowerArmL",
+      "LowerLegL"
+    ],
+    "animated": 0,
+    "aura": {
+      "drawCalls": 4,
+      "motes": 12,
+      "motif": "Sea-silk ribbon sweeps",
+      "triangles": 58
+    },
+    "class": "bladedancer",
+    "eyes": 15,
+    "headFittingMeshes": 0,
+    "key": "bladedancer:2",
+    "meshes": 33,
+    "samples": 48,
+    "tier": 2,
+    "triangles": 5698
+  }
+]

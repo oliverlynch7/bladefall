@@ -1,0 +1,124 @@
+{
+  "paladin": [
+    {
+      "tier": 0,
+      "key": "paladin:0",
+      "meshes": 7,
+      "triangles": 1896,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL"
+      ]
+    },
+    {
+      "tier": 1,
+      "key": "paladin:1",
+      "meshes": 18,
+      "triangles": 3440,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ]
+    },
+    {
+      "tier": 2,
+      "key": "paladin:2",
+      "meshes": 31,
+      "triangles": 8174,
+      "animated": 0,
+      "aura": {
+        "motif": "Ivory-gold sun wings",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 122
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ]
+    }
+  ],
+  "ninja": [
+    {
+      "tier": 0,
+      "key": "ninja:0",
+      "meshes": 8,
+      "triangles": 320,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL"
+      ]
+    },
+    {
+      "tier": 1,
+      "key": "ninja:1",
+      "meshes": 15,
+      "triangles": 1328,
+      "animated": 0,
+      "aura": null,
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ]
+    },
+    {
+      "tier": 2,
+      "key": "ninja:2",
+      "meshes": 30,
+      "triangles": 2874,
+      "animated": 0,
+      "aura": {
+        "motif": "Scarlet afterimage slashes",
+        "drawCalls": 4,
+        "motes": 12,
+        "triangles": 42
+      },
+      "anchors": [
+        "Torso",
+        "Hips",
+        "Head",
+        "UpperArmR",
+        "UpperArmL",
+        "LowerArmR",
+        "LowerLegR",
+        "LowerArmL",
+        "LowerLegL"
+      ]
+    }
+  ],
+  "errors": [],
+  "nativePublicGallery": true
+}

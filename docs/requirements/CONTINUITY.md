@@ -3223,3 +3223,10 @@ U-HUB-NPC-ACCESS implemented v2.354.0: stable shop/service, quests and lore menu
 
 
 Hub NPC access production verified:83a78884, deployment0dd7e2d9, v2.354.0. All5 public resources match committed blobs. Fresh muted main-site browser shows new version and2354 dialogue/CSS/quest assets with no captured errors. Real old-save shop/quest and responsive results are in browser.json; co-op is simulated, not a live two-person session. Mirror codea30aa277. No user save reset or voice changes.
+
+
+## U-IANS-BLADE-NAME-20261021
+User: ??? Blade should say Ian's Blade. Inspection: iansBladeName hides the name until iansComplete; saved weapon names are not refreshed. Plan: always display Ian's Blade, normalize that relic's saved name in equipped/bag/banked copies; preserve acquisition, stats, forge costs and all save progress. Verify both completion states, an old named copy and real legacy-save shop.
+
+
+U-IANS-BLADE-NAME implemented v2.354.1: canonical name always shown, including existing equipped/stash/banked relic copies. Real muted legacy-save browser confirms both completion states, old-name normalization with unchanged damage and actual shop row. Inline syntax passes; no new tests for this small label correction. Evidence docs/art-validation/ians-blade-name-20261021/browser.json. No user saves changed.

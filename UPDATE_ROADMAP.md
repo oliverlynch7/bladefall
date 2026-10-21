@@ -3972,3 +3972,7 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 - Every shop NPC opens the same clearly separated Shop & services / Quests / Lore menu. Thomas uses the same quest entry. Shop Back and quest dialogue return to that NPC's menu. Ready turn-ins and old lore cursors no longer bypass it.
 - Quests show locked requirements, in-progress, turn-in and completed review states. Refresh stale quest cursors from persisted status on authoritative opening; guests see host-world status. Listeners follow actual shared quests without gaining control or closing the owner conversation when leaving. Existing voiced lines/rewards/unlocks preserved.
 -120 new access/quest/authority checks plus existing return,33 voice,1447 category,94 ending,33 transition and257 recovery checks pass. Real muted legacy-save browser verifies all five services + Thomas, quest lifecycle/review, shop-back, keyboard navigation and desktop/narrow layout; no errors. Co-op tested with a complete simulated connected peer, not live WebRTC. No user save changes. Preview public/design/hub-npc-access/menu-2354.png.
+
+
+## [Codex | 2026-10-21] Ian's Blade name (v2.354.1)
+- Replaced hidden ??? name with Ian's Blade in all completion states. Refresh old relic names in equipped, bag and bank copies; acquisition/stats/progress unchanged.

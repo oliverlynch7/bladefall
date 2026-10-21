@@ -1243,7 +1243,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.354.0-hub-npc-access';
+const VERSION3D='2.354.1-ians-blade-name';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1630,7 +1630,7 @@ const IANS_SHARDS=[
 const IANS_FORGE_LEVEL=100, IANS_FORGE_GOLD=250000;
 function iansShardCount(){ return (meta.iansShards&&meta.iansShards.length)||0; }
 function iansHasAllShards(){ return iansShardCount()>=IANS_SHARDS.length; }
-function iansBladeName(){ return meta.iansComplete?"Ian's Blade":"??? ’s Blade"; }   // name stays hidden until reforged
+function iansBladeName(){ return "Ian's Blade"; }   // The relic keeps its name before and after reforging.
 function grantIansShard(trialId){
   if(meta.iansComplete) return;
   const idx=IANS_SHARDS.findIndex(s=>s.trial===trialId); if(idx<0) return;   // not a shard-bearing trial
@@ -2942,6 +2942,7 @@ function normWeapon(w){ if(!w) return w; if(w.intrinsic) return intrinsicWeapon(
   if(w.el){ w.el=normEl(w.el); }                                    // retired affinities (storm) migrate onto a surviving one
   const a=ARCHES[w.arche];
   if(a){ w.art=a.art; w.chg=a.chg||null; w.reaper=a.reaper||false; w.anyClass=!!a.anyClass; w.ians=!!a.ians; w.cls=a.cls; w.sch=a.sch;   // re-derive art/charge/class/damage-type from the (possibly remapped) archetype so old saves gain the finalized behavior
+    if(a.ians) w.name=iansBladeName();
     if(a.el && !w.el) w.el=a.el;
     if(a.cls==='ranged') w.proj=Object.assign({},a.proj); }   // refresh proj from the archetype so migrated items gain finalized behavior (e.g. wand seek)
   else if(LEGACY_ART[w.art]) w.art=LEGACY_ART[w.art];               // unknown archetype: at least fold a retired art
@@ -3014,7 +3015,7 @@ function makeWeapon(aid,rid,nameOverride){
     dmg:+(a.dmg*r.mul).toFixed(1),cd:a.cd,kb:a.kb,
     lifesteal:(a.lifesteal||0)+(rid==='legendary'?0.05:0),
     color:r.color, blade:(a.sch==='mag'?(elementColor(a.el)||'#c9a6ff'):'#dfe5ec')};
-  if(a.ians){ w.name=iansBladeName(); w.blade='#fff4ae'; w.color='#ffd24a'; }   // name hidden as "??? 's Blade" until reforged
+  if(a.ians){ w.name=iansBladeName(); w.blade='#fff4ae'; w.color='#ffd24a'; }   // The relic always uses its canonical name.
   if(a.cls==='melee'){ w.range=a.range; } else { w.proj=Object.assign({},a.proj); }
   /* Ian's Blade is authored, not rolled - it is the one weapon in the game whose identity is the
      story rather than the dice. */
@@ -3051,10 +3052,11 @@ function intrinsicWeapon(cid){
 function fistsWeapon(){ return intrinsicWeapon('monk'); }
 function migrateClassEquipment(){
   meta.stash=(meta.stash||[]).filter(it=>!isIntrinsicLoot(it.weapon));
+  for(const it of meta.stash)if(it.weapon?.arche==='iansblade')normWeapon(it.weapon);
   const recovered=new Map(); // Deduplicate snapshot copies, never an independently owned matching bag item.
   const fix=(p,cid,bag=meta.stash)=>{if(!p||!p.weapon)return;if(cid==='pyromancer'&&!isIntrinsicLoot(p.weapon)){const old=p.weapon,key=JSON.stringify(old);let seen=recovered.get(bag);if(!seen)recovered.set(bag,seen=new Set());if(!seen.has(key)){bag.push({weapon:old});seen.add(key);}p.weapon=intrinsicWeapon(cid);return;}if(isIntrinsicLoot(p.weapon))p.weapon=intrinsicWeapon(cid)||classStartWeapon(cid);else normWeapon(p.weapon);};
   fix(meta.hero,meta.classId);fix(meta.run?.p,meta.classId);fix(meta.run?.base,meta.classId);
-  if(meta.bank){fix(meta.bank.hero,meta.bank.classId||meta.classId,meta.bank.stash||(meta.bank.stash=[]));if(meta.bank.stash)meta.bank.stash=meta.bank.stash.filter(it=>!isIntrinsicLoot(it.weapon));}
+  if(meta.bank){fix(meta.bank.hero,meta.bank.classId||meta.classId,meta.bank.stash||(meta.bank.stash=[]));if(meta.bank.stash){meta.bank.stash=meta.bank.stash.filter(it=>!isIntrinsicLoot(it.weapon));for(const it of meta.bank.stash)if(it.weapon?.arche==='iansblade')normWeapon(it.weapon);}}
 }
 function classStartWeapon(cid){
   if(['monk','reaper','pirate','pyromancer'].includes(cid)) return intrinsicWeapon(cid);

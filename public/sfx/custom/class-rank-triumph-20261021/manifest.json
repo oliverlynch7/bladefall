@@ -1,0 +1,21 @@
+{
+  "version": "class-rank-triumph-20261021",
+  "plan_at_generation": "starter",
+  "provider": "ElevenLabs",
+  "model": "eleven_text_to_sound_v2",
+  "subjective_listening": "Human audition pending; signal checks cannot establish taste.",
+  "cues": [
+    {
+      "id": "class_rank_triumph",
+      "file": "custom/class-rank-triumph-20261021/class_rank_triumph_v01",
+      "duration": 2.4,
+      "channels": 2,
+      "source_seconds": 2.4,
+      "trimmed_start_seconds": 0.0,
+      "gain": 0.8571,
+      "peak": 0.75549,
+      "rms": 0.04678,
+      "sha256": "7f1a856194a3640ac146d335354ea73ef11a95b0c4ed1fa0d9b2b0b517b2b1f7"
+    }
+  ]
+}

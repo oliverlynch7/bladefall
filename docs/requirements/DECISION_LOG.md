@@ -2597,3 +2597,9 @@ U-LOOT-BANNER implementation: retained full comparison/rarity/requirement/result
 
 ## U-SETTINGS-COLLAPSED-20261021
 User: When opening Settings, every dropdown should start closed; Controls & camera currently opens and makes the menu confusing. Grounded plan: remove the implicit first-section fallback and reset the remembered accordion only on explicit title/pause Settings entry. Keep the selected section open during in-menu setting changes and child-screen returns. Verify title and pause entry/re-entry, manual expand/collapse, and changing an option in a muted real browser.
+
+
+## U-CLASS-RANK-SOUND-20261021
+User: Keep the original player level-up sound; neither current class rank-up option is liked. Create a new distinct, triumphant class rank-up sound. Grounded plan: preserve both existing files, generate a short brass/percussion heroic class fanfare with ElevenLabs using the authorized account, level and check the audio, and make it the class rank default while retaining original player level-up. Preserve explicit settings choices as alternatives, expose the new cue for listening, and test reward routing, preload, simultaneous rewards and mute/volume behavior. Technical audio checks cannot certify subjective preference.
+
+U-CLASS-RANK-SOUND final implementation: both old class cues were explicitly rejected, so class sound is now the new named triumphant cue with Listen rather than a confusing selector for rejected options. Existing obsolete class preference is ignored; original files are retained. Original player stays default; explicit optional player choice survives. Added previously missing reward file definitions so selected cues can load. Only one successful generation,24 provider-reported credits; a failed HTTP request was reviewed unbilled before a corrected shorter prompt.

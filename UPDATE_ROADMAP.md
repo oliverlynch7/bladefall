@@ -3922,3 +3922,9 @@ NPC release verification correction: v2.344.1 uses an explicit hero3d.js?v=2344 
 - Every category starts closed when entering Settings from title or pause. Removed the implicit Controls & camera default and reset prior accordion selection at those entry points.
 - Setting changes and child-screen returns preserve the current section while navigating Settings.
 -29 existing title/settings parity and script syntax checks pass. Muted browser verification on an isolated pre-change character: title/pause first entry and re-entry all have zero expanded sections; manual expand/collapse works; FPS toggle retains Graphics section. Screenshot public/design/settings/collapsed-2346.png. No save schema or game balance changes.
+
+
+## [Codex | 2026-10-21] Triumphant class rank fanfare (v2.347.0)
+- Generated a new2.4s brass/percussion class mastery stinger with ElevenLabs Starter,24 billed credits. Leveled/faded and checked decoded signal; retained raw master and all earlier sounds. Original player fanfare stays the default and optional player audition remains separate.
+- Class awards now use the requested fanfare for fresh and existing characters, including saves carrying either rejected class preference. Replaced that obsolete two-choice selector with a named cue and Listen button. Repaired absent reward FX definitions and preloads; mute, volume, error fallback and coordinated simultaneous awards remain. Updated the save-free reward preview to match the current sound.
+-16 routing/preload/asset,514 premium celebration,44 progression plus actual transition,255 original-pack preservation and29 title/settings checks pass. Real muted legacy-save browser decodes2.4s cue; actual player/class award callbacks schedule one correct buffer each with master output0. Human taste remains unverified; preview available at /sfx/custom/class-rank-triumph-20261021/class_rank_triumph_v01.mp3.

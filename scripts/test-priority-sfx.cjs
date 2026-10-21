@@ -26,13 +26,13 @@ async function fixture({missing=false,mute=false}={}){
  for(const c of manifest.cues){if(c.legacy_file)check(a.t.FXDEF[c.id].f===c.legacy_file,'original slot restored '+c.id);else check(!a.t.FXDEF[c.id],'candidate-only slot inactive '+c.id);}
  a.t.loadFxFiles();await new Promise(r=>setImmediate(r));
  check(!a.requests.some(x=>x.includes('/custom/')),'inactive replacements are not loaded');
- check(a.requests.length===Object.keys(a.t.FXDEF).length,'one request per original slot');
+ check(a.requests.length===Object.values(a.t.FXDEF).filter(d=>!d.lazy).length,'one request per eager original slot');
  for(const c of manifest.cues.filter(x=>x.legacy_file))check(!!a.t.FXBUF[c.id],'original decodes '+c.id);
  const n=a.starts.length;a.t.SFX.hit();check(a.fallback.length>0&&a.starts.length===n,'original procedural hit used');
  check(!a.t.playFx('custom_shoot'),'bow naturally falls back to original shoot');
  a.t.playFx('swordswing');check(a.starts.length===n+1,'original file plays once');
  check(a.t.FXDEF.levelcheer.f==='fanfare-celebration'&&a.t.FXDEF.levelcheer.v===.6,'original level-up fanfare and volume');
- a.t.loadFxFiles();check(a.requests.length===Object.keys(a.t.FXDEF).length,'no duplicate loads');
+ a.t.loadFxFiles();check(a.requests.length===Object.values(a.t.FXDEF).filter(d=>!d.lazy).length,'no duplicate loads');
  const m=await fixture({mute:true});m.t.loadFxFiles();await new Promise(r=>setImmediate(r));m.t.SFX.hurt();m.t.SFX.classup();m.t.playFx('swordswing');check(m.starts.length===0&&m.fallback.length===0,'mute retained');
  check(html.includes("if(w.arche!=='bow'||!playFx('custom_shoot'))SFX.shoot()"),'original bow fallback remains available');
  console.log(JSON.stringify({checks,candidateFilesPreserved:64,originalFilesRestored:manifest.cues.filter(x=>x.legacy_file).length,proceduralOverrides:0,unreviewedActiveReplacements:0,subjectiveQuality:'Not inferred from technical tests'}));

@@ -1,0 +1,22 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
+const html=fs.readFileSync('public/3d/index.html','utf8');let checks=0,played=[],fallback=0,ready=true,queued=[];
+const ok=(v,m)=>{assert(v,m);checks++;};
+const c={meta:{},playFx:key=>{played.push(key);return ready;},queueSkillFx:key=>queued.push(key),actx:{},c2CurSkills:()=>[]};vm.createContext(c);
+vm.runInContext(html.slice(html.indexOf('function rewardSoundKey('),html.indexOf('function rewardAudioSettings(')),c);
+vm.runInContext(html.slice(html.indexOf('function warmSkillFx('),html.indexOf('const _fxLoop=')),c);
+for(const old of [undefined,'original','new']){c.meta.progressClassSound=old;ok(c.rewardSoundKey('class')==='reward_class','old preferences use requested new class sound');}
+c.rewardSound('player',()=>fallback++);ok(played.length===0&&fallback===1,'player default retains original');
+c.rewardSound('class',()=>fallback++);ok(played.join()==='reward_class'&&fallback===1,'class plays one fanfare without layering fallback');
+c.meta.progressPlayerSound='new';c.rewardSound('player',()=>fallback++);ok(played.at(-1)==='reward_player','explicit optional player candidate remains separate');
+ready=false;c.rewardSound('class',()=>fallback++);ok(fallback===2,'missing file keeps one safe original fallback');
+c.meta.progressPlayerSound='original';c.warmSkillFx();ok(queued.join()==='reward_class','class default preloads without loading optional player candidate');
+queued=[];c.meta.progressPlayerSound='new';c.warmSkillFx();ok(queued.join()==='reward_player,reward_class','both selected cues preload independently');
+const source=html.slice(html.indexOf('const FXDEF={'),html.indexOf('// Preserve existing files.'));
+const defs={};vm.createContext(defs);vm.runInContext(source+';this.fx=FXDEF;',defs);
+ok(defs.fx.levelcheer.f==='fanfare-celebration'&&defs.fx.levelcheer.v===.6,'original player file and volume untouched');
+ok(defs.fx.reward_class.f!==defs.fx.reward_player.f,'player and class use distinct files');
+for(const key of ['reward_class','reward_player'])ok(fs.existsSync('public/sfx/'+defs.fx[key].f+'.mp3'),'selected file exists '+key);
+const manifest=JSON.parse(fs.readFileSync('public/sfx/custom/class-rank-triumph-20261021/manifest.json'));
+ok(manifest.cues.length===1&&manifest.cues[0].peak<.95&&manifest.cues[0].rms>.002,'finite non-silent unclipped prepared cue');
+const originals=['public/sfx/fanfare-celebration.mp3','public/sfx/custom/premium-progression-20261018/premium_class_rank_v01.mp3'];for(const p of originals)ok(fs.existsSync(p),'earlier sound retained '+p);
+console.log(checks+' class fanfare routing, preload, fallback and asset checks passed.');

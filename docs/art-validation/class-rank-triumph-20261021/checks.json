@@ -1,0 +1,33 @@
+{
+  "version": "2.347.0-class-rank-fanfare",
+  "tests": {
+    "rankFanfare": 16,
+    "premiumProgression": 514,
+    "progression": 44,
+    "priorityOriginalPreservation": 255,
+    "titleSettings": 29
+  },
+  "browser": {
+    "isolatedLegacySave": true,
+    "playerDefault": "original",
+    "classDefault": "triumphant, including stale original/new preferences",
+    "classDecodedDuration": 2.4,
+    "mutedListen": "correct muted message",
+    "preload": true,
+    "realPlayerAwardBuffers": [
+      {
+        "class": false,
+        "player": true
+      }
+    ],
+    "realClassAwardBuffers": [
+      {
+        "class": true,
+        "player": false
+      }
+    ],
+    "speakerMasterGain": 0,
+    "testingNote": "Actual award callbacks invoked synchronously under the test adapter; normal simultaneous-award coordination tested separately in the existing suite."
+  },
+  "subjectiveListening": "User audition pending; signal and integration checks do not establish preference."
+}

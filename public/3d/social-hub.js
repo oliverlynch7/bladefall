@@ -5,7 +5,7 @@ import {chessSeat,chessCompanion,chessHistoryFromSAN} from './chess-presentation
 import './chess-pieces.js?v=2322';
 import {ChessOpponent} from './chess-opponent.mjs?v=2119';
 import {ChessRoom} from './chess-room.mjs?v=2349b';
-import {createChessTable} from './chess-table.js?v=2322';
+import {createChessTable} from './chess-table.js?v=2350';
 const A=window.__BF_SOCIAL_API,table={x:300,z:390},cost=1000,botId='chess-thomas';
 let opened=false,origin=null,parkedPet=null,remote=null,remoteAt=0,talks={},pendingTalk=null,lastTalk='',talkRev=0,wasCoop=false,lastView='',lastDisplay='',lastLobby='',ambientGame='duel',nextRewardAttempt=0;
 const id=()=>A.mp().active?A.mp().myId:'solo',host=()=>!A.mp().active||A.mp().isHost;

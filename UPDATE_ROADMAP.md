@@ -3943,3 +3943,9 @@ NPC release verification correction: v2.344.1 uses an explicit hero3d.js?v=2344 
 -28 approach/prompt,393 shared-room/authority/history and33 presentation checks pass. Real muted legacy-save browser checks cover actual quest conversation, far-side chess entry and returning to bench dialogue after leaving. No save schema changes.
 
 Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reservation after visiting Table & opponents (that lobby removes the view but deliberately retains table ownership). Release checks reserved game owner rather than the deleted view.397 room checks now include this case and spectator non-eviction. Other gameplay is unchanged.
+
+
+## [Codex | 2026-10-21] Unrestricted chess premoves (v2.350.0)
+- Both3D and flat boards accept any other square from an owned piece while waiting, including blocked paths, friendly occupied recapture squares and currently illegal geometry. Normal-turn moves stay strict. Queues execute only if legal in the actual next position; otherwise cancel safely.
+- Preserved round/seat/clock/result/animation guards, latest-revision commands and one-shot execution. Purple queued highlights plus a concise conditional-play note; no63-square legal-highlight flood.
+-835 premove,72 input-window,397 room and28 approach checks pass. Real muted legacy-save browser verifies click/drag on both boards, invalid cancellation, empty-future/occupied captures auto-executing once and Cancel. Two locally simulated seats, not a live remote-peer test. Screenshot public/design/chess/premove-2350.png.

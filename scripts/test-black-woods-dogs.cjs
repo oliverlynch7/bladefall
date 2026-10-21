@@ -62,4 +62,3 @@ for(const [name,path]of Object.entries(D.paths))for(let j=1;j<path.length;j++){
  }
 }
 console.log(checks+' Black Woods discovery, permanent route, save, either-order rescue and co-op authority checks passed.');
-

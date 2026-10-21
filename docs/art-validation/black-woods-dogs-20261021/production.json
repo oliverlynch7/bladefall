@@ -1,0 +1,52 @@
+{
+  "commit": "16c5dbf5",
+  "deployment": "b482f07c-d98d-483f-94d0-eae9f6ff2074",
+  "resources": [
+    {
+      "file": "public/3d/index.html",
+      "match": true,
+      "bytes": 2405669
+    },
+    {
+      "file": "public/3d/campaign-geography.js",
+      "match": true,
+      "bytes": 21187
+    },
+    {
+      "file": "public/3d/return-adventures.js",
+      "match": true,
+      "bytes": 5087
+    },
+    {
+      "file": "public/3d/return-visits.js",
+      "match": true,
+      "bytes": 9253
+    },
+    {
+      "file": "public/3d/story/return-visits.json",
+      "match": true,
+      "bytes": 37333
+    },
+    {
+      "file": "public/design/black-woods-dogs/rescue-2356.png",
+      "match": true,
+      "bytes": 139924
+    },
+    {
+      "file": "public/design/black-woods-dogs/turn-in-2356.png",
+      "match": true,
+      "bytes": 61793
+    },
+    {
+      "file": "public/design/campaign-geography/layout-data.json",
+      "match": true,
+      "bytes": 528832
+    }
+  ],
+  "browser": {
+    "version": "2.356.0-black-woods-dog-rescue",
+    "questScriptsCache": 2356,
+    "errors": [],
+    "scope": "fresh muted public main startup; full lifecycle tested locally in isolated old-save fixture"
+  }
+}

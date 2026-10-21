@@ -20,6 +20,6 @@ The public gallery `/3d/npc-wardrobe.html` calls the same `buildNpcActor` factor
 
 No dialogue, recordings, voice casting, quests, save schema, enemy balance or level layout changes. No paid audio requests. Appearance data is deterministic on each client; real two-human Internet co-op and subjective character likeness/fun are not certified by these checks. Existing intermittent campaign FPS reports remain unresolved by this cosmetic task.
 
-Production deployment evidence is recorded after the tested commit is published. Preserve unrelated premium-progression regression dirt and mirror articulated-rig dirt.
+Production: https://c5a035e0.bladefall.pages.dev (code c8d4dbb4), live at https://bladefall.pages.dev/3d/. Cloudflare check completed successfully. Eight public assets match committed Git blobs exactly, including the gallery and shared actor modules. Fresh muted public startup shows v2.344.1 and one explicit hero3d.js?v=2344 entry; the public Mara gallery renders with no captured errors. See public-hashes.json, live-startup.json and public-gallery.png. Task patches are mirrored in the local queue. Unrelated premium-progression and articulated-rig regression dirt was preserved.
 
 Public startup initially exposed the old hero query URL: import maps apply to imports, not HTML script-src entries. Corrected the actual index entry to hero3d.js?v=2344, added a direct-entry regression and bumped to v2.344.1 so current clients update. The actor code and verified outfits are unchanged.

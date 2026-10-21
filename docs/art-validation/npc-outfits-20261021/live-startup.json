@@ -1,0 +1,36 @@
+{
+  "deployment": "https://c5a035e0.bladefall.pages.dev",
+  "game": {
+    "ready": true,
+    "version": true,
+    "mode": "title",
+    "npcFactoryLoaded": true,
+    "modules": [
+      "https://bladefall.pages.dev/3d/hero3d.js?v=2344",
+      "https://bladefall.pages.dev/3d/npc3d.js?v=2344"
+    ]
+  },
+  "gallery": {
+    "ids": [
+      "mara"
+    ],
+    "ready": true,
+    "drawCalls": 27,
+    "triangles": 5414,
+    "costumes": [
+      {
+        "id": "mara",
+        "meshes": 8,
+        "triangles": 2188,
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head"
+        ]
+      }
+    ],
+    "pose": "Idle"
+  },
+  "gameErrors": [],
+  "galleryErrors": []
+}

@@ -1,0 +1,61 @@
+{
+  "commit": "c8d4dbb4fdc2817a5ed35adeaf6d2cbe32109085",
+  "checks": [
+    {
+      "name": "Cloudflare Pages",
+      "status": "completed",
+      "conclusion": "success",
+      "details": "https://dash.cloudflare.com/?to=/4ee6e0769c54163e373dee3dd31de1d0/pages/view/bladefall/c5a035e0-8cf5-4ac9-af7c-c9ad60d3740f"
+    }
+  ],
+  "assets": [
+    {
+      "path": "3d/index.html",
+      "match": true,
+      "sha256": "ddd4fb7d644482a7463fbb2628a4a180fde11c090a7da562fdada304442fd097",
+      "bytes": 2400964
+    },
+    {
+      "path": "3d/hero3d.js",
+      "match": true,
+      "sha256": "23fdcd272d8b723d202c1a073e9b45084672d1abac2966762f226e9d8e523e82",
+      "bytes": 168291
+    },
+    {
+      "path": "3d/npc3d.js",
+      "match": true,
+      "sha256": "f0dd8eff7625302a958265e69e1519605ab45b181b4a49cf8bfca92233e96208",
+      "bytes": 6362
+    },
+    {
+      "path": "3d/npc-looks.js",
+      "match": true,
+      "sha256": "426ad8dcce89f9d6442ceb9ed5ff34ed87ddd7c987b6bdc87c63f6137d9ddd12",
+      "bytes": 8433
+    },
+    {
+      "path": "3d/npc-costume3d.js",
+      "match": true,
+      "sha256": "9c40d0eed7829a915b27e42d2079943c091655cd98be37cb1609149ceb0192f8",
+      "bytes": 22257
+    },
+    {
+      "path": "3d/npc-wardrobe.html",
+      "match": true,
+      "sha256": "7ceb5fbb8558782d83eec0b5110100fc41d41d336d452acca5e3a8ea323031b3",
+      "bytes": 4656
+    },
+    {
+      "path": "3d/npc-wardrobe.js",
+      "match": true,
+      "sha256": "22e8a736bbac6dfec464bf1b10db96eb83a9715a914e72b16e4abc7e43abf174",
+      "bytes": 6777
+    },
+    {
+      "path": "design/campaign-geography/npc-outfits-2344.png",
+      "match": true,
+      "sha256": "0fc3ddbc4b3b3e387633b6bf551530455eae798fc67aa2b8daac5118de4748c7",
+      "bytes": 121941
+    }
+  ]
+}

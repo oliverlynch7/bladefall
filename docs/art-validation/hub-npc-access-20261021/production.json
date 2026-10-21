@@ -1,0 +1,37 @@
+{
+  "commit": "83a788847f52995a068f038127ae36d45e350913",
+  "deployment": "0dd7e2d9",
+  "files": [
+    {
+      "route": "/3d/",
+      "matches": true,
+      "sha256": "0550fc9fbb64aae098209eda0848d07bffcf0e53c877d69f94f147c1a20b8bcd"
+    },
+    {
+      "route": "/3d/hub-dialogue.js",
+      "matches": true,
+      "sha256": "c91b3205b401fa7602536cb860bbe9dbb9e7d74843766e7f3738d6125d59b574"
+    },
+    {
+      "route": "/3d/hub-dialogue.css",
+      "matches": true,
+      "sha256": "50bb6e3fcdf288f69b6d935e14839730a0a64b7fda41e5a8a056a82f4f9941ef"
+    },
+    {
+      "route": "/3d/return-visits.js",
+      "matches": true,
+      "sha256": "a5bbcbf9597f5746992f3094c02280862cf00814fc9a1e513f11ad9161b5104f"
+    },
+    {
+      "route": "/design/hub-npc-access/menu-2354.png",
+      "matches": true,
+      "sha256": "d895aa66c24cb704ff52d90cd8dff7835eb9cf22d93d431055426f9c18fbd000"
+    }
+  ],
+  "browser": {
+    "version": "2.354.0-hub-npc-access",
+    "mutedFreshMainSiteStartup": true,
+    "newMenuAssetsLoaded": true,
+    "errors": []
+  }
+}

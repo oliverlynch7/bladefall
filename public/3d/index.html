@@ -1127,11 +1127,11 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./loading.js?v=2292"></script>
 <script src="./sprint-race.js?v=2255"></script>
 <link rel="stylesheet" href="./sprint-race.css?v=2255">
-<link rel="stylesheet" href="./hub-dialogue.css?v=2288">
+<link rel="stylesheet" href="./hub-dialogue.css?v=2348">
 <script src="./voice-content.js?v=2336"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./render-motion.js?v=2304"></script>
-<script src="./hub-dialogue.js?v=2335"></script>
+<script src="./hub-dialogue.js?v=2348"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
 <script src="./hub-tour.js?v=2294"></script>
 <script src="./controller.js?v=2323"></script>
@@ -1235,7 +1235,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.347.0-class-rank-fanfare';
+const VERSION3D='2.348.0-npc-voice-playback';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1294,7 +1294,7 @@ function deleteSlot(sl){
 }
 let MODE=null; // 'rl' | 'hc' — chosen at Mode Select
 function loadJSON(k){ try{return BFSaveSafety.parse(localStorage.getItem(k));}catch(e){return null;} }
-const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVoice','dialogueTTS','narrationOn','narrationVol','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
+const GLOBAL_FIELDS=['nativeResolution','showFps','readingSize','objectiveArrows','friendArrows','legacyHubDialogue','dialogueVol','dialogueVoice','dialogueTTS','narrationOn','narrationVol','unlockedSkins','selectedSkin','achievements','soundOn','showArmor','autoAttack','autoKeep','autoBag','autoSellEquipment','camMode','camV2','lookSens','fpsFov','shoulderZoom','overheadZoom','renderDist','silhouette','quality','particles','tutDone','hubTutDone','tutSeen','tut','tutOff',
   'totalKills','bossKills','kingKills','tyrantKills','magicBossKills','rangedBossKills','legendaryFound','flawlessStages','maxLevel',
   'beatNormal','beatHardcore','beatHitless','jetpack','diff','cosmetics','cosEquipped','zonesCleared','elitesKilled','secretsFound','musicOn','musicVol','sfxVol','progressPlayerSound','progressClassSound','combatDetailAudio','actionDetailAudio',
   'introSeen','zoneSeen','shadeSeen','endlessBest','sprintBest','sprintBests','dmgNumbers','originSeen','keybinds','controller','padOff','shakeOff','motionTrails','reduceMotion','bossRushBest','bossRushBestBrutal','bossRushCleared','arcadeOwned'];
@@ -1779,7 +1779,7 @@ function audioSettingsHTML(){
     <div class="setrow"><label><span>Narrator · tutorial &amp; story</span><input id="narrationOn" type="checkbox" ${meta.narrationOn!==false?'checked':''}></label><small>Voice B guides practice, menus, the story and the hub. Replay is available on each page.</small></div>
     <div class="setrow"><label><span>Narrator volume</span><b id="narrationVal">${Math.round(narrationVolume()*100)}%</b></label><input id="narrationSlider" type="range" min="0" max="100" step="5" value="${Math.round(narrationVolume()*100)}"><small>Independent of sound effects. Text and controls remain available when narration is off.</small></div>
     <div class="setrow"><label><span>Recorded NPC voices</span><input id="dialogueVoice" type="checkbox" ${meta.dialogueVoice!==false?'checked':''}></label><small>Plays the voice for the character you are speaking with. <a href="npc-voices/" target="_blank" rel="noopener" style="color:#f3ce87">Listen to recordings ↗</a></small></div>
-    <div class="setrow"><label><span>Device voice for unrecorded lines</span><input id="dialogueTTS" type="checkbox" ${meta.dialogueTTS!==false?'checked':''}></label><small>On by default. Character voices depend on your device. Both follow sound-effects volume.</small></div>${rewardAudioSettings()}`;
+    <div class="setrow"><label><span>Device voice for unrecorded lines</span><input id="dialogueTTS" type="checkbox" ${meta.dialogueTTS!==false?'checked':''}></label><small>On by default. Character voices depend on your device. Both use the NPC voice volume below.</small></div><div class="setrow"><label for="dialogueVolSlider"><span>NPC voice volume</span><b id="dialogueVolVal">${Math.round(BFHubDialogue.voiceVolume(meta)*100)}%</b></label><input id="dialogueVolSlider" type="range" min="0" max="100" step="5" value="${Math.round(BFHubDialogue.voiceVolume(meta)*100)}"><small>Keep conversation clear without raising combat effects. Muting game sound still mutes voices.</small></div>${rewardAudioSettings()}`;
 }
 function bindAudioSettings(){
   bindRewardAudio();
@@ -1787,6 +1787,7 @@ function bindAudioSettings(){
   if(narrator)narrator.onchange=()=>setNarrationEnabled(narrator.checked);
   if(nvol)nvol.oninput=()=>{meta.narrationVol=Math.max(0,Math.min(1,+nvol.value/100));persistGlobal();document.getElementById('narrationVal').textContent=nvol.value+'%';window.BFNarration?.tick();};
   for(const id of ['dialogueVoice','dialogueTTS']){const e=document.getElementById(id);if(e)e.onchange=()=>{meta[id]=e.checked;persistGlobal();};}
+  const npcvol=document.getElementById('dialogueVolSlider');if(npcvol)npcvol.oninput=()=>{meta.dialogueVol=Math.max(0,Math.min(1,+npcvol.value/100));persistGlobal();document.getElementById('dialogueVolVal').textContent=npcvol.value+'%';};
   const ms=document.getElementById('musSlider'), ss=document.getElementById('sfxSlider');
   if(ms) ms.addEventListener('input',()=>{ initAudio(); setMusicVol((+ms.value)/100); const v=document.getElementById('musVal'); if(v) v.textContent=ms.value+'%'; });
   if(ss) ss.addEventListener('input',()=>{ initAudio(); setSfxVol((+ss.value)/100); const v=document.getElementById('sfxVal'), i=document.getElementById('sfxIcon'); if(v) v.textContent=ss.value+'%'; if(i){ i.classList.toggle('ico-sound-on',+ss.value>0); i.classList.toggle('ico-sound-off',+ss.value===0); } SFX.pickup(); });   // hear the new level as you drag
@@ -20833,7 +20834,7 @@ function organizePauseSettings(){
   const groups=[
     ['Controls & camera',['keybindsBtn','padBtn','camBtn','sensSlider','fovSlider','cameraZoomSlider']],
     ['Graphics & appearance',['qualBtn','rdSlider','fsBtn','particlesBtn','armFxBtn','resolutionBtn','fpsBtn']],
-    ['Audio & voices',['musSlider','sfxSlider','narrationOn','narrationSlider','dialogueVoice','dialogueTTS','rewardSoundplayer','rewardSoundclass','actionDetailRow','combatDetailRow','rewardPreviewLink']],
+    ['Audio & voices',['musSlider','sfxSlider','narrationOn','narrationSlider','dialogueVoice','dialogueTTS','dialogueVolSlider','rewardSoundplayer','rewardSoundclass','actionDetailRow','combatDetailRow','rewardPreviewLink']],
     ['Accessibility & guidance',['readingSizeBtn','shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
     ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
   ];

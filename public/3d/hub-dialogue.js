@@ -1,7 +1,7 @@
 /* Service conversations share exact stable line IDs with the private Voice Studio. */
 (function(){
  'use strict';
- let book=null,active=null,generation=0,audio=null,utterance=null,timer=0,frame=0,voiceTimer=0,speaking=false;
+ let book=null,active=null,generation=0,audio=null,utterance=null,timer=0,frame=0,voiceTimer=0,speaking=false,voiceGeneration=0;
  let loading=null;
  async function loadBook(){
   if(book)return book;if(loading)return loading;
@@ -16,7 +16,58 @@
  function state(a,id){const all=a.meta.hubDialogue||(a.meta.hubDialogue={});return all[id]||(all[id]={introduced:false,newsSeen:false,cursor:null})}
  function news(n,a){const d=book?.npcs[n.id];if(!d)return null;const latest=(d.newsStages||[]).filter(q=>a.meta.zoneDone?.[q.zone]).at(-1);if(latest)return state(a,n.id).newsSeenId===latest.id?null:latest.id;return Object.values(a.meta.zoneDone||{}).filter(Boolean).length>=d.newsAfterCompletedRegions&&!state(a,n.id).newsSeen?d.news:null}
  function hasNews(n,a){return !!news(n,a)}
- function stopVoice(){generation++;clearTimeout(voiceTimer);clearTimeout(timer);cancelAnimationFrame(frame);speaking=false;if(audio){audio.pause();audio.removeAttribute('src');audio.load();audio=null}if(utterance){speechSynthesis.cancel();utterance=null}}
+ // Reuse a gesture-unlocked media element; delayed fetches must not lose voice permission.
+ let voiceMedia=null,voiceUnlocked=false,voicePriming=false;
+ const silentVoice='data:audio/wav;base64,UklGRmQBAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==';
+ function mediaPlayer(){return voiceMedia||(voiceMedia=new Audio());}
+ function primeVoice(event){
+  if(!event.isTrusted||voiceUnlocked||voicePriming||active||audio)return;
+  const clip=mediaPlayer();voicePriming=true;clip.volume=0;clip.src=silentVoice;
+  try{Promise.resolve(clip.play()).then(()=>{voiceUnlocked=true;if(!audio&&clip.src===silentVoice){clip.pause();clip.removeAttribute('src');clip.load();}}).catch(()=>{}).finally(()=>{voicePriming=false;});}catch(_){voicePriming=false;}
+ }
+ document.addEventListener('pointerdown',primeVoice,true);document.addEventListener('keydown',primeVoice,true);
+ function cancelVoice(){voiceGeneration++;clearTimeout(voiceTimer);speaking=false;if(audio){const old=audio;audio=null;old.onplaying=old.onpause=old.onwaiting=old.onended=old.onerror=null;old.pause();old.removeAttribute('src');old.load();}if(utterance){speechSynthesis.cancel();utterance=null;}}
+ function stopVoice(){generation++;clearTimeout(timer);cancelAnimationFrame(frame);cancelVoice();}
+ function voiceVolume(meta){const value=meta.dialogueVol==null?.85:Number(meta.dialogueVol);return Number.isFinite(value)?Math.max(0,Math.min(1,value)):.85;}
+ function voiceControls(){return '<div class="hub-voice-controls"><button id="hubVoiceReplay" type="button" aria-label="Replay this NPC voice">▶ Replay voice</button><span id="hubVoiceStatus" role="status" aria-live="polite"></span></div>';}
+ function wireVoice(id,node,autoplay=true){const button=el('hubVoiceReplay');if(!button)return;button.onclick=()=>playVoice(id,node);if(autoplay)playVoice(id,node);else el('hubVoiceStatus').textContent=speaking?'Playing voice':'Replay this line';}
+ function playVoice(id,node){
+  cancelVoice();const token=voiceGeneration,owner=active,{a}=owner,still=()=>token===voiceGeneration&&active===owner;
+  const status=text=>{if(still()&&el('hubVoiceStatus'))el('hubVoiceStatus').textContent=text;};
+  const button=text=>{if(still()&&el('hubVoiceReplay'))el('hubVoiceReplay').textContent=text;};
+  const allowed=a.meta.soundOn!==false&&!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname||'')&&!/[?&]mute=1\b/.test(location.search);
+  if(!allowed){status('Voices muted');button('▶ Play voice');return;}
+  if(!voiceVolume(a.meta)){status('NPC voice volume is zero in Settings');button('▶ Play voice');return;}
+  let ttsStarted=false;
+  async function tts(){
+   if(ttsStarted||!still())return;ttsStarted=true;
+   if(a.meta.dialogueTTS===false){status(a.meta.dialogueVoice===false?'NPC voices are off in Settings':'Recording unavailable · text remains available');button('▶ Retry voice');return;}
+   try{
+    const u=await BFDialogueSpeech.prepare(node.text,node.voice?.speaker||owner.n.id,node.voice||{},voiceVolume(a.meta));if(!still())return;
+    if(!u){status('Device speech unavailable · text remains available');button('▶ Retry voice');return;}
+    utterance=u;status(a.meta.dialogueVoice===false?'Device voice · recordings off in Settings':'Device voice fallback');
+    const done=()=>{if(still()){clearTimeout(voiceTimer);speaking=false;button('▶ Replay voice');}};
+    u.onstart=()=>{if(still())speaking=true;};u.onend=done;u.onerror=()=>{if(still()){status('Voice could not play · press Retry');done();button('▶ Retry voice');}};
+    voiceTimer=setTimeout(()=>{if(still()){speechSynthesis.cancel();done();}},Math.max(12000,Math.min(180000,node.text.length*130+5000)));
+    speechSynthesis.speak(u);
+   }catch(_){if(still()){speaking=false;status('Voice unavailable · text remains available');button('▶ Retry voice');}}
+  }
+  async function start(){
+   if(a.meta.dialogueVoice===false){tts();return;}
+   if(!node.recordedAudio){status('Loading voice…');try{await BFVoiceContent.apply({nodes:{[id]:node}});}catch(_){}if(!still())return;}
+   if(!node.recordedAudio){tts();return;}
+   const clip=audio=mediaPlayer();clip.src=node.recordedAudio;clip.volume=voiceVolume(a.meta);status('Loading recorded voice…');
+   const detach=()=>{clip.onplaying=clip.onpause=clip.onwaiting=clip.onended=clip.onerror=null;clip.pause();clip.removeAttribute('src');clip.load();if(audio===clip)audio=null;};
+   const failed=error=>{if(!still()||audio!==clip)return;clearTimeout(voiceTimer);speaking=false;detach();if(error?.name==='NotAllowedError'){status('Press Play voice to hear this line');button('▶ Play voice');}else tts();};
+   clip.onplaying=()=>{if(still()){voiceUnlocked=true;clearTimeout(voiceTimer);speaking=true;status('Recorded voice');button('▶ Replay voice');}};
+   clip.onpause=()=>{if(still())speaking=false;};clip.onwaiting=()=>{if(still()){speaking=false;status('Loading recorded voice…');}};
+   clip.onended=()=>{if(still()){clearTimeout(voiceTimer);speaking=false;status('Recorded voice · finished');button('▶ Replay voice');}};
+   clip.onerror=()=>failed(clip.error);
+   voiceTimer=setTimeout(()=>failed(new Error('Voice load timed out')),8000);
+   try{const playing=clip.play();playing?.catch(failed);}catch(error){failed(error);}
+  }
+  start();
+ }
  function close(service=false,remote=false){if(!active)return;if(active.external&&!remote){active.a.requestClose();return;}generation++;stopVoice();const {n,a}=active;active=null;el('hubDialogue')?.remove();document.body.classList.remove('npc-conversation');a.leave(service);if(service)n.open()}
  function commit(){active.a.save()}
  function serviceButton(id,n){const icon={quartermaster:'🛒',anvil:'⚒️',keeper:'🎨',drillmaster:'⚔️',beastkeeper:'🐾'}[n.id]||'✦';return `<button id="${id}" class="hub-service-primary"><span class="hub-service-icon" aria-hidden="true">${icon}</span><span>${esc(book?.npcs[n.id]?.service||n.role||'Open services')}</span><span class="hub-service-arrow" aria-hidden="true">›</span></button>`}
@@ -34,13 +85,14 @@
   for(const row of entries.filter(row=>row.choice.end||row.choice.category==='topics'))container.append(row.button);
  }
  function landing(){
-  if(!active)return;stopVoice();active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book?.npcs[n.id]||{role:n.role||'Services'};s.cursor=null;commit();
-  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p><div class="hub-dialogue-options" id="hubLanding"><section class="dialogue-group dialogue-group-main" aria-label="Main action"><h3>! Main action</h3>${serviceButton('hubService',n)}</section>${a.returnInfo?.(n)?'<section class="dialogue-group dialogue-group-side" aria-label="Side quests"><h3>◇ Side quests</h3><button id="hubReturnQuest"></button></section>':''}${book?.npcs[n.id]?'<section class="dialogue-group dialogue-group-lore" aria-label="Lore and questions"><h3>▤ Lore & questions</h3>':''}${hasNews(n,a)?'<button id="hubNews">What has changed?</button>':''}${book?.npcs[n.id]?'<button id="hubHelp">How does this work?</button><button id="hubAbout">About you</button></section>':''}</div>`);
+  if(!active)return;stopVoice();active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book?.npcs[n.id]||{role:n.role||'Services'};s.cursor=null;commit();const greeting=book?.nodes[def.start];
+  shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p>${greeting?'<p class="hub-greeting">'+esc(greeting.text)+'</p>'+voiceControls():''}<div class="hub-dialogue-options" id="hubLanding"><section class="dialogue-group dialogue-group-main" aria-label="Main action"><h3>! Main action</h3>${serviceButton('hubService',n)}</section>${a.returnInfo?.(n)?'<section class="dialogue-group dialogue-group-side" aria-label="Side quests"><h3>◇ Side quests</h3><button id="hubReturnQuest"></button></section>':''}${book?.npcs[n.id]?'<section class="dialogue-group dialogue-group-lore" aria-label="Lore and questions"><h3>▤ Lore & questions</h3>':''}${hasNews(n,a)?'<button id="hubNews">What has changed?</button>':''}${book?.npcs[n.id]?'<button id="hubHelp">How does this work?</button><button id="hubAbout">About you</button></section>':''}</div>`);
   if(el('hubReturnQuest')){const info=a.returnInfo(n),btn=el('hubReturnQuest');btn.textContent='◇ '+info.label;if(info.fresh)markQuestButton(btn,info.label);btn.onclick=()=>a.returnQuest(n);}
+  if(greeting){wireVoice(def.start,greeting,!active.greeted);active.greeted=true;}
   el('hubService').onclick=()=>close(true);if(el('hubAbout'))el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');if(el('hubHelp'))el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
  }
  function navigationItems(root){return [...root.querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(b=>b.getClientRects().length&&!b.closest('[inert]'));}
- function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices [data-dialogue-category="main"]:not(:disabled)')||root.querySelector('#hubChoices [data-dialogue-end="true"]:not(:disabled)')||root.querySelector('#hubChoices button:not(:disabled):not([hidden])');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
+ function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices [data-dialogue-category="main"]:not(:disabled)')||root.querySelector('#hubChoices [data-dialogue-end="true"]:not(:disabled)')||root.querySelector('#hubChoices button:not(:disabled):not([hidden])')||root.querySelector('#hubService');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
  document.addEventListener('focusin',e=>{const root=e.target.closest?.('#hubDialogue,[data-dialogue-menu]');if(!root)return;root.querySelectorAll('.dialogue-selected').forEach(b=>b.classList.remove('dialogue-selected'));if(e.target.matches('button,summary'))e.target.classList.add('dialogue-selected');});
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
@@ -56,9 +108,9 @@
   const finish=()=>{if(topic==='intro')s.introduced=true;if(topic==='news'){s.newsSeen=true;s.newsSeenId=id;}s.cursor=null;commit();close();};
   showLine(id,{...node,choices:node.choices.filter(c=>!c.retired).map(c=>active.visited.includes(c.next)?{...c,text:'Leave conversation',end:true,optional:false}:c)},lastChoice,choice=>choice.end?finish():line(choice.next,choice.text,topic),finish,'Leave conversation');
  }
- function showLine(id,node,lastChoice,choose,finish,finishLabel,canChoose=true){
-  stopVoice();const token=++generation,{a}=active;active.lineId=id;active.started=performance.now();
-  shell(`<p id="hubLine" class="hub-dialogue-line"></p><button id="hubReveal">Show full line</button><p id="hubVoiceStatus" class="hub-dialogue-label"></p>${!canChoose?'<p class="hub-dialogue-label">Your teammate is choosing. You can both leave at any time.</p>':''}<div id="hubChoices" class="hub-dialogue-options"></div>`);
+ function showLine(id,node,lastChoice,choose,finish,finishLabel,canChoose=true,keepVoice=false){
+  if(keepVoice){generation++;clearTimeout(timer);cancelAnimationFrame(frame);}else stopVoice();const token=++generation,{a}=active;active.lineId=id;active.voiceText=node.text;active.started=performance.now();
+  shell(`<p id="hubLine" class="hub-dialogue-line"></p><button id="hubReveal">Show full line</button>${voiceControls()}${!canChoose?'<p class="hub-dialogue-label">Your teammate is choosing. You can both leave at any time.</p>':''}<div id="hubChoices" class="hub-dialogue-options"></div>`);
   const choices=el('hubChoices');let revealed=false;
   function unlock(){if(token!==generation||!active||revealed)return;revealed=true;cancelAnimationFrame(frame);el('hubLine').textContent=node.text;el('hubReveal').hidden=true;
    const entries=[];
@@ -77,24 +129,7 @@
   el('hubReveal').onclick=unlock;
   unlock(); // Read and choose immediately; narration never gates interaction.
 
-  const allowed=a.meta.soundOn!==false&&!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname||'')&&!/[?&]mute=1\b/.test(location.search);
-  let ttsStarted=false;
-  async function tts(){
-   if(ttsStarted||token!==generation||!allowed||a.meta.dialogueTTS===false)return;ttsStarted=true;
-   try{
-    const u=await BFDialogueSpeech.prepare(node.text,node.voice?.speaker||active.n.id,node.voice||{},a.meta.sfxVol);
-    if(token!==generation||!active)return;
-    if(!u){el('hubVoiceStatus').textContent='Device speech is unavailable. You can still read every line.';return;}
-    utterance=u;el('hubVoiceStatus').textContent='Device voice'+(u.voice?' · '+u.voice.name:'');
-    const done=()=>{if(token===generation){clearTimeout(voiceTimer);speaking=false;unlock();}};
-    u.onstart=()=>{if(token===generation)speaking=true;};u.onend=done;
-    u.onerror=()=>{if(token===generation){el('hubVoiceStatus').textContent='Device voice could not play. Subtitles are still available.';done();}};
-    // Some engines omit onend. Never leave a mouth moving or choices locked forever.
-    voiceTimer=setTimeout(()=>{if(token===generation){speechSynthesis.cancel();done();}},Math.max(12000,Math.min(180000,node.text.length*130+5000)));
-    speechSynthesis.speak(u);
-   }catch(_){if(token===generation){speaking=false;el('hubVoiceStatus').textContent='Device speech is unavailable. Subtitles are still available.';unlock();}}
-  }
-  if(allowed&&a.meta.dialogueVoice!==false&&node.recordedAudio){audio=new Audio(node.recordedAudio);audio.volume=Math.max(0,Math.min(1,a.meta.sfxVol??1));audio.onplaying=()=>{if(token===generation)speaking=true};audio.onpause=audio.onwaiting=()=>{if(token===generation)speaking=false};audio.onended=()=>{if(token===generation){speaking=false;unlock()}};audio.onerror=()=>{if(token===generation){speaking=false;audio=null;tts()}};audio.play().catch(()=>{if(token===generation){audio=null;speaking=false;el('hubVoiceStatus').textContent='Voice could not play. Subtitles are still available.';tts()}})}else if(!node.recordedAudio)tts();
+  wireVoice(id,node,!keepVoice);
  }
  async function open(n,a){
   if(active)close();const token=++generation;active={n,a,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');shell('<p>Opening conversation…</p>');
@@ -105,8 +140,8 @@
  function present(n,a,source,view,canChoose){
   if(!view){if(active?.external)close(false,true);return;}
   if(!active?.external||active.n.id!==n.id){if(active)close(false,true);active={n,a,external:true,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');}
-  const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;active.signature=signature;
-  showLine(view.lineId,{...source.nodes[view.lineId],text:view.text,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:c.end?false:(c.optional??!!original?.optional),questProgress:!c.end&&(!!c.questProgress||!!original&&questProgress(original))}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Leave conversation',canChoose);
+  const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;const keepVoice=active.lineId===view.lineId&&active.voiceText===view.text;active.signature=signature;
+  showLine(view.lineId,{...source.nodes[view.lineId],recordedAudio:source.nodes[view.lineId]?.text?.trim()===view.text?.trim()?source.nodes[view.lineId]?.recordedAudio:undefined,text:view.text,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:c.end?false:(c.optional??!!original?.optional),questProgress:!c.end&&(!!c.questProgress||!!original&&questProgress(original))}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Leave conversation',canChoose,keepVoice);
  }
  function listen(n,a,lineId){
  if(!book)return;const same=active?.spectator&&active.n.id===n.id;
@@ -128,5 +163,5 @@ function focus(){if(!active)return null;const {n,a}=active,p=a.player();const x=
   }
  }
  if(!active)return;if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close()}else if(e.code==='Tab'){const buttons=[...el('hubDialogue').querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(e=>e.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}},true);
- window.BFHubDialogue={selectFirst,open,close,present,listen,focus,ready,hasNews,known:id=>!!book?.npcs[id]||['quartermaster','anvil','keeper','drillmaster','beastkeeper'].includes(id),get active(){return active},get speaking(){return speaking}};
+ window.BFHubDialogue={voiceVolume,selectFirst,open,close,present,listen,focus,ready,hasNews,known:id=>!!book?.npcs[id]||['quartermaster','anvil','keeper','drillmaster','beastkeeper'].includes(id),get active(){return active},get speaking(){return speaking}};
 })();

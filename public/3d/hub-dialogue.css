@@ -27,3 +27,9 @@
 #hubDialogue .dialogue-choice-icon{font-weight:900;color:var(--dialogue-accent);min-width:17px;flex-shrink:0}
 #hubDialogue .dialogue-group button.hub-service-primary{margin:0;background:linear-gradient(135deg,#51462c,#303c30)}
 @media(max-width:650px){#hubDialogue .dialogue-group{padding:10px;gap:7px}#hubDialogue .dialogue-group h3{font-size:11px}}
+
+/* Recorded voice is visible and replayable without gating the conversation. */
+#hubDialogue .hub-voice-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+#hubDialogue .hub-voice-controls button{min-height:34px;padding:6px 10px;font-size:12px;background:#213b46;border-color:#91c7da77;white-space:nowrap}
+#hubDialogue #hubVoiceStatus{color:#bed6dc;font:500 11px/1.4 system-ui;letter-spacing:0}
+#hubDialogue .hub-greeting{font-size:16px;line-height:1.5;color:#e7e9db;margin:8px 0}

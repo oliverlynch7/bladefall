@@ -1,0 +1,29 @@
+{
+  "version": "2.348.0-npc-voice-playback",
+  "unchangedRecordedFiles": 371,
+  "tests": {
+    "playback": 33,
+    "dialogueCategories": 1447,
+    "dialogueEndings": 94,
+    "titleSettings": 29,
+    "voiceManifest": "shared fetch, wording/speaker guards, bounded fetch and four recovery scenarios pass",
+    "rankFanfare": 16
+  },
+  "browser": {
+    "legacyCharacter": {
+      "level": 4,
+      "gold": 1145
+    },
+    "nativeMedia": "Actual MP3s reached playing and ended; Smith intro/about and Thomas first/protect. All native Audio hard-muted while testing.",
+    "fixturePolicy": "Production component evaluated with an allowed-host location adapter to exercise native playback on localhost; real master/local/query mute guards tested separately in unit suite.",
+    "trustedGesture": "Silent priming on a real Pause click; subsequent asynchronous greeting played without Replay.",
+    "reusedRecordedPlayers": 1,
+    "sameLineSnapshotRestarts": 0,
+    "responseButtonsRemainUsable": true,
+    "leaveStopsAudio": true,
+    "voiceVolume": 0.85,
+    "independentSliderPersisted": 0.8,
+    "effectsVolumeUnchanged": 0
+  },
+  "coverageNote": "362 of371 source recordings match current local wording/speaker;9 punctuation/encoding revisions remain protected by strict matching and fallback. No new recording or story rewrite."
+}

@@ -1235,7 +1235,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.345.0-loot-banner';
+const VERSION3D='2.346.0-settings-collapsed';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -20819,7 +20819,7 @@ function organizePauseSettings(){
     ['Accessibility & guidance',['readingSizeBtn','shakeBtn','reduceMoBtn','dmgNumBtn','objectiveArrowsBtn','friendArrowsBtn','tutTogBtn']],
     ['Help & tutorial',['helpBtn','skipTrialBtn','jetBtn']]
   ];
-  for(const [title,ids]of groups){const section=document.createElement('details');section.className='settingsSection';section.open=(openPauseSettingsV2.section||groups[0][0])===title;const summary=document.createElement('summary');summary.innerHTML=uiIcon(['settings-controls','settings-graphics','settings-audio-voices','settings-accessibility','settings-help'][groups.findIndex(g=>g[0]===title)])+' '+title;section.append(summary);const contents=document.createElement('div');contents.className='settingsContents';section.append(contents);card.insertBefore(section,back);
+  for(const [title,ids]of groups){const section=document.createElement('details');section.className='settingsSection';section.open=openPauseSettingsV2.section===title;const summary=document.createElement('summary');summary.innerHTML=uiIcon(['settings-controls','settings-graphics','settings-audio-voices','settings-accessibility','settings-help'][groups.findIndex(g=>g[0]===title)])+' '+title;section.append(summary);const contents=document.createElement('div');contents.className='settingsContents';section.append(contents);card.insertBefore(section,back);
     for(const id of ids){const node=document.getElementById(id);if(node)contents.append(node.closest('.setrow')||node);}
     summary.onclick=e=>{e.preventDefault();const opening=!section.open;card.querySelectorAll('.settingsSection').forEach(d=>d.open=false);section.open=opening;openPauseSettingsV2.section=opening?title:null;};
   }
@@ -20831,7 +20831,7 @@ function cameraViewSettings(){
 }
 function bindCameraZoom(){const slider=document.getElementById('cameraZoomSlider');if(slider)slider.oninput=()=>{const field=meta.camMode==='far'?'overheadZoom':'shoulderZoom';meta[field]=Number(slider.value)/100;meta[field]=BFCameraControls.zoom(meta);document.getElementById('cameraZoomVal').textContent=Math.round(meta[field]*100)+'%';persistGlobal();};}
 function openPauseSettingsV2(fromTitle){
-  if(typeof fromTitle==='boolean')openPauseSettingsV2.fromTitle=fromTitle;
+  if(typeof fromTitle==='boolean'){openPauseSettingsV2.fromTitle=fromTitle;openPauseSettingsV2.section=null;}
   const titleOptions=openPauseSettingsV2.fromTitle===true;
   mode='menu';
   const camName=meta.camMode==='shoulder'?'Over-the-shoulder':meta.camMode==='fps'?'First-person':'Overhead';

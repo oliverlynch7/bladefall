@@ -2777,3 +2777,7 @@ NPC release verification correction: v2.344.1 uses an explicit hero3d.js?v=2344 
 
 ## U-LOOT-BANNER-20261021
 User: The HUD card after receiving a chest item blocks too much of the screen. Move it near the top with margin and elongate it horizontally. Grounded plan: restyle only the settled BFChestReveal result as a shallow horizontal banner, retaining the item name/icon, rarity, comparison, equip requirement and bag/sale result. Keep reel/timing/audio/reward behavior. Fit the normal desktop center lane and use a compact portrait fallback below the identity HUD. Verify actual chest results and readable long/restricted gear before release.
+
+
+## U-SETTINGS-COLLAPSED-20261021
+User: When opening Settings, every dropdown should start closed; Controls & camera currently opens and makes the menu confusing. Grounded plan: remove the implicit first-section fallback and reset the remembered accordion only on explicit title/pause Settings entry. Keep the selected section open during in-menu setting changes and child-screen returns. Verify title and pause entry/re-entry, manual expand/collapse, and changing an option in a muted real browser.

@@ -3147,3 +3147,9 @@ User: The HUD card after receiving a chest item blocks too much of the screen. M
 U-LOOT-BANNER implemented locally as v2.345.0. Settled result uses top12px, wide/shallow horizontal layout; normal desktop boss bar is protected. Smaller viewport fallbacks retain item comparisons. Browser found invalid weapon affixes rendered an undefined numeric row; totals now skip non-stat affixes while retaining effects and actual damage/delay.125 reveal and22 transaction checks pass; actual isolated legacy-save chest opening tested muted. Production verification follows.
 
 Loot banner production verified: f8766d65, deployment304fcae1, v2.345.0. Four public files exactly match committed Git blobs, including preview screenshot. Fresh muted live startup loads chest CSS and adventure HUD v2345; no captured console errors. Safe checkout and local queue mirror synchronized; unrelated regression dirt preserved.
+
+
+## U-SETTINGS-COLLAPSED-20261021
+User: When opening Settings, every dropdown should start closed; Controls & camera currently opens and makes the menu confusing. Grounded plan: remove the implicit first-section fallback and reset the remembered accordion only on explicit title/pause Settings entry. Keep the selected section open during in-menu setting changes and child-screen returns. Verify title and pause entry/re-entry, manual expand/collapse, and changing an option in a muted real browser.
+
+U-SETTINGS-COLLAPSED implemented v2.346.0. Explicit title/pause entry resets remembered section to null; organizer no longer defaults to Controls. Internal redraws retain selected section.29 title/settings checks and real muted legacy-character title/pause entry/reentry, expand/collapse and option redraw checks pass. Production verification follows.

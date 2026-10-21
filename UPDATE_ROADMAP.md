@@ -3916,3 +3916,9 @@ NPC release verification correction: v2.344.1 uses an explicit hero3d.js?v=2344 
 - Moved the settled chest reward near the top edge with a12px safe-area margin and widened it to680px on large desktops. Icon, name, rarity, comparisons and bag/sale result remain; stats wrap horizontally instead of stacking a tall card over the action. Smaller screens adapt below identity HUD; normal boss health retains its own lane.
 - Kept reel, audio, reward transactions and six-second reading time unchanged. Omitted invalid affix-stat rows for weapon affixes already represented in damage/delay and their effect description.
 - Verified muted actual chest openings on a pre-change character, reduced motion,1280px desktop,390px portrait long-name overflow,1920px desktop and boss-bar separation.125 reveal lifecycle checks and22 transaction checks pass. Screenshot public/design/loot-banner/reward-2345.png.
+
+
+## [Codex | 2026-10-21] Settings starts collapsed (v2.346.0)
+- Every category starts closed when entering Settings from title or pause. Removed the implicit Controls & camera default and reset prior accordion selection at those entry points.
+- Setting changes and child-screen returns preserve the current section while navigating Settings.
+-29 existing title/settings parity and script syntax checks pass. Muted browser verification on an isolated pre-change character: title/pause first entry and re-entry all have zero expanded sections; manual expand/collapse works; FPS toggle retains Graphics section. Screenshot public/design/settings/collapsed-2346.png. No save schema or game balance changes.

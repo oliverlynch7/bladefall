@@ -31,5 +31,5 @@ function skeletonCleanup(root){root.traverse(o=>{if(o.isSkinnedMesh)o.skeleton.d
 for(const [alias,id]of Object.entries({smith:'anvil',stylist:'keeper',warden_shade:'shade',beth_brother:'bethBrother'}))ok(npcLook(alias)===NPC_LOOKS[id],alias+' stable alias');
 const cast=JSON.parse(fs.readFileSync('public/3d/npc-voice-preview/auditions.json'));for(const c of cast.characters)ok(['sunspire_orb','abyss_king'].includes(c.id)||!!npcLook(c.id),c.id+' approved cast covered');
 ok(!npcLook('not-a-character'),'unknown roster remains explicit');
-const html=fs.readFileSync('public/3d/index.html','utf8');ok(html.includes('"./hero3d.js?v=2342":"./hero3d.js?v=2344"'),'live renderer refreshes once through import map');
+const html=fs.readFileSync('public/3d/index.html','utf8');ok(html.includes('src="./hero3d.js?v=2344"'),'HTML module entry explicitly refreshes renderer; import maps do not remap script src');
 console.log(JSON.stringify({passed:true,checks,profiles:report.length,maxBatches:Math.max(...report.map(r=>r.meshes)),maxTriangles:Math.max(...report.map(r=>r.triangles)),report}));

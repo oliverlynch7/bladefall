@@ -16,7 +16,7 @@ hero="function runtimeTime(key,fn){if(!window.runtimeProfileEnabled)return fn();
 for call in ['syncWorld(scene)','syncArenaArt(scene)','syncCombatArt(scene,cam)','syncMobs(scene, dt, cam)','syncNpcs(scene,dt)','syncRiftShards(scene)','syncCampaignRest(scene)','syncCampaignObjects(scene,dt)','syncProjectiles(scene)','syncProps(scene, dt)','renderer.render(scene, cam)']:
     hero=hero.replace(call+';',"runtimeTime('"+call.split('(')[0]+"',()=>"+call+');')
 (r/'public/3d/.qa-runtime-hero.js').write_text(hero,encoding='utf-8')
-s=s.replace('./hero3d.js?v=2342','./.qa-runtime-hero.js?v=profile')
+s=s.replace('./hero3d.js?v=2344','./.qa-runtime-hero.js?v=profile')
 s=s.replace('</body>','<script>'+(r/'scripts/qa-runtime-profile.js').read_text(encoding='utf-8')+'</script></body>')
 (r/'public/3d/.qa-runtime-profile.html').write_text(s,encoding='utf-8')
 (r/'public/3d/.qa-runtime-legacy.json').write_bytes((r/'docs/art-validation/player-readiness-20261020/legacy-storage.json').read_bytes())

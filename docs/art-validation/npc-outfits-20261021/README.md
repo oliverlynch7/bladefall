@@ -1,4 +1,4 @@
-# NPC outfits — v2.344.0-npc-wardrobe
+# NPC outfits — v2.344.1-npc-wardrobe
 
 Source approval: `docs/requirements/USER_SOURCE_2026-10-21_NPC_APPEARANCES.md`.
 
@@ -21,3 +21,5 @@ The public gallery `/3d/npc-wardrobe.html` calls the same `buildNpcActor` factor
 No dialogue, recordings, voice casting, quests, save schema, enemy balance or level layout changes. No paid audio requests. Appearance data is deterministic on each client; real two-human Internet co-op and subjective character likeness/fun are not certified by these checks. Existing intermittent campaign FPS reports remain unresolved by this cosmetic task.
 
 Production deployment evidence is recorded after the tested commit is published. Preserve unrelated premium-progression regression dirt and mirror articulated-rig dirt.
+
+Public startup initially exposed the old hero query URL: import maps apply to imports, not HTML script-src entries. Corrected the actual index entry to hero3d.js?v=2344, added a direct-entry regression and bumped to v2.344.1 so current clients update. The actor code and verified outfits are unchanged.

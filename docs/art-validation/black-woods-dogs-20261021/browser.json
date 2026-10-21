@@ -1,0 +1,356 @@
+{
+  "version": "2.356.0-black-woods-dog-rescue",
+  "fixture": "isolated in-memory storage with pre-change First Journey QA level4/gold1145",
+  "before": {
+    "unaccepted": {
+      "active": [],
+      "animals": 0,
+      "objects": 0
+    },
+    "accepted": {
+      "animals": 2,
+      "objects": 5
+    }
+  },
+  "fresh": {
+    "active": [
+      "tracks"
+    ],
+    "animals": 2,
+    "beth": true,
+    "loading": false,
+    "objects": 5,
+    "tasks": [
+      {
+        "done": false,
+        "progress": "Free the trapped dogs west of the old grove · 0/2 rescued",
+        "title": "A Kinder Trail"
+      }
+    ],
+    "version": "2.356.0-black-woods-dog-rescue"
+  },
+  "first": {
+    "dogs": [
+      {
+        "rescued": true,
+        "x": -3460,
+        "y": 0,
+        "z": -1490
+      },
+      {
+        "rescued": false,
+        "x": -3350,
+        "y": 125,
+        "z": -2190
+      }
+    ],
+    "freed": 1,
+    "noteRead": false,
+    "snare": true,
+    "status": "accepted",
+    "tasks": [
+      {
+        "done": false,
+        "progress": "Free the trapped dogs west of the old grove · 1/2 rescued",
+        "title": "A Kinder Trail"
+      }
+    ]
+  },
+  "both": {
+    "bounds": {
+      "maxX": 3150,
+      "maxZ": 650,
+      "minX": -3700,
+      "minZ": -4900
+    },
+    "dogs": [
+      {
+        "rescued": true,
+        "x": -3460,
+        "y": 0,
+        "z": -1490
+      },
+      {
+        "rescued": true,
+        "x": -3300,
+        "y": 0,
+        "z": -2050
+      }
+    ],
+    "freed": 2,
+    "route": true,
+    "status": "ready",
+    "tasks": [
+      {
+        "done": false,
+        "progress": "Return to the Beastkeeper in the Waystation",
+        "title": "A Kinder Trail"
+      }
+    ]
+  },
+  "savedHubReturn": {
+    "afterHub": "ready",
+    "gold": 1145,
+    "level": 4,
+    "ready": "ready",
+    "retained": {
+      "tracks": "ready"
+    }
+  },
+  "turnIn": {
+    "gold": 1145,
+    "level": 4,
+    "shop": true,
+    "status": "done",
+    "upgrade": true
+  },
+  "completedRevisit": {
+    "active": [],
+    "animals": 0,
+    "beth": true,
+    "bounds": -3700,
+    "geometry": true,
+    "objects": 0,
+    "status": "done"
+  },
+  "beth": {
+    "accepted": "complete",
+    "brother": 1410,
+    "crossing": true,
+    "dogCopies": 1,
+    "dogOwned": true,
+    "guarded": true,
+    "rescued": true
+  },
+  "beforeBoundaryFix": [
+    {
+      "at": [
+        -2507,
+        0,
+        -2023
+      ],
+      "reached": true,
+      "x": -2520,
+      "z": -2020
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1875
+      ],
+      "reached": false,
+      "x": -2820,
+      "z": -1870
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1761
+      ],
+      "reached": false,
+      "x": -3070,
+      "z": -1750
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1527
+      ],
+      "reached": false,
+      "x": -3340,
+      "z": -1510
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1559
+      ],
+      "reached": false,
+      "x": -3070,
+      "z": -1750
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1865
+      ],
+      "reached": false,
+      "x": -2820,
+      "z": -1870
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1865
+      ],
+      "reached": false,
+      "x": -2960,
+      "z": -1930
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1938
+      ],
+      "reached": false,
+      "x": -3040,
+      "z": -1990
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1938
+      ],
+      "reached": false,
+      "x": -3120,
+      "z": -2040
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1938
+      ],
+      "reached": false,
+      "x": -3200,
+      "z": -2100
+    },
+    {
+      "at": [
+        -2552,
+        0,
+        -1938
+      ],
+      "reached": false,
+      "x": -3290,
+      "z": -2180
+    }
+  ],
+  "afterBoundaryFix": [
+    {
+      "at": [
+        -2507,
+        0,
+        -2023
+      ],
+      "reached": true,
+      "x": -2520,
+      "z": -2020
+    },
+    {
+      "at": [
+        -2807,
+        0,
+        -1877
+      ],
+      "reached": true,
+      "x": -2820,
+      "z": -1870
+    },
+    {
+      "at": [
+        -3056,
+        0,
+        -1757
+      ],
+      "reached": true,
+      "x": -3070,
+      "z": -1750
+    },
+    {
+      "at": [
+        -3328,
+        0,
+        -1521
+      ],
+      "reached": true,
+      "x": -3340,
+      "z": -1510
+    },
+    {
+      "at": [
+        -3080,
+        0,
+        -1741
+      ],
+      "reached": true,
+      "x": -3070,
+      "z": -1750
+    },
+    {
+      "at": [
+        -2833,
+        0,
+        -1864
+      ],
+      "reached": true,
+      "x": -2820,
+      "z": -1870
+    },
+    {
+      "at": [
+        -2946,
+        15,
+        -1925
+      ],
+      "reached": true,
+      "x": -2960,
+      "z": -1930
+    },
+    {
+      "at": [
+        -3028,
+        40,
+        -1980
+      ],
+      "reached": true,
+      "x": -3040,
+      "z": -1990
+    },
+    {
+      "at": [
+        -3109,
+        62,
+        -2033
+      ],
+      "reached": true,
+      "x": -3120,
+      "z": -2040
+    },
+    {
+      "at": [
+        -3185,
+        100,
+        -2098
+      ],
+      "reached": true,
+      "x": -3200,
+      "z": -2100
+    },
+    {
+      "at": [
+        -3279,
+        134,
+        -2169
+      ],
+      "reached": true,
+      "x": -3290,
+      "z": -2180
+    }
+  ],
+  "reverseOrderSaved": {
+    "gold": 1145,
+    "level": 4,
+    "status": "ready"
+  },
+  "errors": [],
+  "limits": "Authoritative co-op events and host-history checks automated; no live two-person session. Progression checks used debug relocation;11route/climb points used actual movement input and collision. User saves untouched."
+}

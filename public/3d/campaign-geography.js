@@ -2,7 +2,7 @@
  * Walls, foundations and floors are gameplay data, not a cosmetic backdrop.
  * Never extend a floor through a named puzzle gap or a lower occupied storey. */
 (function(root){'use strict';
-const REV=2187;
+const REV=2356;
 const colors={outskirts:['#698447','#b0a277'],hollow:['#9d7453','#d7b783'],keep:['#656e70','#aaa086'],frost:['#91b1c4','#d9e9e8'],ember:['#57585b','#a98864'],abyss:['#607c85','#c8bf9a'],palace:['#c6d4d9','#e9cc82'],castle:['#777784','#c2af86']};
 function apply(G,zone){
  if(!G||G.hub||G.trial||G.side||G.delve||G.endless||G.arena||G.bonusActive||G.devBriar||G.devKeep||G.bossRush||G.voyage||!colors[zone]||G.geography?.revision===REV)return false;
@@ -76,7 +76,8 @@ function apply(G,zone){
    route('Village road → mill → wagon gate',[[0,700],[0,-800],[120,-1660],[395,-2150],[230,-3490],[-210,-4350]]);
   }else if(a===1){
    floor('forest-soil-west',-900,-2110,0,3440,5480);floor('forest-soil-east',1980,-1530,0,2400,2510);floor('northwood-soil',220,-3670,0,1950,2440);
-   wooded('woods-edge',[[-2640,700],[1550,700],[1550,-250],[3230,-250],[3230,-2850],[1260,-2850],[1260,-4980],[-2640,-4980]]);
+   // Enclose the existing dog-rescue clearing instead of walling off its trail.
+   wooded('woods-edge',[[-2640,700],[1550,700],[1550,-250],[3230,-250],[3230,-2850],[1260,-2850],[1260,-4980],[-2640,-4980],[-2640,-2430],[-3770,-2430],[-3770,-1190],[-2640,-1190]]);
    route('Clearing trail',[[0,300],[0,-650],[-650,-1850],[0,-3100],[0,-4680]]);
   }else{floor('orchard-soil',0,-80,0,2550,2200);wooded('orchard-edge',[[-1310,1060],[1310,1060],[1310,-1210],[-1310,-1210]]);}
  }

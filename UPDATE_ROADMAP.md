@@ -3982,3 +3982,10 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 - Replaced the third basic-combo downward chop with one complete body turn and a near-horizontal scythe slice. Both palms follow the shared blade path; the crescent trail circles the character. Armature restores exactly without changing character/camera facing.
 - First two attacks, charged throw, attack timing, damage/hitboxes and colored soul effects preserved. Updated actual hero, fallback and interactive combo preview cache versions.
 -303 pose/606 effect and201 circular-path samples pass; native738 rig/restore samples across3skins and standing/moving pass. Actual isolated legacy-save game checks combo/effect/co-op packet steps, body/VFX, heading/camera retention and dodge cancellation. No captured errors; no live remote-peer claim or user save changes.
+
+
+## [Codex | 2026-10-21] Black Woods dog rescue access (v2.356.0)
+
+- Restored direct discovery of the existing two-dog rescue without prior Beastkeeper acceptance or clue-reading; clear0/2progress and immediate saved turn-in.
+- Rerouted the forest bank that physically blocked the western trail; permanent route geometry stays consistent across co-op quest histories. Completed rescues stay completed.
+- Verified241 focused checks, related regressions, actual collision traversal, both rescue orders, immediate hub return/turn-in and Beth’s separate dog-reward rescue in muted isolated Chrome with an old save. No live Internet co-op test.

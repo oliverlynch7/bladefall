@@ -32,14 +32,23 @@ function info(n,meta,state){
  return entries(n,meta,state).filter(q=>q.status in order).sort((a,b)=>order[a.status]-order[b.status])[0]||null;
 }
 function seedHub(s,meta){for(const [id,q]of Object.entries(defs)){s.flags['rv.eligible.'+id]=!!(root.BFReturnAdventures.eligible(q,meta)||meta.returnVisits?.[id]);for(const flag of ['accepted','ready','done'])s.flags['rv.'+flag+'.'+id]=meta.returnVisits?.[id]===flag;s.cursors[q.npc]=meta.returnVisits?.[id]?{npc:q.npc,node:'rv.'+id+'.'+(meta.returnVisits[id]==='accepted'?'wait':meta.returnVisits?.[id]==='ready'?'deliver':'thanks'),lastChoice:''}:{npc:q.npc,node:'rv.'+id+'.offer',lastChoice:''};}return s;}
-function active(G,meta){return Object.keys(defs).filter(id=>{const q=defs[id];return G.zone===q.zone&&G.area===q.area&&meta.returnVisits?.[id]==='accepted';});}
+function active(G,meta){const saved=normalize(meta.returnVisits);return Object.keys(defs).filter(id=>{const q=defs[id];return G.zone===q.zone&&G.area===q.area&&(saved[id]==='accepted'||id==='tracks'&&!['ready','done'].includes(saved[id]));});}
+// Keep a route already built in this visit: rescuing the second dog must not
+// remove its supporting platforms. Only the host selects shared field content.
+function refreshActive(G,meta){return [...new Set([...(G.returnActive||[]),...active(G,meta)])].filter(id=>defs[id]?.zone===G.zone&&defs[id]?.area===G.area);}
 function fieldObjects(ids){const o=(key,label,x,z,y,kind)=>({key,label,x,z,y,kind,returnObject:true});let out=[];
   if(ids.includes('pattern'))out.push(o('rv.pattern.note','Read the pattern box plate',-1740,-2440,160,'note'),o('rv.pattern.cool','Turn the cooling wheel',-1990,-2580,160,'wheel'),o('rv.pattern.clamp','Release the cooled clamp',-2050,-2790,160,'clamp'),o('rv.pattern.take','Take the forge pattern',-2050,-2890,160,'pattern'));
   if(ids.includes('supplies'))out.push(o('rv.supplies.note','Read the hoist repair plate',-1360,-3420,80,'note'),o('rv.supplies.release','Free the jammed hoist brake',-1735,-3815,244,'brake'),o('rv.supplies.take','Collect the lowered supplies',-1630,-3800,80,'supplies'));
   return out.concat(root.BFReturnAdventures.objects(ids));
 }
 function available(key,s){if(!root.BFReturnAdventures.available(key,s))return false;if(key==='rv.pattern.clamp')return !!s.flags['rv.pattern.cool'];if(key==='rv.pattern.take')return !!s.flags['rv.pattern.clamp'];if(key==='rv.supplies.release')return !s.flags['rv.supplies.balance.open'];if(key==='rv.supplies.take')return !!s.flags['rv.supplies.balance.open'];return true;}
-function tasks(G,meta,s){return Object.entries(defs).filter(([id,q])=>(meta.returnVisits?.[id]||G.returnActive?.includes(id))&&meta.returnVisits?.[id]!=='done'&&(G.hub||G.zone===q.zone&&G.area===q.area)).map(([id,q])=>({title:q.title,progress:meta.returnVisits?.[id]==='ready'?'Return to '+(q.giver||(id==='pattern'?'the Smith':'the Quartermaster'))+' in the Waystation':s.flags['rv.collected.'+id]?'Return to the Waystation — recovery saved':id==='supplies'&&s.flags['rv.supplies.balance.open']?'Food basket lowered — collect it on the chamber floor':q.where+' — '+q.hint,done:false}));}
+function tasks(G,meta,s){
+ const status=id=>!G.hub&&G.returnActive?.includes(id)&&Object.prototype.hasOwnProperty.call(s.flags,'rv.accepted.'+id)?['done','ready','accepted'].find(k=>s.flags['rv.'+k+'.'+id]):meta.returnVisits?.[id];
+ return Object.entries(defs).filter(([id,q])=>(status(id)||G.returnActive?.includes(id))&&status(id)!=='done'&&(G.hub||G.zone===q.zone&&G.area===q.area)).map(([id,q])=>({title:q.title,
+  progress:status(id)==='ready'?'Return to '+(q.giver||(id==='pattern'?'the Smith':'the Quartermaster'))+' in the Waystation':
+   s.flags['rv.collected.'+id]?'Return to the Waystation — recovery saved':id==='tracks'?'Free the trapped dogs west of the old grove · '+['snare','cage'].filter(k=>s.flags['rv.tracks.'+k]).length+'/2 rescued':
+   id==='supplies'&&s.flags['rv.supplies.balance.open']?'Food basket lowered — collect it on the chamber floor':q.where+' — '+q.hint,done:false}));
+}
 function sync({G,s,meta,plat}){
   if(!G.keep)return;
   const recovered=['ready','done'].includes(meta?.returnVisits?.supplies);
@@ -94,5 +103,5 @@ function draw({G,bx,ring},t){if(!G?.storyObjects)return;drawSupplyHoist({G,bx,ri
   if(o.kind==='pattern'){if(taken)continue;bx(o.x,y+24,o.z,92,45,64,'#34373b',null,1);bx(o.x,y+49,o.z,68,5,42,'#b09561',null,1);continue;}
   bx(o.x,y+28,o.z,22,56,22,'#66554a',null,1);ring(o.x,y+58,o.z,30,c,1);
 }}
-const api={defs,normalize,entries,info,seedHub,active,fieldObjects,available,tasks,sync,draw,supplyLedges,SUPPLY_CLUE};root.BFReturnVisits=api;if(typeof module!=='undefined')module.exports=api;
+const api={defs,normalize,entries,info,seedHub,active,refreshActive,fieldObjects,available,tasks,sync,draw,supplyLedges,SUPPLY_CLUE};root.BFReturnVisits=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

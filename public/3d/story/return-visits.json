@@ -936,6 +936,28 @@
       ],
       "effects": [
         {
+          "type": "conditional",
+          "id": "rv.tracks.discover",
+          "when": [
+            {
+              "flag": "rv.accepted.tracks",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.tracks",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
+        {
           "type": "note",
           "id": "rv.tracks.start",
           "region": "outskirts",
@@ -953,6 +975,28 @@
         }
       ],
       "effects": [
+        {
+          "type": "conditional",
+          "id": "rv.tracks.discover",
+          "when": [
+            {
+              "flag": "rv.accepted.tracks",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.tracks",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
         {
           "type": "note",
           "id": "rv.tracks.hoof",
@@ -972,6 +1016,28 @@
       ],
       "effects": [
         {
+          "type": "conditional",
+          "id": "rv.tracks.discover",
+          "when": [
+            {
+              "flag": "rv.accepted.tracks",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.tracks",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
+        {
           "type": "note",
           "id": "rv.tracks.paw",
           "region": "outskirts",
@@ -990,6 +1056,28 @@
       ],
       "effects": [
         {
+          "type": "conditional",
+          "id": "rv.tracks.discover",
+          "when": [
+            {
+              "flag": "rv.accepted.tracks",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.tracks",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
+        {
           "type": "flag",
           "id": "rv.tracks.snare"
         },
@@ -1003,7 +1091,7 @@
           "id": "rv.tracks.snare",
           "region": "outskirts",
           "title": "A trap made safe",
-          "text": "The animal is free. Check the other trail too. Finish Black Woods to keep this rescue, then report to the Beastkeeper."
+          "text": "This dog is safe. Find the other trapped dog, then report to the Beastkeeper in the Waystation."
         },
         {
           "type": "conditional",
@@ -1030,7 +1118,7 @@
               "id": "rv.tracks.saved",
               "region": "outskirts",
               "title": "Both animals are free",
-              "text": "Finish Black Woods and enter the boss clearing to keep this rescue. Then report to the Beastkeeper in the Waystation. You do not need to lead the animals through the level."
+              "text": "Both dogs are safe and your rescue is saved. Return to the Waystation whenever you are ready. Report to the Beastkeeper to open the companion shop."
             }
           ]
         }
@@ -1046,6 +1134,28 @@
       ],
       "effects": [
         {
+          "type": "conditional",
+          "id": "rv.tracks.discover",
+          "when": [
+            {
+              "flag": "rv.accepted.tracks",
+              "is": false
+            }
+          ],
+          "effects": [
+            {
+              "type": "flag",
+              "id": "rv.accepted.tracks"
+            },
+            {
+              "type": "reward",
+              "id": "rv.accept.tracks",
+              "kind": "return_accept",
+              "amount": 1
+            }
+          ]
+        },
+        {
           "type": "flag",
           "id": "rv.tracks.cage"
         },
@@ -1059,7 +1169,7 @@
           "id": "rv.tracks.cage",
           "region": "outskirts",
           "title": "A trap made safe",
-          "text": "The animal is free. Check the other trail too. Finish Black Woods to keep this rescue, then report to the Beastkeeper."
+          "text": "This dog is safe. Find the other trapped dog, then report to the Beastkeeper in the Waystation."
         },
         {
           "type": "conditional",
@@ -1086,7 +1196,7 @@
               "id": "rv.tracks.saved",
               "region": "outskirts",
               "title": "Both animals are free",
-              "text": "Finish Black Woods and enter the boss clearing to keep this rescue. Then report to the Beastkeeper in the Waystation. You do not need to lead the animals through the level."
+              "text": "Both dogs are safe and your rescue is saved. Return to the Waystation whenever you are ready. Report to the Beastkeeper to open the companion shop."
             }
           ]
         }

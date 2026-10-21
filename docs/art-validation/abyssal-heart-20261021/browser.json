@@ -1,0 +1,142 @@
+{
+  "desktop": {
+    "icon": 76,
+    "noOverlap": true,
+    "panel": {
+      "bottom": 278.4375,
+      "height": 98,
+      "left": 334,
+      "right": 578,
+      "top": 180.4375,
+      "width": 244,
+      "x": 334,
+      "y": 180.4375
+    },
+    "quest": {
+      "bottom": 288.46875,
+      "height": 118.03125,
+      "left": 22,
+      "right": 322,
+      "top": 170.4375,
+      "width": 300,
+      "x": 22,
+      "y": 170.4375
+    },
+    "text": "Abyssal HeartVery closeSealed shardFaster beat = closer"
+  },
+  "narrow": {
+    "icon": 64,
+    "inside": true,
+    "noOverlap": true,
+    "panel": {
+      "bottom": 374.28125,
+      "height": 86.78125,
+      "left": 12,
+      "right": 230,
+      "top": 287.5,
+      "width": 218,
+      "x": 12,
+      "y": 287.5
+    },
+    "quest": {
+      "bottom": 277.5,
+      "height": 124.0625,
+      "left": 12,
+      "right": 189,
+      "top": 153.4375,
+      "width": 177,
+      "x": 12,
+      "y": 153.4375
+    },
+    "width": 390
+  },
+  "native": {
+    "context": "running",
+    "decodedNormalization": 0.9474094711254106,
+    "distances": [
+      {
+        "actualDistance": 2200,
+        "interval": "2.35s",
+        "label": "Distant",
+        "name": "distant",
+        "sourceCount": 2
+      },
+      {
+        "actualDistance": 700,
+        "interval": "1.57s",
+        "label": "Nearby",
+        "name": "nearby",
+        "sourceCount": 3
+      },
+      {
+        "actualDistance": 90,
+        "interval": "0.82s",
+        "label": "Very close",
+        "name": "very close",
+        "sourceCount": 4
+      }
+    ],
+    "lastVoiceStopped": true,
+    "masterGain": 0,
+    "menu": "menu",
+    "sources": [
+      {
+        "duration": 0.62,
+        "gameTime": 0.9000000000000011,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 1.5499999999999994,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 1.5499999999999994,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 1.5499999999999994,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 2.4833333333333294,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 3.4166666666666594,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 3.9666666666666575,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 4.799999999999988,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 5.733333333333318,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 6.666666666666648,
+        "stopped": true
+      },
+      {
+        "duration": 0.62,
+        "gameTime": 7.583333333333312,
+        "stopped": true
+      }
+    ],
+    "version": "2.353.0-abyssal-heart-pulse"
+  },
+  "errors": []
+}

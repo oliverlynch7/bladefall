@@ -3960,3 +3960,9 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 ## [Codex | 2026-10-21] Readable bag sell actions (v2.352.0)
 - Each equipment card now has equal-width44px-high Equip and Sell buttons side by side below its details. Equip retains gold; Sell uses contrasting sage green with a border, visible focus and explicit localized Sell · N G label.
 - Sale/equip entry identity and transaction handlers unchanged. Real muted legacy-save browser verifies1920/1000/390px layouts, no clipping/overflow, same-row44px buttons,75G sale increasing1145→1220 and removing only that item, and subsequent Iron Longsword Equip. No new unit tests for this presentation change. Screenshot public/design/bag/sell-actions-2352.png.
+
+
+## [Codex | 2026-10-21] Abyssal Heart presence (v2.353.0)
+- Enlarged Heart to76px in a readable purple HUD card with proximity/source labels and Faster beat = closer caption; narrow layouts use64px icon below tracker. Visual double pulse follows actual sound events, with game/OS reduced-motion support.
+- New12-credit ElevenLabs void lub-dub, processed to620ms and routed through existing SFX/master gain. Pulse gap tightens2.35→0.7s as the existing3D nearest shard gets closer; gain gently rises. Low-health heartbeat preserved. Player-local only, lazy loaded, stopped/reset on menus, hidden tab, inactive/no targets and scene changes; no catch-up burst.
+-293 feedback/routing/lifecycle checks plus all40-shard sense audit and52 co-op audio checks pass. Real muted legacy-save browser checks3 proximity states, native decode/scheduling under master0, actual bag cancellation and desktop/narrow placement. Human audio taste and live remote-peer test remain unverified. No user saves changed.

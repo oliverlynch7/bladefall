@@ -710,9 +710,16 @@
   #toast{position:absolute;left:50%;top:30%;transform:translateX(-50%);z-index:25;background:rgba(20,21,27,.92);border:1px solid var(--amber-dim);color:var(--amber);font-weight:800;font-size:13px;letter-spacing:.04em;padding:10px 18px;border-radius:12px;opacity:0;transition:opacity .2s,top .2s;pointer-events:none;text-align:center;max-width:80vw;}
   #toast.show{opacity:1;top:24%;}
   #pausebtn{position:absolute;top:calc(env(safe-area-inset-top) + 8px);right:12px;z-index:7;width:auto;min-width:100px;height:34px;padding:0 9px;gap:7px;border-radius:9px;background:rgba(28,30,38,.5);border:1px solid var(--line);color:var(--ink);font-size:13px;display:flex;align-items:center;justify-content:center;pointer-events:auto;}
-  #secretsense{position:absolute;left:calc(env(safe-area-inset-left) + 12px);top:22%;transform:translateY(-50%);z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:2px;}
-  #secretsense img{width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 0 8px #b06bff) drop-shadow(0 0 3px #ff4af0);animation:abyssbeat var(--beat,1.2s) ease-in-out infinite;transform-origin:center;}
-  #secretsense .ssword{font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:#c78cff;text-shadow:0 1px 3px #000;}
+  #secretsense{position:absolute;left:12px;top:180px;z-index:6;pointer-events:none;box-sizing:border-box;width:244px;max-width:calc(100vw - 24px);display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #ad79d3;border-radius:13px;background:radial-gradient(circle at 16% 50%,#76439d55,transparent 48%),linear-gradient(145deg,#261c39f5,#101b2cf5);box-shadow:0 5px 18px #0006,inset 0 0 16px #aa64dc13;color:#ead8ff;}
+  #secretsense img{width:76px;height:76px;flex:none;object-fit:contain;filter:drop-shadow(0 0 12px #b06bff) drop-shadow(0 0 4px #df75f5);transform-origin:center;}
+  #secretsense.ss-pulse img{animation:abyssbeat .55s ease-out;}
+  #secretsense .sscopy{min-width:0;display:flex;flex-direction:column;gap:3px;}
+  #secretsense .sstitle{font:700 12px/1.3 Georgia,serif;color:#f6eaff;}
+  #secretsense .ssword{font:900 14px/1.3 system-ui;letter-spacing:.03em;color:#e6bbff;}
+  #secretsense .sskind{font:600 11px/1.3 system-ui;color:#d2c5e0;}
+  #secretsense small{font:10px/1.3 system-ui;color:#b8adc9;}
+  @media(max-width:650px){#secretsense{width:218px;padding:8px 10px;gap:9px}#secretsense img{width:64px;height:64px}#secretsense .ssword{font-size:13px}}
+  @media(prefers-reduced-motion:reduce){#secretsense.ss-pulse img{animation:none}}
   @keyframes abyssbeat{0%,100%{transform:scale(.82)}13%{transform:scale(1.14)}26%{transform:scale(.9)}40%{transform:scale(1.03)}55%{transform:scale(.86)}}
   .pausecard #resBtn.restop{min-height:100px!important;border:2px solid #b98a3f;box-shadow:0 8px 22px rgba(0,0,0,.5),0 0 22px rgba(232,163,61,.20);margin:0 auto 10px;}
   .skingrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 18px;}
@@ -1082,7 +1089,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="bonustimer" style="position:absolute;left:60%;top:calc(env(safe-area-inset-top) + 18px);transform:translateX(-50%);z-index:5;pointer-events:none;font-weight:900;font-size:20px;color:#ffd24a;letter-spacing:.06em;text-shadow:0 2px 10px #000;display:none;background:#101626d9;border:1px solid #d8ad58;border-radius:12px;padding:5px 14px;"></div>
 <style>@media(max-width:650px){#bonustimer{left:auto!important;right:10px!important;top:calc(env(safe-area-inset-top) + 196px)!important;transform:none!important;font-size:15px!important;padding:4px 9px!important}}</style>
 <button id="pausebtn" class="hide" aria-label="Pause (Tab)" title="Pause (Tab)"><span class="ico ico-pause" aria-hidden="true"></span><span>Pause</span><span class="pause-binding">(<span data-action-hint="pause">Tab</span>)</span></button>
-<div id="secretsense" class="hide" aria-hidden="true"><img src="icons/abyssal-heart.png" alt=""><span class="ssword">cold</span></div>
+<div id="secretsense" class="hide" aria-hidden="true"><img src="icons/abyssal-heart.png" alt=""><div class="sscopy"><b class="sstitle">Abyssal Heart</b><span class="ssword">Distant</span><span class="sskind"></span><small>Faster beat = closer</small></div></div>
 <div id="inventoryDock" class="hide">
  <button id="hudbag"><span class="ico ico-action ico-action-bag-stash" aria-hidden="true"></span><span class="bag-copy"><span class="bag-count">Bag <b id="hudbagnum">0 / 30</b></span><small id="hudBagState">30 slots free</small></span><kbd class="hud-key" data-action-hint="bag">B</kbd></button>
  <div class="bag-tools"><button id="hudAutoSell" data-on="false" aria-pressed="false">Auto-sell OFF <kbd class="hud-key" data-action-hint="loot">V</kbd></button><button id="hudJournal"><span data-action-hint="journal">N</span> Journal</button><button id="hudLootHistory" title="Show your most recent equipment pickup">Loot</button><span id="hudGold"><span class="ico ico-coin"></span><span id="hudGoldValue">0</span></span></div>
@@ -1150,6 +1157,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./rift-welcome.js?v=2234"></script>
 <script src="./currency-feedback.js?v=2311"></script>
 <script src="./rift-shards.js?v=2300"></script>
+<script src="./abyssal-heart.js?v=2353"></script>
 <script src="./trial-themes.js?v=2315"></script>
 <script src="./rift-hall.js?v=2076"></script>
 <script src="./brute-encounter.js?v=2338"></script>
@@ -1235,7 +1243,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.352.0-bag-sell-actions';
+const VERSION3D='2.353.0-abyssal-heart-pulse';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -1868,6 +1876,7 @@ const SFXDIR='/sfx/';
    loops sit low; combat/UI mid; the big moments up top. Forge start/complete files SWAPPED per
    Oliver: the metal 'forgedone' clang opens the forge, the sharpening 'forgeopen' rings on finish. */
 const FXDEF={
+  abyssal_pulse:{f:'custom/abyssal-heart-20261021/abyssal_heart_pulse_v01',v:.72,lazy:true},
   reward_class:{f:'custom/class-rank-triumph-20261021/class_rank_triumph_v01',v:0.48,lazy:true},
   reward_player:{f:'custom/premium-progression-20261018/premium_player_level_v01',v:0.42,lazy:true},
   quest:{f:'fanfare-announcement-arrival',v:0.55}, levelcheer:{f:'fanfare-celebration',v:0.6},
@@ -1957,7 +1966,7 @@ function pumpSkillFx(){while(_skillFxActive<3&&_skillFxQueue.length){const key=_
  const rms=bufRms(buf);let peak=0;for(let c=0;c<buf.numberOfChannels;c++)for(const v of buf.getChannelData(c))peak=Math.max(peak,Math.abs(v));
  def._norm=Math.min(rms>.0004?Math.max(.35,Math.min(3,FX_TARGET_RMS/rms)):1,peak>0?.85/peak:1);FXBUF[key]=buf;
  }).catch(()=>_skillFxRetry.set(key,Date.now()+30000)).finally(()=>{_skillFxActive--;_skillFxJobs.delete(key);pumpSkillFx();});}}
-function warmSkillFx(){if(!actx||typeof c2CurSkills!=='function')return;for(const kind of ['player','class']){const key=rewardSoundKey(kind);if(key)queueSkillFx(key);}try{for(const sk of c2CurSkills()||[])if(sk)queueSkillFx('skillcast_'+sk.id);}catch(_){}}
+function warmSkillFx(){if(actx&&meta.secretSense)queueSkillFx('abyssal_pulse');if(!actx||typeof c2CurSkills!=='function')return;for(const kind of ['player','class']){const key=rewardSoundKey(kind);if(key)queueSkillFx(key);}try{for(const sk of c2CurSkills()||[])if(sk)queueSkillFx('skillcast_'+sk.id);}catch(_){}}
 const _fxLoop={};
 function playFx(key,volMul){
   if(meta.actionDetailAudio===false&&Object.hasOwn(window.BFRichSfx?.definitions||{},key))return null;
@@ -1968,7 +1977,7 @@ function loopFx(key,volMul){ if(!sOn()||_fxLoop[key]) return; const d=FXDEF[key]
   try{ const s=actx.createBufferSource(); s.buffer=buf; s.loop=true; const g=actx.createGain(); g.gain.value=(d.v||0.3)*(d._norm||1)*(volMul==null?1:volMul);
     s.connect(g); g.connect(fxBus||master); s.start(); _fxLoop[key]={s,g}; }catch(e){} }
 function stopFx(key){ const h=_fxLoop[key]; if(h){ try{ h.s.stop(); }catch(e){} _fxLoop[key]=null; } }
-function stopAllLoops(){ for(const k in _fxLoop) if(_fxLoop[k]) stopFx(k); }   // kill every looping sfx (footsteps/heartbeat/etc) — used when a menu opens
+function stopAllLoops(){ stopAbyssalHeart(); for(const k in _fxLoop) if(_fxLoop[k]) stopFx(k); }   // kill every looping sfx (footsteps/heartbeat/etc) — used when a menu opens
 const SFX={
   lootTick(){tone({f0:1300,f1:720,dur:0.025,type:'triangle',vol:0.012,a:0.002});},
   // blade cutting air: airy whoosh sweeping down, faint steel sing
@@ -4381,20 +4390,32 @@ function applyQuest(el,head,rows,sig,complete=false){
 function qrow(done,tick,text,num){ return `<div class="qrow ${done?'qdone':''}"><span class="qtick">${tick}</span><span class="qtx">${text}</span>${num!=null?`<span class="qn">${num}</span>`:''}</div>`; }
 // The Abyssal Heart follows uncollected authored Rift Shards and their quest rewards.
 // Beats faster as you approach in3D; ownership and collection are save-local.
+const abyssalHeartClock=new BFAbyssalHeart.BeatClock();let abyssalHeartVoice=null;
+function stopAbyssalHeart(){
+ if(abyssalHeartVoice){try{abyssalHeartVoice.s.stop();}catch(e){}abyssalHeartVoice=null;}
+ abyssalHeartClock.reset();document.getElementById('secretsense')?.classList.remove('ss-pulse');
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopAbyssalHeart();});
 function secretSenseUpdate(){const el=document.getElementById('secretsense');if(!el)return;
- const active=meta.secretSense&&mode==='play'&&isCampaignAdventure()&&!G.voyage&&!G.p.dead&&!G.p.downed;
+ const active=meta.secretSense&&mode==='play'&&isCampaignAdventure()&&!G.voyage&&!G.p.dead&&!G.p.downed&&!window.BF_LOADING?.active&&!document.hidden;
  let target=null;if(G)G.shardSenseTargets=[];
  if(active){const region=BFRiftShards.regions[G.zone],all=worldRiftShards(true),targets=BFRiftShards.senseTargets(meta.riftShards,G.pendingRiftShards,all,worldRiftShards(),G.storyNpcs||[],G.storyObjects||[],briarBook,region?.prefix||'');G.shardSenseTargets=targets;target=BFRiftShards.nearestShard(G.p,targets);
   // Old optional portals survive only in scenes without authored shard sources.
   if(!target&&!all.length&&!BFRiftShards.shardRewards(briarBook).some(r=>r.id.startsWith((region?.prefix||'?')+'-'))){const z=curZone(),o=G.secret;if(o&&!o.spent&&z.side&&!meta.sideFound[z.side.id])target={...o,kind:'Hidden rift',distance:Math.hypot(G.p.x-o.x,(G.p.y||0)-(o.y||0),G.p.z-o.z)};}
  }
- el.classList.toggle('hide',!target);if(!target){el.setAttribute('aria-hidden','true');return;}
- const t=Math.max(0,Math.min(1,target.distance/1500)),word=t<.15?'burning':t<.33?'hot':t<.55?'warm':t<.78?'cool':'cold';
- el.style.setProperty('--beat',(.24+t*1.6).toFixed(2)+'s');el.style.opacity=(.6+(1-t)*.4).toFixed(2);
- el.querySelector('.ssword').textContent=word;let kind=el.querySelector('.sskind');if(!kind){kind=document.createElement('span');kind.className='sskind';kind.style.cssText='font:700 10px system-ui;color:#ead4ff;text-shadow:0 1px 3px #000';el.append(kind);}kind.textContent=target.kind;
- el.setAttribute('aria-label','Abyssal Heart: '+word+' · '+target.kind);el.setAttribute('aria-hidden','false');
+ el.classList.toggle('hide',!target);if(!target){stopAbyssalHeart();el.setAttribute('aria-hidden','true');return;}
+ const pulse=BFAbyssalHeart.profile(target.distance);
+ el.style.setProperty('--beat',pulse.interval.toFixed(2)+'s');el.style.opacity='1';
+ el.querySelector('.ssword').textContent=pulse.label;el.querySelector('.sskind').textContent=target.kind;
+ el.setAttribute('aria-label','Abyssal Heart: '+pulse.label+' · '+target.kind);el.setAttribute('aria-hidden','false');
+ if(abyssalHeartClock.due(G,G.time,pulse.interval)){
+  if(abyssalHeartVoice){try{abyssalHeartVoice.s.stop();}catch(e){}abyssalHeartVoice=null;}
+  abyssalHeartVoice=playFx('abyssal_pulse',pulse.volume);
+  el.classList.remove('ss-pulse');if(!meta.reduceMotion){void el.offsetWidth;el.classList.add('ss-pulse');}
+ }
  const q=document.getElementById('questbox'),rect=q&&!q.classList.contains('hide')?q.getBoundingClientRect():null;
- el.style.top=(rect?rect.top+10:180)+'px';el.style.left=(rect&&rect.right+100<innerWidth?rect.right+12:12)+'px';if(rect&&rect.right+100>=innerWidth)el.style.top=(rect.bottom+8)+'px';el.style.transform='none';
+ const width=Math.min(244,innerWidth-24),alongside=rect&&rect.right+width+24<innerWidth;
+ el.style.top=(rect?(alongside?rect.top+10:rect.bottom+10):180)+'px';el.style.left=(alongside?rect.right+12:12)+'px';el.style.transform='none';
 }
 function riftShardHudUpdate(){
  const region=G&&isCampaignAdventure()&&!G.bonusActive&&BFRiftShards.regions[G.zone];
@@ -6269,7 +6290,7 @@ function showGameUI(v){
   if(!v){BFAdventureHud.shards(null,false);window.BFNpcNames?.clear();document.getElementById('interactprompt')?.classList.add('hide');}
   if(v) document.body.classList.remove('t-title');
   ['hud','hudprogress','controls','pausebtn','inventoryDock','mapCaption'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('hide',!v);});
-  if(!v){ const _ss=document.getElementById('secretsense'); if(_ss) _ss.classList.add('hide'); }   // heart only shows during play, via secretSenseUpdate
+  if(!v){ const _ss=document.getElementById('secretsense'); if(_ss) _ss.classList.add('hide');stopAbyssalHeart(); }   // heart only shows during play, via secretSenseUpdate
   if(!v){document.getElementById('questbox')?.classList.add('hide');document.getElementById('pethud').classList.add('hide');}
   else if(G&&G.pet) document.getElementById('pethud').classList.remove('hide');
   // Auto-loot decisions matter in the dungeon, not while walking around the Waystation.
@@ -24590,7 +24611,7 @@ window.__BF3={buyCompanionWhistle,fieldEquipCompanion,openFieldCompanions,COMPAN
   dropPing, addMark, updateMarks, syncPingBtn,
   useSkill, skillManaCost, gainMana, snapOf, freshFromSnapshot, hudUpdate, skillbarUpdate, CLASSES, classState, gainClassXp, classFamilyOk, offclassMul, curSkills, skillUnlocked, openClassChoice, get queueSub(){ return queueSubclass; }, set queueSub(v){ queueSubclass=v; }, meta,
   enemyEncounterLevel, rollDrop, restoreEnemyChests, prepareChest, descentRewardChest, canyonWindState, pushLoot, saltMob, doInteract, updateInteract, openChest, isChargeWeapon, chargeRelease, DROP_ARCHES,
-  briarReady, briarRequest, briarReceive, briarApply, briarPacket, briarSync, briarObjects, briarInteract, buildBriarOpening,
+  secretSenseUpdate, stopAbyssalHeart, briarReady, briarRequest, briarReceive, briarApply, briarPacket, briarSync, briarObjects, briarInteract, buildBriarOpening,
   openNpcTalk, openJournal, closeJournal, addJournalNote, adventureStoryState,
   ZONES, openCampaignEntry, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startDelve, loadDelveFloor, delveDescend, delveDie, delveExit, openDelveGate, DELVE_BASE,

@@ -8,7 +8,7 @@
   {
     "script": "test-skill-identity-refinement.cjs",
     "exitCode": 0,
-    "output": "{\"passed\":true,\"skills\":136,\"gameplayUnchanged\":true,\"praisedClassesPreserved\":3,\"semanticChecks\":17}",
+    "output": "{\"passed\":true,\"skills\":136,\"gameplayUnchanged\":true,\"praisedClassesPreserved\":3,\"semanticChecks\":17}\n{\"passed\":true,\"piercingStarFrontWidthRatios\":[0.9872272367286221,0.9872272719844631,0.9872273682721914]}",
     "error": ""
   },
   {
@@ -20,7 +20,7 @@
   {
     "script": "test-skill-surfaces.cjs",
     "exitCode": 0,
-    "output": "{\"passed\":true,\"checks\":6146,\"skills\":136,\"maxFullEffectCostLow\":290,\"maxFullEffectCostHigh\":895,\"withSurfaces\":88,\"maxSurfaceVertices\":11904,\"maxRibbonVertices\":12516,\"shieldCpu250TicksMs\":44.73}",
+    "output": "{\"passed\":true,\"checks\":6146,\"skills\":136,\"maxFullEffectCostLow\":290,\"maxFullEffectCostHigh\":895,\"withSurfaces\":88,\"maxSurfaceVertices\":11904,\"maxRibbonVertices\":12516,\"shieldCpu250TicksMs\":40.38}",
     "error": ""
   },
   {

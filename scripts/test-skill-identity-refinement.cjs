@@ -30,3 +30,14 @@ assert(kinds('nin_barrage',.35).filter(x=>x==='star').length===3,'Second burst r
 assert(kinds('nin_barrage',.9).filter(x=>x==='star').length===3,'Last burst remains visible without accumulating every wave');
 assert(kinds('nin_smoke').includes('sphere')&&!kinds('nin_storm').includes('sphere'),'Low physical smoke bomb differs from tall shadow veil');
 console.log(JSON.stringify({passed:true,skills:136,gameplayUnchanged:true,praisedClassesPreserved:3,semanticChecks:17}));
+// Actual transformed surface geometry must present a blade face along the shot axis.
+// A quarter-turn once made the entire star permanently edge-on in normal camera views.
+(async()=>{
+ const T=await import('../public/3d/three.module.js');
+ global.window=window;vm.runInNewContext(fs.readFileSync('public/3d/combat-art.js','utf8'),{window});
+ const row=JSON.parse(fs.readFileSync('public/3d/skill-motion-catalog.json','utf8')).find(s=>s.id==='nin_pierce');window.BF_COMBAT_ART.profiles[row.id]=row;
+ const {syncCombatArt}=await import('../public/3d/combat-art-three.js');const scene=new T.Scene(),camera=new T.PerspectiveCamera(36,1.5,.1,1000);camera.position.set(0,30,300);camera.lookAt(0,30,0);camera.updateMatrixWorld(true);
+ const ratios=[];
+ for(const q of [.2,.45,.7]){const stats=syncCombatArt(scene,camera,{g:{p:{},projectiles:[],combatArt:[{profile:row,x:0,y:0,z:0,yaw:0,t:q*.65,life:.65}]},meta:{classId:'ninja',quality:'high'},verify:true});const a=scene.getObjectByName('Skill detail surfaces').geometry.attributes.position;let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(let i=0;i<stats.surfaceVertices;i++){minX=Math.min(minX,a.getX(i));maxX=Math.max(maxX,a.getX(i));minY=Math.min(minY,a.getY(i));maxY=Math.max(maxY,a.getY(i));}const ratio=(maxX-minX)/(maxY-minY);assert(ratio>.65&&ratio<1.5,'Piercing star must have a broad frontal silhouette at '+q);ratios.push(ratio);}
+ console.log(JSON.stringify({passed:true,piercingStarFrontWidthRatios:ratios}));
+})().catch(e=>{console.error(e);process.exitCode=1;});

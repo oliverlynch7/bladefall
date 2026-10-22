@@ -4024,3 +4024,7 @@ U-FARMING-BALANCE implemented v2.361.0-hunt-reward-safety. Reproduced/fixed gues
 
 ## 2026-10-22 - Skill identity refinement (2.362.0-skill-identities)
 Audited all136 actions; revised31 poses and22 effect compositions across Ranger, Ninja, Bladedancer, Reaper, Necromancer, Paladin, Monk, Skylancer and Beastmaster. Distinct physical paths, projectile cadence and effect silhouettes replace the identified repetitions. Praised Mage, Stormcaller and Chronomancer preserved. Moving skill preview now uses Run. Native136-skill/5712-pose/816-effect/recovery checks,72 staged real casts (71 accepted, unchanged Smite correctly refunds against dummy), isolated old-save reload and eight regression suites pass. Combat numbers, skill choices, unlocks, presentation durations and saves unchanged. Visual sheets and limitations in docs/art-validation/skill-identity-20261022/review.md. No human fun or new live two-client validation claimed.
+
+
+## 2026-10-22 - Piercing Star frontal readability (2.362.1)
+Final front-camera comparison found the giant shuriken was permanently edge-on along its flight direction because an outer quarter-turn rotated its already-upright disc. Use a slight cant instead; silhouette now reads from the normal front/back view. Other skills, gameplay and durations unchanged. Refresh identity script cache in game and preview.

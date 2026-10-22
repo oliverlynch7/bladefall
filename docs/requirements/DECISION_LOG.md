@@ -2699,3 +2699,7 @@ Audited all136 actions; revised31 poses and22 effect compositions across Ranger,
 
 
 Published verification: code bf50331f / mirror 3a4349d5, Cloudflare 521c458c succeeded. All19 changed public resources match committed SHA256 on unique deployment and production. Native production skill preview passes all136 skills,5712 pose samples,136 recoveries and816 colored-effect checks with no warnings/errors; v2362 module cache URLs loaded. Evidence: skill-identity-20261022/public-hashes.json and public-native.json. Human appeal and a fresh live co-op combat session remain unverified.
+
+
+## 2026-10-22 - Piercing Star frontal readability (2.362.1)
+Final front-camera comparison found the giant shuriken was permanently edge-on along its flight direction because an outer quarter-turn rotated its already-upright disc. Use a slight cant instead; silhouette now reads from the normal front/back view. Other skills, gameplay and durations unchanged. Refresh identity script cache in game and preview.

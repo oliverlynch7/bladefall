@@ -1,4 +1,4 @@
-# Skill identity review - 2.362.0
+# Skill identity review - 2.362.1
 
 The user's friend found too much repetition within Ninja and Ranger, while liking Mage, Stormcaller and Chronomancer. This review uses actual action descriptions, hand/body paths, effect silhouette, trajectory and cadence. Different names, colors and geometry hashes do not establish perceptual variety.
 
@@ -39,3 +39,5 @@ The user's friend found too much repetition within Ninja and Ranger, while likin
 ## Limits
 
 This addresses visible sameness found in the current source and native previews. Similar defensive mechanics can still share some visual vocabulary. Player feedback is still needed on readability and appeal during busy combat; tests and an author's visual judgment cannot certify that every skill feels unique to a new player.
+
+Final front-camera correction: the large Piercing Star disc had been rotated edge-on along its flight axis. Its outer cant is now slight, so its broad blade face reads from normal player views. Added a real transformed-surface regression at three phases; width/height stays approximately0.99 instead of collapsing to zero. Native frontal screenshots and Ninja comparison sheet refreshed.

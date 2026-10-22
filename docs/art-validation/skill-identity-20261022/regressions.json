@@ -1,0 +1,50 @@
+[
+  {
+    "script": "test-skill-motion.cjs",
+    "exitCode": 0,
+    "output": "{\"passed\":true,\"checks\":42045,\"skills\":136}",
+    "error": ""
+  },
+  {
+    "script": "test-skill-identity-refinement.cjs",
+    "exitCode": 0,
+    "output": "{\"passed\":true,\"skills\":136,\"gameplayUnchanged\":true,\"praisedClassesPreserved\":3,\"semanticChecks\":17}",
+    "error": ""
+  },
+  {
+    "script": "test-distinct-skill-effects.cjs",
+    "exitCode": 0,
+    "output": "{\"passed\":true,\"skills\":136,\"checks\":206310,\"uniqueGeometrySignatures\":136,\"maxStrokes\":710,\"projectileShapes\":[{\"round\":5,\"shaft\":0,\"gem\":3,\"seed\":0,\"tip\":0,\"bar\":0,\"ring\":0},{\"round\":0,\"shaft\":1,\"gem\":3,\"seed\":0,\"tip\":0,\"bar\":0,\"ring\":2}]}",
+    "error": ""
+  },
+  {
+    "script": "test-skill-surfaces.cjs",
+    "exitCode": 0,
+    "output": "{\"passed\":true,\"checks\":6146,\"skills\":136,\"maxFullEffectCostLow\":290,\"maxFullEffectCostHigh\":895,\"withSurfaces\":88,\"maxSurfaceVertices\":11904,\"maxRibbonVertices\":12516,\"shieldCpu250TicksMs\":44.73}",
+    "error": ""
+  },
+  {
+    "script": "test-skill-effects-preview.cjs",
+    "exitCode": 0,
+    "output": "{\"passed\":true,\"skills\":136,\"finiteStrokes\":26857,\"emptyEffects\":0}",
+    "error": ""
+  },
+  {
+    "script": "test-weapon-actions.cjs",
+    "exitCode": 0,
+    "output": "{\"passed\":true,\"profiles\":17,\"distinctPaths\":17,\"poses\":10302,\"chargeSamples\":170,\"maxChargeStrokes\":89,\"packetVariants\":34,\"bufferFrames\":34}",
+    "error": ""
+  },
+  {
+    "script": "test-reaper-combo.cjs",
+    "exitCode": 0,
+    "output": "{\"passed\":true,\"poseSamples\":303,\"effectSamples\":606,\"maxStroke\":223,\"distinctPaths\":3,\"coOpVariants\":3,\"chargedThrowPreserved\":true,\"actualBufferFrames\":24}",
+    "error": ""
+  },
+  {
+    "script": "check-3d-inline.cjs",
+    "exitCode": 0,
+    "output": "Parsed 1 inline game script.",
+    "error": ""
+  }
+]

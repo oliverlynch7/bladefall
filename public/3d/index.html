@@ -1211,12 +1211,12 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./fallen-encounter.js?v=2338"></script>
 <script src="./frost-officers.js?v=2338"></script>
 <script src="./story-authority.js?v=2325"></script>
-<script src="./skill-surfaces.js?v=2330f"></script><script src="./skill-identity.js?v=2330f"></script>
+<script src="./skill-surfaces.js?v=2330f"></script><script src="./skill-identity.js?v=2362"></script>
 <script src="./campaign-journey.js?v=2318"></script>
 <script src="./bag-browser.js?v=2238"></script>
 <link rel="stylesheet" href="./party-feedback.css?v=2297"><script src="./party-feedback.js?v=2297"></script>
 <script src="./party-navigation.js?v=2318"></script>
-<script src="./skill-motion.js?v=2328"></script><script src="./weapon-actions.js?v=2333d"></script>
+<script src="./skill-motion.js?v=2362"></script><script src="./weapon-actions.js?v=2333d"></script>
 <script src="./reaper-combo.js?v=2355"></script>
 <script src="./combat-art.js?v=2333d"></script>
 <script src="./hostile-art.js?v=1978"></script>
@@ -1246,7 +1246,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.361.0-hunt-reward-safety';
+const VERSION3D='2.362.0-skill-identities';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -25045,8 +25045,8 @@ if(window.BF_KEEP_ISOLATED)setTimeout(()=>new URLSearchParams(location.search).g
      and the level is exactly as generated. Never a reason to hold up boot. */
   ED.loadShipped();
 </script>
-<script type="module" src="./hero3d.js?v=2358"></script>
-<script type="module" src="./progression-model-preview.js?v=2358"></script>
+<script type="module" src="./hero3d.js?v=2362"></script>
+<script type="module" src="./progression-model-preview.js?v=2362"></script>
 <script type="module" src="./social-hub.js?v=2350"></script>
 <!-- The editor MODE (input, HUD, drag). Separate from editor.js on purpose: editor.js is the data
      layer the game depends on at load to replay saved edits, and a fault in the UI must never be

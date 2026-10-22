@@ -1,0 +1,6 @@
+
+
+## U-SKILL-IDENTITY-20261022
+User: friend finds several Ninja and Ranger skills visually too similar; Mage, Stormcaller and Chronomancer are successful references. Audit and improve repetitive skills.
+Inspected actual 136-skill catalog, shared action sampler, real IK adapter and explicit VFX cases. Ranger has three identical bow actions (including non-projectile Shadowstrike) and two pointing marks. Ninja repeats star shapes for barrage, piercing and mark, and smoke for two defenses. Bladedancer has four nearly identical parry poses. Other duplicates include Reaper sweeps, Necromancer raises, Monk palms and Skylancer dives.
+Plan: distinguish physical anticipation, release and recovery plus effect silhouette, trajectory and cadence, starting with all eight Ranger and Ninja actions. Separate Bladedancer guards and the identified duplicate actions where semantics differ. Keep Mage, Stormcaller and Chronomancer compositions unchanged. Retain colored effects, weapons/skins, damage, timing of gameplay, targeting, class choices and saves. All offsets remain cosmetic and bounded. Preview real rigs idle/moving/front/side, low/high effects, cancellation and remote serialization; load a legacy save. Automated distinct hashes are regression checks only, not evidence of human-perceived uniqueness.

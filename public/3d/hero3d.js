@@ -1,6 +1,6 @@
 import {applyWeaponAction,restoreWeaponAction} from './weapon-actions3d.js?v=2333d';
 import {applyReaperPose,restoreReaperPose} from './reaper-combo3d.js?v=2355';
-import {applySkillPose,restoreSkillPose} from './skill-motion3d.js?v=2328';
+import {applySkillPose,restoreSkillPose} from './skill-motion3d.js?v=2362';
 import {syncInspectionMirror} from './hub-mirror3d.js?v=2342';
 const inspectionBackdrop=new THREE.Color(0x0e0d12);
 import {syncArenaArt} from './arena-art.js?v=2274';
@@ -1642,7 +1642,7 @@ export async function createClassDisplay(classId,tier=0){
    restoreEmotePose(A);restoreWeaponAction(A);restoreReaperPose(A);restoreSkillPose(A);restoreGripPose(A);
    const attack=({bow:'Bow_Shoot',staff:'Staff_Attack',wand:'Spell1',fist:'Punch',dagger:'Dagger_Attack',axe:'Attack',hammer:'Attack',scythe:'Attack'})[weapon?.art]||'Sword_Attack';
    const name=motion==='Attack'?attack:motion==='RunAttack'?attack:motion==='Charge'?(weapon?.art==='bow'?'Bow_Draw':'Attacking_Idle'):motion==='Skill'?'Spell1':motion==='Jump'?'Roll':motion==='Dodge'?'Run':['wave','point','cheer','bow','dance'].includes(motion)?'Idle':motion;
-   const weaponPreview=options.weaponAction;const reap=Number.isInteger(options.reaperHit)&&weapon?.art==='scythe',carrier=reap||weaponPreview?(options.moving?'Run':'Idle'):name;const actual=clips[carrier]?carrier:'Idle';if(actual!==clipName){action?.stop();action=mixer.clipAction(clips[actual]);action.reset().play();clipName=actual;}
+   const weaponPreview=options.weaponAction;const reap=Number.isInteger(options.reaperHit)&&weapon?.art==='scythe',carrier=skill||reap||weaponPreview?(options.moving?'Run':'Idle'):name;const actual=clips[carrier]?carrier:'Idle';if(actual!==clipName){action?.stop();action=mixer.clipAction(clips[actual]);action.reset().play();clipName=actual;}
    mixer.update(dt);const p={swingCombo:options.reaperHit??-1,swingId:1,x:0,y:0,z:0,yaw:0,vx:0,vz:options.moving||['Run','RunAttack','Dodge'].includes(motion)?90:0,onGround:!options.airborne&&motion!=='Jump',weapon,atkTimer:['Attack','RunAttack'].includes(motion)?.4:0,chargeAmt:motion==='Charge'?.7:0,dodgeTimer:motion==='Dodge'?.12:0,combatPose:skill&&phase<=1?{skill:skill.id,clip:'Idle',serial:1,duration:skill.duration,remaining:skill.duration*(1-phase)}:motion==='Skill'?{remaining:.5,clip:'Spell1'}:null,emote:['wave','point','cheer','bow','dance'].includes(motion)?{id:motion,t:time%4}:null};
    movingCombatLegs(p,A,dt);captureGripPose(wrap,A);
    if(!p.emote||p.emote.id==='bow'){pirateWeaponPose(p,wrap,A,dt);poseWeaponGrip(p,wrap,A,model,dt);}

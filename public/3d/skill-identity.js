@@ -48,7 +48,7 @@ root.BF_SKILL_IDENTITY=function(pr,c){
  const slashX=(z=45,color=col)=>{for(const s of [-1,1])curve(t=>[s*(-30+60*t),65-55*t,z+Math.sin(t*Math.PI)*9],7,color);G([0,38,z+5],9,hot);};
  const cage=(radius=31,color=col)=>{at(0,31,0,()=>{S('sphere',[radius,31,radius],color,fade*.13,2);});for(let k=0;k<4;k++){const an=k*TAU/4;curve(t=>[Math.sin(an)*radius*Math.sin(t*Math.PI),4+62*t,Math.cos(an)*radius*Math.sin(t*Math.PI)],2,color);}circle(radius*.6,8,color);};
  const claws=(y=35,z=36,color=col)=>{for(let k=-1;k<=1;k++)curve(t=>[k*10+Math.sin(t*Math.PI)*10,y+25-48*t,z+15*Math.sin(t*Math.PI)],4,color);};
- const shuriken=(x,y,z,rr=17,color=col)=>at(x,y,z,()=>{pushM();rotX(Math.PI/2);rotY(q*16);S('star',[rr,2,rr],'#bdc7d5',fade*.8,1);for(let k=0;k<4;k++){pushM();rotY(k*Math.PI/2);path([[0,0,3],[-4,0,8],[0,0,rr],[5,0,7],[0,0,3]],2,color);popM();}circle(4,0,hot);popM();});
+ const shuriken=(x,y,z,rr=17,color=col)=>at(x,y,z,()=>{pushM();rotX(Math.PI/2);rotY(q*16);S('star',[rr,2,rr],'#bdc7d5',fade*.8,1);for(let k=0;k<4;k++){pushM();rotY(k*Math.PI/2);path([[0,0,rr*.12],[-rr*.18,0,rr*.32],[0,0,rr],[rr*.23,0,rr*.30],[0,0,rr*.12]],rr<16?1.2:2,color);popM();}circle(rr*.13,0,hot,.8);popM();});
  // Every case below is authored for one current skill; class names do not select a generic motif.
  switch(pr.id){
  // Warrior: steel follows the equipped swing; defense, charge and shockwave have different spaces.
@@ -61,14 +61,14 @@ root.BF_SKILL_IDENTITY=function(pr,c){
  case 'w_berserk':for(let k=0;k<3;k++){pushM();rotX(Math.PI/2);upright(24+k*18*v,38,0,'#edbb67',-.9,.9);popM();}sparks(10,28,35,'#ffb45f',30);break;
  case 'w_execute':curve(t=>[0,85-77*t,16+Math.sin(t*Math.PI)*43],11,hot);at(0,2,40,()=>{burst(42,2,'#e3b45e',8);});break;
  // Ranger: arrows, shadow travel, physical spikes, smoke, aim and volatile marks.
- case 'r_volley':for(let j=-2;j<=2;j++){pushM();rotY(j*.23);arrow(0,28,22+55*v,50);curve(t=>[Math.sin(t*5+j)*2,28,18+55*v-45*t],2);popM();}break;
- case 'r_pierce':arrow(0,29,25+95*v,78,'#d5f1b7');for(const s of [-1,1])curve(t=>[s*7*(1-t),29+3*Math.sin(t*5),20+100*v*t],2.5);G([0,29,100*v],6,hot);break;
- case 'r_tumble':footprints('#d4d5c0',3);curve(t=>[0,12+24*Math.sin(t*Math.PI),-42*t*v],4,'#b9c8a2');arrow(0,30,35+30*v,24,hot);break;
- case 'r_shadow':sweep(42,28,-.9+q*2,.5+q*2,'#a288c3',5);for(let j=0;j<3;j++)curve(t=>[(j-1)*6,14+18*t,-65*(1-t)*v],3,'#7b699c',fade*.6);break;
- case 'r_spike':circle(31,1,'#9bb577',2);for(let k=0;k<8;k++){const an=k*TAU/8,x=Math.sin(an)*23,z=Math.cos(an)*23;at(x,2,z,()=>{S('needle',[4,17*v+1,3],'#99ad8d',fade*.85,1);});path([[x-4,2,z],[x,17*v,z],[x+4,2,z]],1.3,'#dbe4b5');}path([[-21,2,-21],[21,2,21],[-21,2,21],[21,2,-21]],1,'#8ca66a');break;
- case 'r_smoke':smoke(15,'#91b9a9',5);sparks(7,34,15,'#d8e3bd',35);break;
- case 'r_mark':crosshair();at(0,77,0,()=>{path([[-8,7,0],[0,0,0],[8,7,0]],2,'#e7da83');});break;
- case 'r_deathmark':skull(49,'#e8986a');circle(25,2,'#cf7b51',2,0,TAU*.82);for(let k=0;k<5;k++){const an=k*TAU/5;G([Math.sin(an)*23,20+q*10,Math.cos(an)*23],4,'#ffc070');}break;
+ case 'r_volley':for(let j=-2;j<=2;j++){pushM();rotY(j*.25);const fly=Math.max(0,Math.min(1,(q-.12-Math.abs(j)*.035)*1.8));arrow(0,29+Math.abs(j)*2,18+100*fly,39,'#b5df96');curve(t=>[0,29+Math.abs(j)*2+Math.sin(t*Math.PI)*2,18+100*fly-27*t],1.6,'#92be80',fade*.65,16);popM();}break;
+ case 'r_pierce':const shot=Math.max(0,Math.min(1,(q-.26)/.65));arrow(0,30,20+140*shot,69,'#e3f7b0');for(const side of [-1,1])curve(t=>[side*(2+10*Math.sin(t*Math.PI)),30,18+140*shot-48*t],2,'#c8e2aa',fade*.7,24);at(0,30,18+140*shot,()=>{pushM();rotX(Math.PI/2);circle(7+shot*9,0,'#f0f7cb',1,0,TAU);popM();});break;
+ case 'r_tumble':footprints('#c0c8a2',3);curve(t=>[0,8+17*Math.sin(t*Math.PI),-52*t],2,'#a5ba8e',fade*.55,24);at(0,0,0,()=>{pushM();rotY(Math.PI*.12);arrow(0,32,20+65*Math.max(0,q-.27),30,'#dde9bd');popM();});break;
+ case 'r_shadow':for(const side of [-1,1])curve(t=>[side*(8+9*Math.sin(t*Math.PI)),10+12*Math.sin(t*Math.PI),-70+125*t],3,'#9c86b8',fade*.7,24);curve(t=>[-25+50*t,48-26*t,35+Math.sin(t*Math.PI)*8],6,'#d8c3f2',fade,24);for(let j=0;j<4;j++)G([(j%2?1:-1)*10,12+j*6,-50+j*22],3,'#baa2d0',fade*.4);break;
+ case 'r_spike':at(0,2,0,()=>{S('barrel',[24,3,24],'#665f47',fade*.80,1);});circle(25,4,'#c9ba82',2);for(let k=0;k<8;k++){const an=k*TAU/8,x=Math.sin(an)*20,z=Math.cos(an)*20;at(x,5,z,()=>{S('needle',[3,12+7*v,3],'#cad3b2',fade*.88,1);});}path([[-16,6,0],[16,6,0]],2,'#e0d6a7');G([0,7,0],4,'#bad18a',fade*.45);break;
+ case 'r_smoke':at(0,5,10,()=>{S('barrel',[5,8,5],'#7f7657',fade*.85,1);circle(5,5,'#c9c29b',1.4);});for(let k=0;k<(N<40?5:8);k++){const an=k*2.39996,rr=10+36*v;G([Math.sin(an)*rr,7+(k%3)*5,10+Math.cos(an)*rr],15,'#8bb2a1',fade*.30);curve(t=>[Math.sin(an+t)*rr,6+t*7,10+Math.cos(an+t)*rr],4,'#a2c6ae',fade*.32,12);}break;
+ case 'r_mark':const focus=1-q*.34;for(const side of [-1,1]){path([[side*22*focus,61,0],[side*15*focus,61,0],[side*15*focus,35,0],[side*22*focus,35,0]],2,'#dbeaa2');L([side*6,48,0],[side*11,48,0],1.4,hot);}path([[-5,76,0],[0,69,0],[5,76,0]],2,'#f4d88c');G([0,48,0],3,'#fff1b0',fade*.75);break;
+ case 'r_deathmark':skull(49,'#e8ab6d');for(let j=0;j<3;j++){const x=(j-1)*28;at(x,25,0,()=>{path([[-5,0,0],[0,8,0],[5,0,0],[0,-6,0],[-5,0,0]],1.7,'#eeac6e');curve(t=>[0,8+12*t,Math.sin(t*5+q*9)*3],1.2,'#ffd7a0',fade*.8,12);G([0,20,0],3.5,'#ffd491',fade*.8);});}break;
  // Mage: bolt = compact moving orb; beam = narrow continuous lance. No shared crystal cage.
  case 'm_bolt':bolt(0,30,20,48*v,'#ac9bff');for(let k=0;k<5;k++)G([Math.sin(k*2+q*8)*8,30+Math.cos(k*2)*5,20+48*v-k*9],4-k*.4,'#bba9ff',fade*.65);break;
  case 'm_beam':beam(140,'#a4ceff');at(0,30,17,()=>{pushM();rotX(Math.PI/2);circle(13,0,'#d8e5ff',2);popM();});break;
@@ -89,7 +89,7 @@ root.BF_SKILL_IDENTITY=function(pr,c){
  case 'py_sun':orb(0,60-40*v,0,22,'#ffd26a');burst(R,12,'#ff9c3d',N<40?8:16);for(let k=0;k<(N<40?3:6);k++){pushM();rotY(k*TAU/(N<40?3:6));curve(t=>[0,25+70*t,4+Math.sin(t*Math.PI)*15],4,'#ffe3a0');popM();}break;
  // Reaper: scythe crescents, shadow wisps, chains and draining souls.
  case 'x_reap':sweep(50,27,-1.1+q,1.6+q,'#b293ec',7);curve(t=>[Math.sin(t*3)*20,18+t*16,20*(1-t)],2,'#d9c8ff');break;
- case 'x_cleave':at(0,20,45*v,()=>{pushM();rotX(.35);sweep(38,0,-1.4,1.4,'#c2a1ff',7);popM();});break;
+ case 'x_cleave':at(0,26,24+100*v,()=>{pushM();rotY(Math.PI/2);sweep(32,0,-1.5,1.5,'#d3b5f4',7);popM();});for(const side of [-1,1])curve(t=>[side*6,26,20+100*v-48*t],2,'#967bbf',fade*.6,24);break;
  case 'x_step':footprints('#a88cce',4);smoke(6,'#8a79a9',9);break;
  case 'x_wraith':for(const sign of [-1,1])at(sign*15,0,-5,()=>{pushM();rotY(sign*.9);S('plume',[12,59,6],'#9081b3',fade*.20,2);popM();});for(const s of [-1,1])curve(t=>[s*(15+Math.sin(t*5+q*4)*7),7+65*t,-12*t],6,'#ad99d8',fade*.45);G([0,30,0],28,'#8c78b4',fade*.2);break;
  case 'x_pull':for(let k=0;k<5;k++){pushM();rotY(k*TAU/5);curve(t=>[Math.sin(t*4)*10,8+8*Math.sin(t*Math.PI),R*(1-t)],4,'#b59be1');popM();}G([0,12,0],13,'#e5d3ff');break;
@@ -115,14 +115,16 @@ root.BF_SKILL_IDENTITY=function(pr,c){
  case 'necro_army':for(let k=0;k<(N<40?2:5);k++){const an=k*TAU/(N<40?2:5);at(Math.sin(an)*48,0,Math.cos(an)*48,()=>{skull(25+25*v);bone(0,0,0,20+20*v);});}circle(62,1,'#92ba84',3);break;
  case 'necro_storm':for(let k=0;k<(N<40?7:12);k++){const an=k*2.399+q*4;at(Math.sin(an)*R*.7,12+(k%4)*12,Math.cos(an)*R*.7,()=>{pushM();rotX(k);bone(0,0,0,13);popM();});}smoke(8,'#77916c',3);break;
  // Ninja: slicing, thrown stars, smoke, curse and self-empowerment are separate motions.
- case 'nin_strike':slashX(36,'#e899a1');smoke(4,'#766477',4);break;
- case 'nin_barrage':for(let k=-1;k<=1;k++){pushM();rotY(k*.30);shuriken(0,28,28+48*v,14,'#e2a7b8');popM();}break;
- case 'nin_step':for(let j=0;j<3;j++)curve(t=>[(j-1)*10,14+j*8,-65*t*v],3,'#a68fb5',fade*.7);footprints('#d0b7c8',3);break;
- case 'nin_smoke':smoke(13,'#8d809c',2);for(let j=0;j<4;j++)G([Math.sin(j*2)*24,3,Math.cos(j*2)*24],8,'#b991bb',fade*.4);break;
- case 'nin_mark':at(0,48,0,()=>{shuriken(0,0,0,22,'#e499a3');});for(const s of [-1,1])curve(t=>[s*(20-12*t),65-35*t,1],2,'#f1bac4');break;
- case 'nin_pierce':shuriken(0,32,25+80*v,29,'#f0bdc4');curve(t=>[Math.sin(t*4)*3,32,20+80*v-50*t],4,'#c58f9e');break;
- case 'nin_fury':for(const s of [-1,1])sweep(25,30+10*s,s<0?-1.5:.4,s<0?-.2:1.7,'#e5939f',7);sparks(12,22,12,'#f4b5b2',50);break;
- case 'nin_storm':smoke(7,'#61566e',20);for(let j=0;j<4;j++)curve(t=>[Math.sin(j*1.7)*22,3+65*t,Math.cos(j*1.7)*15],3,'#b4a2c8',fade*.4);break;
+ case 'nin_strike':curve(t=>{const u=t*Math.min(1,q/.48);return [-32+64*u,21+42*u,28+9*Math.sin(u*Math.PI)]},7,'#ffd2d1',fade,32);curve(t=>[-25+50*t,17+40*t,25],2.5,'#cb596f',fade*.8,24);for(let k=0;k<5;k++)G([-22+k*11,27+k*7,29],2,'#ffb8b7',fade*.65);break;
+ case 'nin_barrage':for(let wave=0;wave<3;wave++){const age=q-wave*.22;if(age<0||(wave<2&&age>=.22))continue;const fly=Math.min(1,age/.25);for(let k=-1;k<=1;k++){pushM();rotY(k*.29);shuriken(0,27+wave*3,20+100*fly,10,'#e6b4b7');L([0,27+wave*3,8+100*fly],[0,27+wave*3,20+100*fly],1.2,'#b8798b',fade*(1-fly*.5));popM();}}break;
+ case 'nin_step':for(const side of [-1,1])curve(t=>[side*12,10+3*Math.sin(t*Math.PI),-80*t],3,'#c28b9c',fade*.65,24);for(let j=0;j<3;j++)at(0,0,-j*25,()=>{path([[-10,12,0],[-13,29,0],[-6,40,0],[7,38,0],[12,18,0]],1.2,'#977e9e',fade*(.5-j*.12));});break;
+ case 'nin_smoke':at(0,4,8,()=>{S('sphere',[6,6,6],'#514754',fade*.9,1);curve(t=>[0,4+9*t,Math.sin(t*5)*3],1.2,'#c3b7ad',fade,12);});for(let k=0;k<(N<40?6:9);k++){const an=k*2.4,rr=12+35*v;G([Math.sin(an)*rr,5+(k%3)*8,Math.cos(an)*rr],17,'#898096',fade*.30);curve(t=>[Math.sin(an+t*.8)*rr,4+16*Math.sin(t*Math.PI),Math.cos(an+t*.8)*rr],4,'#b395a4',fade*.28,12);}break;
+ case 'nin_mark':// A fixed brush seal, never a rotating projectile.
+ at(0,48,0,()=>{path([[-12,17,0],[12,17,0],[12,-16,0],[-12,-16,0],[-12,17,0]],2,'#c56676');path([[-7,9,1],[5,9,1],[1,2,1],[-6,-2,1],[7,-2,1],[1,-11,1]],3.1,'#f1a4a6');path([[-5,14,1],[0,19,1],[6,13,1]],1.2,'#ffe2c5');G([0,1,-1],15,'#a83b58',fade*.25);});break;
+ case 'nin_pierce':at(0,31,22+120*v,()=>{pushM();rotY(Math.PI/2);shuriken(0,0,0,30,'#f2d2cb');popM();});for(const side of [-1,1])curve(t=>[side*6*Math.sin(t*Math.PI),31+side*9,18+120*v-70*t],3,'#d797a0',fade*.75,24);G([0,31,22+120*v],5,'#fff2e0',fade*.75);break;
+ case 'nin_fury':for(const side of [-1,1]){curve(t=>[side*(10+15*t),22+30*t,18-9*t],4,'#eb8f9b',fade,24);path([[side*22,23,14],[side*25,16,12],[side*18,18,14]],1.3,'#ffd4c4');for(let k=0;k<3;k++)G([side*24,13+k*12,12],2.5,'#f6b1ae',fade*.6);}break;
+ case 'nin_storm':// Tall folding shadow curtains contrast with the low smoke bomb.
+ for(const side of [-1,1])for(let j=0;j<3;j++){const x=side*(10+j*5)*(1-q*.5),z=-8+j*8;curve(t=>[x+side*5*Math.sin(t*Math.PI+q*4),3+68*t,z+4*Math.sin(t*7-q*5)],4-j*.6,j===1?'#c19cb8':'#72627f',fade*.55,24);}for(let j=0;j<4;j++)path([[(j%2?1:-1)*16,12+j*13,0],[(j%2?1:-1)*11,18+j*13,0]],2,'#e4b6bf',fade*.65);break;
  // Berserker: blood expenditure, physical horn impact, rage and heavy finishing impacts.
  case 'bsk_cleave':sweep(65,22,-1.5+q*.8,1.6+q*.8,'#ec7059',9);sparks(12,48,15,'#cf5747',-18);break;
  case 'bsk_bash':at(0,42,31+v*12,()=>{for(const s of [-1,1])curve(t=>[s*(4+12*t),5+8*Math.sin(t*Math.PI),10*t],3,'#e3b783');});burst(26,40,'#ffad79',7);break;
@@ -156,7 +158,7 @@ root.BF_SKILL_IDENTITY=function(pr,c){
  case 'mon_deflect':for(const s of [-1,1])curve(t=>[s*(20-12*t),22+32*t,24+8*Math.sin(t*Math.PI)],4,'#e4d5ac');upright(27,31,26,'#fff0d0',-.9,.9);break;
  case 'mon_roll':footprints('#e7cfa2',4);curve(t=>[18*Math.sin(t*Math.PI),6+20*Math.sin(t*Math.PI),-38*t],3,'#d6c4a0');break;
  case 'mon_whirl':sweep(52,14,q*7,q*7+4.8,'#e3c68c',7);sweep(46,24,q*7+1,q*7+3.5,'#fff1c8',2);break;
- case 'mon_stun':at(0,28,25,()=>{S('sphere',[18,18,1.5],'#edcd92',fade*.12,2);});for(let k=0;k<3;k++)upright(15+k*15*v,28,20+k*20*v,'#e6c992',-.9,.9);G([0,29,28],12,'#fff3d2');break;
+ case 'mon_stun':at(0,28,25,()=>{S('sphere',[18,18,1.5],'#edcd92',fade*.12,2);});shock(R*.7,'#e6c992');for(let j=0;j<3;j++){const an=j*TAU/3+q;at(Math.sin(an)*13,62,25+Math.cos(an)*7,()=>{path([[0,4,0],[2,0,0],[6,0,0],[3,-2,0],[4,-6,0],[0,-3,0],[-4,-5,0],[-3,0,0],[-6,1,0],[0,1,0],[0,4,0]],1.1,'#fff0c1');});}break;
  case 'mon_thousand':circle(28,1,'#dbbd87',3);for(let j=0;j<6;j++){const an=j*TAU/6;G([Math.sin(an)*26,6+v*8,Math.cos(an)*26],5,'#f5e1b4',fade*.5);}upright(24,52,-9,'#f2d99d',-.9,.9);break;
  case 'mon_dragon':at(0,64,70,()=>{S('sphere',[10,8,7],'#dcba75',fade*.35,2);at(0,-4,8,()=>{S('sphere',[6,4,8],'#e8cf90',fade*.45,2);});for(const side of [-1,1]){G([side*4,2,7],2,'#fff4bc',fade*.8);at(side*7,7,0,()=>{S('needle',[2,11,2],'#f1d79e',fade*.5,2);});}});curve(t=>[Math.sin(t*7)*16,8+55*t,20+55*t],7,'#e3bd73');at(0,64,70,()=>{path([[-12,-2,0],[-8,12,0],[0,7,8],[8,12,0],[12,-2,0],[0,-10,13],[-12,-2,0]],2,'#ffdf98');});shock(56,'#ebce99');break;
  // Stormcaller: branching paths, piercing discharge, localized field, sphere and enemy links.
@@ -187,14 +189,15 @@ root.BF_SKILL_IDENTITY=function(pr,c){
  case 'sky_crash':lightning([0,130*(1-q),0],[0,3,0],'#b2e9ff',5);shock(R,'#b6e7f3');feathers(N<40?5:8,3,0,'#d3f4ff');break;
  case 'sky_cyclone':for(let j=0;j<4;j++){pushM();rotY(j*Math.PI/2);curve(t=>[Math.sin(t*TAU+q*5)*R*.6,4+70*t,Math.cos(t*TAU+q*5)*R*.6],5,'#a6dfe9');popM();}sweep(R,12,q*7,q*7+4,'#d2f4fa',4);break;
  // Bladedancer: contact windows differ from active cuts; no phantom extra weapons on the body.
- case 'bd_counter':upright(29,32,24,'#e9b4d8',-.8,.8);for(const s of [-1,1])L([s*24,15,23],[s*8,45,23],3,'#ffe4f7');break;
+ case 'bd_counter':path([[-24,15,25],[7,51,25],[12,48,25]],3,'#f9d7ec');curve(t=>[-26+55*t,20+4*Math.sin(t*Math.PI),28],2,'#d79ebf',fade*.65,24);G([0,39,26],5,'#ffe5ee',fade*.65);break;
  case 'bd_twin':sweep(48,31,-1.4+q*2,1.1+q*2,'#e8afd2',6);sweep(52,20,1.3-q*2,3.7-q*2,'#f7d6eb',4);break;
  case 'bd_riposte':curve(t=>[0,31,16+85*t*v],5,'#ffd6ef');sweep(39,30,-.7,1.6,'#de9ec8',6);break;
  case 'bd_step':footprints('#eab9dc',4);for(const s of [-1,1])curve(t=>[s*14+Math.sin(t*4)*12,9,-65*t],3,'#dba8d0');break;
- case 'bd_mirror':at(0,30,20,()=>{S('kite',[19,24,2],'#c3aacd',fade*.26,2);});for(const s of [-1,1])upright(20,31,s*13,'#e8c9ec',s<0?-.9:2.2,s<0?.9:4.1);circle(29,2,'#d5aedb');break;
+ case 'bd_mirror':for(const side of [-1,1])at(side*(16+7*v),31,21,()=>{path([[0,22,0],[11,0,2],[0,-22,0],[-11,0,2],[0,22,0]],2,'#f0cee5');S('kite',[10,21,1.3],'#ceb9e4',fade*.23,2);L([0,-16,1],[0,16,1],.9,hot,fade*.6);});break;
  case 'bd_cross':slashX(43,'#f5c1e4');sparks(9,20,35,'#ffdef2',5);break;
- case 'bd_steel':shield(-8,21,24,1.05,'#e5c0dd');upright(35,32,24,'#f8e0ee',-.5,.5);G([0,33,25],8,'#ffe8f6',fade*.3);break;
- case 'bd_perfect':at(0,30,24,()=>{S('kite',[25,28,3],'#e4b9d2',fade*.18,2);});for(let j=0;j<3;j++)upright(22+j*7,32,24,'#e4a8d0',-.9+j*.13,.9-j*.13);for(const s of [-1,1])curve(t=>[s*(30-26*t),16+32*t,26],4,'#ffe5f5');break;
+ case 'bd_steel':for(const side of [-1,1])at(side*7,34,24,()=>{pushM();rotY(Math.PI/2);rotX(side*.65);S('needle',[2,22,1],'#b9bdcf',fade*.70,1);popM();}); // Crossed steel and a contact spark, not another magic mirror panel.
+ for(const side of [-1,1])path([[side*17,14,24],[-side*12,54,24],[-side*15,57,24]],3.2,'#ded5df');G([0,36,26],7,'#fff1de',fade*.6);for(let j=0;j<5;j++){const an=j*TAU/5;L([Math.sin(an)*7,36+Math.cos(an)*7,26],[Math.sin(an)*15,36+Math.cos(an)*15,26],1.4,'#edb4ce');}break;
+ case 'bd_perfect':curve(t=>[-29+17*t,13+44*t,24],4,'#ffdaed',fade,24);curve(t=>[28-17*t,13+44*t,24],4,'#e9acd0',fade,24);path([[-13,58,24],[0,65,24],[13,58,24]],2,'#f9d3e9');for(const side of [-1,1])curve(t=>[side*(24-18*t),8,18+24*t],1.7,'#c68fb6',fade*.65,16);break;
  // Beastmaster: companion commands, ties and care use paw/pack cues, not generic claw attacks.
  case 'bst_sic':for(let j=0;j<3;j++)path([[-9,12,20+j*15],[0,12,30+j*15],[9,12,20+j*15]],2,'#e1cf9e');claws(24,65,'#d5bd84');break;
  case 'bst_coordinated':arrow(-10,29,32+45*v,35,'#d7cf9e');claws(28,64,'#e6d4a1');upright(13,45,64,'#e4c994',-.7,.7);break;

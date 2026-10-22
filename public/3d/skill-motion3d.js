@@ -65,10 +65,10 @@ export function applySkillPose(p,root,a){
  }
  if(s.bow&&profile?.kind==='bow'){
   // Same anatomical bow/string placement as normal attacks, with visible draw and release.
-  const draw=Math.sin(Math.PI*Math.min(1,(1-pose.remaining/d.duration)/.62));
+  const draw=s.bowDraw??Math.sin(Math.PI*Math.min(1,(1-pose.remaining/d.duration)/.62));
   const frame=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3(0,-.98,-.199),new T.Vector3(0,-.199,.98),new T.Vector3(-1,0,0)));
   wristQ=root.getWorldQuaternion(new T.Quaternion()).multiply(frame);
-  s.right=[-.25,1.5,.52];arm('R',s.right,[-.74,1.35,.12],wristQ);
+  s.right=[-.25,1.5+(s.bowLift||0),.52];arm('R',s.right,[-.74,1.35,.12],wristQ);
   const string=grip.getObjectByName('BowString');if(string){string.geometry.attributes.position.setX(1,profile.stringX-.18*draw);string.geometry.attributes.position.needsUpdate=true;}
   const anchor=grip.localToWorld(new T.Vector3(profile.stringX-.18*draw,0,0));root.worldToLocal(anchor);arm('L',anchor.toArray(),[.65,1.4,.16]);
  }else{

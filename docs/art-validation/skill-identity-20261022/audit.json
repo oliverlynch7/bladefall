@@ -1,0 +1,236 @@
+{
+  "skillsAudited": 136,
+  "classesAudited": 17,
+  "changedPoses": 31,
+  "changedEffects": 22,
+  "changedClasses": [
+    "ranger",
+    "reaper",
+    "paladin",
+    "necromancer",
+    "ninja",
+    "monk",
+    "skylancer",
+    "bladedancer",
+    "beastmaster"
+  ],
+  "changes": [
+    {
+      "id": "r_volley",
+      "name": "Volley",
+      "before": "bow",
+      "after": "volley",
+      "duration": 0.48
+    },
+    {
+      "id": "r_pierce",
+      "name": "Piercing Shot",
+      "before": "bow",
+      "after": "aimshot",
+      "duration": 0.48
+    },
+    {
+      "id": "r_tumble",
+      "name": "Tumble",
+      "before": "retreat",
+      "after": "backshot",
+      "duration": 0.5
+    },
+    {
+      "id": "r_shadow",
+      "name": "Shadowstrike",
+      "before": "bow",
+      "after": "shadowslip",
+      "duration": 0.48
+    },
+    {
+      "id": "r_spike",
+      "name": "Spike Trap",
+      "before": "place",
+      "after": "settrap",
+      "duration": 0.6
+    },
+    {
+      "id": "r_smoke",
+      "name": "Smoke Bomb",
+      "before": "toss",
+      "after": "smoketoss",
+      "duration": 0.44
+    },
+    {
+      "id": "r_mark",
+      "name": "Hunter's Mark",
+      "before": "point",
+      "after": "sight",
+      "duration": 0.42
+    },
+    {
+      "id": "r_deathmark",
+      "name": "Death Mark",
+      "before": "point",
+      "after": "brandspread",
+      "duration": 0.42
+    },
+    {
+      "id": "x_cleave",
+      "name": "Soul Cleave",
+      "before": "cleave",
+      "after": "wavecast",
+      "duration": 0.48
+    },
+    {
+      "id": "x_siphon",
+      "name": "Soul Siphon",
+      "before": "cleave",
+      "after": "harvest",
+      "duration": 0.48
+    },
+    {
+      "id": "pal_laststand",
+      "name": "Last Stand",
+      "before": "guard",
+      "after": "lastbrace",
+      "duration": 0.58
+    },
+    {
+      "id": "pal_sky",
+      "name": "Sky Hammer",
+      "before": "call",
+      "after": "skycall",
+      "duration": 0.68
+    },
+    {
+      "id": "necro_summon",
+      "name": "Summon Skeletons",
+      "before": "raise",
+      "after": "packraise",
+      "duration": 0.7
+    },
+    {
+      "id": "necro_raise",
+      "name": "Raise the Dead",
+      "before": "raise",
+      "after": "resurrect",
+      "duration": 0.7
+    },
+    {
+      "id": "necro_wall",
+      "name": "Bone Wall",
+      "before": "raise",
+      "after": "wallraise",
+      "duration": 0.7
+    },
+    {
+      "id": "necro_army",
+      "name": "Army of the Dead",
+      "before": "raise",
+      "after": "armycall",
+      "duration": 0.7
+    },
+    {
+      "id": "nin_strike",
+      "name": "Shadow Strike",
+      "before": "cleave",
+      "after": "drawcut",
+      "duration": 0.48
+    },
+    {
+      "id": "nin_barrage",
+      "name": "Shuriken Barrage",
+      "before": "stars",
+      "after": "starbursts",
+      "duration": 0.64
+    },
+    {
+      "id": "nin_step",
+      "name": "Shadow Step",
+      "before": "blink",
+      "after": "shadowrun",
+      "duration": 0.32
+    },
+    {
+      "id": "nin_smoke",
+      "name": "Smoke Bomb",
+      "before": "toss",
+      "after": "smoketoss",
+      "duration": 0.44
+    },
+    {
+      "id": "nin_mark",
+      "name": "Death Mark",
+      "before": "point",
+      "after": "handseal",
+      "duration": 0.42
+    },
+    {
+      "id": "nin_pierce",
+      "name": "Piercing Star",
+      "before": "throw",
+      "after": "greatstar",
+      "duration": 0.44
+    },
+    {
+      "id": "nin_fury",
+      "name": "Blade Fury",
+      "before": "empower",
+      "after": "bladeready",
+      "duration": 0.56
+    },
+    {
+      "id": "nin_storm",
+      "name": "Vanish",
+      "before": "vanish",
+      "after": "shadowveil",
+      "duration": 0.42
+    },
+    {
+      "id": "mon_stun",
+      "name": "Stunning Palm",
+      "before": "palm",
+      "after": "shockpalm",
+      "duration": 0.45
+    },
+    {
+      "id": "sky_crash",
+      "name": "Thunder Dive",
+      "before": "dive",
+      "after": "thunderplunge",
+      "duration": 0.54
+    },
+    {
+      "id": "bd_counter",
+      "name": "Counter Stance",
+      "before": "parry",
+      "after": "counterready",
+      "duration": 0.56
+    },
+    {
+      "id": "bd_mirror",
+      "name": "Mirror Guard",
+      "before": "parry",
+      "after": "mirroropen",
+      "duration": 0.56
+    },
+    {
+      "id": "bd_steel",
+      "name": "Perfect Guard",
+      "before": "parry",
+      "after": "steelguard",
+      "duration": 0.56
+    },
+    {
+      "id": "bd_perfect",
+      "name": "Perfect Counter",
+      "before": "parry",
+      "after": "countercoil",
+      "duration": 0.56
+    },
+    {
+      "id": "bst_stampede",
+      "name": "Stampede",
+      "before": "command",
+      "after": "herdcall",
+      "duration": 0.46
+    }
+  ]
+}

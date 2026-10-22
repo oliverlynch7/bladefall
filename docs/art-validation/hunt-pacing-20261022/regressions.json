@@ -1,0 +1,16 @@
+{
+  "commands": [
+    "node scripts/check-3d-inline.cjs",
+    "node scripts/test-campaign-hunts.cjs",
+    "node scripts/test-campaign-refinement.cjs",
+    "node scripts/test-campaign-encounters.cjs",
+    "node scripts/test-campaign-compatibility.cjs",
+    "node scripts/test-campaign-placement.cjs",
+    "node scripts/test-campaign-combat-experience.cjs"
+  ],
+  "allPassed": true,
+  "huntChecks": 2583,
+  "formationChecks": 37,
+  "compatibilityChecks": 33,
+  "combatChecks": 3058
+}

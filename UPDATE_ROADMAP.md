@@ -4013,3 +4013,7 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 - [x] Native fresh warrior completed Briar supplies, mill, departure guards, Woods signal and1949HP Brute, including real earned skills, boss death/retry and level-clear banking.16map placement/anchor checks, targeted/source quest/co-op tests and comparative high-quality foreground frame probes pass.
 - [ ] Full fresh-character quest/combat playthroughs for the other14halves, human pacing/fun, live two-client co-op, low-end hardware and all camera/controller variants remain unverified.
 - [x] Evidence and limits: docs/art-validation/campaign-encounters-20261021/.
+
+
+## 2026-10-22 - Faster repeatable hunt camps (2.360.0-hunt-reinforcements)
+NPC grind camps now have five safely placed enemies (previously at most three) and refill each cleared spot after six seconds (previously 25). Existing close-player safety, host authority and split-slime ownership remain. All 16 native campaign camps have five supported, separated positions; staged Ruined Keep three-cycle kill/refill/real-turn-in/save-continue checks and the related source regression suites passed. Finite story guards, trials, rewards, quotas and save schemas unchanged. Evidence: docs/art-validation/hunt-pacing-20261022. Live two-client co-op and full campaign playthrough not claimed.

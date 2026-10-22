@@ -11,3 +11,7 @@ NPC-owned repeatable camps now target five enemies instead of three. Safe, suppo
 - Fixture tooling note: the old compact-loot helper panel intercepted the first turn-in click and opened a test chest. The panel was hidden, chest overlay cleared and the real dialogue hand-in repeated successfully. This was isolated fixture UI, not a production quest fix.
 - regressions.json lists all passing related checks. Hunts exercise three complete quest rounds for every section, host-only refill, unsafe-floor/blocked-camp rejection, occupied spawn recovery, unique live slots and split-slime offspring ownership. Other regression suites preserve old quests, scene authority and placement behavior.
 - Native browser console: no warnings/errors. No real production player saves were modified. Live two-client co-op and a full fresh campaign playthrough were not performed.
+
+## Published verification
+
+Game commit 4b154bac; mirror 286d2730. Cloudflare deployment dd7bf469 completed successfully. public-hashes.json verifies exact committed SHA256 for all three changed public resources on both the deployment and production origins. public-native.json verifies WebGL readiness, five supported camp slots on each Ruined Keep half, six-second refill configuration and no console warnings/errors on the deployed game. Unique deployment origin used; primary production saves untouched.

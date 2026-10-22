@@ -1,0 +1,108 @@
+{
+  "briar": {
+    "enemies": 28,
+    "plan": {
+      "groups": [
+        {
+          "id": "village-lane",
+          "intent": "Read the first raider before reaching the mill.",
+          "members": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "millrace",
+          "intent": "Cross the repaired mill bridge into a guard and rear caster.",
+          "members": [
+            27,
+            28
+          ]
+        },
+        {
+          "id": "granary-road",
+          "intent": "Finite guards defend the departure road, not the village.",
+          "members": [
+            14,
+            15,
+            16
+          ]
+        }
+      ],
+      "id": "0.0",
+      "moved": [
+        {
+          "from": [
+            120,
+            -550,
+            0
+          ],
+          "mid": 1,
+          "to": [
+            100,
+            -680,
+            0
+          ]
+        },
+        {
+          "from": [
+            300,
+            -1120,
+            0
+          ],
+          "mid": 2,
+          "to": [
+            210,
+            -1190,
+            0
+          ]
+        },
+        {
+          "from": [
+            20,
+            -2570,
+            0
+          ],
+          "mid": 27,
+          "to": [
+            70,
+            -2470,
+            0
+          ]
+        },
+        {
+          "from": [
+            -110,
+            -2810,
+            0
+          ],
+          "mid": 28,
+          "to": [
+            -170,
+            -2800,
+            0
+          ]
+        }
+      ],
+      "rejected": [],
+      "unmatched": []
+    },
+    "ready": true,
+    "render": {
+      "calls": 335,
+      "geometries": 389,
+      "shadows": true,
+      "triangles": 187894
+    }
+  },
+  "tower": {
+    "canWakeOnLanding": true,
+    "cannotWakeBelow": true,
+    "groups": 7,
+    "guardY": 240,
+    "ready": true,
+    "rejected": [],
+    "unmatched": []
+  },
+  "version": "2.359.0-campaign-formations"
+}

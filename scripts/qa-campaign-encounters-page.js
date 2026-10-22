@@ -33,5 +33,20 @@
  }
  function act(key){const before=JSON.parse(JSON.stringify(b.G.storyState));b.briarRequest('world',{key});rows.push({kind:'world',key,before:{flags:before.flags,items:before.items},after:state()});return state();}
  function talk(npc,choices){b.briarRequest('open',{npc});if(!b.G.storyState.conversation)throw Error('Cannot talk '+npc+' '+JSON.stringify(state()));for(const choice of choices){const line=b.G.storyState.conversation?.node;if(!line)throw Error('Missing line '+npc+' '+choice);b.briarRequest('choose',{line,choice});}b.briarRequest('close');rows.push({kind:'dialogue',npc,choices,after:state()});return state();}
- window.liveCampaignQA={state,stop,frame,walk,act,talk,rows};
+ function brute(n=1200){
+  const e=b.G.boss;if(!e?.bruteOrchard)throw Error('Enter the actual Briar boss room first');
+  document.getElementById('resBtn')?.click();
+  try{
+   if(!e.active)walk(0,310,false,false);
+   for(let i=0;i<n&&!e.dead;i++){
+    const g=b.G,p=g.p,prop=g.bruteArena.props.slice().sort((a,c)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(c.x-p.x,c.z-p.z))[0];
+    const dx=prop.x-e.x,dz=prop.z-e.z,d=Math.hypot(dx,dz)||1,bait={x:prop.x+dx/d*190,z:prop.z+dz/d*190};
+    const handler=g.enemies.some(h=>!h.boss&&!h.dead&&Math.hypot(h.x-p.x,h.z-p.z)<220);
+    const jump=g.shockwaves.some(w=>w.orchardId&&Math.hypot(w.x-p.x,w.z-p.z)-w.r<80&&Math.hypot(w.x-p.x,w.z-p.z)>w.r-20);
+    frame(e.bruteState==='stagger'?e.x:bait.x,e.bruteState==='stagger'?e.z:bait.z,jump,handler||e.bruteState==='stagger');
+   }
+   return state();
+  }finally{stop();rows.push({kind:'boss-attempt',state:state(),hp:e.hp,maxHp:e.maxHp,staggers:e.bruteStaggers,waves:e.bruteWaves});if(b.mode==='play')b.openPause();}
+ }
+ window.liveCampaignQA={state,stop,frame,walk,act,talk,brute,rows};
 })();

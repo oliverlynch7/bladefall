@@ -23,3 +23,7 @@ The other14 halves received native scene/placement checks and existing quest/hun
 ## Reviewable plan
 
 public/design/campaign-geography/encounter-plan.json mirrors the in-code authored formations. No terrain or route blueprint geometry changed in this pass.
+
+## Production verification
+
+Game commit41bf38df; mirror97a5bb8b. Cloudflare112c9a1e completed successfully. public-hashes.json: all5 changed public resources match committed SHA256. public-native.json: deployed Briar and Long Ascent ready, all expected formations, no rejected/unmatched actors; upper landing guard cannot wake from below and can wake on its landing. Native console captured no errors/warnings. Public checks use the new unique deployment origin so the player's production saves are untouched.

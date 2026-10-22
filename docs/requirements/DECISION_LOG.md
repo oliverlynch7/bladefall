@@ -2703,3 +2703,6 @@ Published verification: code bf50331f / mirror 3a4349d5, Cloudflare 521c458c suc
 
 ## 2026-10-22 - Piercing Star frontal readability (2.362.1)
 Final front-camera comparison found the giant shuriken was permanently edge-on along its flight direction because an outer quarter-turn rotated its already-upright disc. Use a slight cant instead; silhouette now reads from the normal front/back view. Other skills, gameplay and durations unchanged. Refresh identity script cache in game and preview.
+
+
+Final patch verification: code9ae3c498 / mirror7968fa97, Cloudflare829753ae succeeded. All19 resources again match SHA256 on deployment and production for2.362.1. Old level4 Warrior save loads with1145gold and v2362b identity module. Frontal Piercing Star checked in native production preview; transformed blade width/height is0.99 at three phases. Published native136-skill regression rerun recorded in public-native.json.

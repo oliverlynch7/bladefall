@@ -45,3 +45,7 @@ scripts/test-campaign-farming.cjs runs the actual extracted story/gain-XP handle
 | 6.1 | 891 | 1951 |
 | 7.0 | 1033 | 2324 |
 | 7.1 | 1195 | 2789 |
+
+## Published verification
+
+Game597a49eb / mirror85040631. Cloudflare88fbab72 completed successfully. public-hashes.json verifies both changed public resources on deployment and production against committed SHA256. public-native.json repeats guest acceptance/partial-count/atomic-gold/duplicate/reload checks on the deployed real WebGL game, with no console warnings/errors. Public handler probe uses a unique deployment origin; primary production saves untouched. Real two-client network checks were performed locally as documented above.

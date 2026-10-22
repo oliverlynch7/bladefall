@@ -1,0 +1,33 @@
+{
+  "version": "2.361.0-hunt-reward-safety",
+  "result": {
+    "acceptance": {
+      "quest": "active",
+      "writes": 1
+    },
+    "duplicate": {
+      "extraWrites": 0,
+      "gold": 360
+    },
+    "partial": {
+      "count": 7,
+      "writes": 2
+    },
+    "payout": {
+      "checkpointGold": 360,
+      "liveClaim": true,
+      "liveGold": 360,
+      "savedClaim": true,
+      "savedGold": 360,
+      "savedReceipt": true
+    },
+    "restored": {
+      "campCount": 5,
+      "claim": true,
+      "gold": 360,
+      "round": 1
+    },
+    "unchangedWrites": 0
+  },
+  "logs": []
+}

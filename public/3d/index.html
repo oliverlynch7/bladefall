@@ -1167,11 +1167,12 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./campaign-geography.js?v=2356"></script>
 <script src="./campaign-district-data.js?v=2357"></script>
 <script src="./campaign-districts.js?v=2357"></script>
-<script src="./campaign-patrols.js?v=2325"></script>
+<script src="./campaign-patrols.js?v=2359"></script>
 <script src="./campaign-hunts.js?v=2325"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2342"></script>
-<script src="./campaign-elites.js?v=2337"></script>
+<script src="./campaign-elites.js?v=2359"></script>
+<script src="./campaign-encounters.js?v=2359"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2319"></script>
 <script src="./briar-journey.js?v=2302"></script>
@@ -1245,7 +1246,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.358.0-natural-class-heads';
+const VERSION3D='2.359.0-campaign-formations';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -5860,7 +5861,7 @@ function loadArea(){
   if(isCampaignAdventure()){BFCampaignGeography.apply(G,Z.id);BFCampaignDistricts.install(G);BFCampaignJourney.install(G);BFBriarDistrict.install(G,{chestKey:chestRewardKey});}
   G.patrolWork=null;if(isCampaignAdventure()&&G.area>=0){const setup=BFCampaignPatrols.setup(G,{spawn:spawnEnemy,support:enemySupport});BFCampaignHunts.setup(G,{host:!MP.guest(),book:briarBook,xp:characterXpAward,spawn:spawnEnemy,support:enemySupport,label:e=>e?foeName(e):null,clear:p=>{const q={...p};resolveObstacles(q,q.r,null,0);return Math.hypot(q.x-p.x,q.z-p.z)<2;}});if(setup?.elite){const e=makeElite(setup.elite);e.hp=Math.round(e.hp*1.5);e.maxHp=e.hp;e.label=setup.work.elite;e.campaignElite=true;BFCampaignElites.setup(e,G.zone);const support=enemySupport(e);if(Number.isFinite(support))e.y=support;}}
   if(isCampaignAdventure()&&G.area>=0)BFBriarCombat.build(G,{spawn:spawnEnemy,support:enemySupport});
-  if(isCampaignAdventure()&&G.area>=0)BFCampaignPlacement.settle(G,{floor:floorAt,resolve:resolveObstacles});
+  if(isCampaignAdventure()&&G.area>=0){BFCampaignPlacement.settle(G,{floor:floorAt,resolve:resolveObstacles});BFCampaignEncounters.install(G,{floor:floorAt,resolve:resolveObstacles});}
 }
 /* ---- Side zones: hidden, one tier above their parent, best loot in the game ---- */
 function enterSide(zi){
@@ -15729,7 +15730,8 @@ const MP={
       const row=[e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null];
       if(e.boss||e.hydraChain)row[7]={...row[7],...BFBossTactics.snapshot(e)};
       if(e.homeBellWave)row[7]={...row[7],homeBellWave:e.homeBellWave,label:e.label,y:e.y};
-      if(syncedMelee(e))row[7]={...row[7],normalMelee:true,y:e.y,yaw:e.yaw,meleeW:e.meleeW||0,meleeActive:e.meleeActive||0,meleeCd:e.meleeCd||0,meleeSerial:e.meleeSerial||0,meleeReach:e.meleeReach||0,keepGuard:e.keepGuard||null,keepEscort:!!e.keepEscort,furnaceEscort:!!e.furnaceEscort,furnaceEscortWave:e.furnaceEscortWave||0,canyonEscort:!!e.canyonEscort,canyonEscortWave:e.canyonEscortWave||0,canyonAlarm:!!e.canyonAlarm};
+      if(BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e))row[7]={...row[7],encounterOwned:true,encReturning:!!e.encReturning,y:e.y};
+      if(syncedMelee(e)||BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e)&&e.kind==='walk'&&!e.ceKind)row[7]={...row[7],normalMelee:true,y:e.y,yaw:e.yaw,meleeW:e.meleeW||0,meleeActive:e.meleeActive||0,meleeCd:e.meleeCd||0,meleeSerial:e.meleeSerial||0,meleeReach:e.meleeReach||0,keepGuard:e.keepGuard||null,keepEscort:!!e.keepEscort,furnaceEscort:!!e.furnaceEscort,furnaceEscortWave:e.furnaceEscortWave||0,canyonEscort:!!e.canyonEscort,canyonEscortWave:e.canyonEscortWave||0,canyonAlarm:!!e.canyonAlarm};
       if(e.canyonEscort||e.canyonAlarm)row[7]={...row[7],canyonEscort:!!e.canyonEscort,canyonEscortWave:e.canyonEscortWave||0,canyonAlarm:!!e.canyonAlarm};
       if(STATUS_ORDER.some(k=>(e.st?.[k]||0)>0)||(e.stunT||0)>0||(e.slowT||0)>0||(e.exposed||0)>0||(e.markT||0)>0||(e.warCurseT||0)>0||(e.markExplode||0)>0)row[8]=[...STATUS_ORDER.map(k=>Math.round((e.st?.[k]||0)*10)/10),Math.round(e.stDmg||0),Math.round((e.stunT||0)*10)/10,Math.round((e.slowT||0)*10)/10,Math.round((e.exposed||0)*10)/10,e.primed?1:0,Math.round((e.markT||0)*10)/10,e.markOwner||null,Math.round((e.warCurseT||0)*10)/10,e.warCurseOwner||null,Math.round(e.markExplode||0)];
       if((e._tetherT||0)>0||(e.doomT||0)>0||(e.warBurstT||0)>0||(e.beastMarkT||0)>0||(e.tauntT||0)>0||(e.petTauntT||0)>0)row[9]=[e._tether||null,Math.round((e._tetherT||0)*10)/10,Math.round((e.doomT||0)*10)/10,Math.round((e.warBurstT||0)*10)/10,Math.round((e.beastMarkT||0)*10)/10,Math.round((e.tauntT||0)*10)/10,e.tauntId||null,Math.round((e.petTauntT||0)*10)/10,e.petTauntId||null,Math.round(e.warBurstDmg||0)];
@@ -15838,7 +15840,7 @@ const MP={
       if(e){const st=a[8];if(st){e.st=Object.fromEntries(STATUS_ORDER.map((k,i)=>[k,Math.max(0,Number(st[i])||0)]));e.stDmg=Math.max(0,Number(st[6])||0);e.stunT=Math.max(0,Number(st[7])||0);e.slowT=Math.max(0,Number(st[8])||0);e.exposed=Math.max(0,Number(st[9])||0);e.primed=!!st[10];e.markT=Math.max(0,Number(st[11])||0);e.markOwner=st[12]||null;e.warCurseT=Math.max(0,Number(st[13])||0);e.warCurseOwner=st[14]||null;e.markExplode=Math.max(0,Number(st[15])||0);}else{e.st=null;e.stunT=0;e.slowT=0;e.exposed=0;e.primed=false;e.markT=0;e.markOwner=null;e.warCurseT=0;e.warCurseOwner=null;e.markExplode=0;}}
       if(e){const fx=a[9];if(fx){e._tether=fx[0]||null;e._tetherT=Math.max(0,Number(fx[1])||0);e.doomT=Math.max(0,Number(fx[2])||0);e.warBurstT=Math.max(0,Number(fx[3])||0);e.beastMarkT=Math.max(0,Number(fx[4])||0);e.tauntT=Math.max(0,Number(fx[5])||0);e.tauntId=fx[6]||null;e.petTauntT=Math.max(0,Number(fx[7])||0);e.petTauntId=fx[8]||null;e.warBurstDmg=Math.max(0,Number(fx[9])||0);}else{e._tether=null;e._tetherT=0;e.doomT=0;e.warBurstT=0;e.warBurstDmg=0;e.beastMarkT=0;e.tauntT=0;e.tauntId=null;e.petTauntT=0;e.petTauntId=null;}}
     }
-    for(const a of en)if(a[7]?.normalMelee||a[7]?.homeBellWave||a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
+    for(const a of en)if(a[7]?.encounterOwned||a[7]?.normalMelee||a[7]?.homeBellWave||a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ if(Number.isFinite(k[4])&&k[4]>=0)e.xp=k[4];e.elite=!!k[2];this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -16994,6 +16996,7 @@ function updateWorld(dt){
   recoverMana(p,dt); // Skills briefly slow recovery; basic attacks can be used while saving mana.
   if(!G.bonusActive)updateAmbient(dt,s);
   reconcileWorldHeights();   // keep drops/chests/exit portals sitting on the highest surface, never under a plateau
+  const encounterPlayers=[p,...(MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area):[])].filter(q=>q.hp>0&&!q.downed&&!q.dead);
   // Enemies wait continuously during basic-control practice, even while the player moves.
   for(const e of G.enemies){
     if(G._tutorialSafe)continue;
@@ -17004,8 +17007,9 @@ function updateWorld(dt){
     if(e.bot){ botAI(e,dt); continue; }                 // Arena AI bots run their own player-like combat AI
     if(e.boss&&!e.active&&!(e.dropT>0))e.dropT=.65;
     const bossTarget=e.boss?bossPartyTarget(e,p):null;
-    const wakeDistance=e.boss?(bossTarget?dXZ(e.x,e.z,bossTarget.x,bossTarget.z):Infinity):(e.ceKind||syncedMelee(e))&&MP.active?Math.min(dXZ(e.x,e.z,p.x,p.z),...Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G.area&&q.hp>0&&!q.downed).map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
-    if(e.dropT>0){ if(wakeDistance<(e.marksmanCrossing?1600:640)){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
+    const wakeDistance=e.boss?(bossTarget?dXZ(e.x,e.z,bossTarget.x,bossTarget.z):Infinity):MP.active&&(e.ceKind||syncedMelee(e)||BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e))?Math.min(...encounterPlayers.map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
+    if(MP.guest()&&BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e)){if(!e.active)continue;e.dropT=0;}
+    if(e.dropT>0){ if(wakeDistance<(e.marksmanCrossing?1600:640)&&(MP.guest()||BFCampaignEncounters.canWake(G,e,encounterPlayers,enemyMeleeClear))){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
       if(e.boss) onBossActivate(e); else mobAggro(e); } } continue; }   // curated per-mob aggro voice on wake
     if(!e.active) continue;
     if(e.hitFlash>0) e.hitFlash-=dt;
@@ -17022,13 +17026,15 @@ function updateWorld(dt){
        respects a stun respects this. */
     if((G._freezeT||0)>0)eff=0;
     if(e.stunT>0){ e.stunT-=dt; eff=0; }
-    const partyTarget=syncedMelee(e)?enemyPartyTarget(e,p):p;
+    const partyTarget=syncedMelee(e)||BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e)?enemyPartyTarget(e,p):p;
     const meleeTarget=inBrokenWalls()&&e.keepEscort?BFBrokenWalls.target(G,e,partyTarget):inGreatFurnace()&&e.furnaceEscort?BFGreatFurnace.target(G,e,partyTarget):inLostCanyon()&&(e.canyonEscort||e.canyonAlarm)?BFLostCanyon.target(G,e,partyTarget):partyTarget;
     const d=Math.max(1,dXZ(meleeTarget.x,meleeTarget.z,e.x,e.z)); let dirX=(meleeTarget.x-e.x)/d, dirZ=(meleeTarget.z-e.z)/d;
     if(e.dummy)e.yaw=e.fixedYaw??0;else if(!(MP.guest()&&e.normalMelee))e.yaw=Math.atan2(dirX,dirZ);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
     e.shotReleaseT=Math.max(0,(e.shotReleaseT||0)-dt);
-    if(e.prisonFoe){updatePrisonFoe(e,dt,p,eff);}else if(e.ceKind){updateCampaignElite(e,dt,p,eff);}else{
+    const encounterReturning=MP.guest()?!!e.encReturning:BFCampaignEncounters.retreat(G,e,encounterPlayers,dt,(dx,dz)=>moveGroundEnemy(e,dx,dz,eff,dt));
+    if(encounterReturning){/* Return on real floors with normal HP and collision; no healing/reset exploit. */}
+    else if(e.prisonFoe){updatePrisonFoe(e,dt,p,eff);}else if(e.ceKind){updateCampaignElite(e,dt,p,eff);}else{
     if(e.shotW>0){eff=0;e.shotW=Math.max(0,e.shotW-dt);if(e.shotW===0&&e.shotAim){releaseEnemyShot(e,e.shotAim);e.shotAim=null;}}
     const contactOnly=e.dmg>0&&!e.boss&&e.kind!=='charger'&&e.kind!=='goblin';
     if(contactOnly){
@@ -17056,7 +17062,7 @@ function updateWorld(dt){
           if(n) addText(e.x,e.h+14,e.z,'HEAL','#7de08a'); } }
       if(e.role==='shielder'){ if(e.shieldYaw==null)e.shieldYaw=e.yaw; let dd=e.yaw-e.shieldYaw; while(dd>Math.PI)dd-=6.283; while(dd<-Math.PI)dd+=6.283; e.shieldYaw+=Math.max(-1.5*dt,Math.min(1.5*dt,dd)); }   // shield tracks you SLOWLY — dash behind it
     }
-    if(e.spec){ specBehavior(e,dt,p,dirX,dirZ,d); }
+    if(e.spec){ specBehavior(e,dt,meleeTarget,dirX,dirZ,d); }
     if(e.eruptW>0||e.knightW>0||e.fuseT>0||e.blinkFx>0)eff=0;   // Batch-2 unique-mob behaviors (totem/trail/blink/tether/knightslam)
     if(e.kind==='fly'){ e.bob+=dt*2.4;
       const flyTarget=e.dive&&isCampaignAdventure()?meleeTarget:p;
@@ -17091,11 +17097,11 @@ function updateWorld(dt){
       if(e.look==='slime'){ e.bob+=dt*6; } }
     else if(e.kind==='caster'){ // robed lobber: keeps range, hurls element orbs
       const want=250;
-      if(!enemyMeleeClear(e,p)){ moveGroundEnemy(e,dirX,dirZ,eff,dt,d); }
+      if(!enemyMeleeClear(e,meleeTarget)){ moveGroundEnemy(e,dirX,dirZ,eff,dt,d); }
       else if(d<want-40){ moveGroundEnemy(e,-dirX,-dirZ,eff,dt); }
       else if(d>want+70){ moveGroundEnemy(e,dirX,dirZ,eff,dt,d); }
       if(e.shootT>0) e.shootT-=dt;
-      if(e.shootT<=0 && d<560&&enemyMeleeClear(e,p)){ bossShoot(e,p); e.shootT=e.shootCd; }
+      if(e.shootT<=0 && d<560&&enemyMeleeClear(e,meleeTarget)){ bossShoot(e,meleeTarget); e.shootT=e.shootCd; }
     }
     else if(e.kind==='charger'){ // beetle: winds up, then rams in a straight line
       if(e.atkTimer>0) e.atkTimer-=dt;
@@ -17127,7 +17133,7 @@ function updateWorld(dt){
         else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
       }
     }
-    if(!e.dead && !e.ceKind && !e.prisonFoe && !(MP.guest()&&e.normalMelee&&(e._meleeSeenSerial!==e.meleeSerial||(e._meleeSeen||0)<.4)) && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0:e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
+    if(!e.dead && !encounterReturning && !e.ceKind && !e.prisonFoe && !(MP.guest()&&e.normalMelee&&(e._meleeSeenSerial!==e.meleeSerial||(e._meleeSeen||0)<.4)) && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0:e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
       if(inBrokenWalls()&&!MP.guest()&&e.keepEscort&&e.meleeActive>0&&BFBrokenWalls.hitEscort(G,e)){/* The host owns escort health and retry state. */}
       else if(inGreatFurnace()&&!MP.guest()&&e.furnaceEscort&&e.meleeActive>0&&BFGreatFurnace.hitEscort(G,e)){/* The host owns worker health and retry state. */}
       else if(inLostCanyon()&&!MP.guest()&&(e.canyonEscort||e.canyonAlarm)&&e.meleeActive>0&&BFLostCanyon.hitEscort(G,e)){/* The host owns the north crossing. */}

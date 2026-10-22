@@ -4004,3 +4004,12 @@ Exit-path follow-up v2.349.1: Leave table also releases the owner's Thomas reser
 - [x] Removed the oversized flattened Paladin face replacement, preserving the real face mesh/hair and consistent skin across face, neck and sides. Earned solar halos remain.
 - [x] Removed Ninja/Reaper rigid mask overlays and Reaper forehead blade; verified all3tiers of all3Rogue-based classes keep their source hood. Armor, colors, auras and unlocks retained.
 - [x]222focused source-geometry/restoration checks;51-look/4080-pose/204-rank-gate audit; native12combo/576sample and legacy-save actual character validation pass. Cache refresh covers game and all dependent previews. Evidence docs/art-validation/class-head-fit-20261021/.
+
+
+## [Codex | 2026-10-21] Campaign formations - v2.359.0
+
+- [x] All16halves:57 authored groups,136 assigned soldiers/creatures,27 physical relocations; no extra enemies/scenery/particles. Finite guards, hunting slots, NPC/quest anchors, map bounds, rewards and save formats preserved.
+- [x] Same-floor sight wake; physical district returns with retained HP; nearest-party wake/target for ground specialists. Host owns sleeping/returning bodies and melee warning phases; scripted escort/alarm/wave fights excluded.
+- [x] Native fresh warrior completed Briar supplies, mill, departure guards, Woods signal and1949HP Brute, including real earned skills, boss death/retry and level-clear banking.16map placement/anchor checks, targeted/source quest/co-op tests and comparative high-quality foreground frame probes pass.
+- [ ] Full fresh-character quest/combat playthroughs for the other14halves, human pacing/fun, live two-client co-op, low-end hardware and all camera/controller variants remain unverified.
+- [x] Evidence and limits: docs/art-validation/campaign-encounters-20261021/.

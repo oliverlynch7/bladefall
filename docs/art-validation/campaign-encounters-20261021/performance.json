@@ -1,0 +1,221 @@
+{
+  "before": [
+    {
+      "active": 3,
+      "area": "0.0",
+      "at": [
+        -1100,
+        -1800,
+        0
+      ],
+      "enemies": 28,
+      "kind": "native foreground RAF probe; debug position and invulnerability only for comparable performance sampling",
+      "medianFrameMs": 8.200000047683716,
+      "p95FrameMs": 11.5,
+      "render": {
+        "calls": 260,
+        "geometries": 452,
+        "shadows": true,
+        "triangles": 152618
+      },
+      "settings": {
+        "camMode": "far",
+        "quality": "high"
+      }
+    },
+    {
+      "active": 0,
+      "area": "2.0",
+      "at": [
+        400,
+        -2200,
+        0
+      ],
+      "enemies": 10,
+      "kind": "native foreground RAF probe; debug position and invulnerability only for comparable performance sampling",
+      "medianFrameMs": 6.399999976158142,
+      "p95FrameMs": 11.099999964237211,
+      "render": {
+        "calls": 249,
+        "geometries": 627,
+        "shadows": true,
+        "triangles": 255794
+      },
+      "settings": {
+        "camMode": "far",
+        "quality": "high"
+      }
+    },
+    {
+      "active": 3,
+      "actualAt": [
+        -1000,
+        -2000,
+        180
+      ],
+      "area": "2.1",
+      "at": [
+        -1000,
+        -2000,
+        180
+      ],
+      "enemies": 12,
+      "kind": "native foreground RAF probe; debug position and invulnerability only for comparable performance sampling",
+      "medianFrameMs": 8.300000011920929,
+      "p95FrameMs": 13.799999952316284,
+      "render": {
+        "calls": 506,
+        "geometries": 1026,
+        "shadows": true,
+        "triangles": 151723
+      },
+      "settings": {
+        "camMode": "far",
+        "quality": "high"
+      }
+    },
+    {
+      "active": 3,
+      "actualAt": [
+        0,
+        880,
+        0
+      ],
+      "area": "7.1",
+      "at": [
+        0,
+        880,
+        0
+      ],
+      "enemies": 17,
+      "kind": "native foreground RAF probe; debug position and invulnerability only for comparable performance sampling",
+      "medianFrameMs": 6.399999976158142,
+      "p95FrameMs": 9.300000011920927,
+      "render": {
+        "calls": 107,
+        "geometries": 797,
+        "shadows": true,
+        "triangles": 69618
+      },
+      "settings": {
+        "camMode": "far",
+        "quality": "high"
+      }
+    }
+  ],
+  "after": [
+    {
+      "active": 3,
+      "actualAt": [
+        -1100,
+        -1800,
+        0
+      ],
+      "area": "0.0",
+      "at": [
+        -1100,
+        -1800,
+        0
+      ],
+      "enemies": 28,
+      "kind": "native foreground RAF probe; debug position and invulnerability only for comparable performance sampling",
+      "medianFrameMs": 8.5,
+      "p95FrameMs": 12.399999976158142,
+      "render": {
+        "calls": 260,
+        "geometries": 1672,
+        "shadows": true,
+        "triangles": 152618
+      },
+      "settings": {
+        "camMode": "far",
+        "quality": "high"
+      }
+    },
+    {
+      "active": 0,
+      "actualAt": [
+        400,
+        -2184.5,
+        0
+      ],
+      "area": "2.0",
+      "at": [
+        400,
+        -2200,
+        0
+      ],
+      "enemies": 10,
+      "kind": "native foreground RAF probe; debug position and invulnerability only for comparable performance sampling",
+      "medianFrameMs": 5.600000023841858,
+      "p95FrameMs": 8.399999976158142,
+      "render": {
+        "calls": 249,
+        "geometries": 1706,
+        "shadows": true,
+        "triangles": 255794
+      },
+      "settings": {
+        "camMode": "far",
+        "quality": "high"
+      }
+    },
+    {
+      "active": 2,
+      "actualAt": [
+        -1000,
+        -2000,
+        180
+      ],
+      "area": "2.1",
+      "at": [
+        -1000,
+        -2000,
+        180
+      ],
+      "enemies": 12,
+      "kind": "native foreground RAF probe; debug position and invulnerability only for comparable performance sampling",
+      "medianFrameMs": 8.399999976158142,
+      "p95FrameMs": 12.100000023841858,
+      "render": {
+        "calls": 520,
+        "geometries": 1971,
+        "shadows": true,
+        "triangles": 152323
+      },
+      "settings": {
+        "camMode": "far",
+        "quality": "high"
+      }
+    },
+    {
+      "active": 0,
+      "actualAt": [
+        0,
+        880,
+        0
+      ],
+      "area": "7.1",
+      "at": [
+        0,
+        880,
+        0
+      ],
+      "enemies": 17,
+      "kind": "native foreground RAF probe; debug position and invulnerability only for comparable performance sampling",
+      "medianFrameMs": 5.5,
+      "p95FrameMs": 7.300000011920929,
+      "render": {
+        "calls": 107,
+        "geometries": 1670,
+        "shadows": true,
+        "triangles": 69618
+      },
+      "settings": {
+        "camMode": "far",
+        "quality": "high"
+      }
+    }
+  ],
+  "limitations": "Four foreground Chrome samples on this PC, same saved high-quality overhead settings. Player is placed and invulnerable solely in this performance fixture. RAF frame pacing is observational, not a controlled GPU benchmark or a promise for other machines."
+}

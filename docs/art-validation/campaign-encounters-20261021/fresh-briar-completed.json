@@ -1,0 +1,135 @@
+{
+  "flags": {
+    "briar.bridge": true,
+    "briar.depart": true,
+    "briar.jam": true,
+    "briar.water": true,
+    "event.briar.bridge": true,
+    "event.briar.depart": true,
+    "event.briar.dressings": true,
+    "event.briar.jam": true,
+    "event.briar.mill.weighted": true,
+    "event.briar.root.1": true,
+    "event.briar.root.2": true,
+    "event.briar.root.3": true,
+    "event.woods.signal.crank": true,
+    "mara.healing": true,
+    "rv.accepted.tracks": false,
+    "rv.active.tracks": true,
+    "rv.done.tracks": false,
+    "rv.ready.tracks": false,
+    "thomas.ready": true,
+    "woods.ready": true,
+    "woods.signal": true
+  },
+  "gold": 991,
+  "hero": {
+    "allocation": {
+      "attack": 0,
+      "defense": 0,
+      "health": 0,
+      "mana": 0,
+      "speed": 0
+    },
+    "gear": {
+      "amulet": null,
+      "chest": null,
+      "helmet": null,
+      "legs": null,
+      "ring": null
+    },
+    "hp": 75,
+    "level": 3,
+    "mana": 75,
+    "maxHp": 122,
+    "maxJumps": 1,
+    "maxMana": 75,
+    "skin": "knight",
+    "stats": {
+      "atkSpeed": 1.036324,
+      "cdr": 0,
+      "crit": 0,
+      "defense": 0,
+      "dodgeCd": 0.75,
+      "goldFind": 0,
+      "lifesteal": 0,
+      "magPower": 1,
+      "power": 1.071225,
+      "speed": 1.008016
+    },
+    "tunedLevels": 2,
+    "weapon": {
+      "anyClass": false,
+      "arche": "sword",
+      "art": "sword",
+      "blade": "#bcae8a",
+      "cd": 0.38,
+      "chg": null,
+      "cls": "melee",
+      "color": "#b9c0cc",
+      "dmg": 10.6,
+      "el": null,
+      "ians": false,
+      "kb": 260,
+      "lifesteal": 0,
+      "name": "Rusty Sword",
+      "range": 84,
+      "rarity": "common",
+      "reaper": false,
+      "sch": "phys"
+    },
+    "xp": 171,
+    "xpNext": 450
+  },
+  "state": {
+    "area": "0.-1",
+    "at": [
+      0,
+      0,
+      -973
+    ],
+    "class": {
+      "ch": {
+        "2": "w_cleave",
+        "3": "w_heavy"
+      },
+      "rank": 3,
+      "sub": null,
+      "v2": 1,
+      "xp": 756
+    },
+    "flags": {
+      "briar.bridge": true,
+      "briar.depart": true,
+      "briar.jam": true,
+      "briar.water": true,
+      "event.briar.bridge": true,
+      "event.briar.depart": true,
+      "event.briar.dressings": true,
+      "event.briar.jam": true,
+      "event.briar.mill.weighted": true,
+      "event.briar.root.1": true,
+      "event.briar.root.2": true,
+      "event.briar.root.3": true,
+      "event.woods.signal.crank": true,
+      "mara.healing": true,
+      "rv.accepted.tracks": false,
+      "rv.active.tracks": true,
+      "rv.done.tracks": false,
+      "rv.ready.tracks": false,
+      "thomas.ready": true,
+      "woods.ready": true,
+      "woods.signal": true
+    },
+    "hp": 75,
+    "items": {
+      "dressings": 0,
+      "tangle_root": 0
+    },
+    "level": 3,
+    "mode": "menu"
+  },
+  "zoneDone": {
+    "outskirts": true
+  }
+}

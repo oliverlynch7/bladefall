@@ -1,0 +1,1681 @@
+{
+  "revision": 2359,
+  "scope": "Existing campaign actors only. No terrain, quest, reward or save changes.",
+  "areas": [
+    {
+      "id": "0.0",
+      "groups": [
+        {
+          "name": "village-lane",
+          "intent": "Read the first raider before reaching the mill.",
+          "leash": 760,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                120,
+                -550
+              ],
+              "job": "runner",
+              "to": [
+                100,
+                -680
+              ]
+            },
+            {
+              "type": "grunt",
+              "from": [
+                300,
+                -1120
+              ],
+              "job": "guard",
+              "to": [
+                210,
+                -1190
+              ]
+            }
+          ]
+        },
+        {
+          "name": "millrace",
+          "intent": "Cross the repaired mill bridge into a guard and rear caster.",
+          "leash": 720,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                20,
+                -2570
+              ],
+              "job": "guard",
+              "to": [
+                70,
+                -2470
+              ]
+            },
+            {
+              "type": "caster",
+              "from": [
+                -110,
+                -2810
+              ],
+              "job": "caster",
+              "to": [
+                -170,
+                -2800
+              ]
+            }
+          ]
+        },
+        {
+          "name": "granary-road",
+          "intent": "Finite guards defend the departure road, not the village.",
+          "leash": 650,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                360,
+                -3490
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                165,
+                -3395
+              ],
+              "job": "runner"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                165,
+                -3585
+              ],
+              "job": "guard"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0.1",
+      "groups": [
+        {
+          "name": "forest-search",
+          "intent": "A front searcher, flanker and rear hex caster hold the signal approach.",
+          "leash": 720,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -570,
+                -1360
+              ],
+              "job": "runner",
+              "to": [
+                -440,
+                -1300
+              ]
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -820,
+                -1800
+              ],
+              "job": "guard",
+              "to": [
+                -720,
+                -1770
+              ]
+            },
+            {
+              "type": "caster",
+              "from": [
+                -400,
+                -1870
+              ],
+              "job": "caster",
+              "to": [
+                -490,
+                -1990
+              ]
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -650,
+                -2220
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "signal-ground",
+          "intent": "Ground guards remain below the climb; upper-route players are not detected through floors.",
+          "leash": 650,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -200,
+                -2860
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                240,
+                -3250
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -170,
+                -3600
+              ],
+              "job": "guard"
+            }
+          ]
+        },
+        {
+          "name": "rescue-clearing",
+          "intent": "Rescue predators remain at Beth’s brother, away from the safe path.",
+          "leash": 500,
+          "members": [
+            {
+              "type": "thornboar",
+              "from": [
+                2370,
+                -1550
+              ],
+              "job": "predator"
+            },
+            {
+              "type": "thornboar",
+              "from": [
+                2740,
+                -1600
+              ],
+              "job": "predator"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1.0",
+      "groups": [
+        {
+          "name": "cliff-hunt",
+          "intent": "Predators defend the lower path; the spitter stays behind the first pair.",
+          "leash": 650,
+          "members": [
+            {
+              "type": "dustjackal",
+              "from": [
+                -630,
+                -920
+              ],
+              "job": "predator",
+              "to": [
+                -660,
+                -1060
+              ]
+            },
+            {
+              "type": "dustjackal",
+              "from": [
+                -800,
+                -1030
+              ],
+              "job": "predator",
+              "to": [
+                -870,
+                -1210
+              ]
+            },
+            {
+              "type": "cragspitter",
+              "from": [
+                -900,
+                -1780
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "freight-landing",
+          "intent": "Finite freight guards hold the crossing exit with a rear caster.",
+          "leash": 650,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -660,
+                -3850
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -380,
+                -4100
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "siegeknight",
+              "from": [
+                -280,
+                -3740
+              ],
+              "job": "guard"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1.1",
+      "groups": [
+        {
+          "name": "south-cage",
+          "intent": "A guard screens the caster at the first cage.",
+          "leash": 600,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -720,
+                -1920
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -1080,
+                -2140
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "north-cage",
+          "intent": "Two defenders cover the north cage without chasing back to the entrance.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                710,
+                -3320
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                900,
+                -3610
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "hidden-cage",
+          "intent": "The optional prisoner has an independent guard pair.",
+          "leash": 570,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -2020,
+                -2240
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -2380,
+                -2390
+              ],
+              "job": "caster"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2.0",
+      "groups": [
+        {
+          "name": "arrow-gallery",
+          "intent": "The gallery caster remains above the breached gate, supported by a guard.",
+          "leash": 550,
+          "members": [
+            {
+              "type": "caster",
+              "from": [
+                660,
+                -980
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                850,
+                -950
+              ],
+              "job": "guard"
+            }
+          ]
+        },
+        {
+          "name": "workshop",
+          "intent": "A workshop sentry guards the approach to the tool route.",
+          "leash": 650,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                1250,
+                -2190
+              ],
+              "job": "guard"
+            }
+          ]
+        },
+        {
+          "name": "key-post",
+          "intent": "A front guard and rear hex caster defend the key.",
+          "leash": 590,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -340,
+                -3580
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -496,
+                -3770
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "bell-yard",
+          "intent": "Keep the repeatable siege camp together, separate from the rescue waves.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -1630,
+                -1800
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -1930,
+                -1660
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -1650,
+                -2010
+              ],
+              "job": "runner"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2.1",
+      "groups": [
+        {
+          "name": "cell-block",
+          "intent": "Finite cell guards defend the prisoner, not the lower floor.",
+          "leash": 520,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -970,
+                -1980
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -1229,
+                -2088
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -900,
+                -2150
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "upper-landing",
+          "intent": "The caster supports the knight only on the upper landing.",
+          "leash": 560,
+          "members": [
+            {
+              "type": "caster",
+              "from": [
+                -80,
+                -3520
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "siegeknight",
+              "from": [
+                70,
+                -3710
+              ],
+              "job": "guard"
+            }
+          ]
+        },
+        {
+          "name": "drain-branch",
+          "intent": "Separate drain fights leave the main evacuation route readable.",
+          "leash": 560,
+          "members": [
+            {
+              "type": "bones",
+              "from": [
+                2330,
+                -3450
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                2190,
+                -4090
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "lower-works",
+          "intent": "Hunting troops stay on their own lower floor.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -180,
+                -2940
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                180,
+                -3060
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -120,
+                -3200
+              ],
+              "job": "runner"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3.0",
+      "groups": [
+        {
+          "name": "lower-snow",
+          "intent": "Space the opening creatures along the first climb instead of one pile.",
+          "leash": 650,
+          "members": [
+            {
+              "type": "frostling",
+              "from": [
+                -290,
+                -340
+              ],
+              "job": "predator",
+              "to": [
+                -310,
+                -480
+              ]
+            },
+            {
+              "type": "frostling",
+              "from": [
+                -350,
+                -450
+              ],
+              "job": "predator",
+              "to": [
+                -430,
+                -650
+              ]
+            }
+          ]
+        },
+        {
+          "name": "lift-house",
+          "intent": "The mountain patrol defends the lift house and its supplies.",
+          "leash": 650,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -2200,
+                -1210
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -1960,
+                -1160
+              ],
+              "job": "runner"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -2150,
+                -1470
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "summit-approach",
+          "intent": "The summit has a screening pair and a rear frost caller.",
+          "leash": 680,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -200,
+                -4550
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                250,
+                -4450
+              ],
+              "job": "runner"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -150,
+                -4750
+              ],
+              "job": "caster"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3.1",
+      "groups": [
+        {
+          "name": "cave-entry",
+          "intent": "Two creatures pressure consecutive turns before the first pages.",
+          "leash": 630,
+          "members": [
+            {
+              "type": "frostling",
+              "from": [
+                -100,
+                -630
+              ],
+              "job": "predator",
+              "to": [
+                -150,
+                -740
+              ]
+            },
+            {
+              "type": "frostling",
+              "from": [
+                200,
+                -1380
+              ],
+              "job": "predator",
+              "to": [
+                120,
+                -1430
+              ]
+            }
+          ]
+        },
+        {
+          "name": "scholar-cage",
+          "intent": "Finite rescue guards remain around Ellis’s cell.",
+          "leash": 560,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -1250,
+                -2310
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -1570,
+                -2300
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -1100,
+                -2100
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "waterworks",
+          "intent": "A guard screens the crossing caster; no detection from the channel above.",
+          "leash": 600,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -100,
+                -3500
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                140,
+                -3680
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                0,
+                -3600
+              ],
+              "job": "runner"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4.0",
+      "groups": [
+        {
+          "name": "worker-gate",
+          "intent": "Finite guards hold the workers’ approach, with the caster behind.",
+          "leash": 600,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -90,
+                -1420
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                200,
+                -1550
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -290,
+                -1710
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "west-handles",
+          "intent": "The west guard covers the route into the handle workshop.",
+          "leash": 630,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -1900,
+                -2650
+              ],
+              "job": "guard",
+              "to": [
+                -1830,
+                -2630
+              ]
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -650,
+                -2730
+              ],
+              "job": "runner",
+              "to": [
+                -720,
+                -2540
+              ]
+            }
+          ]
+        },
+        {
+          "name": "weapon-line",
+          "intent": "A screening pair and cinder caller defend the mold drive.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -160,
+                -3780
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                170,
+                -4050
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                0,
+                -3950
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "furnace-door",
+          "intent": "The last guard challenges the exit approach after the machinery.",
+          "leash": 580,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                130,
+                -5620
+              ],
+              "job": "guard",
+              "to": [
+                100,
+                -5490
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "4.1",
+      "groups": [
+        {
+          "name": "worker-floor",
+          "intent": "Repeatable guards defend the worker district independently of the escort.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -1000,
+                -3370
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -980,
+                -3910
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -1000,
+                -3650
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "east-gallery",
+          "intent": "The gallery pair remains on its walkway, away from the animal rescue.",
+          "leash": 580,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                1180,
+                -2910
+              ],
+              "job": "guard",
+              "to": [
+                1130,
+                -3060
+              ]
+            },
+            {
+              "type": "caster",
+              "from": [
+                1250,
+                -3810
+              ],
+              "job": "caster",
+              "to": [
+                1250,
+                -3670
+              ]
+            }
+          ]
+        },
+        {
+          "name": "office",
+          "intent": "Finite office guards remain at the writings, on the upper floor.",
+          "leash": 520,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                2170,
+                -4730
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                2340,
+                -4880
+              ],
+              "job": "caster"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5.0",
+      "groups": [
+        {
+          "name": "rudder-wreck",
+          "intent": "The western wreck caster covers the approach to the rudder.",
+          "leash": 600,
+          "members": [
+            {
+              "type": "caster",
+              "from": [
+                -1670,
+                -1800
+              ],
+              "job": "caster",
+              "to": [
+                -1600,
+                -1880
+              ]
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -696,
+                -2200
+              ],
+              "job": "runner",
+              "to": [
+                -760,
+                -2275
+              ]
+            }
+          ]
+        },
+        {
+          "name": "sail-wreck",
+          "intent": "A guard, flanker and tide caster defend the upper sail wreck.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                1390,
+                -1700
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                1210,
+                -1840
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                1550,
+                -2040
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "memorial-shore",
+          "intent": "The shore guard screens the branch to the memorial.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -1060,
+                -3190
+              ],
+              "job": "guard",
+              "to": [
+                -1140,
+                -3240
+              ]
+            },
+            {
+              "type": "caster",
+              "from": [
+                -2050,
+                -3480
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                0,
+                -3830
+              ],
+              "job": "guard"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "5.1",
+      "groups": [
+        {
+          "name": "first-climb",
+          "intent": "A guard occupies the first landing, a caster the next turn.",
+          "leash": 560,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                894,
+                -1080
+              ],
+              "job": "guard",
+              "to": [
+                830,
+                -1150
+              ]
+            },
+            {
+              "type": "caster",
+              "from": [
+                602,
+                -1661
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "storm-climb",
+          "intent": "Separate successive landings instead of dragging the whole climb behind the player.",
+          "leash": 600,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -980,
+                -2290
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -450,
+                -2950
+              ],
+              "job": "runner"
+            },
+            {
+              "type": "caster",
+              "from": [
+                460,
+                -3360
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "upper-approach",
+          "intent": "A guard screens the final tide caster before the hydra approach.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                870,
+                -4000
+              ],
+              "job": "guard",
+              "to": [
+                790,
+                -4055
+              ]
+            },
+            {
+              "type": "caster",
+              "from": [
+                410,
+                -4590
+              ],
+              "job": "caster"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6.0",
+      "groups": [
+        {
+          "name": "west-court",
+          "intent": "Finite west guards protect the upper route, not the garden below.",
+          "leash": 540,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -920,
+                -2380
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -1160,
+                -2520
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "east-court",
+          "intent": "Finite east guards protect the opposing upper route.",
+          "leash": 540,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                960,
+                -1930
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                1200,
+                -2170
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "garden-patrol",
+          "intent": "The garden patrol is its own fight, with a clear screening guard.",
+          "leash": 600,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -1330,
+                -2100
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -1490,
+                -1930
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -1400,
+                -1900
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "palace-entry",
+          "intent": "The last arcanist holds the climb before the mirror court.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "caster",
+              "from": [
+                -200,
+                -3410
+              ],
+              "job": "caster",
+              "to": [
+                -120,
+                -3470
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "6.1",
+      "groups": [
+        {
+          "name": "records-wing",
+          "intent": "Separate maintenance and records sentries preserve a choice of approach.",
+          "leash": 580,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -1110,
+                -1230
+              ],
+              "job": "guard",
+              "to": [
+                -1110,
+                -1370
+              ]
+            },
+            {
+              "type": "caster",
+              "from": [
+                1150,
+                -1950
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "orders-hall",
+          "intent": "Finite main-hall guards hold the release route.",
+          "leash": 650,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -260,
+                -2640
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                100,
+                -3150
+              ],
+              "job": "runner"
+            },
+            {
+              "type": "caster",
+              "from": [
+                290,
+                -2940
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "display-hall",
+          "intent": "The optional display patrol stays in the display wing.",
+          "leash": 560,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -925,
+                -3690
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -1100,
+                -3800
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -990,
+                -3740
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "scholar-exit",
+          "intent": "A final sentry covers the release-room approach.",
+          "leash": 540,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                500,
+                -4500
+              ],
+              "job": "guard",
+              "to": [
+                440,
+                -4560
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "7.0",
+      "groups": [
+        {
+          "name": "supply-post",
+          "intent": "Finite supply guards defend the disguise supplies; preserve alternate access.",
+          "leash": 600,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                630,
+                -1960
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                1088,
+                -2011
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                940,
+                -1510
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "western-approach",
+          "intent": "A front guard screens the royal arcanist at the helmet route.",
+          "leash": 620,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -1360,
+                -1700
+              ],
+              "job": "guard",
+              "to": [
+                -1360,
+                -1800
+              ]
+            },
+            {
+              "type": "royalarcanist",
+              "from": [
+                -1060,
+                -2260
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -1230,
+                -1970
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "storehouse",
+          "intent": "The optional store has an independent guard/caster pair.",
+          "leash": 580,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                1870,
+                -2570
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                1710,
+                -2720
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "inner-approach",
+          "intent": "The arcanist holds the final approach without pursuing into the supply ward.",
+          "leash": 650,
+          "members": [
+            {
+              "type": "royalarcanist",
+              "from": [
+                -330,
+                -4070
+              ],
+              "job": "caster"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "7.1",
+      "groups": [
+        {
+          "name": "first-landing",
+          "intent": "The first pair only sees the player once they reach its landing.",
+          "leash": 500,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                819,
+                290
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                894,
+                290
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "lower-bars",
+          "intent": "The knight and caster own the lower-bars landing, not the floor below.",
+          "leash": 500,
+          "members": [
+            {
+              "type": "siegeknight",
+              "from": [
+                215,
+                -894
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "royalarcanist",
+              "from": [
+                290,
+                -894
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                160,
+                -854
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "cells",
+          "intent": "Cell guards remain on the prisoner landing.",
+          "leash": 500,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                -1015,
+                0
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                -940,
+                0
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -865,
+                0
+              ],
+              "job": "runner"
+            }
+          ]
+        },
+        {
+          "name": "middle-landing",
+          "intent": "The midpoint guard screens its arcanist.",
+          "leash": 500,
+          "members": [
+            {
+              "type": "royalarcanist",
+              "from": [
+                -528,
+                824
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -453,
+                824
+              ],
+              "job": "guard"
+            }
+          ]
+        },
+        {
+          "name": "upper-east",
+          "intent": "The upper east pair stays on its own storey.",
+          "leash": 500,
+          "members": [
+            {
+              "type": "grunt",
+              "from": [
+                865,
+                0
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                940,
+                0
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "upper-bars",
+          "intent": "The second knight and caster defend the upper bars.",
+          "leash": 500,
+          "members": [
+            {
+              "type": "siegeknight",
+              "from": [
+                215,
+                -894
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "caster",
+              "from": [
+                290,
+                -894
+              ],
+              "job": "caster"
+            }
+          ]
+        },
+        {
+          "name": "summit",
+          "intent": "The final formation defends the summit, independently of lower-storey fights.",
+          "leash": 540,
+          "members": [
+            {
+              "type": "siegeknight",
+              "from": [
+                -475,
+                851
+              ],
+              "job": "guard"
+            },
+            {
+              "type": "royalarcanist",
+              "from": [
+                -400,
+                851
+              ],
+              "job": "caster"
+            },
+            {
+              "type": "grunt",
+              "from": [
+                -325,
+                851
+              ],
+              "job": "runner"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

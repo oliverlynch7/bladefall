@@ -71,7 +71,7 @@ function tick(G,s,dt,api){const w=G.patrolWork;if(!w)return;
  if(!w.contract&&w.anchor&&Math.hypot(G.p.x-w.anchor.x,G.p.z-w.anchor.z)<450&&Math.abs((G.p.y||0)-w.anchor.y)<130&&!s.flags[w.id+'.camp']){s.flags[w.id+'.camp']=true;s.flags[w.id+'.known']=true;s.revision++;api.notice(w.title,w.text+' More enemies return here after a short break. You can train here, or continue your journey.');}
  for(const slot of w.slots){if(G.enemies.some(e=>(e.mid===slot.mid||e.patrolParent===slot.mid)&&!e.dead&&e.hp>0)){slot.readyAt=null;continue;}if(slot.readyAt==null)slot.readyAt=G.time+25;
   const near=api.players.some(p=>Math.hypot(p.x-slot.x,p.z-slot.z)<1100&&Math.abs((p.y||0)-slot.y)<180),crowded=api.players.some(p=>Math.hypot(p.x-slot.x,p.z-slot.z)<(w.contract?110:220)&&Math.abs((p.y||0)-slot.y)<100);
-  if(G.time<slot.readyAt||!near||crowded)continue;const e=api.spawn(slot.type,slot.x,slot.z);if(!e)continue;if(slot.role)dressRaider(e,slot.role);if(slot.group){e.patrolStyle=slot.style;dressPatrol(e,slot.group);}Object.assign(e,{y:slot.y,sy:slot.y,patrolReturn:true,stunT:1.2,active:false});slot.mid=e.mid;slot.readyAt=null;
+  if(G.time<slot.readyAt||!near||crowded)continue;const e=api.spawn(slot.type,slot.x,slot.z);if(!e)continue;if(slot.role)dressRaider(e,slot.role);if(slot.group){e.patrolStyle=slot.style;dressPatrol(e,slot.group);}Object.assign(e,{y:slot.y,sy:slot.y,patrolReturn:true,stunT:1.2,active:false});root.BFCampaignEncounters?.reinstate(e,slot);slot.mid=e.mid;slot.readyAt=null;
  }
 }
 function killed(G,s,e,api){if(G.patrolWork?.contract)return root.BFCampaignHunts.killed(G,s,e,api);const d=G.patrolWork||definition(G.zone,G.area);if(!d||!api.host||e.boss||e.practice||e.dummy||e.bot||s.flags[d.id+'.done'])return false;

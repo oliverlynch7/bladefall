@@ -35,7 +35,7 @@ function briar(e){
 function campaign(G,e){
  if(!active(G)||G.zone===0||e.ceKind||e.boss||e.elite||e.dummy||e.practice||e.bot||e.spec||!['grunt','caster'].includes(e.type))return;
  if(Object.keys(e).some(k=>/escort|officer|kingAdd|furnaceGate|furnaceOffice|libraryGuard|prisonFoe|canyonAlarm|hydraChain|immobile/i.test(k)&&e[k]))return;
- const ranged=e.type==='caster',guard=e.patrolStyle==='guard'||(!e.patrolStyle&&Math.abs(Math.round(((e.x||0)+(e.z||0))/80))%2===0);
+ const ranged=e.type==='caster',guard=e.campaignRoleHint?e.campaignRoleHint==='guard':e.patrolStyle==='guard'||(!e.patrolStyle&&Math.abs(Math.round(((e.x||0)+(e.z||0))/80))%2===0);
  const pair={1:['cliff','coast_volley'],2:['keep_lance','dusk_curse'],3:['keep_lance','frost_ring'],4:['ember_fan','ember_ring'],5:['keep_lance','coast_volley'],6:['keep_lance','palace_cross'],7:['ember_fan','dusk_curse']}[G.zone];
  if(!pair)return;
  const kind=ranged?pair[1]:guard?pair[0]:'cliff_lunge';
@@ -98,6 +98,6 @@ function blocked(e,p,obstacles){return obstacles.some(o=>{
   let a=(center-half-start)/delta,b=(center+half-start)/delta;if(a>b)[a,b]=[b,a];lo=Math.max(lo,a);hi=Math.min(hi,b);if(lo>=hi)return false;
  }return hi>0&&lo<1;
 });}
-function snapshot(e){const out={role:null,spec:null,shot:null,kind:'walk'};for(const key of ['combatRecovery','campaignRole','briarRole','homeRaid','patrolGroup','patrolStyle','patrolReturn','color','speed','campaignElite','elite','label','y','h','r','dmg','ceKind','ceState','ceClock','ceSerial','ceX','ceY','ceZ','ceDX','ceDZ'])if(e[key]!=null)out[key]=e[key];return out;}
-const api={kits,setup,briar,campaign,active,decision,damage,hit,shape,step,contains,blocked,snapshot};root.BFCampaignElites=api;if(typeof module!=='undefined')module.exports=api;
+function snapshot(e){const out={role:null,spec:null,shot:null,kind:'walk',normalMelee:false};for(const key of ['combatRecovery','campaignRole','briarRole','homeRaid','patrolGroup','patrolStyle','patrolReturn','color','speed','campaignElite','elite','label','y','h','r','dmg','ceKind','ceState','ceClock','ceSerial','ceX','ceY','ceZ','ceDX','ceDZ'])if(e[key]!=null)out[key]=e[key];return out;}
+const api={kits,setup,briar,campaign,active,dangerous,decision,damage,hit,shape,step,contains,blocked,snapshot};root.BFCampaignElites=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

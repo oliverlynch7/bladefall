@@ -1168,7 +1168,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./campaign-district-data.js?v=2357"></script>
 <script src="./campaign-districts.js?v=2357"></script>
 <script src="./campaign-patrols.js?v=2360"></script>
-<script src="./campaign-hunts.js?v=2360"></script>
+<script src="./campaign-hunts.js?v=2361"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2342"></script>
 <script src="./campaign-elites.js?v=2359"></script>
@@ -1246,7 +1246,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.360.0-hunt-reinforcements';
+const VERSION3D='2.361.0-hunt-reward-safety';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3514,6 +3514,7 @@ function briarSendPending(){if(!briarPending||!MP.active||MP.isHost)return;try{M
 function briarApply(packet,place=false,ack){
  if(!packet||!(isCampaignAdventure()||G?.riftHall||G?.riftMentor||inReturnHub())||(packet.scene||'campaign')!==(G.riftMentor?'class-trial':inReturnHub()?'hub-return':G.riftHall?'rift-hall':'campaign')||(G.riftMentor&&packet.trialSession!==G.trialSession)||packet.zone!==G.zone||packet.area!==G.area||packet.run!==G.runSeed||packet.state?.version!==1)return;
  if(!place&&(G._storyEpoch!==packet.epoch||packet.state.revision<(G.storyState?.revision||0)))return;
+ const huntBefore=BFCampaignHunts.progressStamp(G,G.storyState);
  const displayWasOpen=inSkyLibrary()&&!!G.storyState?.flags['sl.display.open'];
  if(place&&G.riftHall)G._hallAssembly=packet.state.items?.['hall.assembly']||0;
   if(!place&&JSON.stringify(G.storyState?.quests||{})!==JSON.stringify(packet.state.quests||{}))toast('Your teammate updated a shared quest');
@@ -3536,15 +3537,16 @@ function briarApply(packet,place=false,ack){
  if(inPrison()&&G.prison&&packet.prisonStatus)BFPrison.apply(G,packet.prisonStatus);
  if(inBrokenWalls()&&G.keep&&packet.keepStatus){G.keep.remote=packet.keepStatus;G.keep.clock=packet.keepStatus.clock;}
  if(inLostCanyon()&&G.canyon){for(const p of packet.canyonPrisoners||[]){const n=G.canyonPrisoners.find(n=>n.id===p.id);if(n)Object.assign(n,p);}G.canyon.alarmAt=packet.canyonAlarm>0?G.time+packet.canyonAlarm:0;if(packet.canyonStatus){G.canyon.remote=packet.canyonStatus;BFLostCanyon.actors(G,adventureStoryState(),packet.canyonStatus);}}
- briarSync();if(inBriar())secureHomeBellProgress();presentStoryNotice(packet.notice,place);if(!place&&inSkyLibrary()&&!displayWasOpen&&G.storyState.flags['sl.display.open'])toast('The sword seal opens the hidden display.');
+ briarSync();if(huntBefore!==BFCampaignHunts.progressStamp(G,G.storyState))autosaveRun();if(inBriar())secureHomeBellProgress();presentStoryNotice(packet.notice,place);if(!place&&inSkyLibrary()&&!displayWasOpen&&G.storyState.flags['sl.display.open'])toast('The sword seal opens the hidden display.');
 }
 function briarSync(){
  if(!isCampaignAdventure()&&!G?.riftHall&&!G?.riftMentor&&!inReturnHub())return;
  const s=adventureStoryState();if(inBriar()&&G.homefieldsExploration)BFHomeBellDefense.sync(G,s);journalNoticeSync();G.storyClaims=G.storyClaims||{};
  for(const [id,reward]of Object.entries(s.rewards))if(!G.storyClaims[id]&&reward.recipients?.includes(briarId())){
   if(reward.kind.startsWith('return_')){if(applyReturnReward(id,reward))G.storyClaims[id]=true;}
-  else if(reward.kind==='campaign_hunt'){G.storyClaims[id]=true;gainXp(reward.amount);const gold=awardGold(reward.gold);toast(reward.title+' · +'+gold+' gold +'+characterXpAward(reward.amount)+' XP. Talk to the quest giver to repeat it.');}
-  else if(reward.kind==='campaign_combat'){G.storyClaims[id]=true;gainXp(reward.amount);awardGold(Math.round(reward.amount*.4));toast('Combat task reward · +'+characterXpAward(reward.amount)+' XP');}
+  // gainXp commits earnings: include the claim AND gold in that same save on guests too.
+  else if(reward.kind==='campaign_hunt'){G.storyClaims[id]=true;const gold=awardGold(reward.gold);gainXp(reward.amount);toast(reward.title+' · +'+gold+' gold +'+characterXpAward(reward.amount)+' XP. Talk to the quest giver to repeat it.');}
+  else if(reward.kind==='campaign_combat'){G.storyClaims[id]=true;awardGold(Math.round(reward.amount*.4));gainXp(reward.amount);toast('Combat task reward · +'+characterXpAward(reward.amount)+' XP');}
   else if(reward.kind==='gold'){const gold=awardGold(reward.amount);if(['home.bells.cache','home.grain.cache','home.orchard.cache','lc.cave.supplies'].includes(id)){BFCurrencyFeedback.show(gold,'Savings coffer opened · coins only');playFx('chestthunk');playFx('gamblecoins');}else toast('Quest complete · +'+gold+' gold');G.storyClaims[id]=true;}
   else if(reward.kind==='cliff_runner'||reward.kind==='cliff_cache'){const item=reward.kind==='cliff_runner'?{weapon:makeWeapon('javelin','uncommon','Cliff Runner')}:{armor:makeArmor('uncommon','legs')};if(reward.kind==='cliff_cache')claimAuthoredChestItem(item);else{if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Cliff Runner earned — an uncommon javelin.');}G.storyClaims[id]=true;}
   else if(reward.kind.startsWith('forgeguard_')){const art=reward.kind.slice(11),item=art==='armor'?{armor:makeArmor('rare','chest')}:{weapon:makeWeapon(art,'rare','Forgeguard')};if(!stashItem(item))pushLoot(G.p.x+35,G.p.z,G.p.y,item);toast('Forgeguard earned — rare '+(art==='armor'?'chest armor':art)+'. Finish Iron Halls to keep it.');G.storyClaims[id]=true;}

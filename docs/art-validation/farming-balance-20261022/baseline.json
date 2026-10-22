@@ -1,0 +1,1565 @@
+{
+  "version": "2.360.0-hunt-reinforcements",
+  "camps": [
+    {
+      "anchor": {
+        "x": -2400,
+        "y": 0,
+        "z": -820
+      },
+      "enemies": [
+        {
+          "damage": 11.4696,
+          "homeRaid": "runner",
+          "hp": 71,
+          "level": 1,
+          "role": "flanker",
+          "speed": 74.99520000000001,
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 14.337,
+          "homeRaid": "caster",
+          "hp": 65,
+          "level": 1,
+          "role": null,
+          "speed": 56.16,
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 11.4696,
+          "homeRaid": "runner",
+          "hp": 71,
+          "level": 1,
+          "role": "flanker",
+          "speed": 74.99520000000001,
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 14.337,
+          "hp": 65,
+          "level": 1,
+          "role": null,
+          "speed": 56.16,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 11.4696,
+          "hp": 71,
+          "level": 1,
+          "role": "shielder",
+          "speed": 58.924800000000005,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 120,
+      "handinXp": 270,
+      "npc": "Gus",
+      "npcDistance": 940,
+      "quota": 10,
+      "section": "0.0"
+    },
+    {
+      "anchor": {
+        "x": -650,
+        "y": 0,
+        "z": -1800
+      },
+      "enemies": [
+        {
+          "damage": 13.08384,
+          "hp": 78,
+          "job": "runner",
+          "level": 3,
+          "role": "shielder",
+          "speed": 58.924800000000005,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 13.08384,
+          "hp": 78,
+          "job": "guard",
+          "level": 3,
+          "role": "flanker",
+          "speed": 74.99520000000001,
+          "style": "flank",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 16.354799999999997,
+          "hp": 71,
+          "job": "caster",
+          "level": 3,
+          "role": null,
+          "speed": 56.16,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 16.354799999999997,
+          "hp": 71,
+          "level": 3,
+          "role": null,
+          "speed": 56.16,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 13.08384,
+          "hp": 78,
+          "level": 3,
+          "role": "shielder",
+          "speed": 58.924800000000005,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 150,
+      "handinXp": 321,
+      "npc": "Lewis",
+      "npcDistance": 2055,
+      "quota": 10,
+      "section": "0.1"
+    },
+    {
+      "anchor": {
+        "x": -750,
+        "y": 0,
+        "z": -1100
+      },
+      "enemies": [
+        {
+          "damage": 22.42944,
+          "hp": 106,
+          "job": "predator",
+          "level": 7,
+          "speed": 89.70800000000001,
+          "style": "guard",
+          "type": "dustjackal",
+          "xp": 19
+        },
+        {
+          "damage": 22.42944,
+          "hp": 106,
+          "job": "predator",
+          "level": 7,
+          "speed": 89.70800000000001,
+          "style": "flank",
+          "type": "dustjackal",
+          "xp": 19
+        },
+        {
+          "damage": 26.507520000000003,
+          "hp": 202,
+          "job": "caster",
+          "level": 7,
+          "speed": 28.444000000000003,
+          "style": "flank",
+          "type": "cragspitter",
+          "xp": 28
+        },
+        {
+          "damage": 26.507520000000003,
+          "hp": 202,
+          "level": 7,
+          "speed": 28.444000000000003,
+          "style": "guard",
+          "type": "cragspitter",
+          "xp": 28
+        },
+        {
+          "damage": 22.42944,
+          "hp": 106,
+          "level": 7,
+          "speed": 89.70800000000001,
+          "style": "guard",
+          "type": "dustjackal",
+          "xp": 19
+        }
+      ],
+      "handinGold": 190,
+      "handinXp": 380,
+      "npc": "Caleb",
+      "npcDistance": 1462,
+      "quota": 10,
+      "section": "1.0"
+    },
+    {
+      "anchor": {
+        "x": 2350,
+        "y": 0,
+        "z": -3310
+      },
+      "enemies": [
+        {
+          "damage": 24.649020000000004,
+          "hp": 114,
+          "level": 9,
+          "speed": 89.70800000000001,
+          "style": "guard",
+          "type": "dustjackal",
+          "xp": 19
+        },
+        {
+          "damage": 29.13066,
+          "hp": 218,
+          "level": 9,
+          "role": "healer",
+          "speed": 28.444000000000003,
+          "style": "flank",
+          "type": "cragspitter",
+          "xp": 28
+        },
+        {
+          "damage": 24.649020000000004,
+          "hp": 114,
+          "level": 9,
+          "speed": 89.70800000000001,
+          "style": "guard",
+          "type": "dustjackal",
+          "xp": 19
+        },
+        {
+          "damage": 29.13066,
+          "hp": 218,
+          "level": 9,
+          "speed": 28.444000000000003,
+          "style": "guard",
+          "type": "cragspitter",
+          "xp": 28
+        },
+        {
+          "damage": 24.649020000000004,
+          "hp": 114,
+          "level": 9,
+          "speed": 89.70800000000001,
+          "style": "guard",
+          "type": "dustjackal",
+          "xp": 19
+        }
+      ],
+      "handinGold": 220,
+      "handinXp": 430,
+      "npc": "Ruth",
+      "npcDistance": 3353,
+      "quota": 10,
+      "section": "1.1"
+    },
+    {
+      "anchor": {
+        "x": -1680,
+        "y": 0,
+        "z": -1800
+      },
+      "enemies": [
+        {
+          "damage": 21.155040000000003,
+          "hp": 127,
+          "job": "guard",
+          "level": 13,
+          "role": "shielder",
+          "speed": 60.45248000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 26.443800000000003,
+          "hp": 116,
+          "job": "caster",
+          "level": 13,
+          "role": null,
+          "speed": 57.61600000000001,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 21.155040000000003,
+          "hp": 127,
+          "job": "runner",
+          "level": 13,
+          "role": "flanker",
+          "speed": 76.93952000000002,
+          "style": "flank",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 26.443800000000003,
+          "hp": 116,
+          "level": 13,
+          "role": null,
+          "speed": 57.61600000000001,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 21.155040000000003,
+          "hp": 127,
+          "level": 13,
+          "role": "shielder",
+          "speed": 60.45248000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 260,
+      "handinXp": 489,
+      "npc": "Grant",
+      "npcDistance": 1966,
+      "quota": 12,
+      "section": "2.0"
+    },
+    {
+      "anchor": {
+        "x": 0,
+        "y": 0,
+        "z": -2970
+      },
+      "enemies": [
+        {
+          "damage": 22.76928,
+          "hp": 136,
+          "job": "guard",
+          "level": 15,
+          "role": "shielder",
+          "speed": 60.45248000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 28.4616,
+          "hp": 124,
+          "job": "caster",
+          "level": 15,
+          "role": null,
+          "speed": 57.61600000000001,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 22.76928,
+          "hp": 136,
+          "job": "runner",
+          "level": 15,
+          "role": "flanker",
+          "speed": 76.93952000000002,
+          "style": "flank",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 28.4616,
+          "hp": 124,
+          "level": 15,
+          "role": null,
+          "speed": 57.61600000000001,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 22.76928,
+          "hp": 136,
+          "level": 15,
+          "role": "shielder",
+          "speed": 60.45248000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 290,
+      "handinXp": 540,
+      "npc": "Walter",
+      "npcDistance": 2100,
+      "quota": 12,
+      "section": "2.1"
+    },
+    {
+      "anchor": {
+        "x": -2100,
+        "y": 220,
+        "z": -1300
+      },
+      "enemies": [
+        {
+          "damage": 25.99776,
+          "hp": 163,
+          "job": "guard",
+          "level": 19,
+          "role": "shielder",
+          "speed": 61.21632,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 25.99776,
+          "hp": 163,
+          "job": "runner",
+          "level": 19,
+          "role": "flanker",
+          "speed": 77.91168000000002,
+          "style": "flank",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 32.4972,
+          "hp": 148,
+          "job": "caster",
+          "level": 19,
+          "role": null,
+          "speed": 58.34400000000001,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 35.746919999999996,
+          "hp": 222,
+          "level": 19,
+          "role": "healer",
+          "speed": 35.904,
+          "style": "guard",
+          "type": "frostlobber",
+          "xp": 26
+        },
+        {
+          "damage": 25.99776,
+          "hp": 208,
+          "level": 19,
+          "speed": 56.10000000000001,
+          "style": "guard",
+          "type": "frostling",
+          "xp": 17
+        }
+      ],
+      "handinGold": 330,
+      "handinXp": 599,
+      "npc": "Heath",
+      "npcDistance": 2201,
+      "quota": 12,
+      "section": "3.0"
+    },
+    {
+      "anchor": {
+        "x": 0,
+        "y": 180,
+        "z": -3600
+      },
+      "enemies": [
+        {
+          "damage": 27.612,
+          "hp": 174,
+          "job": "guard",
+          "level": 21,
+          "role": "shielder",
+          "speed": 61.21632,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 34.51499999999999,
+          "hp": 158,
+          "job": "caster",
+          "level": 21,
+          "role": null,
+          "speed": 58.34400000000001,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 27.612,
+          "hp": 174,
+          "level": 21,
+          "role": "shielder",
+          "speed": 61.21632,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 34.51499999999999,
+          "hp": 158,
+          "level": 21,
+          "role": null,
+          "speed": 58.34400000000001,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 27.612,
+          "hp": 174,
+          "level": 21,
+          "role": "shielder",
+          "speed": 61.21632,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 360,
+      "handinXp": 650,
+      "npc": "Professor Ellis",
+      "npcDistance": 1909,
+      "quota": 12,
+      "section": "3.1"
+    },
+    {
+      "anchor": {
+        "x": 0,
+        "y": 100,
+        "z": -3950
+      },
+      "enemies": [
+        {
+          "damage": 30.840480000000003,
+          "hp": 206,
+          "job": "guard",
+          "level": 25,
+          "role": "shielder",
+          "speed": 61.980160000000005,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 38.5506,
+          "hp": 187,
+          "job": "caster",
+          "level": 25,
+          "role": null,
+          "speed": 59.072,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 30.840480000000003,
+          "hp": 206,
+          "level": 25,
+          "role": "shielder",
+          "speed": 61.980160000000005,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 38.5506,
+          "hp": 187,
+          "level": 25,
+          "role": null,
+          "speed": 59.072,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 30.840480000000003,
+          "hp": 206,
+          "level": 25,
+          "role": "shielder",
+          "speed": 61.980160000000005,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 400,
+      "handinXp": 709,
+      "npc": "Flint",
+      "npcDistance": 4112,
+      "quota": 12,
+      "section": "4.0"
+    },
+    {
+      "anchor": {
+        "x": -1000,
+        "y": 120,
+        "z": -3650
+      },
+      "enemies": [
+        {
+          "damage": 32.45472,
+          "hp": 219,
+          "job": "guard",
+          "level": 27,
+          "role": "shielder",
+          "speed": 61.980160000000005,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 40.5684,
+          "hp": 199,
+          "job": "caster",
+          "level": 27,
+          "role": null,
+          "speed": 59.072,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 32.45472,
+          "hp": 219,
+          "level": 27,
+          "role": "shielder",
+          "speed": 61.980160000000005,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 40.5684,
+          "hp": 199,
+          "level": 27,
+          "role": null,
+          "speed": 59.072,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 32.45472,
+          "hp": 219,
+          "level": 27,
+          "role": "shielder",
+          "speed": 61.980160000000005,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 430,
+      "handinXp": 759,
+      "npc": "Martin",
+      "npcDistance": 1982,
+      "quota": 12,
+      "section": "4.1"
+    },
+    {
+      "anchor": {
+        "x": 1390,
+        "y": 350,
+        "z": -1800
+      },
+      "enemies": [
+        {
+          "damage": 35.6832,
+          "hp": 256,
+          "job": "guard",
+          "level": 31,
+          "role": "shielder",
+          "speed": 62.74400000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 44.604,
+          "hp": 232,
+          "job": "caster",
+          "level": 31,
+          "role": null,
+          "speed": 59.8,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 35.6832,
+          "hp": 256,
+          "job": "runner",
+          "level": 31,
+          "role": "flanker",
+          "speed": 79.85600000000002,
+          "style": "flank",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 44.604,
+          "hp": 232,
+          "level": 31,
+          "role": null,
+          "speed": 59.8,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 35.6832,
+          "hp": 256,
+          "level": 31,
+          "role": "shielder",
+          "speed": 62.74400000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 470,
+      "handinXp": 818,
+      "npc": "Otto",
+      "npcDistance": 1933,
+      "quota": 15,
+      "section": "5.0"
+    },
+    {
+      "anchor": {
+        "x": -400,
+        "y": 320,
+        "z": -4200
+      },
+      "enemies": [
+        {
+          "damage": 32.63526,
+          "hp": 395,
+          "level": 33,
+          "speed": 43.7,
+          "style": "guard",
+          "type": "slime",
+          "xp": 18
+        },
+        {
+          "damage": 32.63526,
+          "hp": 395,
+          "level": 33,
+          "speed": 43.7,
+          "style": "flank",
+          "type": "slime",
+          "xp": 18
+        },
+        {
+          "damage": 32.63526,
+          "hp": 395,
+          "level": 33,
+          "role": "shielder",
+          "speed": 43.7,
+          "style": "guard",
+          "type": "slime",
+          "xp": 18
+        },
+        {
+          "damage": 32.63526,
+          "hp": 395,
+          "level": 33,
+          "speed": 43.7,
+          "style": "guard",
+          "type": "slime",
+          "xp": 18
+        },
+        {
+          "damage": 32.63526,
+          "hp": 395,
+          "level": 33,
+          "role": "shielder",
+          "speed": 43.7,
+          "style": "guard",
+          "type": "slime",
+          "xp": 18
+        }
+      ],
+      "handinGold": 500,
+      "handinXp": 869,
+      "npc": "Abe",
+      "npcDistance": 4420,
+      "quota": 15,
+      "section": "5.1"
+    },
+    {
+      "anchor": {
+        "x": -1400,
+        "y": 180,
+        "z": -1900
+      },
+      "enemies": [
+        {
+          "damage": 40.52592,
+          "hp": 314,
+          "job": "guard",
+          "level": 37,
+          "role": "shielder",
+          "speed": 63.50784000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 50.65739999999999,
+          "hp": 286,
+          "job": "caster",
+          "level": 37,
+          "role": null,
+          "speed": 60.528000000000006,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 40.52592,
+          "hp": 314,
+          "level": 37,
+          "role": "shielder",
+          "speed": 63.50784000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 50.65739999999999,
+          "hp": 286,
+          "level": 37,
+          "role": null,
+          "speed": 60.528000000000006,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 40.52592,
+          "hp": 314,
+          "level": 37,
+          "role": "shielder",
+          "speed": 63.50784000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 540,
+      "handinXp": 928,
+      "npc": "Sister Grace",
+      "npcDistance": 1315,
+      "quota": 15,
+      "section": "6.0"
+    },
+    {
+      "anchor": {
+        "x": -990,
+        "y": 440,
+        "z": -3740
+      },
+      "enemies": [
+        {
+          "damage": 42.140159999999995,
+          "hp": 333,
+          "job": "guard",
+          "level": 39,
+          "role": "shielder",
+          "speed": 63.50784000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 52.6752,
+          "hp": 303,
+          "job": "caster",
+          "level": 39,
+          "role": null,
+          "speed": 60.528000000000006,
+          "style": "flank",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 42.140159999999995,
+          "hp": 333,
+          "level": 39,
+          "role": "shielder",
+          "speed": 63.50784000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 52.6752,
+          "hp": 303,
+          "level": 39,
+          "role": null,
+          "speed": 60.528000000000006,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 42.140159999999995,
+          "hp": 333,
+          "level": 39,
+          "role": "shielder",
+          "speed": 63.50784000000001,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 570,
+      "handinXp": 979,
+      "npc": "Master Hugh",
+      "npcDistance": 2606,
+      "quota": 15,
+      "section": "6.1"
+    },
+    {
+      "anchor": {
+        "x": -1230,
+        "y": 150,
+        "z": -1970
+      },
+      "enemies": [
+        {
+          "damage": 45.36864,
+          "hp": 383,
+          "job": "guard",
+          "level": 43,
+          "role": "shielder",
+          "speed": 64.27168000000002,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 68.05296,
+          "hp": 801,
+          "job": "caster",
+          "level": 43,
+          "speed": 37.696000000000005,
+          "style": "flank",
+          "type": "royalarcanist",
+          "xp": 42
+        },
+        {
+          "damage": 45.36864,
+          "hp": 383,
+          "level": 43,
+          "role": "shielder",
+          "speed": 64.27168000000002,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 56.71079999999999,
+          "hp": 348,
+          "level": 43,
+          "role": null,
+          "speed": 61.25600000000001,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 45.36864,
+          "hp": 383,
+          "level": 43,
+          "role": "shielder",
+          "speed": 64.27168000000002,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 610,
+      "handinXp": 1038,
+      "npc": "Roland",
+      "npcDistance": 1160,
+      "quota": 15,
+      "section": "7.0"
+    },
+    {
+      "anchor": {
+        "x": 250,
+        "y": 500,
+        "z": -894
+      },
+      "enemies": [
+        {
+          "damage": 93.96575999999996,
+          "hp": 1545,
+          "job": "guard",
+          "level": 45,
+          "role": "shielder",
+          "speed": 42.40800000000001,
+          "style": "guard",
+          "type": "siegeknight",
+          "xp": 42
+        },
+        {
+          "damage": 70.47431999999999,
+          "hp": 846,
+          "job": "caster",
+          "level": 45,
+          "speed": 37.696000000000005,
+          "style": "flank",
+          "type": "royalarcanist",
+          "xp": 42
+        },
+        {
+          "damage": 46.98287999999999,
+          "hp": 405,
+          "level": 45,
+          "role": "shielder",
+          "speed": 64.27168000000002,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        },
+        {
+          "damage": 58.72859999999999,
+          "hp": 368,
+          "level": 45,
+          "role": null,
+          "speed": 61.25600000000001,
+          "style": "guard",
+          "type": "caster",
+          "xp": 22
+        },
+        {
+          "damage": 46.98287999999999,
+          "hp": 405,
+          "level": 45,
+          "role": "shielder",
+          "speed": 64.27168000000002,
+          "style": "guard",
+          "type": "grunt",
+          "xp": 13
+        }
+      ],
+      "handinGold": 640,
+      "handinXp": 1088,
+      "npc": "Miles",
+      "npcDistance": 1376,
+      "quota": 15,
+      "section": "7.1"
+    }
+  ],
+  "economy": [
+    {
+      "averageHP": 68.6,
+      "expectedCharacterXpPerQuota": 550,
+      "expectedGoldPerQuota": 210,
+      "expectedKillGold": 90,
+      "handinGold": 120,
+      "handinXp": 270,
+      "meanKillXpRaw": 16.6,
+      "quota": 10,
+      "section": "0.0"
+    },
+    {
+      "averageHP": 75.2,
+      "expectedCharacterXpPerQuota": 625,
+      "expectedGoldPerQuota": 250,
+      "expectedKillGold": 100,
+      "handinGold": 150,
+      "handinXp": 321,
+      "meanKillXpRaw": 18,
+      "quota": 10,
+      "section": "0.1"
+    },
+    {
+      "averageHP": 144.4,
+      "expectedCharacterXpPerQuota": 842,
+      "expectedGoldPerQuota": 344,
+      "expectedKillGold": 154,
+      "handinGold": 190,
+      "handinXp": 380,
+      "meanKillXpRaw": 27.4,
+      "quota": 10,
+      "section": "1.0"
+    },
+    {
+      "averageHP": 155.6,
+      "expectedCharacterXpPerQuota": 916,
+      "expectedGoldPerQuota": 378,
+      "expectedKillGold": 158,
+      "handinGold": 220,
+      "handinXp": 430,
+      "meanKillXpRaw": 28.8,
+      "quota": 10,
+      "section": "1.1"
+    },
+    {
+      "averageHP": 122.6,
+      "expectedCharacterXpPerQuota": 959,
+      "expectedGoldPerQuota": 413.6,
+      "expectedKillGold": 153.60000000000002,
+      "handinGold": 260,
+      "handinXp": 489,
+      "meanKillXpRaw": 23.2,
+      "quota": 12,
+      "section": "2.0"
+    },
+    {
+      "averageHP": 131.2,
+      "expectedCharacterXpPerQuota": 1038,
+      "expectedGoldPerQuota": 448.4,
+      "expectedKillGold": 158.39999999999998,
+      "handinGold": 290,
+      "handinXp": 540,
+      "meanKillXpRaw": 24.6,
+      "quota": 12,
+      "section": "2.1"
+    },
+    {
+      "averageHP": 180.8,
+      "expectedCharacterXpPerQuota": 1198,
+      "expectedGoldPerQuota": 526.8,
+      "expectedKillGold": 196.8,
+      "handinGold": 330,
+      "handinXp": 599,
+      "meanKillXpRaw": 29.6,
+      "quota": 12,
+      "section": "3.0"
+    },
+    {
+      "averageHP": 167.6,
+      "expectedCharacterXpPerQuota": 1217,
+      "expectedGoldPerQuota": 542.4,
+      "expectedKillGold": 182.4,
+      "handinGold": 360,
+      "handinXp": 650,
+      "meanKillXpRaw": 28,
+      "quota": 12,
+      "section": "3.1"
+    },
+    {
+      "averageHP": 198.4,
+      "expectedCharacterXpPerQuota": 1325,
+      "expectedGoldPerQuota": 599.2,
+      "expectedKillGold": 199.2,
+      "handinGold": 400,
+      "handinXp": 709,
+      "meanKillXpRaw": 30.4,
+      "quota": 12,
+      "section": "4.0"
+    },
+    {
+      "averageHP": 211,
+      "expectedCharacterXpPerQuota": 1403,
+      "expectedGoldPerQuota": 641.2,
+      "expectedKillGold": 211.2,
+      "handinGold": 430,
+      "handinXp": 759,
+      "meanKillXpRaw": 31.8,
+      "quota": 12,
+      "section": "4.1"
+    },
+    {
+      "averageHP": 246.4,
+      "expectedCharacterXpPerQuota": 1684,
+      "expectedGoldPerQuota": 755,
+      "expectedKillGold": 285,
+      "handinGold": 470,
+      "handinXp": 818,
+      "meanKillXpRaw": 34.2,
+      "quota": 15,
+      "section": "5.0"
+    },
+    {
+      "averageHP": 395,
+      "expectedCharacterXpPerQuota": 1831,
+      "expectedGoldPerQuota": 815,
+      "expectedKillGold": 315,
+      "handinGold": 500,
+      "handinXp": 869,
+      "meanKillXpRaw": 38,
+      "quota": 15,
+      "section": "5.1"
+    },
+    {
+      "averageHP": 302.8,
+      "expectedCharacterXpPerQuota": 1875,
+      "expectedGoldPerQuota": 852,
+      "expectedKillGold": 312,
+      "handinGold": 540,
+      "handinXp": 928,
+      "meanKillXpRaw": 37.4,
+      "quota": 15,
+      "section": "6.0"
+    },
+    {
+      "averageHP": 321,
+      "expectedCharacterXpPerQuota": 1951,
+      "expectedGoldPerQuota": 891,
+      "expectedKillGold": 321,
+      "handinGold": 570,
+      "handinXp": 979,
+      "meanKillXpRaw": 38.4,
+      "quota": 15,
+      "section": "6.1"
+    },
+    {
+      "averageHP": 459.6,
+      "expectedCharacterXpPerQuota": 2324,
+      "expectedGoldPerQuota": 1033,
+      "expectedKillGold": 423,
+      "handinGold": 610,
+      "handinXp": 1038,
+      "meanKillXpRaw": 50.8,
+      "quota": 15,
+      "section": "7.0"
+    },
+    {
+      "averageHP": 713.8,
+      "expectedCharacterXpPerQuota": 2789,
+      "expectedGoldPerQuota": 1195,
+      "expectedKillGold": 555,
+      "handinGold": 640,
+      "handinXp": 1088,
+      "meanKillXpRaw": 67.2,
+      "quota": 15,
+      "section": "7.1"
+    }
+  ],
+  "combat": [
+    {
+      "area": 0,
+      "casts": 12,
+      "cid": "warrior",
+      "frames": 2400,
+      "gold": 151,
+      "heroLevel": 6,
+      "hp": 165,
+      "hpStart": 165,
+      "kills": 13,
+      "level": 6,
+      "mana": 44.19310625000047,
+      "manaMin": 33.134987500000435,
+      "maxHp": 165,
+      "maxMana": 75,
+      "mode": "play",
+      "position": [
+        -1722.6208893611447,
+        0,
+        -1775.320828304347
+      ],
+      "quest": {
+        "area": 0,
+        "collect": null,
+        "count": 12,
+        "fallback": [
+          "grunt",
+          "caster"
+        ],
+        "gold": 260,
+        "id": "hunt.2.0",
+        "instruction": "Defeat 12 Legion shield guard / Legion spellcaster / Legion runner",
+        "name": "Grant",
+        "npc": "grant",
+        "payoutXp": 489,
+        "phase": "ready",
+        "place": "old bell tower yard",
+        "progress": "Return to Grant · 260 gold + 489 XP",
+        "reason": "The siege troops keep returning to the old bell tower yard.",
+        "target": "Legion shield guard / Legion spellcaster / Legion runner",
+        "title": "Break the siege patrol",
+        "total": 12,
+        "when": [],
+        "xp": 489,
+        "zone": 2
+      },
+      "rank": 4,
+      "rankNow": 4,
+      "rarity": "uncommon",
+      "start": 0,
+      "startGold": 0,
+      "startKills": 0,
+      "time": 39.49733333333239,
+      "trace": [
+        {
+          "hp": 165,
+          "kills": 3,
+          "mana": 67.26556249999875,
+          "time": 4.883999999999989
+        },
+        {
+          "hp": 165,
+          "kills": 4,
+          "mana": 67.44774374999908,
+          "time": 9.845333333333402
+        },
+        {
+          "hp": 165,
+          "kills": 6,
+          "mana": 59.6632749999993,
+          "time": 14.768000000000308
+        },
+        {
+          "hp": 165,
+          "kills": 8,
+          "mana": 51.001790624999735,
+          "time": 19.719666666666832
+        },
+        {
+          "hp": 165,
+          "kills": 9,
+          "mana": 49.40614375000014,
+          "time": 24.651999999999894
+        },
+        {
+          "hp": 165,
+          "kills": 10,
+          "mana": 43.47461250000005,
+          "time": 29.613333333332957
+        },
+        {
+          "hp": 165,
+          "kills": 12,
+          "mana": 34.781862500000486,
+          "time": 34.53599999999935
+        },
+        {
+          "hp": 165,
+          "kills": 13,
+          "mana": 44.19310625000047,
+          "time": 39.49733333333239
+        }
+      ],
+      "zone": 2
+    },
+    {
+      "area": 0,
+      "casts": 8,
+      "cid": "ranger",
+      "frames": 2400,
+      "gold": 47,
+      "heroLevel": 6,
+      "hp": 155,
+      "hpStart": 155,
+      "kills": 4,
+      "level": 6,
+      "mana": 59.784079999994866,
+      "manaMin": 52.25595499999434,
+      "maxHp": 155,
+      "maxMana": 90,
+      "mode": "play",
+      "position": [
+        -1708.3418074912895,
+        0,
+        -1754.979306092474
+      ],
+      "quest": {
+        "area": 0,
+        "collect": null,
+        "count": 3,
+        "fallback": [
+          "grunt",
+          "caster"
+        ],
+        "gold": 260,
+        "id": "hunt.2.0",
+        "instruction": "Defeat 12 Legion shield guard / Legion spellcaster / Legion runner",
+        "name": "Grant",
+        "npc": "grant",
+        "payoutXp": 489,
+        "phase": "active",
+        "place": "old bell tower yard",
+        "progress": "3/12 defeated · old bell tower yard",
+        "reason": "The siege troops keep returning to the old bell tower yard.",
+        "target": "Legion shield guard / Legion spellcaster / Legion runner",
+        "title": "Break the siege patrol",
+        "total": 12,
+        "when": [],
+        "xp": 489,
+        "zone": 2
+      },
+      "rank": 4,
+      "rankNow": 4,
+      "rarity": "uncommon",
+      "start": 0,
+      "startGold": 0,
+      "startKills": 0,
+      "time": 39.84533333333235,
+      "trace": [
+        {
+          "hp": 155,
+          "kills": 2,
+          "mana": 89.14703999999881,
+          "time": 4.922666666666654
+        },
+        {
+          "hp": 155,
+          "kills": 4,
+          "mana": 87.29407999999765,
+          "time": 9.845333333333398
+        },
+        {
+          "hp": 155,
+          "kills": 4,
+          "mana": 82.70907999999646,
+          "time": 14.845333333333649
+        },
+        {
+          "hp": 155,
+          "kills": 4,
+          "mana": 78.12407999999527,
+          "time": 19.845333333333485
+        },
+        {
+          "hp": 155,
+          "kills": 4,
+          "mana": 73.53907999999409,
+          "time": 24.8453333333332
+        },
+        {
+          "hp": 155,
+          "kills": 4,
+          "mana": 68.95407999999384,
+          "time": 29.845333333332917
+        },
+        {
+          "hp": 155,
+          "kills": 4,
+          "mana": 64.36907999999436,
+          "time": 34.84533333333263
+        },
+        {
+          "hp": 155,
+          "kills": 4,
+          "mana": 59.784079999994866,
+          "time": 39.84533333333235
+        }
+      ],
+      "zone": 2
+    },
+    {
+      "area": 0,
+      "casts": 18,
+      "cid": "mage",
+      "frames": 2400,
+      "gold": 87,
+      "heroLevel": 6,
+      "hp": 155,
+      "hpStart": 155,
+      "kills": 8,
+      "level": 6,
+      "mana": 1.2832116666704676,
+      "manaMin": 0.043628333337133354,
+      "maxHp": 155,
+      "maxMana": 140,
+      "mode": "play",
+      "position": [
+        -1770.0292704370656,
+        0,
+        -1988.1162151801368
+      ],
+      "quest": {
+        "area": 0,
+        "collect": null,
+        "count": 7,
+        "fallback": [
+          "grunt",
+          "caster"
+        ],
+        "gold": 260,
+        "id": "hunt.2.0",
+        "instruction": "Defeat 12 Legion shield guard / Legion spellcaster / Legion runner",
+        "name": "Grant",
+        "npc": "grant",
+        "payoutXp": 489,
+        "phase": "active",
+        "place": "old bell tower yard",
+        "progress": "7/12 defeated · old bell tower yard",
+        "reason": "The siege troops keep returning to the old bell tower yard.",
+        "target": "Legion shield guard / Legion spellcaster / Legion runner",
+        "title": "Break the siege patrol",
+        "total": 12,
+        "when": [],
+        "xp": 489,
+        "zone": 2
+      },
+      "rank": 4,
+      "rankNow": 4,
+      "rarity": "uncommon",
+      "start": 0,
+      "startGold": 0,
+      "startKills": 0,
+      "time": 39.6906666666657,
+      "trace": [
+        {
+          "hp": 155,
+          "kills": 3,
+          "mana": 114.26495,
+          "time": 4.883999999999989
+        },
+        {
+          "hp": 155,
+          "kills": 4,
+          "mana": 96.64493333333508,
+          "time": 9.845333333333402
+        },
+        {
+          "hp": 155,
+          "kills": 5,
+          "mana": 71.02491666667017,
+          "time": 14.80666666666698
+        },
+        {
+          "hp": 155,
+          "kills": 5,
+          "mana": 56.462416666671174,
+          "time": 19.80666666666682
+        },
+        {
+          "hp": 155,
+          "kills": 6,
+          "mana": 41.84240000000415,
+          "time": 24.76799999999988
+        },
+        {
+          "hp": 155,
+          "kills": 7,
+          "mana": 16.2223833333372,
+          "time": 29.72933333333294
+        },
+        {
+          "hp": 155,
+          "kills": 7,
+          "mana": 1.6598833333371683,
+          "time": 34.729333333332654
+        },
+        {
+          "hp": 155,
+          "kills": 8,
+          "mana": 1.2832116666704676,
+          "time": 39.6906666666657
+        }
+      ],
+      "zone": 2
+    }
+  ],
+  "guestReward": {
+    "checkpointGold": 100,
+    "liveClaim": true,
+    "liveGold": 360,
+    "savedClaim": true,
+    "savedGold": 100,
+    "savedReceipt": true
+  }
+}

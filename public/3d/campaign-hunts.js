@@ -23,6 +23,8 @@ const campSize=5,refillSeconds=6;
 function definition(g){return g&&!g.hub&&!g.trial&&!g.side&&!g.delve&&!g.endless&&!g.escape&&!g.arena&&!g.bonusActive&&!g.devBriar&&!g.devKeep&&g.area>=0?definitions.find(d=>d.zone===g.zone&&d.area===g.area):null;}
 function contract(g){const d=definition(g),w=g?.patrolWork;return d&&w?.contract?.id===d.id?w.contract:null;}
 function count(s,d){return Math.max(0,Math.min(d.total,Number(s?.items?.[d.id])||0));}
+// Only durable hunt fields; unchanged host snapshots must not cause continuous disk writes.
+function progressStamp(g,s){const d=contract(g);return d?JSON.stringify([s?.quests?.[d.id]||'',count(s,d),Number(s?.items?.[d.id+'.round'])||0]):'';}
 function phase(s,d){return s?.quests?.[d.id]!=='active'?'offer':count(s,d)>=d.total?'ready':'active';}
 function setup(g,api){const w=g.patrolWork,d=definition(g);if(!w||!d||(g.storyNpcs||[]).every(n=>n.id!==d.npc))return null;
  // Fill only this authored camp. Do not recycle rescue guards, bosses or arbitrary nearby mobs.
@@ -69,5 +71,5 @@ function apply(state,book,request,context){const fail=()=>({state,changed:false}
 function killed(g,s,e,api){const d=contract(g),w=g.patrolWork;if(!d||!api.host||phase(s,d)!=='active'||!e||e.boss||e.elite||e.practice||e.dummy||e.bot||!w.slots.some(slot=>slot.mid===e.mid&&slot.type===e.type)||w.huntSeen?.has(e))return false;
  (w.huntSeen||(w.huntSeen=new WeakSet())).add(e);s.items[d.id]=Math.min(d.total,count(s,d)+1);s.revision++;if(count(s,d)===d.total)api.notice('Hunt ready to turn in',d.title+' · Return to '+d.name+' for '+d.gold+' gold + '+(d.payoutXp??d.xp)+' XP.');return true;
 }
-root.BFCampaignHunts={campSize,refillSeconds,definitions,definition,contract,count,phase,setup,details,task,marker,decorate,retain,navigation,apply,killed};if(typeof module!=='undefined')module.exports=root.BFCampaignHunts;
+root.BFCampaignHunts={campSize,refillSeconds,definitions,definition,contract,count,progressStamp,phase,setup,details,task,marker,decorate,retain,navigation,apply,killed};if(typeof module!=='undefined')module.exports=root.BFCampaignHunts;
 })(typeof window!=='undefined'?window:globalThis);

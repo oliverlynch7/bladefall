@@ -1,0 +1,113 @@
+{
+  "host": {
+    "afterGuestLeaves": {
+      "actorMultipliers": [
+        1.6,
+        1.6,
+        1.6,
+        1.6,
+        1.6
+      ],
+      "mul": 1.6,
+      "party": 2
+    },
+    "hostClaim": {
+      "after": 812,
+      "before": 552,
+      "receipt": {
+        "amount": 290,
+        "gold": 260,
+        "kind": "campaign_hunt",
+        "recipients": [
+          "h",
+          "ksxau"
+        ],
+        "title": "Break the siege patrol"
+      },
+      "round": 1,
+      "saved": 812,
+      "savedClaim": true
+    },
+    "hostGoldStart": 360,
+    "initialSlots": [
+      {
+        "hp": 203,
+        "mid": 8
+      },
+      {
+        "hp": 186,
+        "mid": 9
+      },
+      {
+        "hp": 203,
+        "mid": 10
+      },
+      {
+        "hp": 186,
+        "mid": 11
+      },
+      {
+        "hp": 203,
+        "mid": 12
+      }
+    ],
+    "killTest": {
+      "mid": 23,
+      "party": 2,
+      "rawXp": 13,
+      "scaledRawXp": 18
+    },
+    "multiplier": 1.6,
+    "party": 2,
+    "waves": [
+      {
+        "alive": 5,
+        "count": 5,
+        "party": 2,
+        "scaled": true
+      },
+      {
+        "alive": 5,
+        "count": 10,
+        "party": 2,
+        "scaled": true
+      },
+      {
+        "alive": 5,
+        "count": 12,
+        "party": 2,
+        "scaled": true
+      }
+    ]
+  },
+  "guest": {
+    "claim": {
+      "after": 1405,
+      "before": 1145,
+      "phase": "offer",
+      "round": 1,
+      "saved": 1405,
+      "savedClaim": true
+    },
+    "killAfter": {
+      "classXp": 418,
+      "gold": 1415,
+      "level": 4,
+      "xp": 571
+    },
+    "killBefore": {
+      "classXp": 360,
+      "gold": 1405,
+      "level": 4,
+      "xp": 541
+    },
+    "soloContinue": {
+      "active": false,
+      "gold": 1415,
+      "questPhase": "offer",
+      "round": 1,
+      "savedClaim": true
+    }
+  },
+  "limits": "Two real same-machine PeerJS clients; staged positioning, lethal diagnostic hits and explicit refill clock. Not two humans or remote latency/fun validation. Three accelerated refill waves sent their kills after the test advanced the clock beyond the transient kill window; those waves validate shared quest counts and spawn HP, not kill XP. A separate immediate kill validates native mirrored gold, character XP and class XP."
+}

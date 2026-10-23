@@ -1,0 +1,322 @@
+[
+  {
+    "cls": "ninja",
+    "draws": 142,
+    "gl": 0,
+    "stats": [
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "ninja:0",
+        "meshes": 10,
+        "triangles": 3108
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "ninja:1",
+        "meshes": 17,
+        "triangles": 1782
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 0,
+        "aura": {
+          "ascension": "Crimson Phantom",
+          "drawCalls": 3,
+          "motes": 0,
+          "motif": "Shadow-silk streamers and scarlet seals",
+          "ornaments": 6,
+          "triangles": 1416
+        },
+        "key": "ninja:2",
+        "meshes": 31,
+        "triangles": 4702
+      }
+    ]
+  },
+  {
+    "cls": "necromancer",
+    "draws": 123,
+    "gl": 0,
+    "stats": [
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "necromancer:0",
+        "meshes": 6,
+        "triangles": 1116
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "necromancer:1",
+        "meshes": 21,
+        "triangles": 3892
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 2,
+        "aura": {
+          "ascension": "Sovereign of Souls",
+          "drawCalls": 3,
+          "motes": 0,
+          "motif": "Three ancestral souls and trailing ectoplasm",
+          "ornaments": 3,
+          "triangles": 1341
+        },
+        "key": "necromancer:2",
+        "meshes": 36,
+        "triangles": 9541
+      }
+    ]
+  },
+  {
+    "cls": "warrior",
+    "draws": 129,
+    "gl": 0,
+    "stats": [
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "warrior:0",
+        "meshes": 8,
+        "triangles": 1392
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "warrior:1",
+        "meshes": 21,
+        "triangles": 4412
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 0,
+        "aura": {
+          "ascension": "Immortal Vanguard",
+          "drawCalls": 3,
+          "motes": 0,
+          "motif": "Spectral royal standards and oath heraldry",
+          "ornaments": 6,
+          "triangles": 1240
+        },
+        "key": "warrior:2",
+        "meshes": 31,
+        "triangles": 9476
+      }
+    ]
+  },
+  {
+    "cls": "ranger",
+    "draws": 122,
+    "gl": 0,
+    "stats": [
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "ranger:0",
+        "meshes": 10,
+        "triangles": 744
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "ranger:1",
+        "meshes": 17,
+        "triangles": 2660
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 0,
+        "aura": {
+          "ascension": "Heart of the Wild",
+          "drawCalls": 3,
+          "motes": 0,
+          "motif": "Living emerald fronds and luminous leaves",
+          "ornaments": 12,
+          "triangles": 2976
+        },
+        "key": "ranger:2",
+        "meshes": 29,
+        "triangles": 8536
+      }
+    ]
+  },
+  {
+    "cls": "mage",
+    "draws": 118,
+    "gl": 0,
+    "stats": [
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "mage:0",
+        "meshes": 10,
+        "triangles": 632
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 0,
+        "aura": null,
+        "key": "mage:1",
+        "meshes": 17,
+        "triangles": 3056
+      },
+      {
+        "anchors": [
+          "Torso",
+          "Hips",
+          "Head",
+          "UpperArmR",
+          "UpperArmL",
+          "LowerArmR",
+          "LowerLegR",
+          "LowerArmL",
+          "LowerLegL"
+        ],
+        "animated": 2,
+        "aura": {
+          "ascension": "Astral Archmage",
+          "drawCalls": 3,
+          "motes": 0,
+          "motif": "A three-dimensional galaxy and orbiting stars",
+          "ornaments": 7,
+          "triangles": 2596
+        },
+        "key": "mage:2",
+        "meshes": 31,
+        "triangles": 7004
+      }
+    ]
+  }
+]

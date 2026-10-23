@@ -1,15 +1,17 @@
 import * as T from './three.module.js';
-import {createClassDisplay} from './hero3d.js?v=2362';
-const $=s=>document.querySelector(s),canvas=$('#wardrobe'),scene=new T.Scene(),camera=new T.PerspectiveCamera(32,1,.05,120),renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true});
+import {createClassDisplay} from './hero3d.js?v=2363c';
+const $=s=>document.querySelector(s),canvas=$('#wardrobe'),scene=new T.Scene(),camera=new T.OrthographicCamera(-5,5,2,-2,.05,120),renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:true});
 renderer.setClearColor(0x000000,0);renderer.outputColorSpace=T.SRGBColorSpace;renderer.setPixelRatio(Math.min(1.75,devicePixelRatio));
 const hemi=new T.HemisphereLight(0xd7ecff,0x86725a,2.15),key=new T.DirectionalLight(0xffefce,2.6),rim=new T.DirectionalLight(0x8bbdde,1.6);key.position.set(-3,6,6);rim.position.set(4,4,-3);scene.add(hemi,key,rim);
 const platform=new T.Group();scene.add(platform);for(let i=0;i<3;i++){const m=new T.Mesh(new T.CylinderGeometry(.83,.92,.08,48),new T.MeshStandardMaterial({color:'#354d56',roughness:.84,metalness:.18}));m.position.set((i-1)*2.50,-.065,0);platform.add(m);const ring=new T.Mesh(new T.TorusGeometry(.85,.014,6,48),new T.MeshStandardMaterial({color:i===2?'#d6b977':'#8faaa9',metalness:.6,roughness:.4}));ring.rotation.x=Math.PI/2;ring.position.copy(m.position);ring.position.y=-.018;platform.add(ring);}
-const catalog=window.BFClassLooks.catalog,ids=Object.keys(catalog),label=c=>c==='beastmaster'?'Beastmaster':c==='bladedancer'?'Bladedancer':c.charAt(0).toUpperCase()+c.slice(1),params=new URLSearchParams(location.search);
+const catalog=window.BFClassLooks.catalog,params=new URLSearchParams(location.search),pilot=params.get('collection')==='ascension',ids=pilot?['ninja','necromancer','warrior','ranger','mage']:Object.keys(catalog),label=c=>c==='beastmaster'?'Beastmaster':c==='bladedancer'?'Bladedancer':c.charAt(0).toUpperCase()+c.slice(1);
+if(pilot){$('.intro>p:last-child').textContent='ASCENSION PILOT · Five classes. Rank 5 completes your outfit; rank 10 unlocks a distinct supernatural transformation. Drag to inspect every angle.';}
 if(params.get('preview')==='1'){
  $('.intro>p:last-child').textContent='REFERENCE WARDROBE · All 17 classes, three complete outfits each. Compare starter, Rank 5 and Rank 10; rotate to inspect the fitted details.';
  $('.back').href='https://bladefall.pages.dev/3d/';$('.brand').href='https://bladefall.pages.dev/3d/class-skins.html';
 }
 let cls=ids.includes(params.get('class'))?params.get('class'):'mage',rigs=[],yaw=.15,pitch=.07,zoom=1,paused=false,sequence=0,disposed=false;
+window.__classWardrobe={get rigs(){return rigs},camera,renderer,scene};
 $('#classes').innerHTML=ids.map(c=>`<button data-class="${c}" aria-pressed="false"><img src="./icons/class-${c}.png" alt="">${label(c)}</button>`).join('');
 $('#classes').addEventListener('click',e=>{const b=e.target.closest('[data-class]');if(b)show(b.dataset.class);});
 function view(){const v=$('#view').value;return v==='all'?null:Number(v);}
@@ -31,13 +33,16 @@ const pointers=new Map();let pinch=0;canvas.onpointerdown=e=>{pointers.set(e.poi
 canvas.onkeydown=e=>{if(e.key==='ArrowLeft')yaw-=.18;if(e.key==='ArrowRight')yaw+=.18;if(e.key==='ArrowUp')pitch=Math.min(.75,pitch+.08);if(e.key==='ArrowDown')pitch=Math.max(-.15,pitch-.08);if(e.key==='+'||e.key==='=')zoom=Math.max(.60,zoom-.12);if(e.key==='-')zoom=Math.min(1.7,zoom+.12);if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-'].includes(e.key))e.preventDefault();};
 const clock=new T.Clock();let lastSize='',statsTime=0;
 function frame(){if(disposed)return;requestAnimationFrame(frame);const raw=Math.min(.05,clock.getDelta()),dt=paused||document.hidden?0:raw,r=canvas.getBoundingClientRect(),size=r.width+':'+r.height;
- if(lastSize!==size){lastSize=size;renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();}
+ if(lastSize!==size){lastSize=size;renderer.setSize(r.width,r.height,false);}
  const focus=view(),single=focus!==null;if($('#rotate').checked&&!paused)yaw+=dt*.24;
  const night=$('#lighting').value==='night';hemi.intensity=night?.65:2.15;key.intensity=night?1.1:2.6;rim.intensity=night?1.9:1.6;
  for(let i=0;i<rigs.length;i++){const rig=rigs[i];rig.wrap.visible=!single||focus===i;if(!rig.wrap.visible)continue;rig.update(dt,{animation:$('#animation').value,cape:$('#cape').value,motion:!$('#still').checked});rig.wrap.position.x=single?0:(i-1)*2.50;rig.wrap.rotation.y=yaw;}
  platform.children.forEach((m,i)=>{m.visible=!single||i<2;if(single)m.position.x=0;else m.position.x=(Math.floor(i/2)-1)*2.50;});
- const extent=single?2.8:8.5,distance=Math.max(2.18,extent/(2*Math.max(.3,camera.aspect)))/Math.tan(16*Math.PI/180)*zoom;
- camera.position.set(0,1.63+Math.sin(pitch)*distance,Math.cos(pitch)*distance);camera.lookAt(0,1.63,0);renderer.render(scene,camera);
+ // Equal projection for all three ranks: perspective parallax hid the far side of
+ // the rightmost aura and made its costume appear to turn away from the other ranks.
+ const aspect=r.width/r.height,halfHeight=Math.max(1.95,(single?1.35:4.25)/Math.max(.3,aspect))*zoom;
+ camera.left=-halfHeight*aspect;camera.right=halfHeight*aspect;camera.top=halfHeight;camera.bottom=-halfHeight;camera.updateProjectionMatrix();
+ camera.position.set(0,1.63+Math.sin(pitch)*8,Math.cos(pitch)*8);camera.lookAt(0,1.63,0);renderer.render(scene,camera);
  statsTime+=raw;if(statsTime>1){statsTime=0;updateStats();$('#viewLabel').textContent=single?(focus===0?'INSPECTING DEFAULT':'INSPECTING RANK '+catalog[cls][focus].rank):'THREE RANKS · SAME LIGHTING';}
 }
 addEventListener('pagehide',e=>{if(e.persisted)return;disposed=true;sequence++;rigs.forEach(r=>r.dispose());renderer.dispose();});

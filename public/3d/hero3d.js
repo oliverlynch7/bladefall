@@ -11,7 +11,7 @@ import { pauseAppearance } from './pause-appearance3d.js?v=2212';
 import {syncCampaignObjects} from './campaign-object3d.js?v=2319';
 import {syncCampaignRest} from './campaign-rest3d.js?v=2183b';
 import {syncWeaponGlow} from './weapon-glow.js?v=2245';
-import {syncClassLook,clearClassLook,classLookStats} from './class-look3d.js?v=2358';
+import {syncClassLook,clearClassLook,classLookStats,registerUncoveredHair} from './class-look3d.js?v=2363c';
 const FACE_DETAIL_PREVIEW = new URLSearchParams(location.search).get('faceDetail')!=='0';
 import {weaponTint} from './weapon-style.js?v=2030';
 import {makeCrossbow,paintCrossbow} from './crossbow3d.js?v=2030';
@@ -1617,7 +1617,7 @@ async function loadClassDisplayModels(){
  if(!displayModelsPromise)displayModelsPromise=(async()=>{
   const loader=new GLTFLoader(),names=['Warrior','Rogue','Ranger','Wizard','Cleric','Monk'];
   const gs=await Promise.all(names.map(n=>loader.loadAsync(ASSETS+'chars/'+n+'.gltf').catch(()=>null)));
-  names.forEach((n,i)=>{if(!gs[i])return;_loaded[n]=gs[i];for(const c of gs[i].animations)clips[c.name]??=c;});return gs;
+  names.forEach((n,i)=>{if(!gs[i])return;_loaded[n]=gs[i];for(const c of gs[i].animations)clips[c.name]??=c;});registerUncoveredHair(_loaded.Warrior?.scene.getObjectByName('Face'));return gs;
  })();return displayModelsPromise;
 }
 
@@ -2334,7 +2334,7 @@ window.__hero3dPreview = (canvas, opts={}) => {
    headFrame.head.localToWorld(target);
    height=headFrame.h*1.38;width=headFrame.w*1.55;
   }
-  rec.holder.root.traverse(o=>{if(o.userData.classLookRoot&&o.userData.classLookBone==='Head')o.visible=!opts.face;});
+  rec.holder.root.traverse(o=>{if(o.userData.classLookRoot&&o.userData.classLookBone==='Head')o.visible=!opts.face||(opts.classId==='ninja'&&lt===0);});
   if(rec.holder._weap)rec.holder._weap.visible=!opts.face;
   const distance=Math.max(height/2,width/(2*rec.cam.aspect))/Math.tan(THREE.MathUtils.degToRad(16))*1.14+(opts.face?.12:radius*.45);
   const pitch=THREE.MathUtils.clamp(Number.isFinite(opts.pitch)?opts.pitch:0,-.45,.45);

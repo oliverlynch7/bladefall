@@ -26,10 +26,10 @@ const catalog={
    "accent": "#a8d6ff",
    "inlay": "#a8d6ff",
    "lift": 1.15,
-   "detail": "Layered cobalt plate, gold borders and a fitted royal circlet."
+   "detail": "Complete cobalt plate, fitted circlet, sword heraldry and layered gold-edged tassets."
   },
   {
-   "name": "Royal Vanguard",
+   "name": "Immortal Vanguard",
    "rank": 10,
    "id": "rank_warrior_2",
    "metal": "#f2c664",
@@ -39,7 +39,7 @@ const catalog={
    "accent": "#ffdc83",
    "inlay": "#ffdc83",
    "lift": 1.15,
-   "detail": "Royal gold crown, heraldic armor and luminous command pennants."
+   "detail": "Royal plate ascends with radiant ancestral standards and floating oath heraldry."
   }
  ],
  "berserker": [
@@ -136,7 +136,7 @@ const catalog={
    "accent": "#e75b55",
    "inlay": "#e75b55",
    "lift": 1.15,
-   "detail": "Burgundy hood, fitted leather and a red face wrap."
+   "detail": "Uncovered head, swept dark hair and practical crimson training wraps."
   },
   {
    "name": "Crimson Shadow",
@@ -149,10 +149,10 @@ const catalog={
    "accent": "#ff8270",
    "inlay": "#ff8270",
    "lift": 1.15,
-   "detail": "Layered crimson guards, gold edging and pointed shoulder blades."
+   "detail": "A fitted crimson hood and face wrap, woven sash and finished assassin guards."
   },
   {
-   "name": "Ruby Nightblade",
+   "name": "Crimson Phantom",
    "rank": 10,
    "id": "rank_ninja_2",
    "metal": "#e4b26a",
@@ -162,7 +162,7 @@ const catalog={
    "accent": "#ff5268",
    "inlay": "#ff5268",
    "lift": 1.15,
-   "detail": "Ruby-black assassin regalia, swept red blades and scarlet afterimages."
+   "detail": "Ascended shadow-silk streamers, scarlet talismans and ruby-black assassin regalia."
   }
  ],
  "bladedancer": [
@@ -344,7 +344,7 @@ const catalog={
    "detail": "Green scout hood, brown leather and a small leaf clasp."
   },
   {
-   "name": "Verdant Hunter",
+   "name": "Verdant Warden",
    "rank": 5,
    "id": "rank_ranger_1",
    "metal": "#c1a46a",
@@ -354,10 +354,10 @@ const catalog={
    "accent": "#c0eb9f",
    "inlay": "#c0eb9f",
    "lift": 1.15,
-   "detail": "Layered forest leaves, the original scout hood and fitted guards."
+   "detail": "The natural green hood, a long woodland coat, stitched harness and carved leaf clasp."
   },
   {
-   "name": "Wildwood Warden",
+   "name": "Heart of the Wild",
    "rank": 10,
    "id": "rank_ranger_2",
    "metal": "#dbb970",
@@ -367,7 +367,7 @@ const catalog={
    "accent": "#b5f38b",
    "inlay": "#b5f38b",
    "lift": 1.15,
-   "detail": "Great leaf mantle, woodland compass and emerald crescent wisps."
+   "detail": "A living mantle of emerald fronds and luminous three-dimensional leaves."
   }
  ],
  "beastmaster": [
@@ -467,7 +467,7 @@ const catalog={
    "detail": "Blue apprentice robes, gold bands and a sapphire clasp."
   },
   {
-   "name": "Crystal Magister",
+   "name": "Crystal Arcanist",
    "rank": 5,
    "id": "rank_mage_1",
    "metal": "#dfbe73",
@@ -477,10 +477,10 @@ const catalog={
    "accent": "#9dceff",
    "inlay": "#9dceff",
    "lift": 1.15,
-   "detail": "Gold-trimmed blue robes, an uncovered head and sapphire shoulders."
+   "detail": "Complete sapphire robes, crystal clasps, a woven stole and decorated cuffs."
   },
   {
-   "name": "Sapphire Archmage",
+   "name": "Astral Archmage",
    "rank": 10,
    "id": "rank_mage_2",
    "metal": "#f0cb7e",
@@ -490,7 +490,7 @@ const catalog={
    "accent": "#a3e6ff",
    "inlay": "#a3e6ff",
    "lift": 1.15,
-   "detail": "A single celestial halo, two orbiting stars and blue constellation light."
+   "detail": "Constellation robes, a clean celestial halo and a three-dimensional galaxy of orbiting stars."
   }
  ],
  "pyromancer": [
@@ -631,7 +631,7 @@ const catalog={
    "detail": "Bone-rib mantle over black-green cloth."
   },
   {
-   "name": "Grave Sovereign",
+   "name": "Gravebinder",
    "rank": 5,
    "id": "rank_necromancer_1",
    "metal": "#dbd0af",
@@ -641,10 +641,10 @@ const catalog={
    "accent": "#95efbb",
    "inlay": "#95efbb",
    "lift": 1.15,
-   "detail": "Ivory horn crown, carved ribs and caged jade souls."
+   "detail": "Ivory skull mask, carved spine clasp, mortuary robes and a bone-capped reliquary."
   },
   {
-   "name": "Soul Shepherd",
+   "name": "Sovereign of Souls",
    "rank": 10,
    "id": "rank_necromancer_2",
    "metal": "#eee3bf",
@@ -654,7 +654,7 @@ const catalog={
    "accent": "#9dffbe",
    "inlay": "#9dffbe",
    "lift": 1.15,
-   "detail": "Great skeletal crown, mortuary keywork and a green soul procession."
+   "detail": "A master death mask, soul lanterns and three ancestral skulls trailing jade ectoplasm."
   }
  ],
  "chronomancer": [

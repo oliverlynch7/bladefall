@@ -3327,3 +3327,14 @@ Final front-camera comparison found the giant shuriken was permanently edge-on a
 
 
 Final patch verification: code9ae3c498 / mirror7968fa97, Cloudflare829753ae succeeded. All19 resources again match SHA256 on deployment and production for2.362.1. Old level4 Warrior save loads with1145gold and v2362b identity module. Frontal Piercing Star checked in native production preview; transformed blade width/height is0.99 at three phases. Published native136-skill regression rerun recorded in public-native.json.
+
+
+## U-ASCENSION-PILOT-20261022
+User selected: Ascension-focused: rank 5 completes the outfit; rank 10 adds strong class-themed supernatural effects. Approved five-class pilot: Ninja, Necromancer, Warrior, Ranger, Mage. Earlier friend prompt specifies Ninja starts without headgear and earns it at rank5; Necromancer skull mask starts at rank5. Keep other12 classes intact until this subset is reviewed.
+Inspected current catalog, bone-fitted wardrobe, preview, aura renderer and source Rogue rig. Current rank10 effects use four shared ribbon/sprite/point draws. Plan: finish fitted rank5 signatures for the five; replace their rank10 backplate motifs with distinct three-dimensional ascension features: scarlet shadow echoes (Ninja), soul apparitions (Necromancer), ancestral spectral standards (Warrior), living foliage mantle (Ranger), celestial orbit (Mage). Reuse existing garments and approved class colors; keep faces/weapons clear, natural Ranger hood, clean Mage halo, stable cosmetics IDs/rank gates/per-class selections, cosmetic-only stats, reduced motion, low-detail and bounded rendering costs. Ninja default removes the source hood safely with a fitted uncovered head; restore source geometry when changing tiers/classes and retain user face options. Verify actual rigs, animation, camera angles, cape compatibility, resource disposal, save/co-op appearance paths and native preview.
+
+U-ASCENSION-PILOT-20261022 correction: No added noses. Remove the new Ninja nose; preserve the established simple face style across the pilot.
+
+
+## 2026-10-22 - Five-class ascension pilot (2.363.0-class-ascension)
+Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: completed rank5 outfits and distinct rank10 shadow-silk, ancestral souls, spectral standards, living foliage and celestial orbit. Ninja earns its hood at5 and has no added nose; source head/face edits restore on class changes and fresh peer/preview clones. Other12 classes, cosmetic IDs, ranks, palettes, gameplay and saves preserved. Three rank10 effect draws (two on low), reduced-motion support, equal-angle wardrobe comparison. All51 rigs/4080frames/204gates and eight suites pass; native five-class angles/motion/quality, real Stylist equip/save and staged peer-render paths checked. Human appeal and live network co-op remain unverified. Evidence docs/art-validation/ascension-pilot-20261022.

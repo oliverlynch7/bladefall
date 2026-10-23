@@ -1,10 +1,23 @@
 import * as T from './three.module.js';
 import {mergeGeometries} from './jsm/utils/BufferGeometryUtils.js';
 import {createClassAura,syncClassAura} from './class-aura3d.js?v=2209';
+import {ASCENSION_CLASSES,createAscension,syncAscension} from './class-ascension3d.js?v=2363c';
 
 // Fittings use inverse bind matrices, not the head's current animated world position.
 // Art is cosmetic only. Static pieces are merged by bone/material; no dynamic lights.
-const records=new WeakMap(),textures=new Map(),V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
+const records=new WeakMap(),inheritedHeads=new WeakMap(),textures=new Map(),V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
+let uncoveredHair=null;
+// Reuse the artist-authored Warrior hair, fitted to the uncovered Rogue head.
+// Registration happens once before source rigs are attached to a game actor.
+export function registerUncoveredHair(source){
+ if(uncoveredHair||!source?.isMesh)return;source.updateWorldMatrix(true,false);
+ const origin=source.parent.getWorldPosition(V()),matrix=new T.Matrix4().makeTranslation(-origin.x,-origin.y,-origin.z).multiply(source.matrixWorld),geometry=source.geometry.clone().applyMatrix4(matrix);
+ // The artist's Face attachment includes a separate nose as well as hair.
+ // Keep only the hair: discard that isolated center component before fitting it.
+ const pos=geometry.attributes.position,index=geometry.index,kept=[],isNose=i=>Math.abs(pos.getX(i))<.05&&pos.getY(i)<.37&&pos.getZ(i)>.25;
+ for(let i=0;i<(index?.count||pos.count);i+=3){const ids=[0,1,2].map(j=>index?index.getX(i+j):i+j);if(!ids.every(isNose))kept.push(...ids);}geometry.setIndex(kept);
+ geometry.scale(1.18,1.16,1.13);uncoveredHair={geometry,material:source.material.clone()};
+}
 const norm=n=>n.replace(/[^a-z]/gi,'').toLowerCase();
 const SHIELD=[[-.46,.42],[0,.54],[.46,.42],[.4,-.22],[0,-.54],[-.4,-.22]];
 const LEAF=[[0,.58],[.26,.25],[.37,-.12],[.16,-.48],[0,-.56],[-.16,-.48],[-.37,-.12],[-.26,.25]];
@@ -30,11 +43,16 @@ function weave(cls,tier){
  if(tier===2){x.strokeStyle=p.inlay||p.accent||p.metal;x.lineWidth=1.2;for(let y=32;y<482;y+=23)for(const s of [-1,1])line([[128+s*101,y-9],[128+s*94,y],[128+s*101,y+9],[128+s*107,y],[128+s*101,y-9]]);}
  const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=2;textures.set(key,tex);return tex;
 }
-export function clearClassLook(root){const r=records.get(root);if(!r)return;r.aura?.dispose();for(const a of r.faceOverrides||[]){a.node.geometry=a.geometry;a.node.material=a.material;}r.groups.forEach(g=>g.removeFromParent());for(const o of r.hidden){o.visible=o.userData.classLookBaseVisibility;delete o.userData.classLookBaseVisibility;}r.geometries.forEach(g=>g.dispose());r.materials.forEach(m=>m.dispose());records.delete(root);}
+// SkeletonUtils clones share geometry/materials. Restore a fresh clone's original
+// head before repainting, without disposing or changing the source actor's skin.
+export function clearClassLook(root){if(!root)return;const r=records.get(root);if(!r){root.traverse(node=>{const source=inheritedHeads.get(node.geometry);if(source){node.geometry=source.geometry;node.material=source.material;}});return;}r.aura?.dispose();for(const [node,p] of r.facePositions||[])node.position.copy(p);for(const a of r.faceOverrides||[]){a.node.geometry=a.geometry;a.node.material=a.material;}r.groups.forEach(g=>g.removeFromParent());for(const o of r.hidden){o.visible=o.userData.classLookBaseVisibility;delete o.userData.classLookBaseVisibility;}r.geometries.forEach(g=>g.dispose());r.materials.forEach(m=>m.dispose());records.delete(root);}
 export function classLookStats(root){const r=records.get(root);return r?{key:r.key,meshes:r.meshes,triangles:r.triangles,animated:r.moving.length,aura:r.aura?.stats||null,anchors:r.groups.map(g=>g.userData.classLookBone)}:{meshes:0,triangles:0,animated:0,aura:null,anchors:[]};}
 function build(root,cls,tier){
  const p=window.BFClassLooks?.palette(cls,tier),r={key:cls+':'+tier,groups:[],moving:[],hidden:[],geometries:new Set(),materials:new Set(),meshes:0,triangles:0};records.set(root,r);
  const stale=[];root.traverse(o=>{if(o.userData.classLookBaseVisibility!==undefined){o.visible=o.userData.classLookBaseVisibility;delete o.userData.classLookBaseVisibility;}if(o.userData.classLookRoot)stale.push(o);});stale.forEach(o=>o.removeFromParent());if(!p)return r;root.traverse(o=>{if(o.isMesh&&/^(shoulderpad|armguard)/i.test(o.name)){o.userData.classLookBaseVisibility=o.visible;o.visible=false;r.hidden.push(o);}});
+ // Ninja earns the source hood at rank 5. Face is the separate hood shell;
+ // retain the skinned anatomical head underneath and all editable face attachments.
+ if(cls==='ninja'&&tier===0)root.traverse(o=>{if(o.isMesh&&o.name==='Face'){o.userData.classLookBaseVisibility=o.visible;o.visible=false;r.hidden.push(o);}});
  let skeleton;root.traverse(o=>{if(!skeleton&&o.isSkinnedMesh)skeleton=o.skeleton;});if(!skeleton)return r;
  const bones=new Map(skeleton.bones.map((b,i)=>[norm(b.name),{b,inv:skeleton.boneInverses[i]}])),anchors=new Map();
  function anchor(name){if(anchors.has(name))return anchors.get(name);const e=bones.get(norm(name));if(!e)return null;const pos=V().setFromMatrixPosition(e.inv.clone().invert()),g=new T.Group();g.name='Class fitting · '+name;g.userData.classLookRoot=true;g.userData.classLookBone=name;e.inv.clone().multiply(new T.Matrix4().makeTranslation(pos.x,pos.y,pos.z)).decompose(g.position,g.quaternion,g.scale);e.b.add(g);r.groups.push(g);anchors.set(name,g);return g;}
@@ -49,7 +67,7 @@ function build(root,cls,tier){
  const gem=(g,x,y,z,s=.08,mat=light)=>{const m=mesh(g,new T.OctahedronGeometry(s,0),mat,x,y,z);m.scale.set(.85,1.3,.55);return m;};
  const bead=(g,x,y,z,s=.027,mat=metal)=>mesh(g,new T.SphereGeometry(s,7,5),mat,x,y,z);
  const ring=(g,x,y,z,rad=.1,mat=metal,rx=0,ry=0)=>mesh(g,new T.TorusGeometry(rad,.014,5,24),mat,x,y,z,rx,ry);
- const tube=(g,pts,rad=.014,mat=metal)=>mesh(g,new T.TubeGeometry(new T.CatmullRomCurve3(pts.map(a=>V(...a))),Math.max(6,pts.length*3),rad,5,false),mat);
+ const tube=(g,pts,rad=.014,mat=metal,segments=null)=>mesh(g,new T.TubeGeometry(new T.CatmullRomCurve3(pts.map(a=>V(...a))),segments??Math.max(6,pts.length*3),rad,5,false),mat);
  const horn=(g,pts,rad,mat=ivory)=>{const curve=new T.CatmullRomCurve3(pts.map(a=>V(...a))),segments=9,fr=curve.computeFrenetFrames(segments,false),positions=[],uv=[],idx=[];for(let i=0;i<=segments;i++){const pos=curve.getPointAt(i/segments),radius=rad*Math.pow(1-i/segments,.75)+.002;for(let j=0;j<7;j++){const a=j*Math.PI/3,q=pos.clone().addScaledVector(fr.normals[i],Math.cos(a)*radius).addScaledVector(fr.binormals[i],Math.sin(a)*radius);positions.push(q.x,q.y,q.z);uv.push(j/6,i/segments);if(i<segments&&j<6){const k=i*7+j;idx.push(k,k+7,k+1,k+1,k+7,k+8);}}}const geo=new T.BufferGeometry();geo.setAttribute('position',new T.Float32BufferAttribute(positions,3));geo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();return mesh(g,geo,mat);};
  const animate=(m,type,speed=1)=>{m.userData.lookAnimated=true;r.moving.push({m,type,speed,base:m.position.clone(),rotation:m.rotation.clone(),scale:m.scale.clone()});return m;};
  const group=(g,x=0,y=0,z=0)=>{const q=new T.Group();q.position.set(x,y,z);g.add(q);return q;};
@@ -59,6 +77,26 @@ function build(root,cls,tier){
  function clothPanels(short=false){for(const s of [-1,1]){const g=group(body,s*.15,-.045,.31);g.rotation.y=s*.15;const panel=new T.PlaneGeometry(.17,short?.34:.56,2,6),positions=panel.attributes.position;for(let i=0;i<positions.count;i++){const y=positions.getY(i);positions.setZ(i,-.09*Math.pow(y/(short?.17:.28),2));}panel.computeVertexNormals();const m=mesh(g,panel,cloth);m.material.side=T.DoubleSide;}}
  function limbDetails(lightweight=false){for(const s of [-1,1]){const side=s===1?'L':'R',arm=anchor('LowerArm'+side),leg=anchor('LowerLeg'+side),a=group(arm,s*.19,0,.10);a.rotation.z=s*Math.PI/2;inset(a,SHIELD,lightweight?.14:.19,rich?.30:.25,0,0,.07,dark);if(rich)for(const y of [-.066,.006,.079])plaque(a,SHIELD,.145,.09,0,y,.105,enamel);if(!lightweight||rich){inset(leg,SHIELD,.20,.25,0,-.13,.15,enamel);if(rich){gem(leg,0,-.1,.194,.036);tube(leg,[[-.058,-.2,.18],[0,-.3,.19],[.058,-.2,.18]],.009,metal);}}}}
  const eachShoulder=fn=>{for(const s of [-1,1])fn(anchor('UpperArm'+(s===1?'L':'R')),s);};
+ if(cls==='ninja'&&tier===0){
+  r.uncovered=true;r.facePositions=new Map();r.faceOverrides=[];
+  // The body contains the anatomical head. Its source texture has the hood's dark
+  // markings; use a skin material on head-weighted triangles only, not on the body.
+  const skin=material('#bd8b69',0,.92);skin.vertexColors=true;root.traverse(node=>{if(!node.isSkinnedMesh||node.name!=='Rogue')return;
+   const hi=node.skeleton.bones.findIndex(b=>b.name==='Head'),original=node.geometry,g=original.index?original.toNonIndexed():original.clone(),si=g.attributes.skinIndex,sw=g.attributes.skinWeight;if(hi<0||!si||!sw){g.dispose();return;}
+   const weight=i=>{let v=0;for(let k=0;k<4;k++)if(si.getComponent(i,k)===hi)v+=sw.getComponent(i,k);return v;},bodyIndices=[],headIndices=[];
+   for(let i=0;i<si.count;i+=3)((weight(i)+weight(i+1)+weight(i+2))/3>.5?headIndices:bodyIndices).push(i,i+1,i+2);
+   // The source Warrior's hair is layered locks; its original head supplies the
+   // dark scalp between them. Give the uncovered Rogue the same backing without
+   // adding another shell, draw or headpiece. Keep its front face and neck skin.
+   const pos=g.attributes.position,colors=new Float32Array(pos.count*3).fill(1),scalp=new T.Color('#302527');for(let i=0;i<pos.count;i++)if(weight(i)>.9&&pos.getY(i)>2.37&&(pos.getZ(i)<.13||pos.getY(i)>2.83)){colors[i*3]=scalp.r/skin.color.r;colors[i*3+1]=scalp.g/skin.color.g;colors[i*3+2]=scalp.b/skin.color.b;}g.setAttribute('color',new T.BufferAttribute(colors,3));
+   // Source triangles alternate between head/body. Sort index references into two
+   // batches instead of creating a material draw for every alternating triangle run.
+   g.setIndex(bodyIndices.concat(headIndices));g.clearGroups();g.addGroup(0,bodyIndices.length,0);g.addGroup(bodyIndices.length,headIndices.length,1);
+   inheritedHeads.set(g,{geometry:original,material:node.material});r.faceOverrides.push({node,geometry:original,material:node.material});r.geometries.add(g);node.geometry=g;node.material=[node.material,skin];
+  });
+  if(uncoveredHair){const m=uncoveredHair.material.clone();r.materials.add(m);mesh(head,uncoveredHair.geometry.clone(),m);}else{const hair=material('#302527',0,.89),cap=new T.SphereGeometry(1,16,8,0,Math.PI*2,0,Math.PI*.46);cap.scale(.40,.50,.46);mesh(head,cap,hair,0,.40,-.07);}
+  for(const d of [-1,1]){const ear=new T.SphereGeometry(1,8,5);ear.scale(.042,.07,.045);mesh(head,ear,skin,d*.335,.34,-.04);}
+ }
  const motif=(kind)=>{
   if(rich&&['warrior','paladin','berserker'].includes(cls)){
    const chest=[[-.48,.36],[-.27,.51],[0,.39],[.27,.51],[.48,.36],[.36,-.27],[0,-.50],[-.36,-.27]];
@@ -98,7 +136,7 @@ if(tier===0){
   eachShoulder((g,s)=>{shell(g,s,1);if(rich)for(let i=0;i<3;i++)feather(g,s,s*(.14+i*.058),.19+i*.013,-.03,.28-i*.04,.10,metal,.42);});motif();clothPanels(true);
 
  }else if(cls==='ranger'){
-  eachShoulder((g,s)=>{for(let i=0;i<(rich?4:3);i++)feather(g,s,s*(.05+i*.072),.11-i*.014,.015-i*.028,rich?.40:.31,.16,i%2?metal:enamel,.5+i*.08);});motif();clothPanels(true);
+  eachShoulder((g,s)=>{for(let i=0;i<(rich?4:3);i++)feather(g,s,s*(.05+i*.072),.11-i*.014,.015-i*.028,rich?.40:.31,.16,i%2?metal:enamel,.5+i*.08);});motif();clothPanels();
  }else if(cls==='mage'){
   clothPanels();eachShoulder((g,s)=>{shell(g,s);for(let i=0;i<3;i++)gem(g,s*(.08+i*.066),.20,.10-i*.06,.041);});chestSigil();limbDetails(true);
   if(rich){const sky=group(head,0,1.23,-.04);sky.name='Archmage quiet celestial halo';sky.userData.legendaryFeature='Quiet celestial halo';ring(sky,0,0,0,.48,light,Math.PI/2);for(let i=0;i<2;i++){const star=group(sky);gem(star,0,0,0,.042,light);animate(star,'orbit',i*Math.PI);}}
@@ -265,6 +303,27 @@ if(tier===0){
  }
 
 
+ // Rank 5 is a finished outfit. Rank 10 retains these fitted signatures and ascends.
+ if(tier>0&&ASCENSION_CLASSES.has(cls)){
+  const sign=group(body);sign.name='Earned outfit - '+cls;sign.userData.earnedOutfit=true;
+  if(cls==='ninja'){
+   tube(sign,[[-.23,.28,.34],[-.04,.10,.41],[.23,-.12,.34]],.035,enamel);
+   for(const d of [-1,1]){const belt=group(hips,d*.15,-.13,.28);plaque(belt,BLADE,.18,.38,0,0,0,dark,-d*.11);tube(belt,[[-.045,.12,.025],[0,-.10,.028],[.045,.12,.025]],.008,metal);}
+   inset(sign,SHIELD,.13,.14,.02,-.14,.40,enamel);gem(sign,.02,-.12,.444,.025,light);
+  }else if(cls==='warrior'){
+   for(const d of [-1,1]){const q=group(hips,d*.16,-.12,.24);inset(q,SHIELD,.23,.31,0,0,0,enamel,-d*.12);tube(q,[[-.06,.08,.05],[0,-.10,.05],[.06,.08,.05]],.009,metal);}
+   tube(sign,[[0,.26,.40],[0,.06,.43],[0,-.10,.40]],.015,metal);tube(sign,[[-.075,.14,.42],[.075,.14,.42]],.012,metal);
+  }else if(cls==='ranger'){
+   for(const d of [-1,1]){tube(sign,[[d*.25,.29,.26],[d*.12,.08,.39],[d*.14,-.14,.37]],.019,dark);feather(sign,d,d*.15,.23,.38,.18,.085,enamel,d*.65);}
+   const brooch=group(sign,0,.08,.43);plaque(brooch,LEAF,.13,.20,0,0,0,metal);tube(brooch,[[0,-.07,.025],[0,.09,.025]],.006,light);
+  }else if(cls==='mage'){
+   for(const d of [-1,1]){tube(sign,[[d*.20,.33,.25],[d*.15,.15,.37],[d*.15,-.17,.36]],.027,enamel);for(let j=0;j<3;j++)gem(sign,d*.16,.19-j*.11,.40,.018,light);}
+   const clasp=group(sign,0,.28,.395);ring(clasp,0,0,0,.055,metal);gem(clasp,0,0,.026,.032,light);
+  }else{
+   for(let j=0;j<5;j++){const y=.23-j*.075;plaque(sign,BLADE,.04,.075,0,y,.39,ivory);for(const d of [-1,1])tube(sign,[[d*.035,y,.37],[d*.14,y-.014,.36]],.008,metal,1);}
+   const vial=group(hips,.30,-.10,-.04);mesh(vial,new T.CylinderGeometry(.045,.035,.18,8),dark);ring(vial,0,.09,0,.041,ivory,Math.PI/2);gem(vial,0,.005,.041,.025,light);
+  }
+ }
  // Legendary fittings add class-specific craft inside the existing fitted silhouette.
  // They do not scale the body, cover the face or add scene lights/particle emitters.
  if(tier===2){
@@ -328,12 +387,13 @@ if(tier===0){
  r.groups.forEach(batch);
  // Keep transparent energy outside the opaque fitting batches and its resources
  // owned by this actor. Rank 5 remains the approved fitted outfit without aura.
- if(tier===2){r.aura=createClassAura(hips,cls);if(r.aura){r.meshes+=r.aura.stats.drawCalls;r.triangles+=r.aura.stats.triangles;}}
+ if(tier===2){r.aura=ASCENSION_CLASSES.has(cls)?createAscension(hips,cls):createClassAura(hips,cls);if(r.aura){r.meshes+=r.aura.stats.drawCalls;r.triangles+=r.aura.stats.triangles;}}
  return r;
 }
 export function syncClassLook(root,cls,tier,M,time=0,motion=true){
  if(!root)return;const n=window.BFClassLooks?.valid(tier)||0,key=cls+':'+n;let r=records.get(root);if(r?.key!==key){clearClassLook(root);r=build(root,cls,n);}const t=motion?time:0;
+ if(r.uncovered)root.traverse(node=>{const mouth=!!(node.userData._mouthShape||node.userData._mouth);if(node.parent?.name!=='Head'||(!mouth&&!(node.isGroup&&node.userData._eye)))return;if(!r.facePositions.has(node))r.facePositions.set(node,node.position.clone());node.position.copy(r.facePositions.get(node));node.position.y+=mouth?.16:.045;if(mouth){node.position.x+=.12;node.position.z+=.21;}});
  for(const a of r.moving){const {m,base,rotation,scale,speed}=a;m.position.copy(base);m.rotation.copy(rotation);m.scale.copy(scale);if(a.type==='spinZ')m.rotation.z+=t*speed;if(a.type==='spinY')m.rotation.y+=t*speed;if(a.type==='orbit'){m.position.set(Math.cos(t*.28+speed)*.51,Math.sin(t*.28+speed)*.065,Math.sin(t*.28+speed)*.51);m.rotation.y=-t*.28;}if(a.type==='breathe')m.position.y+=Math.sin(t*1.7+speed)*.012;if(a.type==='flame')m.scale.y*=1+(motion?Math.sin(t*2.5+speed)*.09:0);if(a.type==='pulse')m.scale.multiplyScalar(1+(motion?Math.sin(t*2+speed)*.035:0));if(a.type==='petal')m.rotation.z+=motion?Math.sin(t*.8+speed)*.035:0;}
- syncClassAura(r.aura,time,motion,window.__BF_META?.()?.quality==='low');
+ if(r.aura?.stats.ascension)syncAscension(r.aura,time,motion,window.__BF_META?.()?.quality==='low');else syncClassAura(r.aura,time,motion,window.__BF_META?.()?.quality==='low');
  return {key,meshes:r.meshes,animated:r.moving.length,triangles:r.triangles,aura:r.aura?.stats||null};
 }

@@ -4028,3 +4028,7 @@ Audited all136 actions; revised31 poses and22 effect compositions across Ranger,
 
 ## 2026-10-22 - Piercing Star frontal readability (2.362.1)
 Final front-camera comparison found the giant shuriken was permanently edge-on along its flight direction because an outer quarter-turn rotated its already-upright disc. Use a slight cant instead; silhouette now reads from the normal front/back view. Other skills, gameplay and durations unchanged. Refresh identity script cache in game and preview.
+
+
+## 2026-10-22 - Five-class ascension pilot (2.363.0-class-ascension)
+Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: completed rank5 outfits and distinct rank10 shadow-silk, ancestral souls, spectral standards, living foliage and celestial orbit. Ninja earns its hood at5 and has no added nose; source head/face edits restore on class changes and fresh peer/preview clones. Other12 classes, cosmetic IDs, ranks, palettes, gameplay and saves preserved. Three rank10 effect draws (two on low), reduced-motion support, equal-angle wardrobe comparison. All51 rigs/4080frames/204gates and eight suites pass; native five-class angles/motion/quality, real Stylist equip/save and staged peer-render paths checked. Human appeal and live network co-op remain unverified. Evidence docs/art-validation/ascension-pilot-20261022.

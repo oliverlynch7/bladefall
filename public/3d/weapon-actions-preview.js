@@ -1,5 +1,5 @@
 import * as T from './three.module.js';
-import {createClassDisplay} from './hero3d.js?v=2362';
+import {createClassDisplay} from './hero3d.js?v=2363c';
 import {applyWeaponAction,restoreWeaponAction} from './weapon-actions3d.js?v=2333d';
 import {syncCombatArt} from './combat-art-three.js?v=2330f';
 const $=id=>document.getElementById(id),api=window.BFWeaponActions,canvas=$('view'),renderer=new T.WebGLRenderer({canvas,antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.outputColorSpace=T.SRGBColorSpace;

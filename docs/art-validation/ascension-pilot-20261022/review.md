@@ -19,3 +19,5 @@ Preview: /3d/class-skins.html?collection=ascension&class=ninja&v=2363c
 The comparison preview now uses equal orthographic framing so the rightmost rank10 is viewed at the same angle as the other ranks. Drag, zoom, animation, weapons and capes remain available. In-game camera behavior is unchanged. Isolated QA tabs use in-memory storage and are closed after checking; player saves are untouched.
 
 The Ninja starter hair also remains visible in the Stylist face close-up; earned head ornaments retain the existing close-up behavior.
+
+Published verification: code74867b58 / mirror d50df72a; Cloudflare3b893f36 succeeded. All18 public resources match committed SHA256 on unique deployment and production. Native production preview loads all15 looks with the correct five ascension effects, v2363c imports, no warnings/errors and no WebGL errors. Evidence public-hashes.json, public-native.json and published-ninja.png. Source Ninja nose removed and live local Stylist close-up visually checked. Human aesthetic review and a new live network co-op session remain unverified.

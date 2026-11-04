@@ -1,0 +1,64 @@
+{
+  "commit": "6d58fd73",
+  "deployment": "d5e5aa9a-1d96-4fb4-8d4a-0f86cdd223d0",
+  "status": "success",
+  "allMatch": true,
+  "checks": [
+    {
+      "file": "index.html",
+      "matchesCommittedBytes": true,
+      "sha256": "3e65a70f13521ed012ce39333afed5af95c502b532db65b54f36211fc6bb5640",
+      "expectedSha256": "3e65a70f13521ed012ce39333afed5af95c502b532db65b54f36211fc6bb5640",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "campaign-hunts.js",
+      "matchesCommittedBytes": true,
+      "sha256": "c8d14da41bcf82490ae46837494667a083a54eb880e896038a576a812f5413e2",
+      "expectedSha256": "c8d14da41bcf82490ae46837494667a083a54eb880e896038a576a812f5413e2",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "quest-panels.js",
+      "matchesCommittedBytes": true,
+      "sha256": "e613ec1dc91565f95df01b882d282fb2d387be7509529bfbbddf94f6e6c07cfe",
+      "expectedSha256": "e613ec1dc91565f95df01b882d282fb2d387be7509529bfbbddf94f6e6c07cfe",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "hub-dialogue.js",
+      "matchesCommittedBytes": true,
+      "sha256": "d7505400b7a512e7d0850a94f11621f6cdf415ab95f833f3348ed815bb3594c4",
+      "expectedSha256": "d7505400b7a512e7d0850a94f11621f6cdf415ab95f833f3348ed815bb3594c4",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "hub-dialogue.css",
+      "matchesCommittedBytes": true,
+      "sha256": "3d46921654698afa42707a24367c0528b4f1543d9361b44328cdcae1b6afe387",
+      "expectedSha256": "3d46921654698afa42707a24367c0528b4f1543d9361b44328cdcae1b6afe387",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "npc-voices/manifest.json",
+      "matchesCommittedBytes": true,
+      "sha256": "8ecc74f4e9db4886e9c9d827c63ef541976c5436868bc497bd3f256f99cb5d54",
+      "expectedSha256": "8ecc74f4e9db4886e9c9d827c63ef541976c5436868bc497bd3f256f99cb5d54",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "npc-voices/briar.gus.first-67e509beff7c.mp3",
+      "matchesCommittedBytes": true,
+      "sha256": "ebc8c2ee5cb80affaf702ffcf2d2bb8a9531b20aeb06588f14c6506183694a4c",
+      "expectedSha256": "ebc8c2ee5cb80affaf702ffcf2d2bb8a9531b20aeb06588f14c6506183694a4c",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "npc-voices/briar.gus.request-f7313e645b10.mp3",
+      "matchesCommittedBytes": true,
+      "sha256": "2ddbcface1322004949c6ee5efc853865be3d5ec84462fe3bb3128b8956bfaad",
+      "expectedSha256": "2ddbcface1322004949c6ee5efc853865be3d5ec84462fe3bb3128b8956bfaad",
+      "cloudflareLoaderRemoved": false
+    }
+  ]
+}

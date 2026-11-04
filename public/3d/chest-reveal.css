@@ -66,3 +66,8 @@
 @media(max-width:899px) and (orientation:landscape){
  #chest-reveal.settled{width:max(240px,calc(100vw - 480px))}
 }
+
+/* Retained rewards teach the bag shortcut without adding another popup. */
+#chest-reveal.settled .cr-open-bag{grid-column:1 / -1;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:7px;padding:7px 10px;background:#e8b858;color:#211809;border-color:#ffdda0;font-size:12px}
+.cr-open-bag img{width:23px;height:23px;object-fit:contain}.cr-open-bag kbd{font:800 13px system-ui;background:#291d0b;color:#fff0c2;border:1px solid #6e4c1e;border-bottom-width:3px;padding:2px 7px;border-radius:4px}
+#chest-reveal.settled .cr-open-bag:hover{background:#ffd37c}

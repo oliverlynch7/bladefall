@@ -17,6 +17,7 @@ let buttons=[button('Delete save'),button('Buy'),button('Back to Pause Menu')];o
 const source=fs.readFileSync('public/3d/index.html','utf8');
 const binds={meta:{keybinds:{lootSell:['KeyQ'],bag:['KeyI']}},window:{addEventListener(){}},document:{addEventListener(){}},updateHudKeys(){}};vm.createContext(binds);vm.runInContext(source.slice(source.indexOf('const KEYACTIONS='),source.indexOf('/* Is the level editor open?')),binds);
 ok(binds.meta.keybinds.lootSell[0]==='KeyX','old Q sale migrates to X');ok(binds.meta.keybinds.bag[0]==='KeyI','custom bag key preserved');ok(vm.runInContext("keyAction('KeyQ')===null",binds),'Q cannot trigger a gameplay action');
+binds.meta.keybinds.bag=['KeyQ'];binds.ensureKeybinds();ok(binds.meta.keybinds.bag[0]==='KeyB','retired Q bag binding safely migrates to B');
 ok(source.includes("keyAction(e.code)==='bag'&&!BFMenuKeys.typing(e.target)"),'bag close uses current binding');
 for(const m of source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g))if(!/\bsrc\s*=|type=["'](?:module|importmap)/.test(m[1])&&m[2].trim())new vm.Script(m[2]);
 ok(vm.runInContext("keyAction('KeyC')==='stats'",binds),'new Character Stats action defaults to C');

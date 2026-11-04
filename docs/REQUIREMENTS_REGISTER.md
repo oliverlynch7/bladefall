@@ -2893,3 +2893,10 @@ U-ASCENSION-PILOT-20261022 correction: No added noses. Remove the new Ninja nose
 
 ## 2026-10-22 - Five-class ascension pilot (2.363.0-class-ascension)
 Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: completed rank5 outfits and distinct rank10 shadow-silk, ancestral souls, spectral standards, living foliage and celestial orbit. Ninja earns its hood at5 and has no added nose; source head/face edits restore on class changes and fresh peer/preview clones. Other12 classes, cosmetic IDs, ranks, palettes, gameplay and saves preserved. Three rank10 effect draws (two on low), reduced-motion support, equal-angle wardrobe comparison. All51 rigs/4080frames/204gates and eight suites pass; native five-class angles/motion/quality, real Stylist equip/save and staged peer-render paths checked. Human appeal and live network co-op remain unverified. Evidence docs/art-validation/ascension-pilot-20261022.
+
+
+## Desktop dialogue and post-chest bag access — 2026-11-04
+
+| ID | Decision | Requirement | Status |
+|---|---|---|---|
+| U-DESKTOP-AUDIO-LOOT-20261104 | A | Desktop browser NPC voices start promptly; retained chest rewards show a bag icon and B/Open bag cue in the existing result bubble; B defaults to bag, Q only cancel/back/exit. Rebound bag hints stay accurate. | Implemented 2.364.0; focused tests and native browser input/reward/audio-buffer checks passed. See art-validation/desktop-voice-loot-20261104 and requirements/USER_SOURCE_2026-11-04.md. |

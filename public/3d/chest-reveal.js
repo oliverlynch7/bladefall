@@ -21,6 +21,7 @@ function finish(){
  const stats=document.createElement('div');stats.className='cr-stats';stats.innerHTML=a.summary||'';
  const usage=document.createElement('small');usage.textContent=a.usability||'';
  body.append(rarity,stats,usage);card.append(img,body);a.status.before(card);
+ if(a.bagged){const button=document.createElement('button');button.type='button';button.className='cr-open-bag';const icon=document.createElement('img');icon.src='icons/action_bag_stash.png';icon.alt='';const key=document.createElement('kbd');key.textContent=window.__BF3?.controlKey?.('bag')||'B';const label=document.createElement('span');label.textContent='Open bag · inspect or equip';button.append(icon,key,label);button.onclick=()=>{if(active!==a)return;a.onOpenBag?.();};a.root.append(button);}
  notify(a);a.tickFrame=requestAnimationFrame(()=>ticks(a));
 }
 function ticks(a){
@@ -44,7 +45,7 @@ function show(data){
  const root=document.createElement('section');root.id='chest-reveal';root.style.setProperty('--loot-color',data.color||'#bea064');root.setAttribute('aria-label','Chest reward');root.innerHTML='<div class="cr-head"><span class="cr-title"></span><span class="cr-auto">One item</span></div><div class="cr-window"><div class="cr-marker"></div><div class="cr-reel"></div></div><div class="cr-result" role="status" aria-live="polite">One equipment reward</div>';
  const reel=root.querySelector('.cr-reel');root.querySelector('.cr-title').textContent='Opening '+data.grade+' chest';
  for(const d of data.cards){const card=document.createElement('div');card.className='cr-card';card.style.setProperty('--rarity',d.color);const img=document.createElement('img');img.src=d.icon||'';img.alt='';const label=document.createElement('span');label.textContent=d.name;const rarity=document.createElement('small');rarity.textContent=d.rarity;card.append(img,label,rarity);reel.append(card);}
- document.body.append(root);const now=performance.now(),a=active={root,reel,title:root.querySelector('.cr-title'),status:root.querySelector('.cr-result'),name:data.name,result:data.result,summary:data.summary,icon:data.icon,rarity:data.rarity,color:data.color,usability:data.usability,winner:Number.isInteger(data.winner)?Math.max(0,Math.min(data.cards.length-1,data.winner)):0,onTick:data.onTick,onReveal:data.onReveal,lastCard:0,lastTick:0,openedAt:now,lastFrame:now,elapsed:0,wasHidden:document.hidden,phase:'rolling',done:false};
+ document.body.append(root);const now=performance.now(),a=active={root,reel,title:root.querySelector('.cr-title'),status:root.querySelector('.cr-result'),name:data.name,result:data.result,summary:data.summary,icon:data.icon,rarity:data.rarity,color:data.color,usability:data.usability,bagged:data.bagged===true,onOpenBag:data.onOpenBag,winner:Number.isInteger(data.winner)?Math.max(0,Math.min(data.cards.length-1,data.winner)):0,onTick:data.onTick,onReveal:data.onReveal,lastCard:0,lastTick:0,openedAt:now,lastFrame:now,elapsed:0,wasHidden:document.hidden,phase:'rolling',done:false};
  a.step=reel.children[0].getBoundingClientRect().width+10;a.distance=center(a);a.reel.style.transform='translateX(0px)';
 
  if(data.reduceMotion)finish();else a.tickFrame=requestAnimationFrame(()=>ticks(a));

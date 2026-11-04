@@ -53,6 +53,9 @@ async function run(){
   assert.equal(restored.nodes.static.recordedAudio,'./npc-voices/hello.mp3','recovered cast attaches');
   time=100000;await w.BFVoiceContent.apply(make());assert.equal(staticCalls,2,'successful static cast stays cached');
  }
+ // A slow/offline optional studio must never delay the bundled approved cast.
+ let release;const fast={},slow={window:fast,Date,AbortSignal:{timeout:()=>({})},fetch:url=>url.includes('npc-voices/manifest')?Promise.resolve({ok:true,json:async()=>({lines:{test:{text:'Hello.',speaker:'thomas',audio:'./npc-voices/test.mp3'}}})}):new Promise(r=>release=r)};
+ vm.runInNewContext(fs.readFileSync('public/3d/voice-content.js','utf8'),slow);const pendingBook={nodes:{test:{text:'Hello.',voice:{speaker:'thomas'}}}};let ready=false;const pending=fast.BFVoiceContent.apply(pendingBook).then(()=>ready=true);for(let i=0;i<12;i++)await Promise.resolve();assert(ready,'approved cast resolves while optional studio is still pending');assert.equal(pendingBook.nodes.test.recordedAudio,'./npc-voices/test.mp3');release({ok:true,json:async()=>({lines:{test:{text:'Hello.',audio:'/voice-api/published/revised.mp3',revision:3}}})});await pending;for(let i=0;i<8;i++)await Promise.resolve();assert.equal(pendingBook.nodes.test.recordedAudio,'/voice-api/published/revised.mp3','matching published overrides still attach in background');
  console.log('Voice manifest: shared fetch, text guards, bounded loading and four failure-recovery paths passed.');
 }
 run().catch(e=>{console.error(e);process.exitCode=1});

@@ -17,16 +17,26 @@
  function news(n,a){const d=book?.npcs[n.id];if(!d)return null;const latest=(d.newsStages||[]).filter(q=>a.meta.zoneDone?.[q.zone]).at(-1);if(latest)return state(a,n.id).newsSeenId===latest.id?null:latest.id;return Object.values(a.meta.zoneDone||{}).filter(Boolean).length>=d.newsAfterCompletedRegions&&!state(a,n.id).newsSeen?d.news:null}
  function hasNews(n,a){return !!news(n,a)}
  // Reuse a gesture-unlocked media element; delayed fetches must not lose voice permission.
- let voiceMedia=null,voiceUnlocked=false,voicePriming=false;
+ let voiceMedia=null,voiceUnlocked=false,voicePriming=false,playingSource='';
+ const warmVoices=new Map(),warmFailures=new Map();
  const silentVoice='data:audio/wav;base64,UklGRmQBAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YUABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==';
- function mediaPlayer(){return voiceMedia||(voiceMedia=new Audio());}
+ function mediaPlayer(src){if(src&&warmVoices.has(src)){const clip=warmVoices.get(src);warmVoices.delete(src);return clip;}return voiceMedia||(voiceMedia=new Audio());}
+ function warmLine(node,settings){
+  if(typeof innerWidth!=='number'||innerWidth<900||settings?.soundOn===false||settings?.dialogueVoice===false||settings?.dialogueVol===0)return;
+  const src=node?.recordedAudio;if(!src||src===playingSource||warmVoices.has(src)||(warmFailures.get(src)||0)>performance.now())return;
+  while(warmVoices.size>=8){const [key,old]=warmVoices.entries().next().value;warmVoices.delete(key);old.onerror=null;old.pause();old.removeAttribute('src');old.load();}
+  const clip=new Audio();clip.preload='auto';clip.volume=0;warmVoices.set(src,clip);clip.onerror=()=>{if(warmVoices.get(src)===clip){warmVoices.delete(src);warmFailures.set(src,performance.now()+60000);if(warmFailures.size>32)warmFailures.delete(warmFailures.keys().next().value);}};clip.src=src;clip.load();
+ }
+ function warm(n,source=book,story=null,settings={}){
+  source=source||book;const def=source?.npcs?.[n.id];if(!def)return;const node=source.nodes[story?.cursors?.[n.id]?.node]||source.nodes[def.start];warmLine(node,settings);for(const c of (node?.choices||[]).slice(0,2))warmLine(source.nodes[c.next],settings);
+ }
  function primeVoice(event){
   if(!event.isTrusted||voiceUnlocked||voicePriming||active||audio)return;
   const clip=mediaPlayer();voicePriming=true;clip.volume=0;clip.src=silentVoice;
   try{Promise.resolve(clip.play()).then(()=>{voiceUnlocked=true;if(!audio&&clip.src===silentVoice){clip.pause();clip.removeAttribute('src');clip.load();}}).catch(()=>{}).finally(()=>{voicePriming=false;});}catch(_){voicePriming=false;}
  }
  document.addEventListener('pointerdown',primeVoice,true);document.addEventListener('keydown',primeVoice,true);
- function cancelVoice(){voiceGeneration++;clearTimeout(voiceTimer);speaking=false;if(audio){const old=audio;audio=null;old.onplaying=old.onpause=old.onwaiting=old.onended=old.onerror=null;old.pause();old.removeAttribute('src');old.load();}if(utterance){speechSynthesis.cancel();utterance=null;}}
+ function cancelVoice(){playingSource='';voiceGeneration++;clearTimeout(voiceTimer);speaking=false;if(audio){const old=audio;audio=null;old.onplaying=old.onpause=old.onwaiting=old.onended=old.onerror=null;old.pause();old.removeAttribute('src');old.load();}if(utterance){speechSynthesis.cancel();utterance=null;}}
  function stopVoice(){generation++;clearTimeout(timer);cancelAnimationFrame(frame);cancelVoice();}
  function voiceVolume(meta){const value=meta.dialogueVol==null?.85:Number(meta.dialogueVol);return Number.isFinite(value)?Math.max(0,Math.min(1,value)):.85;}
  function voiceControls(){return '<div class="hub-voice-controls"><button id="hubVoiceReplay" type="button" aria-label="Replay this NPC voice">▶ Replay voice</button><span id="hubVoiceStatus" role="status" aria-live="polite"></span></div>';}
@@ -56,7 +66,7 @@
    if(a.meta.dialogueVoice===false){tts();return;}
    if(!node.recordedAudio){status('Loading voice…');try{await BFVoiceContent.apply({nodes:{[id]:node}});}catch(_){}if(!still())return;}
    if(!node.recordedAudio){tts();return;}
-   const clip=audio=mediaPlayer();clip.src=node.recordedAudio;clip.volume=voiceVolume(a.meta);status('Loading recorded voice…');
+   const clip=audio=mediaPlayer(node.recordedAudio);playingSource=node.recordedAudio;if(clip.getAttribute?.('src')!==node.recordedAudio)clip.src=node.recordedAudio;clip.volume=voiceVolume(a.meta);status('Loading recorded voice…');
    const detach=()=>{clip.onplaying=clip.onpause=clip.onwaiting=clip.onended=clip.onerror=null;clip.pause();clip.removeAttribute('src');clip.load();if(audio===clip)audio=null;};
    const failed=error=>{if(!still()||audio!==clip)return;clearTimeout(voiceTimer);speaking=false;detach();if(error?.name==='NotAllowedError'){status('Press Play voice to hear this line');button('▶ Play voice');}else tts();};
    clip.onplaying=()=>{if(still()){voiceUnlocked=true;clearTimeout(voiceTimer);speaking=true;status('Recorded voice');button('▶ Replay voice');}};
@@ -135,7 +145,7 @@
   el('hubReveal').onclick=unlock;
   unlock(); // Read and choose immediately; narration never gates interaction.
 
-  wireVoice(id,node,!keepVoice);
+  wireVoice(id,node,!keepVoice);for(const choice of node.choices.slice(0,2))warmLine((active.source||book)?.nodes?.[choice.next],a.meta);
  }
  async function open(n,a){
   if(active)close();const token=++generation;active={n,a,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');shell('<p>Opening conversation…</p>');
@@ -145,7 +155,7 @@
  function present(n,a,source,view,canChoose){
   if(!view){if(active?.external)close(false,true);return;}
   if(!active?.external||active.n.id!==n.id){if(active)close(false,true);active={n,a,external:true,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');}
-  active.canChoose=canChoose;const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;const keepVoice=active.lineId===view.lineId&&active.voiceText===view.text;active.signature=signature;
+  active.source=source;active.canChoose=canChoose;const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;const keepVoice=active.lineId===view.lineId&&active.voiceText===view.text;active.signature=signature;
   showLine(view.lineId,{...source.nodes[view.lineId],recordedAudio:source.nodes[view.lineId]?.text?.trim()===view.text?.trim()?source.nodes[view.lineId]?.recordedAudio:undefined,text:view.text,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:c.end?false:(c.optional??!!original?.optional),questProgress:!c.end&&(!!c.questProgress||!!original&&questProgress(original))}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Leave conversation',canChoose,keepVoice);
  }
  function listen(n,a,lineId){
@@ -168,5 +178,5 @@ function focus(){if(!active)return null;const {n,a}=active,p=a.player();const x=
   }
  }
  if(!active)return;if(e.code==='Escape'){e.preventDefault();e.stopImmediatePropagation();close()}else if(e.code==='Tab'){const buttons=[...el('hubDialogue').querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(e=>e.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}}},true);
- window.BFHubDialogue={voiceVolume,selectFirst,open,close,present,listen,focus,ready,hasNews,known:id=>!!book?.npcs[id]||['quartermaster','anvil','keeper','drillmaster','beastkeeper','thomas'].includes(id),get active(){return active},get speaking(){return speaking}};
+ window.BFHubDialogue={warm,voiceVolume,selectFirst,open,close,present,listen,focus,ready,hasNews,known:id=>!!book?.npcs[id]||['quartermaster','anvil','keeper','drillmaster','beastkeeper','thomas'].includes(id),get active(){return active},get speaking(){return speaking}};
 })();

@@ -26,18 +26,20 @@ function manifest(){
 }
 window.BFVoiceContent={async apply(book){
  try{
-  const [cast,data]=await Promise.all([castManifest(),manifest()]);
+  const published=manifest(),cast=await castManifest();
   for(const [id,line]of Object.entries(cast?.lines||{})){
    const node=book.nodes[id];
    if(!node||node.text.trim()!==line.text?.trim()||node.voice?.speaker!==line.speaker)continue;
    if(!/^\.\/npc-voices\/[a-zA-Z0-9_.-]+\.mp3$/.test(line.audio||''))continue;
    node.recordedAudio=line.audio;node.voiceRevision=cast.revision;node.voiceCast=line.option;
   }
-  if(!data)return book;
-  for(const [id,line]of Object.entries(data.lines||{})){
+  // Optional studio storage must not delay a ready, approved local recording.
+  published.then(data=>{
+  for(const [id,line]of Object.entries(data?.lines||{})){
    if(!Object.prototype.hasOwnProperty.call(book.nodes,id)||typeof line.text!=='string'||!line.audio?.startsWith('/voice-api/published/'))continue;
    if(book.nodes[id].text.trim()!==line.text.trim())continue;book.nodes[id].recordedAudio=line.audio;book.nodes[id].voiceRevision=line.revision;
   }
+  }).catch(()=>{});
  }catch(_){/* Text-only play remains available when audio storage is offline. */}
  return book;
 }};

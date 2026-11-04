@@ -1,0 +1,27 @@
+{
+  "version": "2.364.0-dialogue-loot",
+  "date": "2026-11-04",
+  "browser": "native in-app Chromium at localhost:4331, muted isolated test storage",
+  "verified": [
+    "Real chest reward retained with bag artwork and B hint",
+    "B opens bag and clears settled reward; Q closes without opening bag",
+    "Custom I binding reflected in reward; clicking reward opens real bag",
+    "Auto-sold chest omits bag CTA and leaves stash unchanged",
+    "Nearby Smith intro and guide automatically buffered, native readyState 4 and canplay",
+    "Native buffered MP3 muted play promise resolved in 0.4 ms"
+  ],
+  "tests": [
+    "voice-content",
+    "dialogue-voice-playback (38)",
+    "chest-reveal (129)",
+    "menu-shortcuts (23 plus related checks)",
+    "loot-transactions (22)",
+    "loot-notices (6)",
+    "bag-browser"
+  ],
+  "limits": [
+    "Muted native playback does not establish perceived hardware latency or remove authored silence",
+    "Dialogue dispatch, cancellation, mute and retry behavior covered by VM tests",
+    "No production saves modified; no Unreal changes"
+  ]
+}

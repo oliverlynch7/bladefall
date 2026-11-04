@@ -1,0 +1,36 @@
+{
+  "commit": "b884e1e0",
+  "deployment": "a57cd622-76dc-41ce-a2fc-3cf330c0b38d",
+  "allMatch": true,
+  "checks": [
+    {
+      "file": "index.html",
+      "matchesCommittedBytes": true,
+      "sha256": "3a382155ac09f11d7d0521c7e6c811e6b4207878b7871b683b1ed6386cd58efa",
+      "expectedSha256": "3a382155ac09f11d7d0521c7e6c811e6b4207878b7871b683b1ed6386cd58efa",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "hub-dialogue.js",
+      "matchesCommittedBytes": true,
+      "sha256": "5b83144b020a80a9976e285df74b3c77cea6f1ce65dd15c0240c0350769aa797",
+      "expectedSha256": "5b83144b020a80a9976e285df74b3c77cea6f1ce65dd15c0240c0350769aa797",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "hub-dialogue.css",
+      "matchesCommittedBytes": true,
+      "sha256": "27d9cb239d4665c6e9d77033ad64c1428b9e8ea2f70f9a030802243161606a25",
+      "expectedSha256": "27d9cb239d4665c6e9d77033ad64c1428b9e8ea2f70f9a030802243161606a25",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "npc-voices/rv.keepsake.home-1befe0f2aaff.mp3",
+      "matchesCommittedBytes": true,
+      "sha256": "a6f80b0b055f349e098efed15c14d0a118ef07f07595ea9af2282a6b2e80a240",
+      "expectedSha256": "a6f80b0b055f349e098efed15c14d0a118ef07f07595ea9af2282a6b2e80a240",
+      "cloudflareLoaderRemoved": false
+    }
+  ],
+  "status": "success"
+}

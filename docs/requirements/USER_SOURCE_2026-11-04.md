@@ -20,3 +20,7 @@ Interpretation: quick equip retained chest loot from the existing result card, p
 
 ## U-HUB-GREETING-FIRST-20261104
 User: "Also when I interact with NPCs at the hub, I want their voice lines to come up first before I access their menus. So it really feels like I'm talking to them and getting to know them before I just click into their menus and use the utility of them."
+
+
+## U-ENEMY-FACING-20261104
+User: "Also there's a major issue with certain enemy types, like the tankier ones that have shields, and even the Abyss King. It's that part of the strategy to beating them is to get behind them, but the way that enemy behavior operates is they always face towards you with perfect tracking no matter what. So you can never actually get behind them because they'll always be looking at you. And this is obviously a problem, and I also don't think enemies should operate like this. I think it should be a little bit more natural, and especially when they commit to an attack or a defensive stance or something, they should be facing the way that they're facing, and they shouldn't just, like, perfectly track the player all the time. It should be a bit more natural than that. They generally should want to look towards the player, but, like, not like perfect security cameras, if that makes sense. Please fix."

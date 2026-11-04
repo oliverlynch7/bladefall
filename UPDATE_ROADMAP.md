@@ -4048,3 +4048,7 @@ Retained chest results show a green F/Equip now button beside amber B/Open bag, 
 
 ## 2026-11-04 - Greeting before hub menus (2.367.0-hub-greetings)
 Fresh talks with Quartermaster, Smith, Stylist, Drillmaster, Beastkeeper and Thomas open a voiced, text-readable greeting before service/quest/lore options. Continue uses actual interact binding, with250ms arming; Q leaves. Continue preserves the playing line; shop/quest Back restores options without repeating the greeting. No utility footer shortcut can bypass the greeting. Thomas reuses his fitting approved hub line and proximity buffering/listener support. Fresh co-op requests still acquire ownership; a one-use world-local Back marker cannot leak into new talks. No quest/reward/save schema changes or new audio spend. Native all-six, E/U/Q, forge/quest Back, listener path, readable focus and390px checks pass. Suites64 greeting/return,41 playback,120 quest ownership,173 panel and menu checks pass. Evidence docs/art-validation/hub-greetings-20261104. Native checks muted; no new network co-op or physical-phone claim.
+
+
+### 2026-11-04 - v2.368.0: committed enemy facing
+Enemies turn naturally rather than snapping toward the player. Shield guards and Abyss King expose real flank/recovery openings; committed attacks follow their warning direction. Host-facing snapshots keep co-op bodies and shields consistent.55 focused checks plus existing boss suites and muted native combat checks passed. Evidence: docs/art-validation/enemy-facing-20261104.

@@ -1,0 +1,33 @@
+{
+  "guard": {
+    "front": 30,
+    "guest": {
+      "shield": 0,
+      "yaw": 0
+    },
+    "lockMax": 0,
+    "mirror": {
+      "role": "shielder",
+      "shield": 0,
+      "yaw": 0
+    },
+    "packetFacing": 0,
+    "rear": 100
+  },
+  "king": {
+    "aimed": {
+      "dx": 0,
+      "dz": 1,
+      "state": "wind",
+      "yaw": 0
+    },
+    "area": -1,
+    "frontHit": true,
+    "kind": "sweep",
+    "maxYawDuringWind": 0,
+    "playerHp": 10000,
+    "rearHit": false,
+    "state": "strike",
+    "steps": 91
+  }
+}

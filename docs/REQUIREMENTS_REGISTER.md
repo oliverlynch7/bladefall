@@ -2903,3 +2903,6 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 
 
 | U-QUEST-SPEECH-20261104 | A | Restore Gus approved voice; separate concise NPC speech from boxed objectives and distinct gold/XP rewards for side quests and hunts. | Implemented 2.365.0; native UI and focused regressions passed. See art-validation/quest-dialogue-20261104. |
+
+
+| U-LOOT-QUICK-EQUIP-20261104 | A | Beautiful immediate chest-result equip action using F/remapped lootEquip, preserving level/class locks and item conservation. | Implemented 2.366.0; focused transaction and native browser checks passed. See art-validation/quick-equip-20261104. |

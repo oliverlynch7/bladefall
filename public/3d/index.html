@@ -1221,9 +1221,9 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./reaper-combo.js?v=2355"></script>
 <script src="./combat-art.js?v=2333d"></script>
 <script src="./hostile-art.js?v=1978"></script>
-<link rel="stylesheet" href="./chest-reveal.css?v=2364">
+<link rel="stylesheet" href="./chest-reveal.css?v=2366">
 <script src="./chest-rules.js?v=2311"></script>
-<script src="./chest-reveal.js?v=2364"></script>
+<script src="./chest-reveal.js?v=2366"></script>
 <script src="./hub-upgrade-layout.js?v=2121"></script>
 <script src="./field-art.js?v=1976"></script>
 <link rel="stylesheet" href="./guided-tutorial.css?v=2285">
@@ -1247,7 +1247,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.365.0-quest-dialogue';
+const VERSION3D='2.366.0-quick-equip';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -10352,7 +10352,7 @@ const KEYACTIONS=[
   {id:'skill4',  label:'Skill 4',           def:['Digit4']},
   {id:'interact',label:'Interact / Talk',   def:['KeyE']},
   {id:'loot',     label:'Toggle Equipment Auto-sell', def:['KeyV']},
-  {id:'lootEquip',label:'Equip Dropped Item', def:['KeyF']},
+  {id:'lootEquip',label:'Quick Equip Loot', def:['KeyF']},
   {id:'lootBag',  label:'Send Dropped Item to Bag', def:['KeyR']},
   {id:'lootSell', label:'Sell Dropped Item',  def:['KeyX']},
   {id:'auto',    label:'Toggle Auto-Fight', def:['KeyL']},
@@ -10465,7 +10465,7 @@ window.addEventListener('keydown',e=>{
   if(MOVE_ACTS[act]){ if(mode!=='play')return;heldKeyboard.set(code,act);e.preventDefault(); initAudio();
     if(act==='jump'&&!input.jump) input.jumpEdge=true; if(act==='dodge'&&!input.dodge) input.dodgeEdge=true; input[act]=true; return; }
   if(/^skill[1-4]$/.test(act)){ if(mode==='play'&&!e.repeat){ e.preventDefault(); useSkill(+act.slice(5)-1); } return; }
-  if(act==='lootEquip'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootEquipCurrent(); } return; }
+  if(act==='lootEquip'){ if(mode==='play'&&!e.repeat){ e.preventDefault(); initAudio(); if(!BFChestReveal.quickEquip()&&G.lootCard)lootEquipCurrent(); } return; }
   if(act==='lootBag'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootToBag(false); } return; }
   if(act==='lootSell'){ if(mode==='play'&&G.lootCard&&!e.repeat){ e.preventDefault(); initAudio(); lootSellCurrent(); } return; }
   if(act==='loot'){ if(mode==='play'&&!e.repeat){ e.preventDefault(); initAudio(); cycleLootMode(); } return; }
@@ -10515,7 +10515,7 @@ window.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse'||mode!=='p
     input[act]=true; return;
   }
   if(/^skill[1-4]$/.test(act)) useSkill(+act.slice(5)-1);
-  else if(act==='lootEquip'&&G.lootCard) lootEquipCurrent();
+  else if(act==='lootEquip'){if(!BFChestReveal.quickEquip()&&G.lootCard)lootEquipCurrent();}
   else if(act==='lootBag'&&G.lootCard) lootToBag(false);
   else if(act==='lootSell'&&G.lootCard) lootSellCurrent();
   else if(act==='bag'){releaseKeyboard();openBag(resumePlay);}
@@ -14181,12 +14181,29 @@ function claimAuthoredChestItem(item){
  if(!bagged)pushLoot(G.p.x+35,G.p.z,G.p.y,item);
  playFx('chestthunk');revealChestReward({rarity:gear.rarity,challenge:false},item,bagged?'Added to bag':'Bag full · reward placed beside you');
 }
+function chestEquipState(entry,world){
+ if(G!==world||!G?.p)return {allowed:false,reason:'Reward from another area'};
+ if(!meta.stash?.includes(entry))return {allowed:false,reason:'Item no longer in bag'};
+ const item=entry?.weapon||entry?.armor||entry?.trinket;
+ if(!item||!entry.weapon&&!GEARSLOTS.includes(item.slot))return {allowed:false,reason:'Inspect in bag'};
+ if((G.p.level||1)<rarityReq(item.rarity))return {allowed:false,reason:'Requires Level '+rarityReq(item.rarity)};
+ if(entry.weapon&&monkBlocksWeapons(item))return {allowed:false,reason:'Class uses its own weapon'};
+ if(entry.weapon&&!classFamilyOk(item))return {allowed:false,reason:'For another class'};
+ if(G.p.downed||G.p.dead||G.p.hp<=0)return {allowed:false,reason:'Revive before equipping'};
+ if(mode!=='play')return {allowed:false,reason:'Resume play to equip'};
+ return {allowed:true};
+}
+function quickEquipChestItem(entry,world){
+ if(!chestEquipState(entry,world).allowed)return false;
+ initAudio();if(!equipBagItem(entry,world))return false;
+ playFx('equip');autosaveRun();return true;
+}
 function revealChestReward(ch,item,result,gold=0,soldGold=0){
  const describe=box=>{const o=box.weapon||box.armor||box.trinket;return {name:o.name,rarity:o.rarity,color:RARITY[o.rarity].color,icon:itemStaticAv(o)};};
  const rewardWorld=G,kind=item.weapon?'weapon':item.armor?'armor':'trinket',gear=item[kind],equipped=checkpointClone((kind==='weapon'?G.p.weapon:G.p.gear?.[gear.slot])||null);
-  const summary=BFAdventureHud.comparison({kind,item:gear,equipped});
+  const summary=()=>BFAdventureHud.comparison({kind,item:gear,equipped:G===rewardWorld?(kind==='weapon'?G.p.weapon:G.p.gear?.[gear.slot]):equipped});
   const cards=[];for(let i=0;i<24;i++)cards.push(describe(i===20?item:randomLoot(BFChestRules.reward(ch.rarity,ch.challenge,Math.random()))));
- BFChestReveal.show({grade:RARITY[ch.rarity].name,name:describe(item).name,summary,rarity:RARITY[gear.rarity].name,color:RARITY[gear.rarity].color,icon:itemStaticAv(gear),usability:!canWield(gear)?'Requires character level '+rarityReq(gear.rarity):kind==='weapon'&&!classFamilyOk(gear)?'For another class':'Ready to equip',result:result+(gold>0?' · Chest +'+gold+'g':''),bagged:result==='Added to bag',onOpenBag:()=>{if(G!==rewardWorld||!['play','pause','menu'].includes(mode))return;BFChestReveal.clear();releaseKeyboard();openBag(resumePlay);},cards,winner:20,onTick:()=>SFX.lootTick(),onReveal:()=>{SFX.achieve();if(G===rewardWorld)equipmentNotice(kind,gear,result.startsWith('Auto-sold'),soldGold,false,true);},reduceMotion:BFChestReveal.motionReduced(meta.reduceMotion,matchMedia('(prefers-reduced-motion: reduce)').matches)});
+ BFChestReveal.show({grade:RARITY[ch.rarity].name,name:describe(item).name,summary,rarity:RARITY[gear.rarity].name,color:RARITY[gear.rarity].color,icon:itemStaticAv(gear),usability:!canWield(gear)?'Requires character level '+rarityReq(gear.rarity):kind==='weapon'&&!classFamilyOk(gear)?'For another class':'Ready to equip',result:result+(gold>0?' · Chest +'+gold+'g':''),bagged:result==='Added to bag',equipState:()=>chestEquipState(item,rewardWorld),onEquip:()=>quickEquipChestItem(item,rewardWorld),onOpenBag:()=>{if(G!==rewardWorld||!['play','pause','menu'].includes(mode))return;BFChestReveal.clear();releaseKeyboard();openBag(resumePlay);},cards,winner:20,onTick:()=>SFX.lootTick(),onReveal:()=>{SFX.achieve();if(G===rewardWorld)equipmentNotice(kind,gear,result.startsWith('Auto-sold'),soldGold,false,true);},reduceMotion:BFChestReveal.motionReduced(meta.reduceMotion,matchMedia('(prefers-reduced-motion: reduce)').matches)});
 }
 function descentRewardChest(){
  if(!G.endless||G.chests.some(c=>c.descentReward))return;

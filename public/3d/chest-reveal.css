@@ -71,3 +71,20 @@
 #chest-reveal.settled .cr-open-bag{grid-column:1 / -1;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:7px;padding:7px 10px;background:#e8b858;color:#211809;border-color:#ffdda0;font-size:12px}
 .cr-open-bag img{width:23px;height:23px;object-fit:contain}.cr-open-bag kbd{font:800 13px system-ui;background:#291d0b;color:#fff0c2;border:1px solid #6e4c1e;border-bottom-width:3px;padding:2px 7px;border-radius:4px}
 #chest-reveal.settled .cr-open-bag:hover{background:#ffd37c}
+
+/* One compact action row: equip immediately, or inspect the whole bag. */
+#chest-reveal.settled .cr-actions{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-top:8px}
+#chest-reveal.settled .cr-actions:has(>button:only-child){grid-template-columns:1fr}
+#chest-reveal.settled .cr-actions button{grid-column:auto;display:flex;align-items:center;justify-content:center;gap:7px;min-height:40px;margin:0;padding:7px 9px;border-radius:8px;white-space:normal;line-height:1.25}
+.cr-actions img{width:23px;height:23px;object-fit:contain;flex-shrink:0}
+.cr-actions kbd{font:800 13px system-ui;flex-shrink:0;border:1px solid #6c9271;border-bottom-width:3px;padding:2px 7px;border-radius:5px}
+#chest-reveal.settled .cr-equip{color:#edfff1;border:1px solid #9de6ab;background:linear-gradient(135deg,#346844,#214a3e);box-shadow:inset 0 1px #c2ffbd30,0 0 12px #83d79b1a;font-size:12px}
+.cr-equip kbd{background:#112d20;color:#e6ffd8}
+#chest-reveal.settled .cr-equip:hover:not(:disabled){background:linear-gradient(135deg,#438954,#2b6550);border-color:#d2ffbc}
+#chest-reveal.settled .cr-equip:disabled{cursor:default;background:#26303b;color:#bec9d5;border-color:#71829170;box-shadow:none}
+#chest-reveal.settled .cr-equip:disabled img{opacity:.5}
+#chest-reveal.settled.cr-equipped{border-color:#a8e5ad;box-shadow:0 0 16px #86db9a30,0 5px 18px #0006}
+#chest-reveal.settled.cr-equipped .cr-equip{color:#d8ffdc;border-color:#9de6ab;background:#244e37}
+#chest-reveal.settled.cr-equipped .cr-equip img{opacity:1}
+#chest-reveal.settled.cr-equipped .cr-result{color:#b9efbb}
+@media(max-width:480px){#chest-reveal.settled .cr-actions{gap:6px}#chest-reveal.settled .cr-actions button{font-size:11px;gap:5px;padding:7px 5px}.cr-actions img{width:19px;height:19px}.cr-actions kbd{padding:2px 5px}}

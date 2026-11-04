@@ -1,0 +1,31 @@
+{
+  "version": "2.366.0-quick-equip",
+  "date": "2026-11-04",
+  "nativeBrowser": [
+    "Real retained sword reward: F equips it and preserves previous sword in bag",
+    "Remapped lootEquip U displays correctly; F does nothing and U equips",
+    "Under-level rare helmet: disabled Requires Level 6; F preserves bag item and empty slot",
+    "Wrong-class fire staff: disabled For another class; F preserves weapon and bag item",
+    "Clicking F/Equip now equips a ring and preserves previous ring",
+    "B opens bag and clears settled reward; Q closes",
+    "390x844 emulation: action buttons169px each, reward fits within x12..378",
+    "Reload through title/Continue/Normal preserves both protected loadout and newly earned reward under existing campaign checkpoint rules"
+  ],
+  "sourceTests": {
+    "quickEquip": 52,
+    "chestReveal": 144,
+    "bagEquip": 100,
+    "lootTransactions": 22,
+    "menuShortcuts": "pass"
+  },
+  "scope": [
+    "Uses existing lootEquip default F, with current remapped label",
+    "Uses equipBagItem transaction and immediate existing autosave contract",
+    "Existing campaign retry policy intentionally preserved; normal reload restores protected checkpoint equipment and retains earned chest gear in bag",
+    "No rewards granted, duplicated or sold by the result UI"
+  ],
+  "limits": [
+    "Muted native browser tests; no new live network co-op session",
+    "Responsive emulation is not physical phone testing"
+  ]
+}

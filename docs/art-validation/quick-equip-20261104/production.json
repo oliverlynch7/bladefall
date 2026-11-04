@@ -1,0 +1,43 @@
+{
+  "commit": "fa3edc2c",
+  "deployment": "c8f690d1-cb79-4d09-a4a5-f49addab7f8c",
+  "status": "success",
+  "allMatch": true,
+  "checks": [
+    {
+      "file": "index.html",
+      "matchesCommittedBytes": true,
+      "sha256": "47b11a9e2f96499b80990d0c39f502b3dfd940c66f23778a0cb8667ac4aa7010",
+      "expectedSha256": "47b11a9e2f96499b80990d0c39f502b3dfd940c66f23778a0cb8667ac4aa7010",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "chest-reveal.js",
+      "matchesCommittedBytes": true,
+      "sha256": "ef03234956259307429b4e7564e601c12fec88c0196cf44085f9ebe7b94b0e10",
+      "expectedSha256": "ef03234956259307429b4e7564e601c12fec88c0196cf44085f9ebe7b94b0e10",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "chest-reveal.css",
+      "matchesCommittedBytes": true,
+      "sha256": "40be65a0b70da0479a5f989a230c7d927923ebc2d274d82c054926103df8c533",
+      "expectedSha256": "40be65a0b70da0479a5f989a230c7d927923ebc2d274d82c054926103df8c533",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "icons/action_equip.png",
+      "matchesCommittedBytes": true,
+      "sha256": "5e47badfb8ed939cb5d6c2cade7d4a29c25b8c9a1248356f5fd892dc61b61185",
+      "expectedSha256": "5e47badfb8ed939cb5d6c2cade7d4a29c25b8c9a1248356f5fd892dc61b61185",
+      "cloudflareLoaderRemoved": false
+    },
+    {
+      "file": "icons/action_bag_stash.png",
+      "matchesCommittedBytes": true,
+      "sha256": "719456c616c729d0ad30e54a3477841aa4a27ab7378e4adbd76965172d09460a",
+      "expectedSha256": "719456c616c729d0ad30e54a3477841aa4a27ab7378e4adbd76965172d09460a",
+      "cloudflareLoaderRemoved": false
+    }
+  ]
+}

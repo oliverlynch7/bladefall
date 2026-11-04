@@ -2900,3 +2900,6 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 | ID | Decision | Requirement | Status |
 |---|---|---|---|
 | U-DESKTOP-AUDIO-LOOT-20261104 | A | Desktop browser NPC voices start promptly; retained chest rewards show a bag icon and B/Open bag cue in the existing result bubble; B defaults to bag, Q only cancel/back/exit. Rebound bag hints stay accurate. | Implemented 2.364.0; focused tests and native browser input/reward/audio-buffer checks passed. See art-validation/desktop-voice-loot-20261104 and requirements/USER_SOURCE_2026-11-04.md. |
+
+
+| U-QUEST-SPEECH-20261104 | A | Restore Gus approved voice; separate concise NPC speech from boxed objectives and distinct gold/XP rewards for side quests and hunts. | Implemented 2.365.0; native UI and focused regressions passed. See art-validation/quest-dialogue-20261104. |

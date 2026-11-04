@@ -108,7 +108,7 @@
  }
  function returnToMenu(){if(!active)return;if(active.external){const menu=active.a.hubMenu;if(!menu)return;active.afterClose=menu;close();}else landing();}
  function navigationItems(root){return [...root.querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(b=>b.getClientRects().length&&!b.closest('[inert]'));}
- function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices [data-dialogue-category="main"]:not(:disabled)')||root.querySelector('#hubChoices [data-dialogue-end="true"]:not(:disabled)')||root.querySelector('#hubChoices button:not(:disabled):not([hidden])')||root.querySelector('#hubService');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
+ function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices [data-dialogue-category="main"]:not(:disabled)')||root.querySelector('#hubChoices [data-dialogue-end="true"]:not(:disabled)')||root.querySelector('#hubChoices button:not(:disabled):not([hidden])')||root.querySelector('.quest-facts-actions button:not(:disabled)')||root.querySelector('#hubService');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
  document.addEventListener('focusin',e=>{const root=e.target.closest?.('#hubDialogue,[data-dialogue-menu]');if(!root)return;root.querySelectorAll('.dialogue-selected').forEach(b=>b.classList.remove('dialogue-selected'));if(e.target.matches('button,summary'))e.target.classList.add('dialogue-selected');});
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
@@ -126,19 +126,19 @@
  }
  function showLine(id,node,lastChoice,choose,finish,finishLabel,canChoose=true,keepVoice=false){
   if(keepVoice){generation++;clearTimeout(timer);cancelAnimationFrame(frame);}else stopVoice();const token=++generation,{a}=active;active.lineId=id;active.voiceText=node.text;active.started=performance.now();
-  shell(`<p id="hubLine" class="hub-dialogue-line"></p><button id="hubReveal">Show full line</button>${voiceControls()}${!canChoose?'<p class="hub-dialogue-label">Your teammate is choosing. You can both leave at any time.</p>':''}<div id="hubChoices" class="hub-dialogue-options"></div>`);
-  const choices=el('hubChoices');let revealed=false;
+  shell(`<p id="hubLine" class="hub-dialogue-line"></p><button id="hubReveal">Show full line</button>${voiceControls()}${window.BFQuestPanels?.render(node.questPanels)||''}${!canChoose?'<p class="hub-dialogue-label">Your teammate is choosing. You can both leave at any time.</p>':''}<div id="hubChoices" class="hub-dialogue-options"></div>`);
+  const choices=el('hubChoices'),responseButtons=()=>[...el('hubDialogue').querySelectorAll('#hubChoices button,.quest-facts-actions button')];let revealed=false;
   function unlock(){if(token!==generation||!active||revealed)return;revealed=true;cancelAnimationFrame(frame);el('hubLine').textContent=node.text;el('hubReveal').hidden=true;
    const entries=[];
-   for(const choice of node.choices){if(!canChoose&&choice.end)continue;const btn=document.createElement('button');btn.textContent=choice.text;if(choice.questProgress)markQuestButton(btn,choice.text);btn.onclick=()=>{for(const b of choices.querySelectorAll('button'))b.disabled=true;choose(choice)};entries.push({choice,button:btn})}
-   choiceGroups(choices,entries);
+   for(const choice of node.choices){if(!canChoose&&choice.end)continue;const btn=document.createElement('button');btn.textContent=choice.text;if(choice.questProgress)markQuestButton(btn,choice.text);btn.onclick=()=>{for(const b of responseButtons())b.disabled=true;choose(choice)};entries.push({choice,button:btn})}
+   const grouped=[];for(const row of entries){const panel=node.questPanels?.find(p=>p.choiceIds?.includes(row.choice.id)),slot=panel&&[...el('hubDialogue').querySelectorAll('[data-quest-actions]')].find(e=>e.dataset.questActions===panel.id);if(slot){row.button.dataset.dialogueCategory='side';slot.append(row.button);}else grouped.push(row);}choiceGroups(choices,grouped);
    if(!node.choices.length){const btn=document.createElement('button');btn.textContent=finishLabel;btn.onclick=finish;choices.append(btn)}
    if(!node.choices.length||canChoose&&node.choices.some(c=>c.end)){el('hubLeave').hidden=true;const ending=[...choices.querySelectorAll('button')].find(b=>b.textContent===finishLabel||b.textContent==='Leave conversation');if(ending)ending.dataset.dialogueEnd='true';}
    // A text-skip click cannot become a response click; all choices have a short arming window.
-   for(const btn of choices.querySelectorAll('button'))btn.disabled=true;
+   for(const btn of responseButtons())btn.disabled=true;
    el('hubDialogue').dataset.dialogueArming='true';
    timer=setTimeout(()=>{if(token!==generation||!active)return;
-    for(const btn of choices.querySelectorAll('button'))btn.disabled=!canChoose&&!!node.choices.length;
+    for(const btn of responseButtons())btn.disabled=!canChoose&&!!node.choices.length;
     delete el('hubDialogue').dataset.dialogueArming;if(canChoose&&!document.activeElement?.closest?.('.hub-optional'))selectFirst(el('hubDialogue'));
    },250);
   }
@@ -156,7 +156,7 @@
   if(!view){if(active?.external)close(false,true);return;}
   if(!active?.external||active.n.id!==n.id){if(active)close(false,true);active={n,a,external:true,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');}
   active.source=source;active.canChoose=canChoose;const signature=JSON.stringify([view,canChoose]);if(active.signature===signature)return;const keepVoice=active.lineId===view.lineId&&active.voiceText===view.text;active.signature=signature;
-  showLine(view.lineId,{...source.nodes[view.lineId],recordedAudio:source.nodes[view.lineId]?.text?.trim()===view.text?.trim()?source.nodes[view.lineId]?.recordedAudio:undefined,text:view.text,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:c.end?false:(c.optional??!!original?.optional),questProgress:!c.end&&(!!c.questProgress||!!original&&questProgress(original))}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Leave conversation',canChoose,keepVoice);
+  showLine(view.lineId,{...source.nodes[view.lineId],recordedAudio:source.nodes[view.lineId]?.text?.trim()===view.text?.trim()?source.nodes[view.lineId]?.recordedAudio:undefined,text:view.text,questPanels:view.questPanels,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:c.end?false:(c.optional??!!original?.optional),questProgress:!c.end&&(!!c.questProgress||!!original&&questProgress(original))}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Leave conversation',canChoose,keepVoice);
  }
  function listen(n,a,lineId){
  if(!book)return;const same=active?.spectator&&active.n.id===n.id;

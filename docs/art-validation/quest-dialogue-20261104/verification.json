@@ -1,0 +1,30 @@
+{
+  "version": "2.365.0-quest-dialogue",
+  "date": "2026-11-04",
+  "cause": "Hunt details were appended to spoken text, invalidating exact approved recording matches and triggering device speech.",
+  "scope": [
+    "All16 campaign hunt contracts keep source speech unchanged",
+    "Seven authored optional requests and four hub return requests use separate fact cards",
+    "Matching approved Gus C recordings reused; no new synthesized takes or subscription changes"
+  ],
+  "nativeChecks": [
+    "Gus recordedAudio resolves to approved MP3 for intro and tools request",
+    "Real hunt acceptance then seeded completion and E turn-in pays120gold and270scaledXP once; round1 saved",
+    "Gus tools accept button inside its own card sets actual quest active; Q exits",
+    "Spectator-render path leaves both quest-card actions disabled after arming",
+    "390x844 responsive emulation: no horizontal overflow; cards/actions readable",
+    "Desktop ready and sidequest screenshots inspected"
+  ],
+  "sourceTests": {
+    "questPanels": 173,
+    "campaignHunts": 2583,
+    "dialoguePlayback": 41,
+    "voiceContent": "pass",
+    "menuShortcuts": "pass"
+  },
+  "limits": [
+    "Native UI testing muted; actual recorded dispatch preference validated by playback fixture with current Gus source/cast",
+    "No new live network co-op session; authority lifecycles and spectator UI checked",
+    "Responsive emulation is not physical phone testing"
+  ]
+}

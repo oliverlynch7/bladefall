@@ -48,10 +48,11 @@ function marker(g,s,npc){const d=contract(g);return d&&d.npc===npc&&(!root.BFSto
 function decorate(g,s,v,book){const d=details(g,s);if(!v||!d||v.npc!==d.npc)return v;
  // A ready main-story hand-in keeps its existing exclusive turn-in path.
  const originals=book.nodes[v.lineId]?.choices||[];if(originals.some(c=>c.turnIn&&v.choices.some(q=>q.id===c.id&&!q.end)))return v;
- const text=v.text+'\n\n'+d.title+' · Repeatable\n'+(d.phase==='offer'?d.reason+'\n'+d.instruction+'.\n'+d.place+' · Orange Hunt marker\n'+d.gold+' gold + '+d.xp+' XP · Return to '+d.name+'.\nReinforcements return after '+refillSeconds+'s; give cleared spots a little room.':d.progress+' · '+(d.phase==='ready'?'Green Turn-in marker':'Orange Hunt marker'));
+ const panel={id:d.id,title:d.title,kind:'Repeatable hunt',status:d.phase,objective:d.collect?'Recover '+d.total+' '+d.collect+'.':'Defeat '+d.total+' patrol enemies.',where:d.place,progress:d.phase==='offer'?'':d.count+' / '+d.total,returnTo:d.name,gold:d.gold,xp:d.xp,reason:d.reason};
  const option=d.phase==='active'?null:{id:d.phase==='ready'?'__hunt_claim':'__hunt_accept',text:d.phase==='ready'?'Turn in hunt · '+d.gold+' gold + '+d.xp+' XP':'Accept hunt · Repeatable',category:'side',optional:true,questProgress:true};
  const choices=d.phase==='ready'?[option]:[...v.choices.filter(c=>!c.id.startsWith('__hunt_')), ...(option?[option]:[])];
- return {...v,text,choices};
+ panel.choiceIds=option?[option.id]:[];
+ return {...v,choices,questPanels:[...(v.questPanels||[]),panel]};
 }
 // Keep only hunt progress when campaign retries rewind the main quest checkpoint.
 function retain(g,route){const d=contract(g),source=g?.storyState;if(!d||!source||!route)return;const target=route.storyState||(route.storyState={version:1,revision:0,flags:{},items:{},quests:{},notes:{},cursors:{},rewards:{},events:{}});for(const k of ['flags','items','quests','rewards'])target[k]||={};

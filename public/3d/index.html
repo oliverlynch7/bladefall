@@ -1134,11 +1134,12 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./loading.js?v=2292"></script>
 <script src="./sprint-race.js?v=2255"></script>
 <link rel="stylesheet" href="./sprint-race.css?v=2255">
-<link rel="stylesheet" href="./hub-dialogue.css?v=2354">
+<link rel="stylesheet" href="./hub-dialogue.css?v=2365">
 <script src="./voice-content.js?v=2364"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./render-motion.js?v=2304"></script>
-<script src="./hub-dialogue.js?v=2364"></script>
+<script src="./quest-panels.js?v=2365"></script>
+<script src="./hub-dialogue.js?v=2365"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
 <script src="./hub-tour.js?v=2294"></script>
 <script src="./controller.js?v=2323"></script>
@@ -1168,7 +1169,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./campaign-district-data.js?v=2357"></script>
 <script src="./campaign-districts.js?v=2357"></script>
 <script src="./campaign-patrols.js?v=2360"></script>
-<script src="./campaign-hunts.js?v=2361"></script>
+<script src="./campaign-hunts.js?v=2365"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2342"></script>
 <script src="./campaign-elites.js?v=2359"></script>
@@ -1246,7 +1247,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.364.0-dialogue-loot';
+const VERSION3D='2.365.0-quest-dialogue';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3575,7 +3576,7 @@ function briarSync(){
  if(inGreatFurnace()&&s.flags['gf.cache']&&!G._cacheNoticeCleared&&G.p.x>630&&G.p.z<-5120&&G.p.z>-5680){G._cacheNoticeCleared=true;BFJournalNotice.queue.dismiss('gf.cache');}
  syncReturnField();syncReturnHubNpcs();
  if(window.BFRiftWelcome?.active){questUpdate();hudUpdate();return;}
- const v=briarBook&&BFCampaignHunts.decorate(G,s,BFStoryState.view(s,briarBook),briarBook),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
+ const v=briarBook&&BFQuestPanels.decorate(G,s,BFCampaignHunts.decorate(G,s,BFStoryState.view(s,briarBook),briarBook)),n=v&&G.storyNpcs.find(n=>n.id===v.npc);
  if(v)v.revision=s.revision;
  if(n&&(G.kingFinal||s.conversation.owner===briarId()||G._storyViewing===n.id)){
   const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);

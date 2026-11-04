@@ -44,3 +44,34 @@
 #hubDialogue #hubLanding .dialogue-group{padding:10px;gap:6px}
 #hubDialogue #hubLanding .dialogue-group button:not(.hub-service-primary){padding:9px 12px}
 @media(min-width:651px){#hubDialogue .hub-dialogue-panel:has(#hubLanding){max-height:calc(100dvh - 48px);padding:20px}}
+
+/* Spoken words and the unspoken quest contract have different visual roles. */
+#hubDialogue .hub-dialogue-panel:has(.quest-facts){width:min(510px,45vw)}
+#hubDialogue .hub-dialogue-panel:has(.quest-facts) .hub-dialogue-line{border-left:3px solid #dec28c;padding:10px 13px;margin:8px 0;background:#d8c3980b;border-radius:0 9px 9px 0;color:#f4ead4;font-size:17px}
+#hubDialogue .quest-facts-list{display:grid;gap:12px;margin:16px 0}
+#hubDialogue .quest-facts{border:1px solid #84b6b875;border-left:4px solid #89d5bf;border-radius:12px;background:linear-gradient(135deg,#173138,#111e2d);padding:14px;box-shadow:0 4px 14px #0003}
+#hubDialogue .quest-facts header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+#hubDialogue .quest-facts header small{display:block;color:#9fdcc9;font-size:10px;font-weight:750;letter-spacing:1px;text-transform:uppercase}
+#hubDialogue .quest-facts h3{color:#f0f5e8;font-size:16px;line-height:1.35;margin:4px 0 0}
+#hubDialogue .quest-facts-status{font-size:10px;line-height:1.4;border:1px solid #8bb1bf66;background:#789dab18;border-radius:6px;padding:4px 6px;color:#c5dee8;flex-shrink:0;max-width:100px}
+#hubDialogue .quest-facts[data-quest-phase=ready]{border-color:#9be4b0}
+#hubDialogue .quest-facts[data-quest-phase=ready] .quest-facts-status{color:#b6fac6;border-color:#9be4b0}
+#hubDialogue .quest-facts-reason{color:#adc4c6;font-size:12px;line-height:1.45;margin:10px 0}
+#hubDialogue .quest-facts dl{display:grid;gap:9px;margin:13px 0}
+#hubDialogue .quest-facts dl>div{display:grid;grid-template-columns:65px 1fr;gap:8px}
+#hubDialogue .quest-facts dt{color:#9fb9c3;font-size:11px;font-weight:700;padding-top:2px}
+#hubDialogue .quest-facts dd{margin:0;color:#d9e6ed;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+#hubDialogue .quest-facts .quest-facts-objective dd{font-size:14px;font-weight:650;color:#fff5ce}
+#hubDialogue .quest-facts-count{display:inline-block;margin-left:8px;color:#adf0d8;white-space:nowrap}
+#hubDialogue .quest-facts-rewards{border-top:1px solid #91b7bc40;padding-top:11px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12px}
+#hubDialogue .quest-facts-rewards>b{color:#9fb9c3;font-size:11px;margin-right:3px}
+#hubDialogue .quest-facts-rewards>span{padding:5px 8px;border:1px solid currentColor;border-radius:6px;background:#0003;font-weight:700;line-height:1.4}
+#hubDialogue .quest-reward-gold{color:#ffda79}
+#hubDialogue .quest-reward-xp{color:#84cfff}
+#hubDialogue .quest-reward-perk{color:#d0b1ff}
+#hubDialogue .quest-facts-actions{display:grid;gap:7px}
+#hubDialogue .quest-facts-actions:not(:empty){margin-top:12px}
+#hubDialogue .quest-facts-actions button{width:100%;margin:0;border-color:#94dfbf88;background:#214a40;color:#eaffef;text-align:left;padding:10px 12px;font-size:13px}
+#hubDialogue .quest-facts-actions button.hub-quest-choice{background:#214a40;border-color:#9cdbb2}
+#hubDialogue #hubChoices:empty{display:none}
+@media(max-width:650px){#hubDialogue .hub-dialogue-panel:has(.quest-facts){width:100%;max-height:78dvh}#hubDialogue .quest-facts{padding:11px}#hubDialogue .quest-facts h3{font-size:15px}#hubDialogue .quest-facts dl>div{grid-template-columns:58px 1fr}#hubDialogue .hub-dialogue-panel:has(.quest-facts) .hub-dialogue-line{font-size:15px}}

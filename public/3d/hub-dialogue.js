@@ -27,7 +27,8 @@
   while(warmVoices.size>=8){const [key,old]=warmVoices.entries().next().value;warmVoices.delete(key);old.onerror=null;old.pause();old.removeAttribute('src');old.load();}
   const clip=new Audio();clip.preload='auto';clip.volume=0;warmVoices.set(src,clip);clip.onerror=()=>{if(warmVoices.get(src)===clip){warmVoices.delete(src);warmFailures.set(src,performance.now()+60000);if(warmFailures.size>32)warmFailures.delete(warmFailures.keys().next().value);}};clip.src=src;clip.load();
  }
- function warm(n,source=book,story=null,settings={}){
+ function warm(n,source=book,story=null,settings={},greeting=null){
+  if(greeting?.node){warmLine(greeting.node,settings);return;}
   source=source||book;const def=source?.npcs?.[n.id];if(!def)return;const node=source.nodes[story?.cursors?.[n.id]?.node]||source.nodes[def.start];warmLine(node,settings);for(const c of (node?.choices||[]).slice(0,2))warmLine(source.nodes[c.next],settings);
  }
  function primeVoice(event){
@@ -99,21 +100,30 @@
   const quests=rows.length?rows.map(q=>q.status!=='locked'?`<button id="hubReturnQuest" data-quest-status="${esc(q.status)}">${esc(q.label)}</button>`:`<p class="hub-quest-status" data-quest-status="${esc(q.status)}"><b>${esc(q.title)}</b><span>${q.status==='done'?'✓ Completed':esc(q.label)}</span></p>`).join(''):current?'<button id="hubReturnQuest"></button>':'<p class="hub-quest-status">No quests from this character right now.</p>';
   return '<section class="dialogue-group dialogue-group-side" aria-label="Quests"><h3>◇ Quests</h3>'+quests+'</section>';
  }
- function landing(){
-  if(!active)return;stopVoice();active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book?.npcs[n.id]||{role:n.role||'Requests'};s.cursor=null;commit();const greeting=book?.nodes[def.start];
+ function greetingLine(n,a){const def=book?.npcs[n.id];return def&&book.nodes[def.start]?{id:def.start,node:book.nodes[def.start]}:a.greeting||null;}
+ function greet(){
+  if(!active)return;const {n,a}=active,hello=greetingLine(n,a);if(!hello){landing();return;}
+  stopVoice();const token=++generation;active.greeting=true;active.lineId=hello.id;active.voiceText=hello.node.text;active.greeted=true;
+  shell(`<p class="hub-dialogue-welcome">${esc(book?.npcs[n.id]?.role||n.role||'')}</p><div class="hub-greeting-first"><p class="hub-dialogue-label">A MOMENT WITH ${esc(n.name)}</p><p id="hubLine" class="hub-dialogue-line">${esc(hello.node.text)}</p>${voiceControls()}</div><button id="hubGreetingContinue" class="hub-greeting-continue" disabled>Continue <kbd>${esc(window.__BF3?.controlHint?.('interact')||'E')}</kbd><span aria-hidden="true">›</span></button>`);
+  const button=el('hubGreetingContinue');button.onclick=()=>{if(!active||token!==generation||button.disabled)return;state(a,n.id).introduced=true;commit();landing(true);};
+  el('hubDialogue').dataset.dialogueArming='true';timer=setTimeout(()=>{if(!active||token!==generation)return;button.disabled=false;delete el('hubDialogue').dataset.dialogueArming;button.focus({preventScroll:true});},250);
+  wireVoice(hello.id,hello.node);
+ }
+ function landing(keepVoice=false){
+  if(!active)return;if(keepVoice){generation++;clearTimeout(timer);cancelAnimationFrame(frame);}else stopVoice();active.greeting=false;active.lineId=null;const {n,a}=active,s=state(a,n.id),def=book?.npcs[n.id]||{role:n.role||'Requests'};s.cursor=null;commit();const hello=greetingLine(n,a),greeting=hello?.node;
   shell(`<p class="hub-dialogue-welcome">${esc(def.role)}</p>${greeting?'<p class="hub-greeting">'+esc(greeting.text)+'</p>'+voiceControls():''}<div class="hub-dialogue-options" id="hubLanding">${!n.questOnly?'<section class="dialogue-group dialogue-group-main" aria-label="Shop and services"><h3>Shop & services</h3>'+serviceButton('hubService',n)+'</section>':''}${questSection(n,a)}${book?.npcs[n.id]?'<section class="dialogue-group dialogue-group-lore" aria-label="Lore and questions"><h3>▤ Lore & questions</h3>':''}${hasNews(n,a)?'<button id="hubNews">What has changed?</button>':''}${book?.npcs[n.id]?'<button id="hubHelp">How does this work?</button><button id="hubAbout">About you</button></section>':''}</div>`);
   if(el('hubReturnQuest')){const info=a.returnInfo(n)||a.returnEntries?.(n).find(q=>q.status==='done'),btn=el('hubReturnQuest');if(info){btn.textContent=(info.status==='done'?'✓ ':'◇ ')+info.label;if(info.fresh)markQuestButton(btn,info.label);btn.onclick=()=>a.returnQuest(n);}else btn.disabled=true;}
-  if(greeting){wireVoice(def.start,greeting,!active.greeted);active.greeted=true;}
+  if(greeting){wireVoice(hello.id,greeting,!active.greeted);active.greeted=true;}
   if(el('hubService'))el('hubService').onclick=()=>close(true);if(el('hubAbout'))el('hubAbout').onclick=()=>line(def.about,'Tell me about yourself.','about');if(el('hubHelp'))el('hubHelp').onclick=()=>line('hub.'+n.id+'.guide','Remind me how this works.','help');if(el('hubNews'))el('hubNews').onclick=()=>line(news(n,a),'What has changed?','news');
  }
  function returnToMenu(){if(!active)return;if(active.external){const menu=active.a.hubMenu;if(!menu)return;active.afterClose=menu;close();}else landing();}
  function navigationItems(root){return [...root.querySelectorAll('button:not(:disabled):not([hidden]),summary')].filter(b=>b.getClientRects().length&&!b.closest('[inert]'));}
- function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubChoices [data-dialogue-category="main"]:not(:disabled)')||root.querySelector('#hubChoices [data-dialogue-end="true"]:not(:disabled)')||root.querySelector('#hubChoices button:not(:disabled):not([hidden])')||root.querySelector('.quest-facts-actions button:not(:disabled)')||root.querySelector('#hubService');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
+ function selectFirst(root){const items=navigationItems(root);const first=root.querySelector('#hubGreetingContinue:not(:disabled)')||root.querySelector('#hubChoices [data-dialogue-category="main"]:not(:disabled)')||root.querySelector('#hubChoices [data-dialogue-end="true"]:not(:disabled)')||root.querySelector('#hubChoices button:not(:disabled):not([hidden])')||root.querySelector('.quest-facts-actions button:not(:disabled)')||root.querySelector('#hubService');(first?.getClientRects().length?first:items.find(b=>!b.hasAttribute('data-menu-close')))?.focus({preventScroll:true});}
  document.addEventListener('focusin',e=>{const root=e.target.closest?.('#hubDialogue,[data-dialogue-menu]');if(!root)return;root.querySelectorAll('.dialogue-selected').forEach(b=>b.classList.remove('dialogue-selected'));if(e.target.matches('button,summary'))e.target.classList.add('dialogue-selected');});
  function shell(content){
   const {n}=active;let root=el('hubDialogue');if(!root){root=document.createElement('section');root.id='hubDialogue';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','hubSpeaker');document.body.append(root)}
   delete root.dataset.dialogueArming;
-  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<p class="dialogue-key-hint">W / S or ↑ / ↓ · ${esc(window.__BF3?.controlHint?.('interact')||'E')} choose</p><footer>${!active.spectator&&active.lineId&&(!active.external||active.a.hubMenu&&active.canChoose)?'<button id="hubTopics">'+(active.external?(n.questOnly?'Back to quests':'Shop & quests'):'Other questions / quests')+'</button>':''}${!active.external&&!active.spectator&&active.lineId&&n.open&&!n.questOnly?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Q / Esc</small></button></footer></div>`;
+  root.innerHTML=`<div class="hub-dialogue-panel"><p class="hub-dialogue-label">${active.external?esc(active.a.location||'BRIAR TOWN'):'WAYSTATION'}</p><h2 id="hubSpeaker">${esc(n.name)}</h2>${content}<p class="dialogue-key-hint">W / S or ↑ / ↓ · ${esc(window.__BF3?.controlHint?.('interact')||'E')} choose</p><footer>${!active.greeting&&!active.spectator&&active.lineId&&(!active.external||active.a.hubMenu&&active.canChoose)?'<button id="hubTopics">'+(active.external?(n.questOnly?'Back to quests':'Shop & quests'):'Other questions / quests')+'</button>':''}${!active.greeting&&!active.external&&!active.spectator&&active.lineId&&n.open&&!n.questOnly?serviceButton('hubQuickService',n):''}<button id="hubLeave">Leave conversation <small>Q / Esc</small></button></footer></div>`;
   if(el('hubTopics'))el('hubTopics').onclick=returnToMenu;
   if(el('hubQuickService'))el('hubQuickService').onclick=()=>close(true);el('hubLeave').onclick=()=>close();window.BFMenuClose?.mount(root.querySelector('.hub-dialogue-panel'),()=>el('hubLeave'));selectFirst(root);
  }
@@ -150,7 +160,7 @@
  async function open(n,a){
   if(active)close();const token=++generation;active={n,a,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');shell('<p>Opening conversation…</p>');
   await loadBook();if(token!==generation||!active)return;
-  landing(); // Every fresh talk starts at the same service/quest/lore menu, including old saves.
+  if(a.resumeMenu){active.greeted=true;landing();}else greet(); // Every fresh talk greets, including old saves.
  }
  function present(n,a,source,view,canChoose){
   if(!view){if(active?.external)close(false,true);return;}
@@ -159,11 +169,12 @@
   showLine(view.lineId,{...source.nodes[view.lineId],recordedAudio:source.nodes[view.lineId]?.text?.trim()===view.text?.trim()?source.nodes[view.lineId]?.recordedAudio:undefined,text:view.text,questPanels:view.questPanels,choices:view.choices.map(c=>{const original=source.nodes[view.lineId].choices.find(o=>o.id===c.id);return {...c,optional:c.end?false:(c.optional??!!original?.optional),questProgress:!c.end&&(!!c.questProgress||!!original&&questProgress(original))}})},view.lastChoice,choice=>a.choose(view.lineId,choice.id),()=>close(),a.leaveLabel||'Leave conversation',canChoose,keepVoice);
  }
  function listen(n,a,lineId){
- if(!book)return;const same=active?.spectator&&active.n.id===n.id;
+ if(!book&&!a.greeting)return;const same=active?.spectator&&active.n.id===n.id;
  if(!same){if(active)close(false,true);active={n,a,spectator:true,lineId:null,start:performance.now(),eye:a.eye()};a.enter();document.body.classList.add('npc-conversation');}
  if(same&&active.lineId===lineId)return;
- if(lineId&&book.nodes[lineId])showLine(lineId,book.nodes[lineId],'',()=>{},()=>close(),'Leave conversation',false);
- else{active.lineId=null;shell('<p class="hub-dialogue-line">Your teammate is browsing '+esc(book.npcs[n.id]?.service||'services')+'.</p><p>You are listening. They control this conversation.</p>');}
+ const node=book?.nodes[lineId]||(a.greeting?.id===lineId?a.greeting.node:null);
+ if(lineId&&node)showLine(lineId,node,'',()=>{},()=>close(),'Leave conversation',false);
+ else{active.lineId=null;shell('<p class="hub-dialogue-line">Your teammate is browsing '+esc(book?.npcs[n.id]?.service||'services')+'.</p><p>You are listening. They control this conversation.</p>');}
 }
 function focus(){if(!active)return null;const {n,a}=active,p=a.player();const x=n.x+(n.x<0?-13:13),z=n.z+(n.id==='anvil'?22:0),len=Math.hypot(p.x-x,p.z-z)||1;return {x,y:n.y||0,z,dx:(p.x-x)/len,dz:(p.z-z)/len,blend:a.meta.reduceMotion?1:Math.min(1,(performance.now()-active.start)/550),from:active.eye}}
  document.addEventListener('keydown',e=>{

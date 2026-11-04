@@ -2906,3 +2906,6 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 
 
 | U-LOOT-QUICK-EQUIP-20261104 | A | Beautiful immediate chest-result equip action using F/remapped lootEquip, preserving level/class locks and item conservation. | Implemented 2.366.0; focused transaction and native browser checks passed. See art-validation/quick-equip-20261104. |
+
+
+| U-HUB-GREETING-FIRST-20261104 | A | Voiced hub NPC greeting before utility/options menus; clear Continue and preserved quest access. | Implemented 2.367.0; six-character native and focused regression checks passed. See art-validation/hub-greetings-20261104. |

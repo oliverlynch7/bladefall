@@ -1,0 +1,32 @@
+{
+  "version": "2.367.0-hub-greetings",
+  "date": "2026-11-04",
+  "scope": [
+    "Five service NPCs and Thomas greet before any options",
+    "Approved short recordings reused; Thomas uses existing rv.keepsake.home take",
+    "Explicit shop/quest Back restores options; fresh interactions greet again",
+    "Continue keeps the current greeting playing without restart; Q exits"
+  ],
+  "nativeBrowser": [
+    "All six greeting screens rendered with Continue and no utility/quest/quick-service buttons",
+    "Smith E Continue opens forge/quest/lore; forge Back restores options without greeting",
+    "Smith return quest opens and Shop & quests returns directly to options",
+    "Beastkeeper E Continue exposes Pet Yard and A Kinder Trail",
+    "Interact remapped to U: badge updates, E stays on greeting, U advances",
+    "Thomas staged social listener resolves personal line and has no owner Continue control",
+    "Focused Continue has dark rgb34,26,14 text over gold; desktop screenshot inspected",
+    "390x844 responsive emulation:370px panel, no horizontal overflow"
+  ],
+  "tests": {
+    "hubGreeting": 64,
+    "dialogueVoicePlayback": 41,
+    "hubQuestAccess": 120,
+    "menuShortcuts": "pass",
+    "questPanels": 173
+  },
+  "limits": [
+    "Native browser checks muted; actual voice autoplay/preservation tested with approved cast in media fixture",
+    "Staged listener and ownership tests are not a fresh live network co-op session",
+    "Responsive emulation is not physical phone testing"
+  ]
+}

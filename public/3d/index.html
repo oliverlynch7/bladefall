@@ -1134,12 +1134,12 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./loading.js?v=2292"></script>
 <script src="./sprint-race.js?v=2255"></script>
 <link rel="stylesheet" href="./sprint-race.css?v=2255">
-<link rel="stylesheet" href="./hub-dialogue.css?v=2365">
+<link rel="stylesheet" href="./hub-dialogue.css?v=2367">
 <script src="./voice-content.js?v=2364"></script>
 <script src="./dialogue-speech.js?v=2081-2033"></script>
 <script src="./render-motion.js?v=2304"></script>
 <script src="./quest-panels.js?v=2365"></script>
-<script src="./hub-dialogue.js?v=2365"></script>
+<script src="./hub-dialogue.js?v=2367"></script>
 <link rel="stylesheet" href="./hub-tour.css?v=2282">
 <script src="./hub-tour.js?v=2294"></script>
 <script src="./controller.js?v=2323"></script>
@@ -1247,7 +1247,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.366.0-quick-equip';
+const VERSION3D='2.367.0-hub-greetings';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -3580,7 +3580,7 @@ function briarSync(){
  if(v)v.revision=s.revision;
  if(n&&(G.kingFinal||s.conversation.owner===briarId()||G._storyViewing===n.id)){
   const owner=s.conversation.owner,actor=s.conversation.origin||(owner===briarId()?G.p:MP.peers[owner]||G.p);
-  BFHubDialogue.present(n,{meta,location:inReturnHub()?'WAYSTATION':G.kingFinal?(G.kingFinal.void?'THE ABYSSAL VOID':'THE KING’S HALL'):inLongAscent()?'LONG ASCENT':inCastleGates()?'CASTLE GATES':G.marbleArena?'THE ORB CHAMBER':inSkyLibrary()?'SKY LIBRARY':inPalaceCourtyard()?'PALACE COURTYARD':inThunderCliffs()?'THUNDER CLIFFS':inShipwreck()?'SHIPWRECK SHORE':inGreatFurnace()?'THE GREAT FURNACE':inIronHalls()?'IRON HALLS':inIceCaves()?'DEEP ICE CAVES':inSnowbound()?'SNOWBOUND PEAKS':inPrison()?'THE DUNGEONS':inBrokenWalls()?'BROKEN WALLS':inLostCanyon()?'LOST CANYON':inWindingCliffs()?'WINDING CLIFFS':G.riftMentor?'CLASS TRAINING':G.riftHall?'RIFT HALL':inBlackWoods()?'BLACK WOODS':'BRIAR TOWN',leaveLabel:'Leave conversation',hubMenu:inReturnHub()?()=>{if(inReturnHub()&&G.hubNpcs.includes(n))openNpcTalk(n);}:null,eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
+  BFHubDialogue.present(n,{meta,location:inReturnHub()?'WAYSTATION':G.kingFinal?(G.kingFinal.void?'THE ABYSSAL VOID':'THE KING’S HALL'):inLongAscent()?'LONG ASCENT':inCastleGates()?'CASTLE GATES':G.marbleArena?'THE ORB CHAMBER':inSkyLibrary()?'SKY LIBRARY':inPalaceCourtyard()?'PALACE COURTYARD':inThunderCliffs()?'THUNDER CLIFFS':inShipwreck()?'SHIPWRECK SHORE':inGreatFurnace()?'THE GREAT FURNACE':inIronHalls()?'IRON HALLS':inIceCaves()?'DEEP ICE CAVES':inSnowbound()?'SNOWBOUND PEAKS':inPrison()?'THE DUNGEONS':inBrokenWalls()?'BROKEN WALLS':inLostCanyon()?'LOST CANYON':inWindingCliffs()?'WINDING CLIFFS':G.riftMentor?'CLASS TRAINING':G.riftHall?'RIFT HALL':inBlackWoods()?'BLACK WOODS':'BRIAR TOWN',leaveLabel:'Leave conversation',hubMenu:inReturnHub()?()=>{if(inReturnHub()&&G.hubNpcs.includes(n))openNpcTalk(n,false,true);}:null,eye:()=>G.eye?{...G.eye}:null,player:()=>actor,
    enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
    leave:()=>{if(mode==='npc')resumePlay();},requestClose:()=>{G._storyViewing=null;briarRequest('close');},choose:(line,choice)=>choice.startsWith('__hunt_')?briarRequest('hunt',{line,npc:v.npc,action:choice==='__hunt_claim'?'claim':'accept'}):briarRequest('choose',{line,choice})},briarBook,v,owner===briarId());
  }else if(BFHubDialogue.active?.external)BFHubDialogue.close(false,true);
@@ -19307,12 +19307,15 @@ function enterWaystation(riftHall=false){
   window.BF_LOADING?.tick(G,mode);   // one-time hub onboarding after the first trial
 }
 // Hub services use the same authored, recordable lines as the Voice Studio.
-function openNpcTalk(n,granted=false){
+function hubNpcGreeting(n){const id=n.id==='thomas'?'rv.keepsake.home':null;return id&&briarBook?.nodes[id]?{id,node:briarBook.nodes[id]}:null;}
+function openNpcTalk(n,granted=false,returning=false){
  if(inReturnHub()&&G.storyState?.conversation?.npc===n.id){briarRequest('open',{npc:n.id});return;}
+ if(!granted)G._hubMenuReturn=returning?n.id:null;
  if(!granted&&MP.active&&window.BFSocial&&['quartermaster','anvil','keeper','drillmaster','beastkeeper','thomas'].includes(n.id)){BFSocial.requestTalk(n);return;}
  if(!['quartermaster','anvil','keeper','drillmaster','beastkeeper','thomas'].includes(n.id)){n.open();return;}
+ const resumeMenu=returning||G._hubMenuReturn===n.id;G._hubMenuReturn=null;
  BFHubDialogue.open(n,{
-  meta,save:persist,returnInfo:returnHubInfo,returnEntries:n=>BFReturnVisits.entries(n,meta,MP.guest()?G?.storyState:null),returnQuest:openReturnRequest,openService:()=>{const world=G;n.open(()=>{if(G===world&&inReturnHub())openNpcTalk(n);else wsResume();});},player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,
+  meta,resumeMenu,greeting:hubNpcGreeting(n),save:persist,returnInfo:returnHubInfo,returnEntries:n=>BFReturnVisits.entries(n,meta,MP.guest()?G?.storyState:null),returnQuest:openReturnRequest,openService:()=>{const world=G;n.open(()=>{if(G===world&&inReturnHub())openNpcTalk(n,false,true);else wsResume();});},player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,
   enter:()=>{mode='npc';showOverlay(false);showGameUI(false);stopAllLoops();for(const k in input)if(typeof input[k]==='boolean')input[k]=false;if(document.pointerLockElement)document.exitPointerLock();},
   leave:service=>{if(service){mode='menu';showGameUI(false);}else resumePlay();}
  });
@@ -19653,7 +19656,7 @@ function updateInteract(){
   let it=null; const p=G.p;
   // Buffer only nearby dialogue and its first choices, before the player presses E.
   const voiceNpcs=[...new Map([...(G.hubNpcs||[]),...(G.storyNpcs||[])].map(n=>[n.id,n])).values()].filter(n=>Math.hypot(n.x-p.x,n.z-p.z)<360).sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z)).slice(0,2);
-  for(const n of voiceNpcs)BFHubDialogue.warm(n,G.hub&&!G.riftHall?null:briarBook,G.hub&&!G.riftHall?null:G.storyState,meta);
+  for(const n of voiceNpcs)BFHubDialogue.warm(n,G.hub&&!G.riftHall?null:briarBook,G.hub&&!G.riftHall?null:G.storyState,meta,G.hub&&!G.riftHall?hubNpcGreeting(n):null);
   const social=window.BFSocial?.interaction();if(social){G.interact=social;updateInteractPrompt();return;}
   if((G.hub||G.arena) && G.hubNpcs){   // interactables (keepers / arena master + door) work in the hub AND the arena room
     // Pick by what you're LOOKING AT, not just what's nearest: a big facing bonus lets the object you face
@@ -25018,7 +25021,7 @@ function awardChessCape(){
 }
 window.__BF_SOCIAL_API={awardChessCape,g:()=>G,mp:()=>MP,meta:()=>meta,box:bx,project:(x,y,z)=>{const p=project(x,y,z);return p?{x:p[0],y:p[1]}:null;},openTalk:n=>openNpcTalk(n,true),
  enter:m=>{releaseKeyboard();mode=m;showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},resume:resumePlay,
- listen:(n,line)=>{if(inReturnHub()&&G.storyState?.conversation?.npc===n.id){G._storyViewing=n.id;briarSync();return;}BFHubDialogue.listen(n,{meta,player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,enter:()=>{mode='npc';releaseKeyboard();showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},leave:()=>resumePlay()},line);}};
+ listen:(n,line)=>{if(inReturnHub()&&G.storyState?.conversation?.npc===n.id){G._storyViewing=n.id;briarSync();return;}BFHubDialogue.listen(n,{meta,greeting:hubNpcGreeting(n),player:()=>G.p,eye:()=>G.eye?{...G.eye}:null,enter:()=>{mode='npc';releaseKeyboard();showOverlay(false);showGameUI(false);if(document.pointerLockElement)document.exitPointerLock();},leave:()=>resumePlay()},line);}};
 window.__BF_MAP_PARTY=()=>({shards:meta.secretSense&&isCampaignAdventure()?G?.shardSenseTargets||[]:[],heading:meta.camMode==='far'?Math.atan2(VIEW[2],VIEW[10])+Math.PI:G?.camYaw,peers:MP.active?Object.values(MP.peers).filter(q=>q.zone===MP.zone&&q.area===G?.area):[]});
 function devBeta(){return G?.devBriar?BFBriarBeta:BFKeepBeta;}
 const betaApi={

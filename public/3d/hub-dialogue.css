@@ -74,4 +74,16 @@
 #hubDialogue .quest-facts-actions button{width:100%;margin:0;border-color:#94dfbf88;background:#214a40;color:#eaffef;text-align:left;padding:10px 12px;font-size:13px}
 #hubDialogue .quest-facts-actions button.hub-quest-choice{background:#214a40;border-color:#9cdbb2}
 #hubDialogue #hubChoices:empty{display:none}
+
+/* Fresh talks begin with the person, before their service/options menu. */
+#hubDialogue .hub-greeting-first{margin:18px 0 22px;padding:18px;border:1px solid #c9aa7066;border-radius:13px;background:linear-gradient(135deg,#2b3540,#14282e);box-shadow:inset 0 1px #fff1c414}
+#hubDialogue .hub-greeting-first .hub-dialogue-label{color:#d4b77f;font-size:10px;letter-spacing:1.2px;margin:0 0 12px}
+#hubDialogue .hub-greeting-first .hub-dialogue-line{color:#fff0d6;font-size:20px;line-height:1.6;margin:0 0 18px;min-height:0}
+#hubDialogue .hub-greeting-first .hub-voice-controls{margin-bottom:0}
+#hubDialogue button.hub-greeting-continue{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:50px;background:linear-gradient(130deg,#eac274,#bd8b41);color:#221a0e;font-weight:800;border:1px solid #f9d995;border-radius:9px;font-size:16px}
+#hubDialogue .hub-greeting-continue kbd{font:800 13px system-ui;border:1px solid #604720;border-bottom-width:3px;border-radius:5px;padding:2px 8px;background:#2d281c;color:#ffe8b6}
+#hubDialogue button.hub-greeting-continue:hover:not(:disabled){background:#f6d48c}
+#hubDialogue button.hub-greeting-continue.dialogue-selected,#hubDialogue button.hub-greeting-continue:focus-visible{color:#221a0e!important}
+#hubDialogue .hub-greeting-continue>span{font-size:25px;line-height:1}
+@media(max-width:650px){#hubDialogue .hub-greeting-first{padding:14px;margin:12px 0 16px}#hubDialogue .hub-greeting-first .hub-dialogue-line{font-size:17px}}
 @media(max-width:650px){#hubDialogue .hub-dialogue-panel:has(.quest-facts){width:100%;max-height:78dvh}#hubDialogue .quest-facts{padding:11px}#hubDialogue .quest-facts h3{font-size:15px}#hubDialogue .quest-facts dl>div{grid-template-columns:58px 1fr}#hubDialogue .hub-dialogue-panel:has(.quest-facts) .hub-dialogue-line{font-size:15px}}

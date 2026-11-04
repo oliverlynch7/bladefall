@@ -16,3 +16,7 @@ User: "I'm also noticing Gus doesn't have his custom voice. And when I open the 
 ## U-LOOT-QUICK-EQUIP-20261104
 User: "Also for when you get a new drop, loot drop from a chest that you can't equip. There should also be a button you can press, like maybe F, to immediately equip it rather than having to go to the bag manually every single time. And that should be visually clear on a little text pop-up too. Make it visually beautiful."
 Interpretation: quick equip retained chest loot from the existing result card, preserving level/class locks rather than bypassing them. Existing lootEquip default F is available; preserve remaps.
+
+
+## U-HUB-GREETING-FIRST-20261104
+User: "Also when I interact with NPCs at the hub, I want their voice lines to come up first before I access their menus. So it really feels like I'm talking to them and getting to know them before I just click into their menus and use the utility of them."

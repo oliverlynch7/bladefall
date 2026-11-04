@@ -1,0 +1,38 @@
+{
+  "commit": "0771e2fe",
+  "deployment": "2b7bbcab-5bac-45c9-9202-1801f081dbb6",
+  "status": "success",
+  "allMatch": true,
+  "checks": [
+    {
+      "file": "index.html",
+      "matchesCommittedBytes": true,
+      "sha256": "e9f4a98a9ff2a4da223a7ba284c3bff633fbd3ec9a4c63fd927542e1ca0e90f7",
+      "expectedSha256": "e9f4a98a9ff2a4da223a7ba284c3bff633fbd3ec9a4c63fd927542e1ca0e90f7"
+    },
+    {
+      "file": "voice-content.js",
+      "matchesCommittedBytes": true,
+      "sha256": "2012908a04ba205476a60d15e03548473052c01175f4a2d6c4412d105a1568ef",
+      "expectedSha256": "2012908a04ba205476a60d15e03548473052c01175f4a2d6c4412d105a1568ef"
+    },
+    {
+      "file": "hub-dialogue.js",
+      "matchesCommittedBytes": true,
+      "sha256": "39428f76cd2594070a48945e2eb275b257259b0ad65a754e4ad4166e4eeba7dd",
+      "expectedSha256": "39428f76cd2594070a48945e2eb275b257259b0ad65a754e4ad4166e4eeba7dd"
+    },
+    {
+      "file": "chest-reveal.js",
+      "matchesCommittedBytes": true,
+      "sha256": "5e903bbebb54d1a6f42c22df9a05af3e73f2dc488e540ac8fad79fdb65c00cfe",
+      "expectedSha256": "5e903bbebb54d1a6f42c22df9a05af3e73f2dc488e540ac8fad79fdb65c00cfe"
+    },
+    {
+      "file": "chest-reveal.css",
+      "matchesCommittedBytes": true,
+      "sha256": "42296d064c7e0d241a64c7bf0617c4834fff38c0fd3486b5c09d00bf472666c4",
+      "expectedSha256": "42296d064c7e0d241a64c7bf0617c4834fff38c0fd3486b5c09d00bf472666c4"
+    }
+  ]
+}

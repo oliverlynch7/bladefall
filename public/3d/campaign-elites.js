@@ -1,5 +1,6 @@
 /* Named campaign encounters: shared attack geometry, host-owned phase clock. */
 (function(root){'use strict';
+const facing=root.BFEnemyFacing||(typeof require==='function'?require('./enemy-facing.js'):null);
 const kits={
  keep_lance:{shape:'thrust',wind:.82,strike:.26,recover:1.12,reach:145,width:23,stop:95,color:'#e1ba82',title:'Driving thrust',hint:'Step beside the narrow thrust, then close in.',damage:1.05},
  ember_ring:{shape:'ring',wind:1.05,strike:.65,recover:1.3,reach:190,stop:100,color:'#ffb172',title:'Cinder ring',hint:'Jump the spreading ring or leave its reach.',damage:1.05},
@@ -70,10 +71,10 @@ function shape(e){return kits[e.ceKind]?.shape||(e.briarRole==='hex'?'circle':e.
 function step(e,dt,target,speed,canAttack=true,move=null){const k=kits[e.ceKind];if(!k||e.dead||!target)return;dt=Math.min(.05,Math.max(0,dt));const form=shape(e),travel=(dx,dz,n,rush=false)=>{if(move)move(dx,dz,n,rush);else{e.x+=dx*n;e.z+=dz*n;}};e.ceClock=Math.max(0,e.ceClock-dt);
  if(e.ceState==='hunt'){
   let dx=target.x-e.x,dz=target.z-e.z,d=Math.hypot(dx,dz);if(d<.001){dx=Math.sin(e.yaw||0);dz=Math.cos(e.yaw||0);d=1;}
-  e.yaw=Math.atan2(dx,dz);const stop=k.stop??(!canAttack?20:e.ceKind==='shore'?210:e.briarRole==='hex'?305:e.briarRole==='runner'?125:e.briarRole==='guard'?85:85);
+  facing?.turn(e,dx,dz,dt);const stop=k.stop??(!canAttack?20:e.ceKind==='shore'?210:e.briarRole==='hex'?305:e.briarRole==='runner'?125:e.briarRole==='guard'?85:85);
   if(d>stop){const length=Math.min(d-stop,speed*dt);travel(dx/d,dz/d,length);}
   if((e.briarRole==='hex'||e.campaignRole==='caster')&&d<150)travel(-dx/d,-dz/d,speed*dt*.6);
-  if(canAttack&&e.ceClock===0&&d<k.reach+35&&Math.abs(target.y-e.y)<65){Object.assign(e,{ceState:'wind',ceClock:k.wind,ceSerial:e.ceSerial+1,ceX:e.x,ceZ:e.z,ceY:e.y,ceDX:dx/d,ceDZ:dz/d});if(form==='circle'){e.ceX=target.x;e.ceZ=target.z;e.ceY=e.y;}}
+  if(canAttack&&(!facing||facing.aligned(e,target))&&e.ceClock===0&&d<k.reach+35&&Math.abs(target.y-e.y)<65){Object.assign(e,{ceState:'wind',ceClock:k.wind,ceSerial:e.ceSerial+1,ceX:e.x,ceZ:e.z,ceY:e.y,ceDX:dx/d,ceDZ:dz/d});if(form==='circle'){e.ceX=target.x;e.ceZ=target.z;e.ceY=e.y;}}
  }else{e.yaw=Math.atan2(e.ceDX,e.ceDZ);
   if((form==='lunge'||form==='thrust')&&e.ceState==='strike'){const distance=form==='thrust'?70:k.reach-30,travel=Math.min(distance,(1-e.ceClock/k.strike)*distance),last=e.ceTravel||0;const length=Math.max(0,travel-last);if(move)move(e.ceDX,e.ceDZ,length,true);else{e.x+=e.ceDX*length;e.z+=e.ceDZ*length;}e.ceTravel=travel;}
   if(e.ceClock===0){if(e.ceState==='wind'){e.ceState='strike';e.ceClock=k.strike;e.ceTravel=0;}else if(e.ceState==='strike'){e.ceState='recover';e.ceClock=k.recover*(e.combatRecovery||1);}else{e.ceState='hunt';e.ceClock=0;}}

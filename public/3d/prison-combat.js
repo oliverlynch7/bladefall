@@ -1,5 +1,6 @@
 /* Original Prison Break roster. Pure attack geometry/state; rendering never deals damage. */
 (()=>{'use strict';
+const facing=(typeof window!=='undefined'?window:globalThis).BFEnemyFacing||(typeof require==='function'?require('./enemy-facing.js'):null);
 const moves={
  bash:{shape:'cone',reach:100,wind:.95,strike:.25,recover:1.45,range:95},
  thrust:{shape:'lane',reach:145,width:18,wind:.85,strike:.22,recover:1.05,range:135},
@@ -38,9 +39,9 @@ function step(e,dt,target,speed,canAttack=true){
  }
  if(e.pcState==='recover'){if(!e.pcClock){e.pcState='approach';e.pcClock=.18;}return;}
  const seq=e.hp<e.maxHp*.5&&k.second?k.second:k.sequence,next=seq[e.pcCount%seq.length],a=moves[next];
- const dx=target.x-e.x,dz=target.z-e.z,d=Math.hypot(dx,dz)||1;e.yaw=Math.atan2(dx,dz);
+ const dx=target.x-e.x,dz=target.z-e.z,d=Math.hypot(dx,dz)||1;facing?.turn(e,dx,dz,dt);
  if(d>a.range){e.x+=dx/d*speed*dt;e.z+=dz/d*speed*dt;}
- else if(!e.pcClock&&canAttack){
+ else if(!e.pcClock&&canAttack&&(!facing||facing.aligned(e,target))){
   e.pcMove=next;e.pcState='wind';e.pcClock=a.wind;e.pcSerial++;e.pcCount++;
   e.pcDX=dx/d;e.pcDZ=dz/d;e.pcX=a.target?target.x:e.x;e.pcZ=a.target?target.z:e.z;e.pcY=e.y;
  }

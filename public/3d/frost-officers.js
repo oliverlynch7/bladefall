@@ -1,5 +1,6 @@
 /* One shared attack slot; locked geometry is also the visible warning and hit test. */
 (function(root){'use strict';
+const facing=root.BFEnemyFacing||(typeof require==='function'?require('./enemy-facing.js'):null);
 const paths={west:[[-600,520,0],[-600,0,100],[-600,-500,100],[-320,-740,160],[0,-740,160]],east:[[600,520,0],[600,-80,180],[600,-520,180],[320,-740,160],[0,-740,160]],south:[[-600,520,0],[0,520,0],[600,520,0]],center:[[0,520,0],[0,-300,0]]};
 const fields=['frostOfficer','offState','offClock','offSeq','offX','offZ','offY','offDX','offDZ','offRange','offTravel','offTwin','offAttack','offTurn','offFlankedSeq','yaw','y','h','r','boss','kind','label'];
 const alive=e=>!e.dead&&e.hp>0,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),busy=e=>alive(e)&&['wind','strike'].includes(e.offState);
@@ -11,13 +12,13 @@ function nav(arena,e,p){const nodes=arena.nodes,nearest=q=>nodes.reduce((best,n,
 }
 function move(e,p,arena,dt,speed){let q=[p.x,p.z,p.y];if(Math.abs(e.y-p.y)>28||e._offRoute?.length)q=nav(arena,e,p);let dx=q[0]-e.x,dz=q[1]-e.z,d=Math.hypot(dx,dz)||1;const length=Math.min(d,speed*dt);let x=clamp(e.x+dx/d*length,-800,800),z=clamp(e.z+dz/d*length,-810,760),y=floor(x,z,arena);
  if(y-e.y>50){q=nav(arena,e,p);dx=q[0]-e.x;dz=q[1]-e.z;d=Math.hypot(dx,dz)||1;x=e.x+dx/d*length;z=e.z+dz/d*length;y=floor(x,z,arena);}
- if(y-e.y<=50){e.x=x;e.z=z;e.y=y;e.yaw=Math.atan2(dx,dz);} }
+ if(y-e.y<=50){e.x=x;e.z=z;e.y=y;facing?.turn(e,dx,dz,dt);} }
 function step(e,dt,p,a){if(!alive(e))return;dt=clamp(dt,0,.05);const group=a.enemies.filter(q=>q.frostOfficer&&alive(q)),shield=group.some(q=>q.frostOfficer==='shield'),caster=group.some(q=>q.frostOfficer==='caster');
  if(!e.offState){e.offState='hunt';e.offClock={caster:2,shield:3.4,spear:4.6}[e.frostOfficer];e.offSeq=0;}e.offClock=Math.max(0,e.offClock-dt);e.offAttack=Math.max(0,(e.offAttack||0)-dt);
- if(e.offState==='hunt'){
+ if(e.offState==='hunt'){facing?.turn(e,p.x-e.x,p.z-e.z,dt);
   const distance=Math.hypot(p.x-e.x,p.z-e.z),reach=e.frostOfficer==='caster'?450:e.frostOfficer==='shield'?230:480;
   if(distance>(e.frostOfficer==='caster'?300:140)||Math.abs(e.y-p.y)>45){let target=p;if(e.frostOfficer==='shield'&&caster){const c=group.find(q=>q.frostOfficer==='caster');if(distance>500&&Math.abs(c.y-p.y)<20&&Math.abs(e.y-p.y)<20)target={x:(c.x+p.x)/2,z:(c.z+p.z)/2,y:c.y};}move(e,target,a.arena,dt,a.speed*(e.frostOfficer==='spear'?(shield?1.4:1.8):e.frostOfficer==='shield'?(caster?.85:1.25):.8));}
-  if(e.offClock||distance>reach||a.enemies.some(q=>q!==e&&busy(q))||(e.frostOfficer!=='caster'&&Math.abs(e.y-p.y)>40))return;
+  if(e.offClock||distance>reach||facing&&!facing.aligned(e,p)||a.enemies.some(q=>q!==e&&busy(q))||(e.frostOfficer!=='caster'&&Math.abs(e.y-p.y)>40))return;
   e.offTurn=(e.offTurn||0)+1;e.offState='wind';e.offClock=e.frostOfficer==='caster'?1.35:e.frostOfficer==='shield'?1.15:1.05;e.offX=e.x;e.offZ=e.z;e.offY=e.y;const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz)||1;e.offDX=dx/d;e.offDZ=dz/d;e.yaw=Math.atan2(e.offDX,e.offDZ);e.offTwin=e.frostOfficer==='caster'&&!shield;
   if(e.frostOfficer==='caster'){e.offX=p.x;e.offZ=p.z;e.offY=floor(p.x,p.z,a.arena);e.offRange=115;}
   else if(e.frostOfficer==='spear'){e.offRange=0;for(let r=8;r<=420;r+=8){const x=e.x+e.offDX*r,z=e.z+e.offDZ*r;if(Math.abs(x)>800||z< -810||z>760||Math.abs(floor(x,z,a.arena)-e.y)>28)break;e.offRange=r;}}

@@ -1,4 +1,5 @@
 (function(root){'use strict';
+const facing=root.BFEnemyFacing||(typeof require==='function'?require('./enemy-facing.js'):null);
 const stations=[{x:-470,z:0},{x:470,z:0},{x:0,z:470}],fields=['marbleGuardian','mcState','mcClock','mcKind','mcSeq','mcX','mcZ','mcY','mcDX','mcDZ','mcExposed','mcBeat','mcBlock','mcUsed','mcScreens','yaw','y','h','r','boss','kind','label','slamW','atkT'];
 const alive=e=>e&&!e.dead&&e.hp>0;
 const paths={west:[[-500,700,0],[-800,500,100],[-940,100,180],[-880,-430,180],[-530,-840,220],[0,-1000,220]],east:[[500,700,0],[800,500,100],[940,100,180],[880,-430,180],[530,-840,220],[0,-1000,220]],orb:[[0,-1000,220],[0,-1380,220],[0,-1730,220]]};
@@ -28,8 +29,8 @@ function sync(G,s,openWay){const e=G.boss;for(let i=0;i<3;i++){const n=s.items['
 G.walls=G.walls.filter(w=>!w.marbleScreen);for(let i=0;i<3;i++){const q=stations[i],on=e.mcScreens[i]%2===1,side=i<2;G.walls.push({x:q.x,z:q.z,y0:0,w:side?(on?30:170):(on?170:30),d:side?(on?170:30):(on?30:170),h:215,courtWall:true,invisible:true,marbleScreen:true});}
 if(s.flags['mc.defeated']){G.walls=G.walls.filter(w=>!w.marbleGate);G.storyNpcs=[{id:'sunspire_orb',name:'The Sunspire Orb',x:0,z:-1780,y:280}];if(s.flags['mc.answer'])openWay();}}
 function deflector(e){if(e.mcKind!=='hammer')return -1;const len=Math.hypot(e.mcX-e.x,e.mcZ-e.z);return stations.findIndex((q,i)=>{const dx=q.x-e.x,dz=q.z-e.z,along=dx*e.mcDX+dz*e.mcDZ;return e.mcScreens[i]%2===1&&e.mcUsed[i]!==e.mcScreens[i]&&along>0&&along<len&&Math.abs(dx*e.mcDZ-dz*e.mcDX)<95;});}
-function step(e,dt,p,cue){if(!alive(e))return;dt=Math.min(.05,Math.max(0,dt));e.mcClock=Math.max(0,e.mcClock-dt);e.mcExposed=Math.max(0,e.mcExposed-dt);e.atkT=Math.max(0,(e.atkT||0)-dt);e.slamW=e.mcState==='wind'?e.mcClock:0;if(e.mcClock)return;
-if(e.mcState==='recover'){e.mcKind=['hammer','sweep','hammer','fall'][e.mcBeat++%4];e.mcState='wind';e.mcClock=e.mcKind==='hammer'?2.2:1.9;e.mcX=p.x;e.mcZ=p.z;e.mcY=p.y;const d=Math.hypot(p.x-e.x,p.z-e.z)||1;e.mcDX=(p.x-e.x)/d;e.mcDZ=(p.z-e.z)/d;e.yaw=Math.atan2(e.mcDX,e.mcDZ);e.slamW=e.mcClock;e.mcBlock=-1;cue?.('wind');return;}
+function step(e,dt,p,cue){if(!alive(e))return;dt=Math.min(.05,Math.max(0,dt));e.mcClock=Math.max(0,e.mcClock-dt);e.mcExposed=Math.max(0,e.mcExposed-dt);e.atkT=Math.max(0,(e.atkT||0)-dt);e.slamW=e.mcState==='wind'?e.mcClock:0;if(e.mcState==='recover')facing?.turn(e,p.x-e.x,p.z-e.z,dt);if(e.mcClock)return;
+if(e.mcState==='recover'){if(facing&&!facing.aligned(e,p)){e.mcClock=.1;return;}e.mcKind=['hammer','sweep','hammer','fall'][e.mcBeat++%4];e.mcState='wind';e.mcClock=e.mcKind==='hammer'?2.2:1.9;e.mcX=p.x;e.mcZ=p.z;e.mcY=p.y;const d=Math.hypot(p.x-e.x,p.z-e.z)||1;e.mcDX=(p.x-e.x)/d;e.mcDZ=(p.z-e.z)/d;e.yaw=Math.atan2(e.mcDX,e.mcDZ);e.slamW=e.mcClock;e.mcBlock=-1;cue?.('wind');return;}
 if(e.mcState==='wind'){const k=deflector(e);e.slamW=0;e.atkT=.5;e.mcSeq++;if(k>=0){e.mcUsed[k]=e.mcScreens[k];e.mcBlock=k;e.mcExposed=7;e.mcState='recover';e.mcClock=7;cue?.('break');return;}e.mcState='strike';e.mcClock=.45;cue?.('strike');return;}
 e.mcState='recover';e.mcClock=2;
 }

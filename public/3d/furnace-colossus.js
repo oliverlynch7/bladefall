@@ -1,5 +1,6 @@
 /* Ground-accessible cooling valves; shared locked warnings and hit geometry. */
 (function(root){'use strict';
+const facing=root.BFEnemyFacing||(typeof require==='function'?require('./enemy-facing.js'):null);
 const paths={west:[[-400,720,0],[-790,400,120],[-790,-250,120],[-700,-850,220],[0,-1030,220]],east:[[400,720,0],[790,400,120],[790,-250,120],[700,-850,220],[0,-1030,220]],stations:[[-350,100,0],[0,300,0],[350,100,0]],rear:[[-350,100,0],[-400,-650,0],[0,-760,0],[400,-650,0],[350,100,0]]};
 const fields=['furnaceColossus','fcState','fcClock','fcKind','fcSeq','fcX','fcZ','fcY','fcDX','fcDZ','fcExposed','fcValveCd','fcVent','fcRepair','fcBeat','yaw','y','h','r','boss','kind','label','slamW','atkT'];
 const alive=e=>e&&!e.dead&&e.hp>0;
@@ -25,8 +26,8 @@ function step(e,dt,p,a){if(!alive(e))return;dt=Math.min(.05,Math.max(0,dt));e.fc
  if(!e.fcRepair&&e.hp<e.maxHp*.55){e.fcRepair=true;a.repair?.();}
  // One limited crew can repair at most eight percent of maximum health in total.
  if(e.fcRepair&&(e._fcHealed||0)<e.maxHp*.08&&a.enemies.some(q=>q.furnaceRepair&&alive(q))){const d=Math.min(e.maxHp*.003*dt,e.maxHp*.08-(e._fcHealed||0));e.hp=Math.min(e.maxHp,e.hp+d);e._fcHealed=(e._fcHealed||0)+d;}
- if(e.fcClock)return;
- if(e.fcState==='recover'){
+ if(e.fcState==='recover')facing?.turn(e,p.x-e.x,p.z-e.z,dt);if(e.fcClock)return;
+ if(e.fcState==='recover'){if(facing&&!facing.aligned(e,p)){e.fcClock=.1;return;}
   e.fcBeat++;e.fcKind=e.fcBeat%3===0?'sweep':e.fcBeat%3===1?'slam':'vents';e.fcState='wind';e.fcClock=e.fcKind==='sweep'?1.8:1.5;e.fcX=p.x;e.fcZ=p.z;e.fcY=p.y;const d=Math.hypot(p.x-e.x,p.z-e.z)||1;e.fcDX=(p.x-e.x)/d;e.fcDZ=(p.z-e.z)/d;e.yaw=Math.atan2(e.fcDX,e.fcDZ);e.slamW=e.fcClock;a.cue?.('wind');return;
  }
  if(e.fcState==='wind'){e.fcState='strike';e.fcClock=.45;e.fcSeq++;e.slamW=0;e.atkT=.45;a.cue?.('strike');return;}

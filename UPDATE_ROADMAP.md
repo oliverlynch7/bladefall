@@ -4057,3 +4057,8 @@ Enemies turn naturally rather than snapping toward the player. Shield guards and
 ### 2026-11-05 - v2.369.0 Attack commitment
 
 Directional attacks keep their first visible aim through release. The Abyss King's sweep marker matches the hit arc, shield guards leave a rear opening, and co-op clients receive the host's charge direction. Focused combat suites and muted browser checks passed.
+
+
+### 2026-11-05 - v2.369.1 Shield Officer recovery
+
+The Frostfell Shield Officer keeps its attack direction through the full recovery, then turns again while hunting. Direct rear hits land throughout that opening. The shield continues blocking direct hits from the front, and damage-over-time effects can keep ticking after a rear hit.

@@ -3379,3 +3379,10 @@ Production verified: code79eb6354, Cloudflare a6d66588-84a1-49de-b0ea-922b937fda
 Charger rams, legacy lunges, the Orchard Brute, the Fallen and the Marksman use the aim shown on the first warning frame. Shared turning limits apply before the attack begins. The Abyss King's sweep uses the same angle for the body, warning and hit area. Frontal contact respects the committed direction, and charger packets carry the host's warning and charge state.
 
 Verified 60 focused facing assertions and 12 related regression suites, including boss environmental counters. Muted Chrome ran the actual update loop. A shield took 30 damage from a 100-damage front hit and 100 from the rear. The King hit the warned arc and missed the player behind him. A guest snapshot adopted the host's committed charge. A level 9 save created on 2.368.0 kept its level and 413 gold when loaded in 2.369.0. The multiplayer check exercised packet reconciliation in one browser. The separate sound signature test fails on both revisions because its test context lacks rewardSoundKey.
+
+
+## 2026-11-05 - Shield Officer recovery (2.369.1)
+
+The Frostfell Shield Officer stays planted through its authored recovery instead of resuming tracking after the generic hold. Each direct hit still requires a rear angle. Status damage can tick after a rear hit in the same window. The Abyss King retains first-warning commitment and his existing pillar and jump counters.
+
+Verification in muted Chrome used the actual world update and hit pipeline. At 1.5 seconds into recovery, the shield had turned zero radians, blocked a front hit for zero damage, and took 175 from a 100-damage rear hit. It resumed turning in hunt. The King's sweep hit the warned arc and missed the rear. An isolated 2.369.0 campaign save kept level 9, 413 gold, and its route after reload. 69 facing checks and 12 adjacent regression suites passed. The local static server returned its expected missing voice endpoint response. The test used staged combat and did not exercise a live co-op connection.

@@ -9,7 +9,7 @@ function rule(G,e,src,kind='direct'){
  else if(e.fallenDuel){const open=e.fallState==='stagger';r.factor=open?3:0;r.key=open?'pillar:'+e.fallSeq:null;r.limit=.38;r.hint=open?'Blade caught — attack now':'Lead the thrust into a pillar; ordinary recovery stays guarded';}
  else if(e.frostOfficer){const protector=(G.enemies||[]).find(q=>q.frostOfficer==='shield'&&live(q));const separated=!protector||Math.hypot(e.x-protector.x,e.z-protector.z)>1000;
   const dx=(src?.x??e.x)-e.x,dz=(src?.z??e.z)-e.z,d=Math.hypot(dx,dz),rear=kind==='direct'&&src&&d>0&&(dx*Math.sin(e.yaw||0)+dz*Math.cos(e.yaw||0))/d<-.15;
-  const open=(e.offSeq||0)>0&&e.offState==='recover'&&(e.frostOfficer==='caster'?separated:e.frostOfficer==='shield'?(rear||e.offFlankedSeq===e.offSeq):true);
+  const open=(e.offSeq||0)>0&&e.offState==='recover'&&(e.frostOfficer==='caster'?separated:e.frostOfficer==='shield'?(kind==='direct'?rear:e.offFlankedSeq===e.offSeq):true);
   r.factor=open?1.75:0;r.key=open?'officer:'+e.offSeq:null;r.limit=.4;r.hint=open?'Officer exposed — attack':e.frostOfficer==='caster'?'Draw the shield officer away from the caster':e.frostOfficer==='shield'?'Jump the wave, then strike the shield from behind':'Sidestep the rush, then close in while the spear recovers';}
  else if(e.furnaceColossus){const open=e.fcExposed>0;r.factor=open?2.5:0;r.key=open?'cool:'+e._fcCool:null;r.limit=.34;r.hint=open?'Armor cooled — strike the joints':e.fcValveCd>0?'Cooling refills in '+Math.ceil(e.fcValveCd)+'s — avoid its attacks':'Turn a cooling valve to open the armor';}
  else if(e.marbleGuardian){const open=e.mcExposed>0;r.factor=open?2.5:0;r.key=open?'screen:'+e.mcSeq:null;r.limit=.34;r.hint=open?'Armor seal open — attack':'Turn a screen; reflect the heavy strike';}

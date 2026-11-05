@@ -32,8 +32,9 @@ function action(e){
  return null;
 }
 // Bracket each host AI step, so legacy yaw assignments cannot bypass the turn limit.
+function shieldRecovering(e){return e.frostOfficer==='shield'&&e.offState==='recover';}
 function begin(e,target,dt){
- const saved=memory.get(e)||{key:null,aim:0,recover:0},current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,held:saved.recover>0||e.staggerT>0||e.fallState==='stagger'};
+ const saved=memory.get(e)||{key:null,aim:0,recover:0},current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,held:saved.recover>0||shieldRecovering(e)||e.staggerT>0||e.fallState==='stagger'};
  saved.recover=Math.max(0,saved.recover-Math.max(0,dt));memory.set(e,saved);
  if(!current&&!frame.held&&target)turn(e,target.x-e.x,target.z-e.z,dt);
  // Encounter helpers can also step in isolation. Inside the game loop they share this one turn.

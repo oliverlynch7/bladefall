@@ -2762,3 +2762,8 @@ U-ENEMY-FACING-20261104 implementation verified in code79eb6354, version2.368.0.
 ### 2026-11-05 follow-up
 
 Once a directional attack starts winding up, hold the visible aim through release. This supersedes the early tracking exception in the first facing pass. Keep natural turning while pursuing or reacquiring a target. Keep area attacks and environmental counters distinct from directional hit zones.
+
+
+### 2026-11-05 | U-ENEMY-FACING-20261104 | Shield Officer recovery
+
+The existing attack lock is live in 2.369.0. The Frostfell Shield Officer resumes following the player after the shared 0.7-second hold, before its two-second recovery finishes. Keep its last attack direction until that recovery ends. Verify that the officer turns again while hunting and that follow-up direct hits still have to come from behind. Preserve status ticks unlocked by the rear hit and the other bosses' arena counters.

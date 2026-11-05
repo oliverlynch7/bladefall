@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),F=require('../public/3d/enemy-facing.
 const fs=require('node:fs'),vm=require('node:vm'),ctx={window:{BFEnemyFacing:F},console};vm.runInNewContext(fs.readFileSync('public/3d/prison-combat.js','utf8'),ctx);const Prison=ctx.window.BFPrisonCombat;
 const delta=(a,b)=>Math.abs(Math.atan2(Math.sin(a-b),Math.cos(a-b)));
 let checks=0;function ok(v,msg){assert(v,msg);checks++;}
-function tick(e,p,dt=.016,ai=()=>{}){const frame=F.begin(e,p,dt);ai();F.finish(e,p,dt,frame);}
+function tick(e,p,dt=.016,ai=()=>{}){const frame=F.begin(e,p,dt);ai();F.finish(e,dt,frame);}
 for(const dt of [1/120,1/60,1/30,.05,.2])for(const props of [{role:'shielder'},{boss:true},{kind:'charger'},{kind:'fly'},{}]){const e={x:0,z:0,yaw:Math.PI-.02,...props};tick(e,{x:0,z:100},dt,()=>e.yaw=0);ok(delta(e.yaw,Math.PI-.02)<=F.rate(e)*Math.min(.05,dt)+1e-8,'no snap even when AI overwrites yaw');}
 ok(delta(F.angle(Math.PI-.01,-Math.PI+.01,.016,1),Math.PI-.01)<.017,'wrap takes short arc');
 const guard={x:0,z:0,yaw:0,role:'shielder',meleeW:.5,meleeSerial:1};
@@ -16,4 +16,17 @@ const late={...king,akState:'recover',akClock:0,yaw:0};tick(late,rear,.016,()=>K
 const pg={type:'prison_guard',x:0,z:0,y:0,yaw:0,hp:100};Prison.setup(pg);pg.pcClock=0;for(let i=0;i<10;i++)tick(pg,rear,.016,()=>Prison.step(pg,.016,rear,0));ok(pg.pcState==='approach','prison guard cannot instantly bash behind itself');
 for(const data of [{chargeT:1,cdx:1,cdz:0},{windT:1,teleX:1,teleZ:0},{cleaveW:1,cleaveX:1,cleaveZ:0},{shotW:1,shotAim:{x:100,z:0}},{marksmanCrossing:true,markState:'aim',markClock:.4,markX:100,markZ:0},{bruteOrchard:true,bruteState:'charge',teleX:1,teleZ:0}]){const e={x:0,z:0,yaw:Math.PI/2,...data};for(let i=0;i<40;i++)tick(e,{x:-100,z:0});ok(delta(e.yaw,Math.PI/2)<1e-8,'charge/projectile vectors stay committed');}
 const mirrored={x:0,z:0,yaw:0,facingYaw:1.2,shieldYaw:1.2,role:'shielder'};ok(F.mirror(mirrored)&&mirrored.yaw===1.2&&mirrored.shieldYaw===1.2,'guest uses host facing');ok(!F.mirror({}),'legacy snapshots tolerated');
+for(const props of [{kind:'charger'},{boss:true}]){
+ const e={x:0,z:0,yaw:0,...props};
+ ok(!F.contact(e,{x:0,z:-30})&&F.contact(e,{x:0,z:30}),'directional charge contact cannot hit behind');
+}
+const sideways={x:70,y:0,z:150,hp:100,r:16};
+const angledKing={...king,akState:'recover',akClock:.01,akBeat:0,yaw:0};
+tick(angledKing,sideways,.016,()=>King.step(angledKing,.016,sideways));
+ok(angledKing.akState==='wind'&&delta(angledKing.yaw,Math.atan2(angledKing.akDX,angledKing.akDZ))<1e-8,'sweep aim agrees with the body on its first frame');
+const start=angledKing.yaw;
+for(let i=0;i<100&&angledKing.akState!=='strike';i++)tick(angledKing,rear,.016,()=>King.step(angledKing,.016,rear));
+ok(delta(start,angledKing.yaw)<1e-8,'off-axis sweep stays fixed after the target crosses behind');
+const hunting={x:0,z:0,yaw:0,boss:true};
+tick(hunting,{x:100,z:0},.016,()=>{F.turn(hunting,100,0,.016);F.turn(hunting,100,0,.016);ok(Math.abs(hunting.yaw-F.rate(hunting)*.016)<1e-8,'AI helpers share the same turn allowance');});
 console.log(`Enemy facing: ${checks} checks passed (rates, wrap, locks, recovery, rear contact, authored boss directions, live King cycle, prison gate and guest mirror).`);

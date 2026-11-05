@@ -1129,8 +1129,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2368"></script>
-<script src="./prison-combat.js?v=2368"></script>
+<script src="./enemy-facing.js?v=2369"></script>
+<script src="./prison-combat.js?v=2369"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
 <script src="./sprint-race.js?v=2255"></script>
@@ -1153,7 +1153,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./emotes.js?v=2225"></script>
 <script src="./camera-occlusion.js?v=2341"></script>
 <script src="./campaign-threat.js?v=2337"></script>
-<script src="./boss-tactics.js?v=2341"></script>
+<script src="./boss-tactics.js?v=2369"></script>
 <script src="./starter-practice.js?v=2340"></script>
 <script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-welcome.js?v=2234"></script>
@@ -1162,8 +1162,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./abyssal-heart.js?v=2353"></script>
 <script src="./trial-themes.js?v=2315"></script>
 <script src="./rift-hall.js?v=2076"></script>
-<script src="./brute-encounter.js?v=2368"></script>
-<script src="./marksman-encounter.js?v=2368"></script>
+<script src="./brute-encounter.js?v=2369"></script>
+<script src="./marksman-encounter.js?v=2369"></script>
 <script src="./story-state.js?v=2288"></script>
 <script src="./campaign-placement.js?v=2183a"></script>
 <script src="./campaign-geography.js?v=2356"></script>
@@ -1173,7 +1173,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./campaign-hunts.js?v=2365"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2342"></script>
-<script src="./campaign-elites.js?v=2368"></script>
+<script src="./campaign-elites.js?v=2369"></script>
 <script src="./campaign-encounters.js?v=2359"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2319"></script>
@@ -1191,7 +1191,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./thunder-cliffs.js?v=2318"></script>
 <script src="./castle-gates.js?v=2318"></script>
 <script src="./long-ascent.js?v=2185"></script>
-<script src="./final-king.js?v=2368"></script>
+<script src="./final-king.js?v=2369"></script>
 <script src="./return-adventures.js?v=2356"></script>
 <script src="./return-visits.js?v=2356"></script>
 <script src="./palace-courtyard.js?v=2317"></script>
@@ -1199,19 +1199,19 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./dragon-combat.js?v=2024"></script>
 <script src="./dragon-riding.js?v=2225"></script>
 <script src="./sky-library.js?v=2318"></script>
-<script src="./marble-guardian.js?v=2368"></script>
+<script src="./marble-guardian.js?v=2369"></script>
 <script src="./hydra.js?v=2338"></script>
 <script src="./shipwreck-shore.js?v=2318"></script>
 <script src="./ship-crossing.js?v=2299"></script>
 <script src="./great-furnace.js?v=2318"></script>
-<script src="./furnace-colossus.js?v=2368"></script>
+<script src="./furnace-colossus.js?v=2369"></script>
 <link rel="stylesheet" href="./journal-notice.css?v=2201">
 <script src="./journal-notice.js?v=2254"></script>
 <script src="./puzzle-feedback.js?v=2197"></script>
 <script src="./journal-clues.js?v=2203"></script>
 <script src="./music-score.js?v=2293"></script>
-<script src="./fallen-encounter.js?v=2368"></script>
-<script src="./frost-officers.js?v=2368"></script>
+<script src="./fallen-encounter.js?v=2369"></script>
+<script src="./frost-officers.js?v=2369"></script>
 <script src="./story-authority.js?v=2325"></script>
 <script src="./skill-surfaces.js?v=2330f"></script><script src="./skill-identity.js?v=2362b"></script>
 <script src="./campaign-journey.js?v=2318"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.368.0-enemy-facing';
+const VERSION3D='2.369.0-attack-commitment';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -8547,7 +8547,7 @@ function updatePrisonFoe(e,dt,p,eff){
  const C=BFPrisonCombat,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
  if(!MP.guest()){
   let target=p.hp>0&&!p.dead&&!p.downed?p:null;
-  for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&q.zone===MP.zone&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
+  for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&!q.dead&&q.zone===MP.zone&&q.area===G.area&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
   if(G.devKeep)target=devBeta().target(e,target);
   const busy=G.enemies.filter(o=>o!==e&&!o.dead&&o.prisonRoom===e.prisonRoom&&['wind','strike'].includes(o.pcState)).length;
   C.step(e,dt,target,eff,busy<2&&!!target&&!losBlocked(e.x,e.z,target.x,target.z));
@@ -8773,7 +8773,7 @@ function drawBruteOrchard(t){
  for(const [x,z]of [[-640,590],[700,180],[-570,-740],[620,-720]]){bx(x,16,z,36,32,32,'#7b653f');bx(x,34,z,42,6,42,'#ac935c');}
  const e=G.boss;if(!e||e.dead)return;
  if(e.windT>0){
-  const tx=e.teleX,tz=e.teleZ,locked=e.windT<=.45,c=locked?'#ff7044':'#e9b367';
+  const tx=e.teleX,tz=e.teleZ,c='#ff7044';
   const path=bruteChargePath(e),half=path.width/2;
   // Borders show the moving body's full width; the player's own radius still
   // matters at the edge. Stop at the cart/stone that actually blocks this rush.
@@ -15752,6 +15752,7 @@ const MP={
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
       const row=[e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null];
       row[7]={...row[7],role:e.role||null,roleCol:e.roleCol||null,facingYaw:Number.isFinite(e.yaw)?e.yaw:0,shieldYaw:e.role==='shielder'?e.shieldYaw:null};
+      if(e.kind==='charger')Object.assign(row[7],{hostCharge:true,chargeSerial:e.chargeSerial||0,windT:e.windT||0,windMax:e.windMax||0,chargeT:e.chargeT||0,teleX:e.teleX||0,teleZ:e.teleZ||0,cdx:e.cdx||0,cdz:e.cdz||0});
       if(e.boss||e.hydraChain)row[7]={...row[7],...BFBossTactics.snapshot(e)};
       if(e.homeBellWave)row[7]={...row[7],homeBellWave:e.homeBellWave,label:e.label,y:e.y};
       if(BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e))row[7]={...row[7],encounterOwned:true,encReturning:!!e.encReturning,y:e.y};
@@ -15864,7 +15865,7 @@ const MP={
       if(e){const st=a[8];if(st){e.st=Object.fromEntries(STATUS_ORDER.map((k,i)=>[k,Math.max(0,Number(st[i])||0)]));e.stDmg=Math.max(0,Number(st[6])||0);e.stunT=Math.max(0,Number(st[7])||0);e.slowT=Math.max(0,Number(st[8])||0);e.exposed=Math.max(0,Number(st[9])||0);e.primed=!!st[10];e.markT=Math.max(0,Number(st[11])||0);e.markOwner=st[12]||null;e.warCurseT=Math.max(0,Number(st[13])||0);e.warCurseOwner=st[14]||null;e.markExplode=Math.max(0,Number(st[15])||0);}else{e.st=null;e.stunT=0;e.slowT=0;e.exposed=0;e.primed=false;e.markT=0;e.markOwner=null;e.warCurseT=0;e.warCurseOwner=null;e.markExplode=0;}}
       if(e){const fx=a[9];if(fx){e._tether=fx[0]||null;e._tetherT=Math.max(0,Number(fx[1])||0);e.doomT=Math.max(0,Number(fx[2])||0);e.warBurstT=Math.max(0,Number(fx[3])||0);e.beastMarkT=Math.max(0,Number(fx[4])||0);e.tauntT=Math.max(0,Number(fx[5])||0);e.tauntId=fx[6]||null;e.petTauntT=Math.max(0,Number(fx[7])||0);e.petTauntId=fx[8]||null;e.warBurstDmg=Math.max(0,Number(fx[9])||0);}else{e._tether=null;e._tetherT=0;e.doomT=0;e.warBurstT=0;e.warBurstDmg=0;e.beastMarkT=0;e.tauntT=0;e.tauntId=null;e.petTauntT=0;e.petTauntId=null;}}
     }
-    for(const a of en)if(Number.isFinite(a[7]?.facingYaw)||a[7]?.encounterOwned||a[7]?.normalMelee||a[7]?.homeBellWave||a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];Object.assign(e,a[7]);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
+    for(const a of en)if(Number.isFinite(a[7]?.facingYaw)||a[7]?.encounterOwned||a[7]?.normalMelee||a[7]?.homeBellWave||a[7]?.prisonFoe||a[7]?.briarRole||a[7]?.campaignRole||a[7]?.campaignElite||a[7]?.patrolGroup||a[7]?.patrolReturn||a[7]?.finalKing||a[7]?.marbleGuardian||a[7]?.libraryGuard||a[7]?.furnaceColossus||a[7]?.frostOfficer||a[7]?.fallenDuel||a[7]?.bruteOrchard||a[7]?.marksmanCrossing){const e=this.byMid(a[0]);if(e){const wake=!e.active&&a[6];if(a[7].hostCharge&&e.chargeSerial!==a[7].chargeSerial)e._chargeSeen=0;Object.assign(e,a[7]);BFEnemyFacing.mirror(e);e.active=!!a[6];if(wake&&e.boss)onBossActivate(e);}}
     if(ek) for(const k of ek){ const mid=k[0]; if(this._killed[mid]) continue; this._killed[mid]=1;
       const e=this.byMid(mid);
       if(e){ if(Number.isFinite(k[4])&&k[4]>=0)e.xp=k[4];e.elite=!!k[2];this._authKill=true; try{ killEnemy(e,false); }catch(err){ e.dead=true; } this._authKill=false; }
@@ -17050,10 +17051,10 @@ function updateWorld(dt){
        respects a stun respects this. */
     if((G._freezeT||0)>0)eff=0;
     if(e.stunT>0){ e.stunT-=dt; eff=0; }
-    const partyTarget=syncedMelee(e)||BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e)?enemyPartyTarget(e,p):p;
+    const partyTarget=e.ceKind||e.prisonFoe||syncedMelee(e)||BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e)?enemyPartyTarget(e,p):p;
     const meleeTarget=inBrokenWalls()&&e.keepEscort?BFBrokenWalls.target(G,e,partyTarget):inGreatFurnace()&&e.furnaceEscort?BFGreatFurnace.target(G,e,partyTarget):inLostCanyon()&&(e.canyonEscort||e.canyonAlarm)?BFLostCanyon.target(G,e,partyTarget):partyTarget;
     const d=Math.max(1,dXZ(meleeTarget.x,meleeTarget.z,e.x,e.z)); let dirX=(meleeTarget.x-e.x)/d, dirZ=(meleeTarget.z-e.z)/d;
-    const facingTarget=bossTarget||meleeTarget,mirrorFacing=MP.guest()&&Number.isFinite(e.facingYaw);
+    const facingTarget=e.boss?bossTarget:meleeTarget,mirrorFacing=MP.guest()&&Number.isFinite(e.facingYaw);
     const facingFrame=e.dummy||mirrorFacing||e.stunT>0||(G._freezeT||0)>0?null:BFEnemyFacing.begin(e,facingTarget,dt);
     if(e.dummy)e.yaw=e.fixedYaw??0;else if(mirrorFacing)BFEnemyFacing.mirror(e);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
@@ -17130,12 +17131,24 @@ function updateWorld(dt){
       if(e.shootT<=0 && d<560&&enemyMeleeClear(e,meleeTarget)){ bossShoot(e,meleeTarget); e.shootT=e.shootCd; }
     }
     else if(e.kind==='charger'){ // beetle: winds up, then rams in a straight line
-      if(e.atkTimer>0) e.atkTimer-=dt;
-      if(e.chargeT>0){ e.chargeT-=dt;e.yaw=Math.atan2(e.cdx,e.cdz); e.x+=e.cdx*e.speed*3.4*dt; e.z+=e.cdz*e.speed*3.4*dt; }
-      else if(e.windT>0){ e.windMax=e.windMax||e.windT; if(e.windT>.22){BFEnemyFacing.turn(e,dirX,dirZ,dt);e.teleX=Math.sin(e.yaw);e.teleZ=Math.cos(e.yaw);} e.windT-=dt;   // track aim so the danger-line follows you during the tell
-        if(e.windT<=0){ e.chargeT=e.elite?0.62:0.7; e.cdx=e.teleX; e.cdz=e.teleZ; } }
-      else { moveGroundEnemy(e,dirX,dirZ,eff,dt,d);
-        if(d<300 && e.atkTimer<=0&&BFEnemyFacing.aligned(e,meleeTarget)){ e.windT=G.trial?(e.elite?0.42:0.55):.7; e.windMax=e.windT;e.teleX=dirX;e.teleZ=dirZ; e.atkTimer=e.elite?1.8:2.8; if(!window.BFEnemyWarnings?.emit(e,p,performance.now()/1000,playFx))playFx((e.type==='charger'||e.type==='siegeknight'||e.type==='marblestatue')?'ma_stomp':(Math.random()<0.5?'atk1':'atk2'),0.6); } }   // curated attack telegraph at the START of the wind-up
+      const mirroredCharge=MP.guest()&&e.hostCharge;
+      if(mirroredCharge){
+        if(e.windT>0){e._chargeSeen=(e._chargeSeen||0)+dt;e.windT=Math.max(0,e.windT-dt);}
+        if(e.chargeT>0){e.chargeT=Math.max(0,e.chargeT-dt);e.x+=e.cdx*e.speed*3.4*dt;e.z+=e.cdz*e.speed*3.4*dt;}
+        else if(e.windT<=0)moveGroundEnemy(e,dirX,dirZ,eff,dt,d);
+      }else{
+        if(e.atkTimer>0) e.atkTimer-=dt;
+        if(e.chargeT>0){ e.chargeT-=dt;e.yaw=Math.atan2(e.cdx,e.cdz); e.x+=e.cdx*e.speed*3.4*dt; e.z+=e.cdz*e.speed*3.4*dt; }
+        else if(e.windT>0){ e.windMax=e.windMax||e.windT; e.windT-=dt;
+          if(e.windT<=0){ e.chargeT=e.elite?0.62:0.7; e.cdx=e.teleX; e.cdz=e.teleZ; } }
+        else { moveGroundEnemy(e,dirX,dirZ,eff,dt,d);
+          if(d<300 && e.atkTimer<=0&&BFEnemyFacing.aligned(e,meleeTarget,.20)){
+            e.windT=G.trial?(e.elite?0.42:0.55):.7;e.windMax=e.windT;
+            [e.teleX,e.teleZ]=BFEnemyFacing.forward(e);e.chargeSerial=(e.chargeSerial||0)+1;e.atkTimer=e.elite?1.8:2.8;
+            if(!window.BFEnemyWarnings?.emit(e,p,performance.now()/1000,playFx))playFx((e.type==='charger'||e.type==='siegeknight'||e.type==='marblestatue')?'ma_stomp':(Math.random()<0.5?'atk1':'atk2'),.6);
+          }
+        }
+      }
     }
     else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
     }
@@ -17159,8 +17172,8 @@ function updateWorld(dt){
         else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
       }
     }
-    if(!e.dummy){if(mirrorFacing)BFEnemyFacing.mirror(e);else BFEnemyFacing.finish(e,facingTarget,dt,facingFrame,encounterReturning);}
-    if(!e.dead && !encounterReturning && !e.ceKind && !e.prisonFoe && !(MP.guest()&&e.normalMelee&&(e._meleeSeenSerial!==e.meleeSerial||(e._meleeSeen||0)<.4)) && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0:e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
+    if(!e.dummy){if(mirrorFacing)BFEnemyFacing.mirror(e);else BFEnemyFacing.finish(e,dt,facingFrame,encounterReturning);}
+    if(!e.dead && !encounterReturning && !e.ceKind && !e.prisonFoe && !(MP.guest()&&e.normalMelee&&(e._meleeSeenSerial!==e.meleeSerial||(e._meleeSeen||0)<.4)) && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0&&(!MP.guest()||!e.hostCharge||e._chargeSeen>=.18):e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
       if(inBrokenWalls()&&!MP.guest()&&e.keepEscort&&e.meleeActive>0&&BFBrokenWalls.hitEscort(G,e)){/* The host owns escort health and retry state. */}
       else if(inGreatFurnace()&&!MP.guest()&&e.furnaceEscort&&e.meleeActive>0&&BFGreatFurnace.hitEscort(G,e)){/* The host owns worker health and retry state. */}
       else if(inLostCanyon()&&!MP.guest()&&(e.canyonEscort||e.canyonAlarm)&&e.meleeActive>0&&BFLostCanyon.hitEscort(G,e)){/* The host owns the north crossing. */}
@@ -17360,13 +17373,13 @@ function drawEnemyDanger(e){
 }
 function bossShoot(e,p){
   if(e.shotW>0||!e.shot||!BFEnemyFacing.aligned(e,p))return;
-  e.shotW=0.7;e.shotAim={x:p.x,y:p.y,z:p.z,h:p.h};
+  e.shotW=0.7;e.shotAim={x:p.x,y:p.y,z:p.z,h:p.h,yaw:e.yaw};
 }
 function releaseEnemyShot(e,p){
-  e.shotReleaseT=.22; // Explicit visual release; cancelled wind-ups must not cast.
+  e.shotReleaseT=.22;e.shotReleaseYaw=p.yaw; // Explicit visual release; cancelled wind-ups must not cast.
   const cfg=e.shot, oy=e.y+e.h*0.62;
   const d=Math.max(1,dXZ(p.x,p.z,e.x,e.z)), t=Math.max(0.25,d/cfg.speed);
-  const baseAng=Math.atan2(p.x-e.x,p.z-e.z);
+  const baseAng=p.yaw??Math.atan2(p.x-e.x,p.z-e.z);
   for(let i=0;i<cfg.count;i++){
     const ang=baseAng+(cfg.count>1?(i-(cfg.count-1)/2)*cfg.spread*2.2:0);
     const vx=Math.sin(ang)*cfg.speed, vz=Math.cos(ang)*cfg.speed;
@@ -17584,7 +17597,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
      The boss PLANTS while winding, which matters as much as the timing: a telegraph you can see but
      cannot outrun is just a countdown. Standing still gives you the ground to move into. */
   if(e.windT>0){
-    if(e.windT>.25){BFEnemyFacing.turn(e,dirX,dirZ,dt);e.teleX=Math.sin(e.yaw);e.teleZ=Math.cos(e.yaw);}e.windT-=dt;e.windMax=e.windMax||0.85;
+    e.windT-=dt;e.windMax=e.windMax||0.85;
     if(e.windT<=0){ e.lunge=0.45; G.shake=Math.min(G.shake+5,11); SFX.growl(1); }
   }
   else if(e.lunge>0){ e.lunge-=dt;e.yaw=Math.atan2(e.teleX,e.teleZ); e.x+=(e.teleX||0)*eff*2.6*dt;e.z+=(e.teleZ||0)*eff*2.6*dt; }
@@ -17592,7 +17605,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.kite && dist<210){ e.x-=dirX*eff*0.6*dt; e.z-=dirZ*eff*0.6*dt; }
     else { e.x+=dirX*eff*0.7*dt; e.z+=dirZ*eff*0.7*dt; }
     if(!e.kite && dist<240 && e.atkTimer<=0&&BFEnemyFacing.aligned(e,p)){
-      e.windT=0.85; e.windMax=0.85; e.teleX=dirX; e.teleZ=dirZ; e.atkTimer=2.3;
+      e.windT=0.85; e.windMax=0.85; [e.teleX,e.teleZ]=BFEnemyFacing.forward(e); e.atkTimer=2.3;
       addText(e.x,e.y+e.h+14,e.z,'!','#ff5a3a',true);
     }
   }
@@ -17608,12 +17621,12 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       if(e.slamCd<=0 && dist<340){ e.slamW=0.7; e.slamCd=(4.5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } } // 0.7s wind-up (faster in phase 2)
   }
   if(e.type==='warden'){                                  // directional greatsword cleave — a hard-hitting cone you sidestep (not jump)
-    if(e.cleaveW>0){ e.cleaveW-=dt; if(e.cleaveW<=0){ const dl=Math.hypot(dirX,dirZ)||1;
+    if(e.cleaveW>0){ e.cleaveW-=dt; if(e.cleaveW<=0){
       (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:20,maxR:300,dmg:e.dmg*1.4,life:0,spd:340,arc:0.95,dirX:e.cleaveX,dirZ:e.cleaveZ,col:'#e2e8f0',col2:'#95a2b4'});
       G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+16,e.z,'CLEAVE!','var(--danger)',true);
-      for(let i=0;i<12;i++){ const a=Math.atan2(dirZ,dirX)+(i/11-0.5)*1.6; G.particles.push({x:e.x+Math.cos(a)*30,y:6,z:e.z+Math.sin(a)*30,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.35,color:'#cfd6df',sz:3}); } } }
+      for(let i=0;i<12;i++){ const a=Math.atan2(e.cleaveZ,e.cleaveX)+(i/11-0.5)*1.6; G.particles.push({x:e.x+Math.cos(a)*30,y:6,z:e.z+Math.sin(a)*30,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.35,color:'#cfd6df',sz:3}); } } }
     else { if(e.cleaveCd==null) e.cleaveCd=4; e.cleaveCd-=dt;
-      if(e.cleaveCd<=0 && dist<300){ e.cleaveW=0.75;e.cleaveX=dirX;e.cleaveZ=dirZ; e.cleaveCd=(5+Math.random()*2)*(e.phase>=2?0.55:1); e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
+      if(e.cleaveCd<=0 && dist<300&&!BFEnemyFacing.action(e)&&BFEnemyFacing.aligned(e,p)){ e.cleaveW=0.75;[e.cleaveX,e.cleaveZ]=BFEnemyFacing.forward(e); e.cleaveCd=(5+Math.random()*2)*(e.phase>=2?0.55:1); e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
   }
   if(e.type==='sorcerer'){                                // frost nova — a chilling ring that erupts when you crowd the lich
     if(e.novaW>0){ e.novaW-=dt; if(e.novaW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:18,maxR:260,dmg:e.dmg*1.1,life:0,spd:300,col:'#bff0ff',col2:'#7fd6ff'});
@@ -17631,7 +17644,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
   }
   // ==== Batch 4: boss signature mechanics, keyed to each set-piece arena (readable, telegraphed, reuse ring/beam VFX) ====
   bossSignature(e,dt,p,dirX,dirZ,dist);
-  if(e.ranged && e.shootT<=0 && dist<2000){ bossShoot(e,p); e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
+  if(e.ranged && e.shootT<=0 && dist<2000&&!BFEnemyFacing.action(e)){ bossShoot(e,p); e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
   if(e.type==='king'||e.type==='tyrant'){
     e.summonT-=dt;
     if(e.summonT<=0 && e.hp/e.maxHp<0.7){ e.summonT=e.type==='tyrant'?5:6;

@@ -2,7 +2,7 @@
 'use strict';
 const facing=root.BFEnemyFacing||(typeof require==='function'?require('./enemy-facing.js'):null);
 const fields=['bruteOrchard','bruteState','bruteStaggers','bruteClock','bruteTurns','bruteWaves','bruteWaveWarn','bruteWaveSide','windT','windMax','teleX','teleZ','lunge','slamW','staggerT','phase','yaw'];
-const CHARGE_SPEED=620,CHARGE_TIME=1.05,LOCK_TIME=.45;
+const CHARGE_SPEED=620,CHARGE_TIME=1.05;
 function impactAt(e,x,z,props){return props.find(p=>Math.abs(x-p.x)<p.w/2+e.r&&Math.abs(z-p.z)<p.d/2+e.r);}
 // Preview the same swept body and first blocking prop as the real charge. Small
 // steps match step()'s collision resolution (at most 10 units), including corners.
@@ -17,7 +17,7 @@ function chargePreview(e,props=[],walkable){
 }
 function cue(e,{jump='Jump',dodge='Dodge'}={}){
  if(!e?.active||e.dead||e.hp<=0)return null;
- if(e.bruteState==='wind')return {text:e.windT<=LOCK_TIME?'Charge locked · '+dodge+' sideways':'Charge aiming · step aside',safe:false};
+ if(e.bruteState==='wind')return {text:'Charge locked · '+dodge+' sideways',safe:false};
  if(e.bruteState==='charge')return {text:'Charging · stay clear',safe:false};
  if(e.bruteState==='slam')return {text:'Ground wave · '+jump+' to jump',safe:false};
  if(e.bruteState==='stagger')return {text:'Staggered · attack now',safe:true};
@@ -40,9 +40,9 @@ function step(e,dt,target,env){
  e.bruteClock=Math.max(0,e.bruteClock-dt);
  if(e.bruteState==='hunt'){facing?.turn(e,dx,dz,dt);
   if(d>115){const v=Math.min(d-115,(env.speed||90)*dt);e.x+=ux*v;e.z+=uz*v;}
-  if(e.bruteClock===0&&d<760&&(!facing||facing.aligned(e,target))){e.bruteTurns++;if(e.bruteTurns%3===0&&d<(e.phase>=2?420:280)){enter(e,'slam',.95);e.slamW=.95;env.tell('Jump the ground wave!');}else{const wind=e.phase===3?.9:e.phase===2?1.02:1.15;enter(e,'wind',wind);e.windMax=wind;e.windT=wind;e.teleX=ux;e.teleZ=uz;env.tell('Bait the charge into a cart or stone!');}}
+  if(e.bruteClock===0&&d<760&&facing.aligned(e,target,.10)){e.bruteTurns++;if(e.bruteTurns%3===0&&d<(e.phase>=2?420:280)){enter(e,'slam',.95);e.slamW=.95;env.tell('Jump the ground wave!');}else{const wind=e.phase===3?.9:e.phase===2?1.02:1.15;enter(e,'wind',wind);e.windMax=wind;e.windT=wind;[e.teleX,e.teleZ]=facing.forward(e);env.tell('Bait the charge into a cart or stone!');}}
  }else if(e.bruteState==='wind'){
-  e.windT=e.bruteClock;if(e.bruteClock>LOCK_TIME){facing?.turn(e,dx,dz,dt);e.teleX=Math.sin(e.yaw||0);e.teleZ=Math.cos(e.yaw||0);}e.yaw=Math.atan2(e.teleX,e.teleZ);
+  e.windT=e.bruteClock;e.yaw=Math.atan2(e.teleX,e.teleZ);
   if(e.bruteClock===0){enter(e,'charge',CHARGE_TIME);e.lunge=CHARGE_TIME;}
  }else if(e.bruteState==='charge'){
   e.yaw=Math.atan2(e.teleX,e.teleZ);e.lunge=e.bruteClock;const travel=CHARGE_SPEED*dt,n=Math.ceil(travel/10);

@@ -6,16 +6,14 @@ const fields=['fallenDuel','fallState','fallClock','fallTurn','fallSeq','fallKin
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function blocked(x,z,tx,tz,pad=0){const n=Math.ceil(Math.hypot(tx-x,tz-z)/8);for(let i=1;i<=n;i++){const f=i/n;for(const p of pillars)if(Math.abs(x+(tx-x)*f-p.x)<p.w/2+pad&&Math.abs(z+(tz-z)*f-p.z)<p.d/2+pad)return true;}return false;}
 function enter(e,s,t){e.fallState=s;e.fallClock=t;}
-function aim(e,p,dt){const dx=p.x-e.x,dz=p.z-e.z;facing?.turn(e,dx,dz,dt);e.fallDX=Math.sin(e.yaw||0);e.fallDZ=Math.cos(e.yaw||0);}
 function step(e,dt,p,a){if(e.dead||e.hp<=0)return;dt=clamp(dt,0,.05);if(!e.fallState){enter(e,'hunt',1.5);e.fallTurn=0;e.fallSeq=0;}e.fallClock=Math.max(0,e.fallClock-dt);e.fallAttack=Math.max(0,(e.fallAttack||0)-dt);e.phase=e.hp/e.maxHp<.5?2:1;
  if(e.fallState==='hunt'){
-  aim(e,p,dt);const d=Math.hypot(p.x-e.x,p.z-e.z),speed=a.speed||150;if(d>135){let dx=e.fallDX,dz=e.fallDZ;if(blocked(e.x,e.z,e.x+dx*90,e.z+dz*90,e.r+8)){const side=e.x<=0?-1:1;dx=side*Math.abs(e.fallDZ);dz=-side*e.fallDX;}
+  facing.turn(e,p.x-e.x,p.z-e.z,dt);[e.fallDX,e.fallDZ]=facing.forward(e);const d=Math.hypot(p.x-e.x,p.z-e.z),speed=a.speed||150;if(d>135){let dx=e.fallDX,dz=e.fallDZ;if(blocked(e.x,e.z,e.x+dx*90,e.z+dz*90,e.r+8)){const side=e.x<=0?-1:1;dx=side*Math.abs(e.fallDZ);dz=-side*e.fallDX;}
    const x=clamp(e.x+dx*speed*dt,-490,490),z=clamp(e.z+dz*speed*dt,-650,650);if(!blocked(e.x,e.z,x,z,e.r)){e.x=x;e.z=z;}}
   if(!e.fallClock&&d<700&&(!facing||facing.aligned(e,p))){e.fallTurn++;e.fallKind=e.fallTurn%3===0?'sweep':'thrust';enter(e,e.fallKind==='sweep'?'feint':'thrust',e.fallKind==='sweep'?.55:1.05);a.cue?.(e.fallKind==='sweep'?'feint':'thrust');}return;
  }
- if(e.fallState==='feint'){if(!e.fallClock){aim(e,p,dt);enter(e,'sweep',.85);a.cue?.('sweep');}return;}
+ if(e.fallState==='feint'){if(!e.fallClock){enter(e,'sweep',.85);a.cue?.('sweep');}return;}
  if(e.fallState==='thrust'||e.fallState==='sweep'){
-  if(e.fallState==='thrust'&&e.fallClock>.65)aim(e,p,dt);
   if(!e.fallClock){e.fallX=e.x;e.fallZ=e.z;e.fallRange=e.fallKind==='sweep'?190:440;
    if(e.fallKind==='thrust'){let length=0;for(let d=8;d<=440;d+=8){const x=e.x+e.fallDX*d,z=e.z+e.fallDZ*d;if(Math.abs(x)>490||Math.abs(z)>650||blocked(e.x,e.z,x,z,e.r)){break;}length=d;}e.fallRange=length;}
    e.fallTravel=0;e.fallSeq++;e.fallAttack=.32;enter(e,'strike',.32);a.cue?.('strike');}return;

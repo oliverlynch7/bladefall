@@ -2911,4 +2911,4 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 | U-HUB-GREETING-FIRST-20261104 | A | Voiced hub NPC greeting before utility/options menus; clear Continue and preserved quest access. | Implemented 2.367.0; six-character native and focused regression checks passed. See art-validation/hub-greetings-20261104. |
 
 
-| U-ENEMY-FACING-20261104 | A | Natural bounded enemy turning and committed attack/guard directions; viable flanking, including shield enemies and Abyss King. | Implemented 2.368.0; 55 facing checks, existing boss suites and muted native shield/King/snapshot checks passed. See art-validation/enemy-facing-20261104. |
+| U-ENEMY-FACING-20261104 | A | Natural bounded enemy turning and committed attack/guard directions; viable flanking, including shield enemies and Abyss King. | Strengthened in 2.369.0. First visible aim stays fixed through release, with shield and attack geometry matching the body. See the November 5 continuity entry for verification. See art-validation/enemy-facing-20261104. |

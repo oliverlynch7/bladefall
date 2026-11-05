@@ -4052,3 +4052,8 @@ Fresh talks with Quartermaster, Smith, Stylist, Drillmaster, Beastkeeper and Tho
 
 ### 2026-11-04 - v2.368.0: committed enemy facing
 Enemies turn naturally rather than snapping toward the player. Shield guards and Abyss King expose real flank/recovery openings; committed attacks follow their warning direction. Host-facing snapshots keep co-op bodies and shields consistent.55 focused checks plus existing boss suites and muted native combat checks passed. Evidence: docs/art-validation/enemy-facing-20261104.
+
+
+### 2026-11-05 - v2.369.0 Attack commitment
+
+Directional attacks keep their first visible aim through release. The Abyss King's sweep marker matches the hit arc, shield guards leave a rear opening, and co-op clients receive the host's charge direction. Focused combat suites and muted browser checks passed.

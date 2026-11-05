@@ -43,7 +43,7 @@ function step(e,dt,target,speed,canAttack=true){
  if(d>a.range){e.x+=dx/d*speed*dt;e.z+=dz/d*speed*dt;}
  else if(!e.pcClock&&canAttack&&(!facing||facing.aligned(e,target))){
   e.pcMove=next;e.pcState='wind';e.pcClock=a.wind;e.pcSerial++;e.pcCount++;
-  e.pcDX=dx/d;e.pcDZ=dz/d;e.pcX=a.target?target.x:e.x;e.pcZ=a.target?target.z:e.z;e.pcY=e.y;
+  [e.pcDX,e.pcDZ]=facing.forward(e);e.pcX=a.target?target.x:e.x;e.pcZ=a.target?target.z:e.z;e.pcY=e.y;
  }
 }
 function contains(e,p){

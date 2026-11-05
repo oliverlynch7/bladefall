@@ -7,11 +7,11 @@ const fields=['marksmanCrossing','markState','markClock','markMoved','markFromX'
 function enter(e,s,t){e.markState=s;e.markClock=t;}
 function step(e,dt,p,a){if(e.dead||e.hp<=0)return;dt=Math.min(.05,Math.max(0,dt));if(!e.markState){enter(e,'recover',1.8);e.markTurns=0;e.markMoved=false;}e.markClock=Math.max(0,e.markClock-dt);e.markAttack=Math.max(0,(e.markAttack||0)-dt);e.markExposed=Math.max(0,(e.markExposed||0)-dt);
  if(e.markState==='glide'){const t=1-e.markClock/2.4,n=nests[1];e.x=e.markFromX+(n.x-e.markFromX)*t;e.z=e.markFromZ+(n.z-e.markFromZ)*t;e.y=e.markFromY+(n.y-e.markFromY)*t+Math.sin(t*Math.PI)*180;if(!e.markClock){e.untargetable=false;enter(e,'recover',3.2);}return;}
- const n=nests[e.markMoved?1:0];e.x=n.x;e.z=n.z;e.y=n.y;if(e.markState!=='aim')facing?.turn(e,p.x-e.x,p.z-e.z,dt);
+ const n=nests[e.markMoved?1:0];e.x=n.x;e.z=n.z;e.y=n.y;if(e.markState!=='aim'&&!(e.markAttack>0))facing?.turn(e,p.x-e.x,p.z-e.z,dt);
  if(e.markState==='relocate'){if(!e.markClock){e.markFromX=e.x;e.markFromZ=e.z;e.markFromY=e.y;e.markMoved=true;e.phase=2;e.untargetable=true;a.reinforce();enter(e,'glide',2.4);}return;}
- if(e.markState==='aim'){if(e.markClock>.6){facing?.turn(e,p.x-e.x,p.z-e.z,dt);const d=Math.hypot(p.x-e.x,p.z-e.z);e.markX=e.x+Math.sin(e.yaw||0)*d;e.markZ=e.z+Math.cos(e.yaw||0)*d;e.markY=p.y;e.markH=p.h||54;}e.yaw=Math.atan2(e.markX-e.x,e.markZ-e.z);if(!e.markClock){e.markAttack=.28;a.fire({x:e.markX,z:e.markZ,y:e.markY,h:e.markH});enter(e,'recover',e.markExposed>0?4:e.markMoved?1.45:1.8);}return;}
+ if(e.markState==='aim'){e.yaw=Math.atan2(e.markX-e.x,e.markZ-e.z);if(!e.markClock){e.markAttack=.28;a.fire({x:e.markX,z:e.markZ,y:e.markY,h:e.markH});enter(e,'recover',e.markExposed>0?4:e.markMoved?1.45:1.8);}return;}
  if(!e.markMoved&&e.hp<=Math.ceil(e.maxHp*.55)){enter(e,'relocate',1.5);a.tell('She is moving to the rear nest. Guards are coming up the east path!');return;}
- if(!e.markClock&&(!facing||facing.aligned(e,p))){e.markTurns++;e.markX=p.x;e.markZ=p.z;e.markY=p.y;e.markH=p.h||54;enter(e,'aim',1.25);a.cue();}
+ if(!e.markClock&&facing.aligned(e,p,.08)){const distance=Math.hypot(p.x-e.x,p.z-e.z),[dx,dz]=facing.forward(e);e.markTurns++;e.markX=e.x+dx*distance;e.markZ=e.z+dz*distance;e.markY=p.y;e.markH=p.h||54;enter(e,'aim',1.25);a.cue();}
 }
 function snapshot(e){return Object.fromEntries(fields.map(k=>[k,e[k]??0]));}
 function build(a){const {G,seg,plat,col,spawn}=a;G._scapeTable='MARKSMAN_CROSSING';G.vertical=true;G.haz=null;G.spireRY=null;G.marksmanArena={walks:{},cover:[],supports:[],seen:false};
@@ -33,7 +33,7 @@ function draw(a,t){const {G,bx}=a;if(!G.marksmanArena)return;const e=G.boss;
  for(const x of [550,810])bx(x,102,-1660,18,204,18,'#765b3e');
  for(const q of G.marksmanArena.cover){bx(q.x,q.h+3,q.z,q.w+8,6,q.d+8,'#d7b47d');for(const dx of [-20,20])bx(q.x+dx,q.h+7,q.z,7,3,24,'#9c815a');}
  if(e&&!e.dead&&e.markExposed>0)for(let i=0;i<12;i++){const a=i*Math.PI/6+t*1.5;bx(e.x+Math.cos(a)*48,e.y+5,e.z+Math.sin(a)*48,10,3,10,'#a6edb5','#6acf92',.85);}
- if(e&&!e.dead&&e.markState==='aim'){const oy=e.y+e.h*.62,ty=e.markY+(e.markH||54)*.5,dx=e.markX-e.x,dz=e.markZ-e.z,n=Math.ceil(Math.hypot(dx,dz)/24),locked=e.markClock<=.6;for(let k=1;k<=n;k++){const f=k/n;bx(e.x+dx*f,oy+(ty-oy)*f,e.z+dz*f,locked?5:3,locked?5:3,12,locked?'#ffac76':'#e7cf93',locked?'#a74622':null,.85);}bx(e.markX,e.markY+3,e.markZ,58,3,5,'#ffc28b');bx(e.markX,e.markY+3,e.markZ,5,3,58,'#ffc28b');}
+ if(e&&!e.dead&&e.markState==='aim'){const oy=e.y+e.h*.62,ty=e.markY+(e.markH||54)*.5,dx=e.markX-e.x,dz=e.markZ-e.z,n=Math.ceil(Math.hypot(dx,dz)/24);for(let k=1;k<=n;k++){const f=k/n;bx(e.x+dx*f,oy+(ty-oy)*f,e.z+dz*f,5,5,12,'#ffac76','#a74622',.85);}bx(e.markX,e.markY+3,e.markZ,58,3,5,'#ffc28b');bx(e.markX,e.markY+3,e.markZ,5,3,58,'#ffc28b');}
  if(e&&!e.dead&&e.markState==='relocate')for(const x of [1110,1210])bx(x,3,-800,70,4,100,'#e0b574');
 }
 function expose(e){e.markExposed=4;e.markCoverSeq=(e.markCoverSeq||0)+1;e.markWindowSeq=(e.markWindowSeq||0)+1;e.markWindowTurn=e.markTurns||0;e.markTacticDone=true;}

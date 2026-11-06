@@ -1,6 +1,20 @@
 /* Facing is combat state: bodies, guards and committed attack directions agree. */
 (function(root){'use strict';
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
+const braceTime=.85,braceInterval=2.4;
+function state(e){
+ let saved=memory.get(e);
+ if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0};memory.set(e,saved);}
+ return saved;
+}
+function bracing(e){return e.role==='shielder'&&memory.get(e)?.brace>0;}
+function brace(e){
+ if(e.role!=='shielder'||e.dummy||e.dead)return false;
+ const saved=state(e);
+ if(saved.braceCooldown>0)return false;
+ saved.brace=braceTime;saved.braceCooldown=braceInterval;
+ return true;
+}
 function heavy(e){return e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield'||e.briarRole==='guard'||e.campaignRole==='guard'||['sentinel','siegeknight','marblestatue'].includes(e.type);}
 function rate(e){return heavy(e)?1.7:e.boss?2.1:e.kind==='charger'?2.6:e.kind==='fly'?4.4:3.4;}
 function angle(yaw,goal,dt,speed){const step=Math.max(0,Math.min(.05,dt))*speed;return wrap(yaw+Math.max(-step,Math.min(step,wrap(goal-yaw))));}
@@ -36,11 +50,14 @@ function holdsRecovery(e){
  if(e.frostOfficer==='shield')return e.offState==='recover';
  if(e.prisonFoe==='prison_guard')return e.pcState==='recover';
  if(e.ceKind&&(e.briarRole==='guard'||e.campaignRole==='guard'))return e.ceState==='recover';
- return !!e.finalKing&&e.akState==='recover'&&e.akClock>0&&e.akEnvSeq>0&&e.akEnvSeq===e.akSeq&&e.akEnvPhase===e.phase;
+ return !!e.finalKing&&e.akState==='recover'&&e.akClock>0;
 }
 function begin(e,target,dt){
- const saved=memory.get(e)||{key:null,aim:0,recover:0},current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,held:saved.recover>0||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
- saved.recover=Math.max(0,saved.recover-Math.max(0,dt));memory.set(e,saved);
+ const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,held:saved.recover>0||bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
+ const elapsed=Math.max(0,dt);
+ saved.recover=Math.max(0,saved.recover-elapsed);
+ saved.brace=Math.max(0,saved.brace-elapsed);
+ saved.braceCooldown=Math.max(0,saved.braceCooldown-elapsed);
  if(!current&&!frame.held&&target)turn(e,target.x-e.x,target.z-e.z,dt);
  // Encounter helpers can also step in isolation. Inside the game loop they share this one turn.
  frame.approachYaw=e.yaw??frame.yaw;saved.frame=frame;
@@ -56,5 +73,5 @@ function finish(e,dt,frame,returning=false){
 }
 function mirror(e){if(!Number.isFinite(e.facingYaw))return false;e.yaw=e.facingYaw;if(e.role==='shielder')e.shieldYaw=Number.isFinite(e.shieldYaw)?e.shieldYaw:e.yaw;return true;}
 function contact(e,p){return aligned(e,p,1.15);}
-const api={turn,aligned,forward,rate,angle,action,begin,finish,mirror,contact,holdsRecovery};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={turn,aligned,forward,rate,angle,action,begin,finish,mirror,contact,holdsRecovery,brace,bracing};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

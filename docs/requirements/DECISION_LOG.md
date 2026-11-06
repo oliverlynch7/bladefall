@@ -2771,3 +2771,7 @@ The existing attack lock is live in 2.369.0. The Frostfell Shield Officer resume
 ### U-ENEMY-FACING-20261104 | Full defensive openings
 
 Keep shield-bearing guards planted throughout their authored recovery. When a pillar or jump breaks the Abyss King's ward, keep his position and facing through the punish window. Return to bounded pursuit when the window ends and keep the existing boss counters and attack geometry.
+
+### U-ENEMY-FACING-20261104 | Shield blocks and standard royal recovery
+
+Plant ordinary shield bearers briefly when they block a frontal hit. Give players time to go around the shield and prevent repeated hits from extending the brace indefinitely. The Abyss King also stays planted through standard recovery. Keep his environmental ward counters and existing damage rules.

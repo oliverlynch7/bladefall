@@ -36,7 +36,7 @@ for(const role of ['caster','shield','spear']){const actor=officers.enemies.find
  const attack=role==='shield'?{...player,x:actor.x-Math.sin(actor.yaw)*100,z:actor.z-Math.cos(actor.yaw)*100}:player;hit(officers,actor,attack);
  }ok(actor.dead,'Three actual '+role+' cycles can finish');}results.push({boss:'Officers',events:officerEvents});
 // The King's body must not phase through the cover his new ward requires.
-{const e=foe({finalKing:true,akStage:'fight1',phase:1,akState:'recover',akClock:10,akSeq:1,x:-430,z:-400,r:43});for(let i=0;i<100;i++)K.step(e,.05,{...p,x:-430,z:400});ok(e.z<=-258,'King stops his body before the real pillar');}
+{const e=foe({finalKing:true,akStage:'fight1',phase:1,akState:'approach',akClock:10,akSeq:1,x:-430,z:-400,r:43});for(let i=0;i<100;i++)K.step(e,.05,{...p,x:-430,z:400});ok(e.z>-400&&e.z<=-258,'King moves up to the real pillar and stops before it');}
 // Exact environmental geometry, including false positives that would make the ward trivial.
 let king=foe({finalKing:true,akStage:'fight1',phase:1,akState:'strike',akKind:'line',akSeq:1,akDX:1,akDZ:0,x:-700,z:-170});
 ok(K.environmentalCounter(king,[{...p,x:0,z:-170}]),'Actual beam blocked by left pillar');ok(!K.inAttack(king,{...p,x:0,z:-170}),'Same pillar truly prevents damage');

@@ -4067,3 +4067,7 @@ The Frostfell Shield Officer keeps its attack direction through the full recover
 ### v2.369.2 — Guard and royal recovery
 
 Campaign and prison guards hold their facing through their recovery. The Abyss King stays planted while his ward is broken, then turns toward the player at his normal pursuit speed. The existing pillar and jump counters still create the opening.
+
+### v2.370.0 — Shield commitment
+
+Ordinary shield bearers brace for 0.85 seconds after a frontal block, giving players a chance to get behind them. The Abyss King holds his facing and position through standard recovery, then lines up the next attack before committing. Co-op guests receive the host's brace state and facing.

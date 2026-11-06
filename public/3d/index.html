@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2369c"></script>
+<script src="./enemy-facing.js?v=2370"></script>
 <script src="./prison-combat.js?v=2369"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1191,7 +1191,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./thunder-cliffs.js?v=2318"></script>
 <script src="./castle-gates.js?v=2318"></script>
 <script src="./long-ascent.js?v=2185"></script>
-<script src="./final-king.js?v=2369c"></script>
+<script src="./final-king.js?v=2370"></script>
 <script src="./return-adventures.js?v=2356"></script>
 <script src="./return-visits.js?v=2356"></script>
 <script src="./palace-courtyard.js?v=2317"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.369.2-guard-recovery';
+const VERSION3D='2.370.0-shield-commitment';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -13812,7 +13812,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(guestOwner?.cid==='warlock'&&(e.warCurseT||0)>0&&guestOwner.id===e.warCurseOwner)dmg*=hasGuestPerk(guestOwner,'war_deep')?1.30:1.15;
   if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
     const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
-    if(fr>0.4){ dmg*=0.3; if(Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
+    if(fr>0.4){ dmg*=0.3; if(BFEnemyFacing.brace(e)||Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
       if(e.spec==='shell' && e.shellHp!=null){ e.shellHp-=dmg; const shatter=(el==='ice'||e.chill>0)?2.4:1; e.shellHp-=dmg*(shatter-1);   // chill/shatter cracks the shell faster
         if(e.shellHp<=0){ e.role=null; e.shieldYaw=null; e.shellCracked=1; addText(e.x,e.y+e.h+14,e.z,'SHELL BROKEN!','#bfe6ff'); playFx('frostclink'); burst(e.x,e.y+e.h*0.55,e.z,'#cfeeff',12); } } } }
   if(e.tethered>0){ dmg*=0.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WARDED','#8f52d6'); }   // void-tether buff: allies take less until the tether dies
@@ -15752,6 +15752,7 @@ const MP={
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
       const row=[e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null];
       row[7]={...row[7],role:e.role||null,roleCol:e.roleCol||null,facingYaw:Number.isFinite(e.yaw)?e.yaw:0,shieldYaw:e.role==='shielder'?e.shieldYaw:null};
+      if(e.role==='shielder')row[7].guardBraced=BFEnemyFacing.bracing(e);
       if(e.kind==='charger')Object.assign(row[7],{hostCharge:true,chargeSerial:e.chargeSerial||0,windT:e.windT||0,windMax:e.windMax||0,chargeT:e.chargeT||0,teleX:e.teleX||0,teleZ:e.teleZ||0,cdx:e.cdx||0,cdz:e.cdz||0});
       if(e.boss||e.hydraChain)row[7]={...row[7],...BFBossTactics.snapshot(e)};
       if(e.homeBellWave)row[7]={...row[7],homeBellWave:e.homeBellWave,label:e.label,y:e.y};
@@ -17090,7 +17091,8 @@ function updateWorld(dt){
       if(e.role==='shielder')e.shieldYaw=e.yaw; // Body, visible shield and frontal block share one direction.
     }
     if(e.spec){ specBehavior(e,dt,meleeTarget,dirX,dirZ,d); }
-    if(e.eruptW>0||e.knightW>0||e.fuseT>0||e.blinkFx>0)eff=0;   // Batch-2 unique-mob behaviors (totem/trail/blink/tether/knightslam)
+    const guardBraced=mirrorFacing?e.role==='shielder'&&e.guardBraced:BFEnemyFacing.bracing(e);
+    if(e.eruptW>0||e.knightW>0||e.fuseT>0||e.blinkFx>0||guardBraced)eff=0;
     if(e.kind==='fly'){ e.bob+=dt*2.4;
       const flyTarget=e.dive&&isCampaignAdventure()?meleeTarget:p;
       const perch=galewispCoverPerch(e,flyTarget);

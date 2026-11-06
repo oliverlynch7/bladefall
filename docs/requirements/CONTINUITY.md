@@ -3393,3 +3393,9 @@ Verification in muted Chrome used the actual world update and hit pipeline. At 1
 Prison Shield Guards and the shield-bearing campaign guard roles keep their attack facing throughout their authored recovery. When a pillar block or wave jump breaks the Abyss King's ward, the King holds his position and facing for the 4.2-second opening. Afterward, he closes the ward and turns at his pursuit rate before beginning another attack.
 
 Verified 80 facing checks, 11 adjacent suites, and the prison layout suite. In muted Chrome, an actual pillar counter opened the ward. After 3.2 seconds with the player behind him, the King had moved and turned zero and a rear hit dealt damage. The ward then closed and he resumed pursuit and began another windup. The Frostfell officer blocked the front hit and took damage from the rear late in recovery. A save from 2.369.1 retained level 9, 413 gold and its campaign route. The combat was staged and used a single browser client.
+
+## Shield commitment (2.370.0)
+
+An ordinary shield bearer holds position and facing for 0.85 seconds after a frontal block, with a 2.4-second interval between braces. The Abyss King stays planted through each attack recovery and lines up the narrow beam before the warning begins. This preserves the opening from baiting the beam into a pillar.
+
+All 18 selected regression suites passed, including 88 facing checks and 151 environmental boss checks. Muted Chrome exercised the game loop. A Sentinel stayed planted after blocking and took 34 damage from the front versus 113 from the rear. The Shield Officer took damage from behind late in recovery. The King held both standard and ward-break recovery, then resumed turning and pursuing. A staged host packet round trip preserved the brace and shield angle in the guest code path. A 2.369.2 campaign save kept its route, level 9 and 413 gold. This validation used a single browser client.

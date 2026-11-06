@@ -4105,3 +4105,7 @@ Shield bearers and the Abyss King turn before chasing a player behind them. Camp
 ### v2.378.0 - Authored guard pivots and royal sweep opening
 
 Frostfell's Shield Officer, the Shield Guard in Prison Break, and scripted campaign guards turn toward a flanking player before chasing. After countering the Abyss King's beam or wave in a phase, dodge behind his sweep and strike his back while he recovers. The larger arena openings and summoned-guard phase still apply.
+
+### 2026-11-06 - v2.379.0 guard targeting and commitment
+
+Scripted guards pivot toward the target their encounter selected. A committed attack takes priority over returning to patrol. Verified front and rear damage, the Abyss King's sweep and rear opening, and an older campaign save in muted Chrome.

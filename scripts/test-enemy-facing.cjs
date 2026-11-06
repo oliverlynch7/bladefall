@@ -114,6 +114,14 @@ for(const [e,step] of pursuitFixtures){
  for(let i=0;i<20;i++)tick(e,farRear,.05,()=>step(e,farRear));
  ok(e.z< -5,'the authored guard advances after facing the player');
 }
+const diverted={x:0,y:0,z:0,yaw:0,type:'prison_guard',hp:100,maxHp:100};
+Prison.setup(diverted);
+const nearerAlly={x:75,y:0,z:0,hp:100};
+for(let i=0;i<14;i++)tick(diverted,null,.05,()=>Prison.step(diverted,.05,nearerAlly,0));
+ok(diverted.pcState==='wind'&&diverted.yaw>.9,'deferred prison facing uses the actual encounter target');
+const aim=diverted.yaw;
+for(let i=0;i<12;i++)tick(diverted,null,.05,()=>Prison.step(diverted,.05,rear,0));
+ok(delta(diverted.yaw,aim)<1e-8,'a later target change cannot turn the committed bash');
 const exposedTick=()=>tick(exposed,farRear,.05,()=>King.step(exposed,.05,farRear));
 exposedTick();
 for(let i=0;i<75;i++)exposedTick();
@@ -156,6 +164,10 @@ const borderGuard={...leashGuard,role:null,ceKind:'keep_lance',campaignRole:'gua
 let borderMoves=0;
 const borderRetreat=()=>CampaignEncounters.retreat(battlefield,borderGuard,[outsideLeash],.05,()=>borderMoves++);
 ok(!borderRetreat()&&!borderGuard.encReturning&&borderMoves===0,'campaign guard finishes recovery even beyond its patrol leash');
+for(const state of ['wind','strike']){
+ borderGuard.ceState=state;borderGuard.encReturning=true;
+ ok(!borderRetreat()&&!borderGuard.encReturning&&borderMoves===0,'an already-returning guard finishes its visible '+state);
+}
 borderGuard.ceState='hunt';
 ok(borderRetreat()&&borderMoves===1,'campaign guard can return home after its recovery');
 // Exercise the actual game warning geometry and projectile release together.

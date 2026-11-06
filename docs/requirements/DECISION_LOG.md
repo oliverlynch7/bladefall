@@ -2808,3 +2808,7 @@ Keep authored campaign guard recovery ahead of patrol retreat. While reacquiring
 ### U-ENEMY-FACING-20261104 | Authored guard pursuit and rear sweep punish
 
 The shared shield and King pursuit checks do not cover the Frostfell Shield Officer, Prison Guard, or scripted campaign guards. Apply the same forward pursuit rule to their hunt states. The King already holds his sweep heading through recovery, but the damage rule currently rejects a rear strike. Allow a short, capped rear opening after the sweep once an arena counter has been performed in that phase. Keep the beam and wave counters as the larger openings and preserve the guard summon threshold.
+
+### U-ENEMY-FACING-20261104 | Encounter target and patrol priority
+
+Spend the one bounded turn on the target chosen by scripted encounter AI. A return already in progress must yield to a visible attack, and heavy guards must keep their recovery. Check both against the old build and recheck the King's sweep.

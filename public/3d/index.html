@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2376"></script>
+<script src="./enemy-facing.js?v=2379"></script>
 <script src="./prison-combat.js?v=2378"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1174,7 +1174,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2342"></script>
 <script src="./campaign-elites.js?v=2378"></script>
-<script src="./campaign-encounters.js?v=2377"></script>
+<script src="./campaign-encounters.js?v=2379"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2319"></script>
 <script src="./briar-journey.js?v=2302"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.378.0-flank-openings';
+const VERSION3D='2.379.0-guard-commitment';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -17058,7 +17058,9 @@ function updateWorld(dt){
     const partyTarget=e.ceKind||e.prisonFoe||syncedMelee(e)||BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e)?enemyPartyTarget(e,p):p;
     const meleeTarget=inBrokenWalls()&&e.keepEscort?BFBrokenWalls.target(G,e,partyTarget):inGreatFurnace()&&e.furnaceEscort?BFGreatFurnace.target(G,e,partyTarget):inLostCanyon()&&(e.canyonEscort||e.canyonAlarm)?BFLostCanyon.target(G,e,partyTarget):partyTarget;
     const d=Math.max(1,dXZ(meleeTarget.x,meleeTarget.z,e.x,e.z)); let dirX=(meleeTarget.x-e.x)/d, dirZ=(meleeTarget.z-e.z)/d;
-    const facingTarget=e.boss?bossTarget:meleeTarget,mirrorFacing=MP.guest()&&Number.isFinite(e.facingYaw);
+    // Scripted guards choose a target or return waypoint inside their encounter AI.
+    const facingTarget=e.prisonFoe||e.ceKind?null:e.boss?bossTarget:meleeTarget;
+    const mirrorFacing=MP.guest()&&Number.isFinite(e.facingYaw);
     const facingFrame=e.dummy||mirrorFacing||e.stunT>0||(G._freezeT||0)>0?null:BFEnemyFacing.begin(e,facingTarget,dt);
     if(e.dummy)e.yaw=e.fixedYaw??0;else if(mirrorFacing)BFEnemyFacing.mirror(e);
     if(e.stunT>0||(G._freezeT||0)>0)continue;

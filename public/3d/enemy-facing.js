@@ -19,7 +19,14 @@ function brace(e){
 function heavy(e){return e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield'||e.briarRole==='guard'||e.campaignRole==='guard'||['sentinel','siegeknight','marblestatue'].includes(e.type);}
 function rate(e){return heavy(e)?1.7:e.boss?2.1:e.kind==='charger'?2.6:e.kind==='fly'?4.4:3.4;}
 function angle(yaw,goal,dt,speed){const step=Math.max(0,Math.min(.05,dt))*speed;return wrap(yaw+Math.max(-step,Math.min(step,wrap(goal-yaw))));}
-function turn(e,dx,dz,dt){const yaw=Number.isFinite(e.yaw)?e.yaw:0;if(memory.get(e)?.frame)return yaw;if(Math.hypot(dx,dz)>.001)e.yaw=angle(yaw,Math.atan2(dx,dz),dt,rate(e));else e.yaw=yaw;return e.yaw;}
+function turn(e,dx,dz,dt){
+ const yaw=Number.isFinite(e.yaw)?e.yaw:0,frame=memory.get(e)?.frame;
+ if(frame&&(frame.turned||frame.busy||frame.held))return yaw;
+ if(!(Math.hypot(dx,dz)>.001))return yaw;
+ e.yaw=angle(frame?.yaw??yaw,Math.atan2(dx,dz),dt,rate(e));
+ if(frame){frame.turned=true;frame.approachYaw=e.yaw;}
+ return e.yaw;
+}
 function aligned(e,p,arc=.65){const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz);return d<.001||(dx*Math.sin(e.yaw||0)+dz*Math.cos(e.yaw||0))/d>=Math.cos(arc);}
 function forward(e){return [Math.sin(e.yaw||0),Math.cos(e.yaw||0)];}
 // Authored attack geometry wins over target position. Null yaw means planted melee.
@@ -59,9 +66,9 @@ function begin(e,target,dt){
  saved.recover=Math.max(0,saved.recover-elapsed);
  saved.brace=Math.max(0,saved.brace-elapsed);
  saved.braceCooldown=Math.max(0,saved.braceCooldown-elapsed);
- if(!current&&!frame.held&&target)turn(e,target.x-e.x,target.z-e.z,dt);
- // Encounter helpers can also step in isolation. Inside the game loop they share this one turn.
- frame.approachYaw=e.yaw??frame.yaw;saved.frame=frame;
+ // Authored encounters can defer the turn until they choose their actual target.
+ frame.approachYaw=frame.yaw;saved.frame=frame;
+ if(target)turn(e,target.x-e.x,target.z-e.z,dt);
  return frame;
 }
 function finish(e,dt,frame,returning=false){

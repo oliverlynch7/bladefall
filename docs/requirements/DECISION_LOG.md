@@ -2791,3 +2791,8 @@ The live build already limits turning and plants shield enemies and the Abyss Ki
 ### U-ENEMY-FACING-20261104 | Royal guard stance
 
 The shared facing update still turned the Abyss King during his summoned-guard phase. Hold his facing until the guards fall and the following recovery finishes. Preserve ward protection, then resume bounded pursuit before the next attack. Verify the full phase transition and the existing shield openings in the browser.
+
+
+### U-ENEMY-FACING-20261104 | Shared attack recovery
+
+The game loop let a caster start a shot on the frame its melee strike expired, and shared boss attacks could also overlap or restart during the facing lock. Gate shared attack starts on the existing commitment and recovery state. Start the ranged cooldown only when an aimed shot commits. Keep the authored King counters and shield openings.

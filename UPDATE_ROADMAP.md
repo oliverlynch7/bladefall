@@ -4088,3 +4088,8 @@ The Siege Knight's warning, facing and crush release now agree for the host and 
 ### v2.374.0 - Royal guard stance
 
 The Abyss King holds his position and heading while his summoned guards fight and through the recovery that follows. He then turns at his normal pursuit speed. The pillar and jump counters still open his ward.
+
+
+### v2.375.0 - Enemy attack recovery
+
+Shared enemies finish their current attack and recovery before committing to the next. A blocked attack attempt leaves the ranged cooldown ready. Shield and Abyss King flank openings were rechecked in muted Chrome. See continuity for evidence.

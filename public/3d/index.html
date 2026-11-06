@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2374"></script>
+<script src="./enemy-facing.js?v=2375"></script>
 <script src="./prison-combat.js?v=2369"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.374.0-royal-guard-stance';
+const VERSION3D='2.375.0-enemy-attack-recovery';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -17076,7 +17076,7 @@ function updateWorld(dt){
         e._meleeSeen=(e._meleeSeen||0)+dt;eff=0;e.meleeW=Math.max(0,e.meleeW-dt);
         if(e.meleeW===0&&!mirror){e.meleeActive=.18;e.meleeCd=.9*(e.combatRecovery||1);}
       }
-      else if(!mirror&&!guardPlanted&&e.meleeCd===0&&d<e.r+(meleeTarget.r||p.r)+(meleeTarget.escortIndex==null?(e.meleeReach??45):10)&&Math.abs(e.y-meleeTarget.y)<75&&galewispHasStrikeClearance(e,meleeTarget)&&enemyMeleeClear(e,meleeTarget)&&BFEnemyFacing.aligned(e,meleeTarget)&&!BFEnemyFacing.action(e)){e.meleeW=.65;e.meleeSerial=(e.meleeSerial||0)+1;eff=0;}
+      else if(!mirror&&!guardPlanted&&e.meleeCd===0&&d<e.r+(meleeTarget.r||p.r)+(meleeTarget.escortIndex==null?(e.meleeReach??45):10)&&Math.abs(e.y-meleeTarget.y)<75&&galewispHasStrikeClearance(e,meleeTarget)&&enemyMeleeClear(e,meleeTarget)&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,meleeTarget)){e.meleeW=.65;e.meleeSerial=(e.meleeSerial||0)+1;eff=0;}
       if(e.meleeActive>0||mirror)eff=0;
     }
     if(e.role && e.stunT<=0){                            // Phase 11: role behaviors
@@ -17132,7 +17132,7 @@ function updateWorld(dt){
       else if(d<want-40){ moveGroundEnemy(e,-dirX,-dirZ,eff,dt); }
       else if(d>want+70){ moveGroundEnemy(e,dirX,dirZ,eff,dt,d); }
       if(e.shootT>0) e.shootT-=dt;
-      if(e.shootT<=0 && d<560&&enemyMeleeClear(e,meleeTarget)){ bossShoot(e,meleeTarget); e.shootT=e.shootCd; }
+      if(e.shootT<=0 && d<560&&enemyMeleeClear(e,meleeTarget)&&bossShoot(e,meleeTarget)){ e.shootT=e.shootCd; }
     }
     else if(e.kind==='charger'){ // beetle: winds up, then rams in a straight line
       const mirroredCharge=MP.guest()&&e.hostCharge;
@@ -17146,7 +17146,7 @@ function updateWorld(dt){
         else if(e.windT>0){ e.windMax=e.windMax||e.windT; e.windT-=dt;
           if(e.windT<=0){ e.chargeT=e.elite?0.62:0.7; e.cdx=e.teleX; e.cdz=e.teleZ; } }
         else { moveGroundEnemy(e,dirX,dirZ,eff,dt,d);
-          if(d<300 && e.atkTimer<=0&&BFEnemyFacing.aligned(e,meleeTarget,.20)){
+          if(d<300 && e.atkTimer<=0&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,meleeTarget,.20)){
             e.windT=G.trial?(e.elite?0.42:0.55):.7;e.windMax=e.windT;
             [e.teleX,e.teleZ]=BFEnemyFacing.forward(e);e.chargeSerial=(e.chargeSerial||0)+1;e.atkTimer=e.elite?1.8:2.8;
             if(!window.BFEnemyWarnings?.emit(e,p,performance.now()/1000,playFx))playFx((e.type==='charger'||e.type==='siegeknight'||e.type==='marblestatue')?'ma_stomp':(Math.random()<0.5?'atk1':'atk2'),.6);
@@ -17378,8 +17378,9 @@ function drawEnemyDanger(e){
     dangerRing(e.x,e.y,e.z,e.r+12,'#f5ad58',.9);}
 }
 function bossShoot(e,p){
-  if(e.shotW>0||!e.shot||!BFEnemyFacing.aligned(e,p))return;
+  if(!e.shot||!BFEnemyFacing.canCommit(e)||!BFEnemyFacing.aligned(e,p))return false;
   e.shotW=0.7;e.shotAim={x:p.x,y:p.y,z:p.z,h:p.h,yaw:e.yaw};
+  return true;
 }
 function releaseEnemyShot(e,p){
   e.shotReleaseT=.22;e.shotReleaseYaw=p.yaw; // Explicit visual release; cancelled wind-ups must not cast.
@@ -17460,7 +17461,7 @@ function specBehavior(e,dt,p,dirX,dirZ,d,guardPlanted){
     if(e.knightW>0){
       e.knightW=Math.max(0,e.knightW-dt);
       if(e.knightW===0){e.knightStrike=[e.x,e.y,e.z,e.dmg*1.5];releaseKnightCrush(e,e.knightStrike);e.slamCd=2.6;}
-    }else if(e.slamCd<=0&&d<120&&!guardPlanted&&!BFEnemyFacing.action(e)){
+    }else if(e.slamCd<=0&&d<120&&!guardPlanted&&BFEnemyFacing.canCommit(e)){
       e.knightSerial=(e.knightSerial||0)+1;
       e.knightStrike=null;
       e.knightW=.6;
@@ -17637,7 +17638,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
   else {
     if(e.kite && dist<210){ e.x-=dirX*eff*0.6*dt; e.z-=dirZ*eff*0.6*dt; }
     else { e.x+=dirX*eff*0.7*dt; e.z+=dirZ*eff*0.7*dt; }
-    if(!e.kite && dist<240 && e.atkTimer<=0&&BFEnemyFacing.aligned(e,p)){
+    if(!e.kite && dist<240 && e.atkTimer<=0&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,p)){
       e.windT=0.85; e.windMax=0.85; [e.teleX,e.teleZ]=BFEnemyFacing.forward(e); e.atkTimer=2.3;
       addText(e.x,e.y+e.h+14,e.z,'!','#ff5a3a',true);
     }
@@ -17651,7 +17652,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       G.shake=Math.min(G.shake+12,18); SFX.boss(); addText(e.x,e.h+16,e.z,'SLAM!','var(--danger)',true);
       for(let i=0;i<18;i++){ const a=i/18*6.283; G.particles.push({x:e.x+Math.cos(a)*24,y:2,z:e.z+Math.sin(a)*24,vx:Math.cos(a)*140,vy:50,vz:Math.sin(a)*140,life:0.4,color:'#e0794a',sz:3}); } } }
     else { if(e.slamCd==null) e.slamCd=3; e.slamCd-=dt;
-      if(e.slamCd<=0 && dist<340){ e.slamW=0.7; e.slamCd=(4.5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } } // 0.7s wind-up (faster in phase 2)
+      if(e.slamCd<=0 && dist<340&&BFEnemyFacing.canCommit(e)){ e.slamW=0.7; e.slamCd=(4.5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } } // 0.7s wind-up (faster in phase 2)
   }
   if(e.type==='warden'){                                  // directional greatsword cleave — a hard-hitting cone you sidestep (not jump)
     if(e.cleaveW>0){ e.cleaveW-=dt; if(e.cleaveW<=0){
@@ -17659,25 +17660,25 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+16,e.z,'CLEAVE!','var(--danger)',true);
       for(let i=0;i<12;i++){ const a=Math.atan2(e.cleaveZ,e.cleaveX)+(i/11-0.5)*1.6; G.particles.push({x:e.x+Math.cos(a)*30,y:6,z:e.z+Math.sin(a)*30,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.35,color:'#cfd6df',sz:3}); } } }
     else { if(e.cleaveCd==null) e.cleaveCd=4; e.cleaveCd-=dt;
-      if(e.cleaveCd<=0 && dist<300&&!BFEnemyFacing.action(e)&&BFEnemyFacing.aligned(e,p)){ e.cleaveW=0.75;[e.cleaveX,e.cleaveZ]=BFEnemyFacing.forward(e); e.cleaveCd=(5+Math.random()*2)*(e.phase>=2?0.55:1); e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
+      if(e.cleaveCd<=0 && dist<300&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,p)){ e.cleaveW=0.75;[e.cleaveX,e.cleaveZ]=BFEnemyFacing.forward(e); e.cleaveCd=(5+Math.random()*2)*(e.phase>=2?0.55:1); e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
   }
   if(e.type==='sorcerer'){                                // frost nova — a chilling ring that erupts when you crowd the lich
     if(e.novaW>0){ e.novaW-=dt; if(e.novaW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:18,maxR:260,dmg:e.dmg*1.1,life:0,spd:300,col:'#bff0ff',col2:'#7fd6ff'});
       G.shake=Math.min(G.shake+6,14); SFX.boss(); addText(e.x,e.h+16,e.z,'FROST NOVA!','#7fd6ff',true);
       for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:e.x+Math.cos(a)*20,y:6,z:e.z+Math.sin(a)*20,vx:Math.cos(a)*120,vy:40,vz:Math.sin(a)*120,life:0.5,color:'#bff0ff',sz:3}); } } }
     else { if(e.novaCd==null) e.novaCd=5; e.novaCd-=dt;
-      if(e.novaCd<=0 && dist<300){ e.novaW=0.7; e.novaCd=(6+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+2,7); } }
+      if(e.novaCd<=0 && dist<300&&BFEnemyFacing.canCommit(e)){ e.novaW=0.7; e.novaCd=(6+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+2,7); } }
   }
   if(e.type==='colossus'){                                 // seismic pound — a shockwave ring you jump (arena mechanic)
     if(e.poundW>0){ e.poundW-=dt; if(e.poundW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:20,maxR:300,dmg:e.dmg*1.2,life:0,spd:300,col:'#ffb060',col2:'#c05a1e'});
       G.shake=Math.min(G.shake+12,18); SFX.boss(); addText(e.x,e.h+16,e.z,'SEISMIC POUND!','#ffb060',true);
       for(let i=0;i<16;i++){ const a=i/16*6.283; G.particles.push({x:e.x+Math.cos(a)*22,y:2,z:e.z+Math.sin(a)*22,vx:Math.cos(a)*130,vy:60,vz:Math.sin(a)*130,life:0.45,color:'#ffb060',sz:3}); } } }
     else { if(e.poundCd==null) e.poundCd=3.5; e.poundCd-=dt;
-      if(e.poundCd<=0 && dist<380){ e.poundW=0.7; e.poundCd=(5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } }
+      if(e.poundCd<=0 && dist<380&&BFEnemyFacing.canCommit(e)){ e.poundW=0.7; e.poundCd=(5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } }
   }
   // ==== Batch 4: boss signature mechanics, keyed to each set-piece arena (readable, telegraphed, reuse ring/beam VFX) ====
   bossSignature(e,dt,p,dirX,dirZ,dist);
-  if(e.ranged && e.shootT<=0 && dist<2000&&!BFEnemyFacing.action(e)){ bossShoot(e,p); e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
+  if(e.ranged && e.shootT<=0 && dist<2000&&bossShoot(e,p)){ e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
   if(e.type==='king'||e.type==='tyrant'){
     e.summonT-=dt;
     if(e.summonT<=0 && e.hp/e.maxHp<0.7){ e.summonT=e.type==='tyrant'?5:6;

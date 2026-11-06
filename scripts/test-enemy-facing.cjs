@@ -128,6 +128,27 @@ vm.runInNewContext(main.slice(main.indexOf('function drawEnemyDanger('),main.ind
 const melee={x:0,y:0,z:0,r:18,yaw:Math.PI/2,meleeReach:12,meleeW:.65};
 warningContext.drawEnemyDanger(melee);
 ok(rings.length===2&&rings[0][3]===46&&rings[0][6]===F.meleeArc&&rings[0][7]===1&&Math.abs(rings[0][8])<1e-8,'melee tell draws the committed forward arc and actual reach');
+const caster={x:0,z:0,yaw:0,shot:{},meleeActive:.02,meleeSerial:1};
+tick(caster,front,.05,()=>{
+ caster.meleeActive=0;
+ ok(!warningContext.bossShoot(caster,front)&&!caster.shotW,'caster cannot cast on its melee release frame');
+});
+for(let i=0;i<9;i++)tick(caster,front,.05,()=>{
+ assert(!warningContext.bossShoot(caster,front),'caster waits out melee recovery');
+});
+tick(caster,front,.05,()=>{
+ ok(warningContext.bossShoot(caster,front)&&caster.shotW===.7,'caster commits a fresh shot after recovery');
+ ok(!F.canCommit(caster),'another attack cannot replace the warned shot');
+});
+const raider={x:0,z:0,yaw:0,boss:true,windT:.02,teleX:0,teleZ:1};
+tick(raider,front,.05,()=>{
+ raider.windT=0;raider.lunge=.45;
+ ok(!F.canCommit(raider),'boss cannot replace a windup with another move on the release frame');
+});
+tick(raider,rear,.05,()=>raider.lunge=0);
+ok(!F.canCommit(raider)&&raider.yaw===0,'boss waits after its lunge without tracking the flank');
+for(let i=0;i<16;i++)tick(raider,rear,.05);
+ok(F.canCommit(raider)&&delta(raider.yaw,0)>.05,'boss can turn and choose a new move after recovery');
 const bow={x:0,y:0,z:0,r:15,h:40,dmg:10,shotW:.7,shotAim:{x:0,y:0,z:120,h:40,yaw:.4},shot:{count:3,spread:.2,speed:240}};
 warningContext.drawEnemyDanger(bow);
 warningContext.releaseEnemyShot(bow,bow.shotAim);

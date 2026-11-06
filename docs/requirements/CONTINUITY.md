@@ -3424,3 +3424,8 @@ The host owns the knight's warning, facing and release. Guests mirror the warnin
 The Abyss King holds his heading and position through the summoned-guard phase and subsequent recovery. He resumes bounded turning and pursuit afterward. The ward remains protected during the summons and the pillar and jump counters retain their existing openings.
 
 The new regression reproduced the unwanted rotation on 2.373.0. The 110 facing checks and six adjacent combat suites pass. Muted Chrome verified the actual summon, stance, recovery and resumed pursuit. The Frostfell officer blocked a front hit and took a rear hit, and the Sentinel took 34 front damage versus 113 rear damage in the staged fight. A seeded 2.373.0 save retained its level 9, 413 gold and route. The co-op shield checks replayed host snapshots in one browser.
+
+
+## Shared enemy attack recovery (2.375.0)
+
+116 focused facing checks and 11 related suites passed. Muted Chrome reproduced a Frost Lobber starting a shot on the melee release frame in 2.374.0. In 2.375.0 it waited through the existing recovery and then fired. The Sentinel took 34 damage from the front and 113 from the rear. The Frostfell Shield Officer blocked a frontal hit and took a rear hit late in recovery. The Abyss King held his heading through the summons and the pillar-counter opening, took a rear hit during the opening, and resumed turning afterward. A 2.374.0 save retained its campaign route, level 9 and 413 gold. Co-op verification replayed a host snapshot in one browser.

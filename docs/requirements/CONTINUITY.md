@@ -3405,3 +3405,9 @@ All 18 selected regression suites passed, including 88 facing checks and 151 env
 A frontal block cannot start a new brace during a committed attack. Braced shield guards wait to start a basic swing or a Siege Knight crush. Ordinary melee warnings show the same forward arc and reach as contact damage. Ranged warnings use the committed projectile heading. Shield bearers with special behaviors send their basic melee windup and release to co-op guests.
 
 Verified 95 focused facing assertions and adjacent boss and campaign regressions. In muted Chrome, a Siege Knight with both attacks ready stayed planted through the brace and started a single attack afterward. A Sentinel took 34 damage from the front and 113 from behind. The Shield Officer blocked the front hit and took damage from behind late in recovery. The Abyss King held normal and ward-break recovery, took a rear hit after the pillar counter, and resumed bounded turning and pursuit. The staged host packet carried shield brace, facing and melee state. An isolated 2.370.0 save reloaded with its route, level 9 and 413 gold. These were staged checks in one browser client.
+
+## Shield recovery (2.372.0)
+
+Ordinary shield bearers now hold their ground and facing through a committed strike and its existing recovery. A Siege Knight cannot cancel that recovery into a crush. Guests receive the host's planted state and facing.
+
+99 facing assertions and 14 related suites passed. Muted Chrome reproduced the premature crush on 2.371.0. On 2.372.0, the knight held position and facing until recovery finished, then resumed pursuit. A Frostfell officer blocked a frontal hit and took rear damage. The Abyss King held position through the pillar opening and took rear damage. The host-to-guest snapshot path was staged in one browser. A 2.371.0 save retained its level, gold and campaign route.

@@ -8,6 +8,7 @@ function state(e){
  return saved;
 }
 function bracing(e){return e.role==='shielder'&&memory.get(e)?.brace>0;}
+function guardPlanted(e){return e.role==='shielder'&&(bracing(e)||memory.get(e)?.recover>0);}
 function brace(e){
  if(e.role!=='shielder'||e.dummy||e.dead||action(e))return false;
  const saved=state(e);
@@ -53,7 +54,7 @@ function holdsRecovery(e){
  return !!e.finalKing&&e.akState==='recover'&&e.akClock>0;
 }
 function begin(e,target,dt){
- const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,held:saved.recover>0||bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
+ const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,guardPlanted:guardPlanted(e),held:saved.recover>0||bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
  const elapsed=Math.max(0,dt);
  saved.recover=Math.max(0,saved.recover-elapsed);
  saved.brace=Math.max(0,saved.brace-elapsed);
@@ -73,5 +74,5 @@ function finish(e,dt,frame,returning=false){
 }
 function mirror(e){if(!Number.isFinite(e.facingYaw))return false;e.yaw=e.facingYaw;if(e.role==='shielder')e.shieldYaw=Number.isFinite(e.shieldYaw)?e.shieldYaw:e.yaw;return true;}
 function contact(e,p){return aligned(e,p,meleeArc);}
-const api={turn,aligned,forward,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={turn,aligned,forward,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

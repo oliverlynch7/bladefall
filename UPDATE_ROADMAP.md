@@ -4075,3 +4075,7 @@ Ordinary shield bearers brace for 0.85 seconds after a frontal block, giving pla
 ### v2.371.0 - Readable attack directions
 
 Shield guards finish a brace before starting a new attack. Melee tells show the forward hit arc, projectile tells follow the locked shot, and co-op guests receive the host's basic shield-guard attack state.
+
+### v2.372.0 - Shield recovery
+
+Shield bearers hold their ground after a committed strike so players have time to get behind them. Siege Knights finish recovery before starting another crush.

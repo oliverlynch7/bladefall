@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),F=require('../public/3d/enemy-facing.
 const fs=require('node:fs'),vm=require('node:vm'),ctx={window:{BFEnemyFacing:F},console};vm.runInNewContext(fs.readFileSync('public/3d/prison-combat.js','utf8'),ctx);const Prison=ctx.window.BFPrisonCombat;
 const delta=(a,b)=>Math.abs(Math.atan2(Math.sin(a-b),Math.cos(a-b)));
 let checks=0;function ok(v,msg){assert(v,msg);checks++;}
-function tick(e,p,dt=.016,ai=()=>{}){const frame=F.begin(e,p,dt);ai();F.finish(e,dt,frame);}
+function tick(e,p,dt=.016,ai=()=>{}){const frame=F.begin(e,p,dt);ai();F.finish(e,dt,frame);return frame;}
 for(const dt of [1/120,1/60,1/30,.05,.2])for(const props of [{role:'shielder'},{boss:true},{kind:'charger'},{kind:'fly'},{}]){const e={x:0,z:0,yaw:Math.PI-.02,...props};tick(e,{x:0,z:100},dt,()=>e.yaw=0);ok(delta(e.yaw,Math.PI-.02)<=F.rate(e)*Math.min(.05,dt)+1e-8,'no snap even when AI overwrites yaw');}
 ok(delta(F.angle(Math.PI-.01,-Math.PI+.01,.016,1),Math.PI-.01)<.017,'wrap takes short arc');
 const guard={x:0,z:0,yaw:0,role:'shielder',meleeW:.5,meleeSerial:1};
@@ -90,6 +90,19 @@ exposedTick();
 ok(exposed.z<0&&delta(exposed.yaw,0)>.05,'king pursues and turns after the opening');
 for(let i=0;i<40&&exposed.akState==='approach';i++)exposedTick();
 ok(exposed.akState==='wind','king eventually lines up and starts the next attack');
+const planted={x:0,z:0,yaw:0,role:'shielder',meleeActive:.02,meleeSerial:1};
+const recoveryFrame=tick(planted,rear,.02,()=>planted.meleeActive=0);
+ok(recoveryFrame.busy&&F.guardPlanted(planted),'a finished shield swing begins a planted recovery');
+for(let i=0;i<40;i++){
+ const frame=tick(planted,rear,1/60);
+ assert(frame.guardPlanted&&planted.yaw===0,'shield stays planted through the full recovery window');
+}
+ok(F.guardPlanted(planted),'shield recovery remains active just before expiry');
+for(let i=0;i<20;i++)tick(planted,rear,1/60);
+ok(!F.guardPlanted(planted)&&Math.abs(planted.yaw)>.2,'shield can pursue again after recovery');
+const unshielded={x:0,z:0,yaw:0,meleeActive:.02,meleeSerial:1};
+tick(unshielded,rear,.02,()=>unshielded.meleeActive=0);
+ok(!F.guardPlanted(unshielded),'ordinary melee keeps its existing recovery movement');
 // Exercise the actual game warning geometry and projectile release together.
 const main=fs.readFileSync('public/3d/index.html','utf8');
 const rings=[],markers=[],projectiles=[];

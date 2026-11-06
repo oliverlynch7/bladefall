@@ -2779,3 +2779,7 @@ Plant ordinary shield bearers briefly when they block a frontal hit. Give player
 ### U-ENEMY-FACING-20261104 | Combat follow-through
 
 A shield brace cannot overlap a new melee attack or Siege Knight crush. A block during an attack leaves the current warning and strike intact. Shield bearers with special behaviors mirror the host's basic melee state in co-op. Ordinary melee tells show their forward hit arc and projectile tells use the actual locked shot angle.
+
+### U-ENEMY-FACING-20261104 | Ordinary shield recovery
+
+During a shield bearer's existing recovery, keep the body planted and block new attacks until the facing hold ends. The Siege Knight's crush can start again after recovery. Mirror the host's planted state for guests.

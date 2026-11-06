@@ -14,7 +14,19 @@ function rule(G,e,src,kind='direct'){
  else if(e.furnaceColossus){const open=e.fcExposed>0;r.factor=open?2.5:0;r.key=open?'cool:'+e._fcCool:null;r.limit=.34;r.hint=open?'Armor cooled — strike the joints':e.fcValveCd>0?'Cooling refills in '+Math.ceil(e.fcValveCd)+'s — avoid its attacks':'Turn a cooling valve to open the armor';}
  else if(e.marbleGuardian){const open=e.mcExposed>0;r.factor=open?2.5:0;r.key=open?'screen:'+e.mcSeq:null;r.limit=.34;r.hint=open?'Armor seal open — attack':'Turn a screen; reflect the heavy strike';}
  else if(e.hydraChain){const h=G.hydraArena,open=h?.state==='recover'&&h.head===e.hydraIndex&&(h.seq||0)>0;r.factor=open?2.5:0;r.key=open?'joint:'+h.seq:null;r.limit=.55;r.hint=open?'Pale joint — break this restraint':'Use the ledges and stone cover; strike after the head attacks';}
- else if(e.finalKing){const open=e.akState==='recover'&&e.akEnvSeq>0&&e.akEnvSeq===e.akSeq&&e.akEnvPhase===e.phase;r.factor=open?3:0;r.floor=e.phase===2&&!e.akSummoned?.55:0;r.key=open?'king:'+e.phase+':'+e.akSeq:null;r.limit=.38;r.hint=e.akState==='adds'?'Defeat the summoned guards':open?'Royal ward broken — attack now':'Block the beam with a pillar or jump the ground wave';}
+ else if(e.finalKing){
+  const recovered=e.akState==='recover';
+  const countered=e.akEnvSeq>0&&e.akEnvPhase===e.phase;
+  const open=recovered&&countered&&e.akEnvSeq===e.akSeq;
+  const sweep=recovered&&countered&&e.akClock>0&&e.akKind==='sweep';
+  const dx=close?src.x-e.x:0,dz=close?src.z-e.z:0;
+  const flank=sweep&&kind==='direct'&&close&&dx*e.akDX+dz*e.akDZ<-.15*Math.hypot(dx,dz);
+  r.factor=open?3:flank?1.5:0;
+  r.floor=e.phase===2&&!e.akSummoned?.55:0;
+  r.key=open||sweep?'king:'+e.phase+':'+e.akSeq:null;
+  r.limit=open?.38:.18;
+  r.hint=e.akState==='adds'?'Defeat the summoned guards':open?'Royal ward broken — attack now':flank?'Back exposed — attack now':sweep?'Strike the King from behind':'Block the beam with a pillar or jump the ground wave';
+ }
  if(r.key&&e._bossBudgetKey===r.key&&(e._bossBudgetSpent||0)>=Math.ceil(e.maxHp*r.limit)){r.factor=0;r.ended=true;r.hint='Opening ended — prepare the next counter';}
  // A phase threshold already blocks damage. Its cue must not invite another hit.
  if(r.hint&&r.floor>0&&e.hp<=Math.ceil(e.maxHp*r.floor)){r.factor=0;r.transition=true;r.hint=e.marksmanCrossing?'Changing nests — follow the outside paths':'Royal guards arriving — defeat them next';}
@@ -78,7 +90,7 @@ function cue(G,e,keys={}){
  if(e.furnaceColossus){if(e.fcExposed>0)return out('Cooled armor — attack the joints',true);if(['wind','strike'].includes(e.fcState))return out(e.fcKind==='sweep'?'Wide sweep — '+dodge+' behind the Colossus':e.fcKind==='vents'?'Vents erupting — leave the marked circles':'Ground slam — leave the marked circle');return out('Reach a cooling valve while it recovers');}
  if(e.marbleGuardian){if(e.mcExposed>0)return out('Armor seal broken — attack now',true);if(['wind','strike'].includes(e.mcState))return out(e.mcKind==='hammer'?'Heavy strike — stand behind a screen facing the boss':e.mcKind==='sweep'?'Low sweep — '+jump+' to jump':'Falling stone — leave the marked circle');return out('Turn a screen toward the boss');}
  if(e.hydraChain){const h=G.hydraArena;if(!h||h.freed)return null;if(h.state==='recover')return out(rule(G,e,G.p).factor>0?'Head resting — strike the pale joint':'Head withdrawing — prepare for its next attack',rule(G,e,G.p).factor>0);return out(h.kind==='blast'?'Water blast — get behind a stone block':h.kind==='sweep'?'Neck sweep — climb onto the high ledges':'Bite — leave the marked circle');}
- if(e.finalKing){if(!['fight1','fight2'].includes(e.akStage))return null;if(e.akState==='adds')return out('Royal guards — defeat them to reach the King');if(e.akState==='recover'||e.akState==='approach')return out(rule(G,e,G.p).factor>0?'Royal ward broken — attack now':'Royal ward intact — prepare a pillar block or wave jump',rule(G,e,G.p).factor>0);return out(e.akKind==='line'?'Royal beam — put a pillar between you and the King':e.akKind==='wave'?'Ground wave — '+jump+' to jump':e.akKind==='burst'?'Void burst — leave the marked circle':'Blade sweep — '+dodge+' behind the King');}
+ if(e.finalKing){if(!['fight1','fight2'].includes(e.akStage))return null;if(e.akState==='adds')return out('Royal guards — defeat them to reach the King');if(e.akState==='recover'||e.akState==='approach')return out(r.hint,r.factor>0);return out(e.akKind==='line'?'Royal beam — put a pillar between you and the King':e.akKind==='wave'?'Ground wave — '+jump+' to jump':e.akKind==='burst'?'Void burst — leave the marked circle':'Blade sweep — '+dodge+' behind the King');}
  return null;
 }
 

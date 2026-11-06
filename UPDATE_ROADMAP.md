@@ -4101,3 +4101,7 @@ Shield bearers stay planted when they block a frontal hit during a brace, strike
 ### 2026-11-06 - v2.377.0 enemy pivots
 
 Shield bearers and the Abyss King turn before chasing a player behind them. Campaign guards finish their recovery before returning to patrol, even at the edge of a patrol. Browser checks reproduced the previous movement and verified rear hits, the King's sweep, and the pillar counter.
+
+### v2.378.0 - Authored guard pivots and royal sweep opening
+
+Frostfell's Shield Officer, the Shield Guard in Prison Break, and scripted campaign guards turn toward a flanking player before chasing. After countering the Abyss King's beam or wave in a phase, dodge behind his sweep and strike his back while he recovers. The larger arena openings and summoned-guard phase still apply.

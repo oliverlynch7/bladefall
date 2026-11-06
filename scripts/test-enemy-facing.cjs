@@ -97,6 +97,23 @@ for(const [guardRole,state,next] of [
 }
 const exposed={...king,x:0,y:0,z:0,yaw:0,akKind:'line',akState:'strike',akClock:.01,akSeq:10,akEnvSeq:10,akEnvPhase:1};
 const farRear={...rear,z:-550};
+const prisonWindow={BFEnemyFacing:F};
+vm.runInNewContext(fs.readFileSync('public/3d/prison-combat.js','utf8'),{window:prisonWindow});
+const Elites=require('../public/3d/campaign-elites.js');
+const pursuitFixtures=[
+ [{x:0,y:0,z:0,yaw:0,hp:100,maxHp:100,frostOfficer:'shield',offState:'hunt',offClock:1},
+  (e,p)=>Officers.step(e,.05,p,{enemies:[e],arena:{surfaces:[]},speed:100})],
+ [{x:0,y:0,z:0,yaw:0,hp:100,maxHp:100,prisonFoe:'prison_guard',pcState:'approach',pcClock:1,pcCount:0},
+  (e,p)=>prisonWindow.BFPrisonCombat.step(e,.05,p,100)],
+ [{x:0,y:0,z:0,yaw:0,hp:100,maxHp:100,ceKind:'keep_lance',ceState:'hunt',ceClock:1,campaignRole:'guard'},
+  (e,p)=>Elites.step(e,.05,p,100)]
+];
+for(const [e,step] of pursuitFixtures){
+ for(let i=0;i<12;i++)tick(e,farRear,.05,()=>step(e,farRear));
+ ok(e.z===0&&Math.abs(e.yaw)>.9,'an authored guard pivots in place to reacquire a flank');
+ for(let i=0;i<20;i++)tick(e,farRear,.05,()=>step(e,farRear));
+ ok(e.z< -5,'the authored guard advances after facing the player');
+}
 const exposedTick=()=>tick(exposed,farRear,.05,()=>King.step(exposed,.05,farRear));
 exposedTick();
 for(let i=0;i<75;i++)exposedTick();

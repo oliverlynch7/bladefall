@@ -3437,3 +3437,7 @@ The same shield commitment state controls movement, frontal knockback, retreat a
 ## Enemy pursuit and campaign guard recovery (2.377.0)
 
 A campaign guard at the edge of its patrol stays planted through recovery and then returns home. Shield bearers and the Abyss King pivot before advancing toward a player behind them. In muted Chrome, the 2.376.0 patrol resumed during recovery and the Sentinel and King both moved backward while turning. On 2.377.0, the patrol stayed in place and finished recovery, and both enemies turned in place before moving forward. Moving behind the King's committed sweep avoided all damage. The Frostfell Shield Officer blocked the front hit and took damage from the rear late in recovery. The royal guard stance and pillar counter passed. The co-op check replayed a host snapshot in one browser. All 124 focused facing checks and 15 adjacent suites passed.
+
+## Authored guard pivots and royal sweep opening (2.378.0)
+
+In muted Chrome, the same Briar guard moved 27.9 world units while pivoting on 2.377.0 and stayed planted on 2.378.0. The player's movement carried them behind the committed royal sweep without damage. A hit during recovery dealt zero from the front in both builds and 42 from the back on 2.378.0. The capped rear opening, pillar counter, shield recoveries, and royal guard stance passed. A host snapshot replay verified shield heading on the guest path. Nine focused suites and an isolated pre-update save load passed.

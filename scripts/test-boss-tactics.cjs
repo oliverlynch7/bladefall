@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),T=require('../public/3d/boss-tactics.js'),M=require('../public/3d/marksman-encounter.js');let n=0;const ok=(x,m)=>{assert(x,m);n++},enemy=o=>({x:0,y:0,z:0,h:80,hp:1000,maxHp:1000,...o}),src={x:0,y:0,z:100};function hit(G,e,d=1e8,p=src,kind='direct'){const a=T.damage(G,e,p,d,kind);e.hp-=a;return a;}
-// The user now requires repeated arena counters; ordinary recovery is intentionally closed.
+// Arena counters open the larger damage windows. Ordinary recoveries remain guarded.
 for(const kind of ['direct','status']){
  let e=enemy({bruteOrchard:true,bruteState:'hunt'});ok(hit({},e,1e8,src,kind)===0,'Brute closed armor '+kind);for(let i=1;i<=3;i++){e.bruteStaggers=i;e.bruteState='stagger';hit({},e,1e8,src,kind);ok(e.hp===Math.max(0,1000-i*380),'Cart window capped '+i+' '+kind);}
  e=enemy({marksmanCrossing:true,markState:'recover',y:140});ok(hit({},e,1e8,src,kind)===0,'Marksman distant reload cannot bypass cover '+kind);for(let i=1;i<=4&&e.hp>0;i++){e.markTurns=i;M.expose(e);if(e.hp<=550)e.markMoved=true;hit({},e,1e8,src,kind);}ok(e.hp===0,'Repeated cover windows finish Marksman '+kind);
@@ -9,6 +9,21 @@ for(const kind of ['direct','status']){
  e=enemy({finalKing:true,akState:'recover',phase:1,akSeq:1});ok(hit({},e,1e8,src,kind)===0,'King ordinary recovery closed');for(let i=1;i<=3;i++){e.akSeq=i;e.akEnvSeq=i;e.akEnvPhase=1;e.akState='recover';hit({},e,1e8,src,kind);}ok(e.hp===0,'Repeated King environmental counters finish phase1');
  e=enemy({finalKing:true,akState:'recover',phase:2,akSeq:1,akEnvSeq:1,akEnvPhase:2});hit({},e,1e8,src,kind);e.akSeq=2;e.akEnvSeq=2;hit({},e,1e8,src,kind);ok(e.hp===550,'King cannot skip phase2 guard summon');e.akSummoned=true;e.akState='adds';ok(hit({},e,1e8,src,kind)===0,'Guard phase closed');for(let i=3;i<=4;i++){e.akState='recover';e.akSeq=i;e.akEnvSeq=i;hit({},e,1e8,src,kind);}ok(e.hp===0,'King phase2 finishes after guards and counters');
 }
+const sweep=enemy({finalKing:true,akStage:'fight1',phase:1,akState:'recover',akKind:'sweep',akClock:2.2,akSeq:3,akDX:1,akDZ:0});
+const kingRear={x:-100,y:0,z:0},kingFront={x:100,y:0,z:0};
+ok(hit({},sweep,100,kingRear)===0,'The King requires a counter in this phase before a sweep flank can hurt');
+sweep.akEnvSeq=2;sweep.akEnvPhase=1;
+ok(hit({},sweep,100,kingFront)===0&&hit({},sweep,100,{...kingRear,x:-400})===0,'Sweep recovery rewards only close rear attacks');
+ok(hit({},sweep,100,kingRear,'status')===0,'Directionless damage cannot claim a rear opening');
+ok(T.view({},sweep,kingRear).hint==='Back exposed — attack now','Rear opening is explained');
+ok(hit({},sweep,100,kingRear)===150&&hit({},sweep,100,kingRear)===30&&hit({},sweep,100,kingRear)===0,'One capped rear opening per committed sweep');
+sweep.akSeq++;
+ok(hit({},sweep,10,kingRear)===15,'A later sweep has its own opening');
+ok(hit({}, {...sweep,phase:2,akStage:'fight2'},100,kingRear)===0,'Phase two needs its own arena counter');
+ok(hit({}, {...sweep,akState:'wind'},100,kingRear)===0,'No rear bonus during the attack');
+ok(hit({}, {...sweep,akClock:0},100,kingRear)===0,'Expired recovery closes the flank');
+const royalGuardGate={...sweep,phase:2,akStage:'fight2',akEnvPhase:2,akSummoned:false,hp:560,_bossBudgetKey:null};
+ok(hit({},royalGuardGate,100,kingRear)===10&&royalGuardGate.hp===550,'Rear hits cannot skip the royal guards');
 let e=enemy({marksmanCrossing:true,markMoved:true,markState:'aim',markTurns:1,y:140});const close={x:80,y:140,z:0};ok(T.damage({},e,close,100)===0,'Climbing during live aim is not an invulnerable damage shortcut');e.markState='recover';ok(T.damage({},e,close,100)===175,'Reaching nest during reload works');ok(T.damage({},e,null,10,'status')===18,'A real nest approach opens the same window for existing status damage');
 const shield=enemy({frostOfficer:'shield',offState:'recover',offSeq:1,yaw:0}),caster=enemy({frostOfficer:'caster',x:400,offState:'recover',offSeq:1}),rear={x:0,y:0,z:-100};ok(T.damage({enemies:[shield,caster]},caster,src,100)===0,'Officer caster protected while near shield');caster.x=1200;ok(T.damage({enemies:[shield,caster]},caster,src,100)===175,'Real distance separation breaks ward');ok(T.damage({},shield,src,100)===0,'Shield front guarded even during recovery');ok(T.damage({},shield,null,100,'status')===0,'Directionless status cannot invent a flank');ok(T.damage({},shield,rear,100)===175,'Shield rear recovery vulnerable');ok(T.damage({},shield,null,100,'status')===175,'After a real flank, status shares the same opening');
 for(const e of [enemy({}),enemy({boss:true}),enemy({bruteOrchard:true,practice:true}),enemy({_peer:true}),enemy({bot:true})])ok(T.damage({},e,src,25)===25,'Ordinary/training/PvP untouched');

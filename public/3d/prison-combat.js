@@ -40,7 +40,10 @@ function step(e,dt,target,speed,canAttack=true){
  if(e.pcState==='recover'){if(!e.pcClock){e.pcState='approach';e.pcClock=.18;}return;}
  const seq=e.hp<e.maxHp*.5&&k.second?k.second:k.sequence,next=seq[e.pcCount%seq.length],a=moves[next];
  const dx=target.x-e.x,dz=target.z-e.z,d=Math.hypot(dx,dz)||1;facing?.turn(e,dx,dz,dt);
- if(d>a.range){e.x+=dx/d*speed*dt;e.z+=dz/d*speed*dt;}
+ if(d>a.range){
+  if(e.prisonFoe==='prison_guard'&&!facing.aligned(e,target,Math.PI/2))return;
+  e.x+=dx/d*speed*dt;e.z+=dz/d*speed*dt;
+ }
  else if(!e.pcClock&&canAttack&&(!facing||facing.aligned(e,target))){
   e.pcMove=next;e.pcState='wind';e.pcClock=a.wind;e.pcSerial++;e.pcCount++;
   [e.pcDX,e.pcDZ]=facing.forward(e);e.pcX=a.target?target.x:e.x;e.pcZ=a.target?target.z:e.z;e.pcY=e.y;

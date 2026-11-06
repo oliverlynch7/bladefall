@@ -72,7 +72,8 @@ function step(e,dt,target,speed,canAttack=true,move=null){const k=kits[e.ceKind]
  if(e.ceState==='hunt'){
   let dx=target.x-e.x,dz=target.z-e.z,d=Math.hypot(dx,dz);if(d<.001){dx=Math.sin(e.yaw||0);dz=Math.cos(e.yaw||0);d=1;}
   facing?.turn(e,dx,dz,dt);const stop=k.stop??(!canAttack?20:e.ceKind==='shore'?210:e.briarRole==='hex'?305:e.briarRole==='runner'?125:e.briarRole==='guard'?85:85);
-  if(d>stop){const length=Math.min(d-stop,speed*dt);travel(dx/d,dz/d,length);}
+  const guard=e.briarRole==='guard'||e.campaignRole==='guard';
+  if(d>stop&&(!guard||facing.aligned(e,target,Math.PI/2))){const length=Math.min(d-stop,speed*dt);travel(dx/d,dz/d,length);}
   if((e.briarRole==='hex'||e.campaignRole==='caster')&&d<150)travel(-dx/d,-dz/d,speed*dt*.6);
   if(canAttack&&(!facing||facing.aligned(e,target))&&e.ceClock===0&&d<k.reach+35&&Math.abs(target.y-e.y)<65){const [ceDX,ceDZ]=facing.forward(e);Object.assign(e,{ceState:'wind',ceClock:k.wind,ceSerial:e.ceSerial+1,ceX:e.x,ceZ:e.z,ceY:e.y,ceDX,ceDZ});if(form==='circle'){e.ceX=target.x;e.ceZ=target.z;e.ceY=e.y;}}
  }else{e.yaw=Math.atan2(e.ceDX,e.ceDZ);

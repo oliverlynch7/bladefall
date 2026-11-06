@@ -2804,3 +2804,7 @@ A frontal hit still gives a braced shield bearer knockback, and encounter retrea
 ### U-ENEMY-FACING-20261104 | Forward pursuit after a pivot
 
 Keep authored campaign guard recovery ahead of patrol retreat. While reacquiring a player behind them, shield bearers and the Abyss King turn before stepping toward the player. Mirror the shield's host position on co-op clients. Verify against the prior live build and check that the King still commits to the original sweep and responds to the arena counters.
+
+### U-ENEMY-FACING-20261104 | Authored guard pursuit and rear sweep punish
+
+The shared shield and King pursuit checks do not cover the Frostfell Shield Officer, Prison Guard, or scripted campaign guards. Apply the same forward pursuit rule to their hunt states. The King already holds his sweep heading through recovery, but the damage rule currently rejects a rear strike. Allow a short, capped rear opening after the sweep once an arena counter has been performed in that phase. Keep the beam and wave counters as the larger openings and preserve the guard summon threshold.

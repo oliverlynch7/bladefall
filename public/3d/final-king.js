@@ -16,7 +16,14 @@ const e=spawn('tyrant',0,-450,false);Object.assign(e,{finalKing:true,boss:true,k
 function startFight(e,phase){e.phase=phase;e.akStage=phase===1?'fight1':'fight2';e.label=phase===1?'The Abyss King':'The Abyss King, Awakened';e.maxHp=Math.round(e.akBaseHP*(phase===2?1.15:1));e.hp=e.maxHp;e.akState='approach';e.akClock=3;e.akBeat=0;e.akSeq++;e.untargetable=false;e.x=0;e.z=-450;e.y=0;e.slamW=e.meleeActive=0;}
 function lethal(e){e.hp=1;e.dead=false;if(!combat(e))return;e.akStage=e.phase===1?'recognition':'collapse';e.akClock=e.phase===1?0:5;e.untargetable=true;e.slamW=e.meleeActive=0;e.akSeq++;}
 function step(e,dt,p,{adds=0,summon=()=>{},cue=()=>{}}={}){if(!combat(e))return;dt=Math.min(.05,Math.max(0,dt));e.akClock=Math.max(0,e.akClock-dt);e.slamW=e.akState==='wind'?e.akClock:0;e.meleeActive=e.akState==='strike'?e.akClock:0;
-if(e.akState==='approach'){const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz)||1;if(d>240){const x=Math.max(-760,Math.min(760,e.x+dx/d*115*dt)),z=Math.max(-800,Math.min(850,e.z+dz/d*115*dt));if(!pillars.some(q=>Math.abs(x-q.x)<45+(e.r||43)&&Math.abs(z-q.z)<45+(e.r||43))){e.x=x;e.z=z;}}facing.turn(e,dx,dz,dt);}
+if(e.akState==='approach'){
+ const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz);
+ facing.turn(e,dx,dz,dt);
+ if(d>240&&facing.aligned(e,p,Math.PI/2)){
+  const x=Math.max(-760,Math.min(760,e.x+dx/d*115*dt)),z=Math.max(-800,Math.min(850,e.z+dz/d*115*dt));
+  if(!pillars.some(q=>Math.abs(x-q.x)<45+(e.r||43)&&Math.abs(z-q.z)<45+(e.r||43))){e.x=x;e.z=z;}
+ }
+}
 if(e.akClock)return;if(e.akState==='adds'){if(adds)return;e.akState='recover';e.akClock=2;return;}
 if(e.akState==='recover'||e.akState==='approach'){
  const sequence=attacks[e.phase===1?1:2],kind=sequence[e.akBeat%sequence.length];

@@ -2800,3 +2800,7 @@ The game loop let a caster start a shot on the frame its melee strike expired, a
 ### U-ENEMY-FACING-20261104 | Keep planted shields in place
 
 A frontal hit still gives a braced shield bearer knockback, and encounter retreat can interrupt the planted window. Preserve its position against blocked hits while braced, striking, or recovering. Hold off on leash retreat until then. Keep rear-hit reactions and the Frostfell and Abyss King tactics. Verify front and rear hits, committed turns, and retreat on the existing browser paths.
+
+### U-ENEMY-FACING-20261104 | Forward pursuit after a pivot
+
+Keep authored campaign guard recovery ahead of patrol retreat. While reacquiring a player behind them, shield bearers and the Abyss King turn before stepping toward the player. Mirror the shield's host position on co-op clients. Verify against the prior live build and check that the King still commits to the original sweep and responds to the arena counters.

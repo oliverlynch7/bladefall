@@ -4097,3 +4097,7 @@ Shared enemies finish their current attack and recovery before committing to the
 ### v2.376.0 - Shield footing
 
 Shield bearers stay planted when they block a frontal hit during a brace, strike, or recovery. They wait until that commitment ends before returning to their patrol. Rear strikes still cause knockback.
+
+### 2026-11-06 - v2.377.0 enemy pivots
+
+Shield bearers and the Abyss King turn before chasing a player behind them. Campaign guards finish their recovery before returning to patrol, even at the edge of a patrol. Browser checks reproduced the previous movement and verified rear hits, the King's sweep, and the pillar counter.

@@ -1174,7 +1174,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2342"></script>
 <script src="./campaign-elites.js?v=2369"></script>
-<script src="./campaign-encounters.js?v=2376"></script>
+<script src="./campaign-encounters.js?v=2377"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2319"></script>
 <script src="./briar-journey.js?v=2302"></script>
@@ -1191,7 +1191,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./thunder-cliffs.js?v=2318"></script>
 <script src="./castle-gates.js?v=2318"></script>
 <script src="./long-ascent.js?v=2185"></script>
-<script src="./final-king.js?v=2370"></script>
+<script src="./final-king.js?v=2377"></script>
 <script src="./return-adventures.js?v=2356"></script>
 <script src="./return-visits.js?v=2356"></script>
 <script src="./palace-courtyard.js?v=2317"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.376.0-shield-footing';
+const VERSION3D='2.377.0-enemy-pivot';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -17066,6 +17066,8 @@ function updateWorld(dt){
     const guardPlanted=e.role==='shielder'&&(mirrorFacing?(e.guardPlanted??e.guardBraced):facingFrame?.guardPlanted);
     if(guardPlanted)eff=0;
     const encounterReturning=MP.guest()?!!e.encReturning:BFCampaignEncounters.retreat(G,e,encounterPlayers,dt,(dx,dz)=>moveGroundEnemy(e,dx,dz,eff,dt));
+    // Shield bearers pivot before chasing a flank. Guests follow the host's position instead of chasing a different target.
+    if(!encounterReturning&&e.role==='shielder'&&(mirrorFacing||!BFEnemyFacing.aligned(e,meleeTarget,Math.PI/2)))eff=0;
     if(encounterReturning){/* Return on real floors with normal HP and collision; no healing/reset exploit. */}
     else if(e.prisonFoe){updatePrisonFoe(e,dt,p,eff);}else if(e.ceKind){updateCampaignElite(e,dt,p,eff);}else{
     if(e.shotW>0){eff=0;e.shotW=Math.max(0,e.shotW-dt);if(e.shotW===0&&e.shotAim){releaseEnemyShot(e,e.shotAim);e.shotAim=null;}}

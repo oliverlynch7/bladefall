@@ -133,7 +133,7 @@ function canWake(G,e,players,clear){
 function retreat(G,e,players,dt,move){
  if(!active(G)||!managed(e))return false;
  if(!e.encHome)home(e);
- if(root.BFEnemyFacing?.guardPlanted(e)){e.encReturning=false;return false;}
+ if(root.BFEnemyFacing?.guardPlanted(e)||root.BFEnemyFacing?.holdsRecovery(e)){e.encReturning=false;return false;}
  const h=e.encHome,homeDistance=Math.hypot(e.x-h.x,e.z-h.z),near=players.some(p=>p&&p.hp>0&&!p.dead&&!p.downed&&Math.abs((p.y||0)-h.y)<140&&Math.hypot(p.x-h.x,p.z-h.z)<e.encLeash);
  if(!e.encReturning&&!near&&homeDistance>e.encLeash*.65){
   // Finish a visible strike before disengaging; never erase an attack already being shown.

@@ -32,7 +32,9 @@ const distantRear={...rear,z:-450};
 for(let i=0;i<40;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
 ok(normalRecovery.akState==='recover'&&normalRecovery.yaw===0&&normalRecovery.z===0,'normal King recovery holds body and position');
 for(let i=0;i<10;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
-ok(normalRecovery.akState==='approach'&&delta(normalRecovery.yaw,0)>.2&&normalRecovery.z<0,'King can turn and pursue after normal recovery');
+ok(normalRecovery.akState==='approach'&&delta(normalRecovery.yaw,0)>.2&&normalRecovery.z===0,'King turns in place to find the player after normal recovery');
+for(let i=0;i<15;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
+ok(normalRecovery.z<0,'King advances when the player is back in front');
 const summoningKing={...king,akStage:'fight2',phase:2,akState:'approach',akClock:0,akBeat:3,akSummoned:false};
 let royalGuards=0;
 const summonedTick=p=>tick(summoningKing,p,.05,()=>King.step(summoningKing,.05,p,{
@@ -46,7 +48,9 @@ royalGuards=0;
 for(let i=0;i<35;i++)summonedTick(distantRear);
 ok(summoningKing.akState==='recover'&&delta(summoningKing.yaw,0)<1e-8,'King stays planted through recovery after the guards fall');
 for(let i=0;i<10;i++)summonedTick(distantRear);
-ok(summoningKing.akState==='approach'&&delta(summoningKing.yaw,0)>.2&&summoningKing.z<0,'King turns and pursues once the stance and recovery end');
+ok(summoningKing.akState==='approach'&&delta(summoningKing.yaw,0)>.2&&summoningKing.z===0,'King pivots toward the player once the stance and recovery end');
+for(let i=0;i<15;i++)summonedTick(distantRear);
+ok(summoningKing.z<0,'King resumes forward pursuit after the stance');
 const pg={type:'prison_guard',x:0,z:0,y:0,yaw:0,hp:100};Prison.setup(pg);pg.pcClock=0;for(let i=0;i<10;i++)tick(pg,rear,.016,()=>Prison.step(pg,.016,rear,0));ok(pg.pcState==='approach','prison guard cannot instantly bash behind itself');
 for(const data of [{chargeT:1,cdx:1,cdz:0},{windT:1,teleX:1,teleZ:0},{cleaveW:1,cleaveX:1,cleaveZ:0},{shotW:1,shotAim:{x:100,z:0}},{marksmanCrossing:true,markState:'aim',markClock:.4,markX:100,markZ:0},{bruteOrchard:true,bruteState:'charge',teleX:1,teleZ:0}]){const e={x:0,z:0,yaw:Math.PI/2,...data};for(let i=0;i<40;i++)tick(e,{x:-100,z:0});ok(delta(e.yaw,Math.PI/2)<1e-8,'charge/projectile vectors stay committed');}
 const mirrored={x:0,z:0,yaw:0,facingYaw:1.2,shieldYaw:1.2,role:'shielder'};ok(F.mirror(mirrored)&&mirrored.yaw===1.2&&mirrored.shieldYaw===1.2,'guest uses host facing');ok(!F.mirror({}),'legacy snapshots tolerated');
@@ -101,7 +105,9 @@ ok(Tactics.rule({},exposed,farRear).factor===3,'counter still opens the royal wa
 for(let i=0;i<12&&exposed.akState==='recover';i++)exposedTick();
 ok(exposed.akState==='approach'&&Tactics.rule({},exposed,farRear).factor===0,'ward closes before reacquisition');
 exposedTick();
-ok(exposed.z<0&&delta(exposed.yaw,0)>.05,'king pursues and turns after the opening');
+ok(exposed.z===0&&delta(exposed.yaw,0)>.05,'king pivots in place after the opening');
+for(let i=0;i<17;i++)exposedTick();
+ok(exposed.z<0,'king advances once he faces the player again');
 for(let i=0;i<40&&exposed.akState==='approach';i++)exposedTick();
 ok(exposed.akState==='wind','king eventually lines up and starts the next attack');
 const planted={x:0,z:0,yaw:0,role:'shielder',meleeActive:.02,meleeSerial:1};
@@ -128,6 +134,13 @@ ok(F.guardPlanted(leashGuard)&&!retreat()&&!leashGuard.encReturning&&retreatStep
 const unshielded={x:0,z:0,yaw:0,meleeActive:.02,meleeSerial:1};
 tick(unshielded,rear,.02,()=>unshielded.meleeActive=0);
 ok(!F.guardPlanted(unshielded),'ordinary melee keeps its existing recovery movement');
+const borderGuard={...leashGuard,role:null,ceKind:'keep_lance',campaignRole:'guard',ceState:'recover',
+ ceClock:1.15,ceDX:0,ceDZ:1,meleeW:0,encReturning:true};
+let borderMoves=0;
+const borderRetreat=()=>CampaignEncounters.retreat(battlefield,borderGuard,[outsideLeash],.05,()=>borderMoves++);
+ok(!borderRetreat()&&!borderGuard.encReturning&&borderMoves===0,'campaign guard finishes recovery even beyond its patrol leash');
+borderGuard.ceState='hunt';
+ok(borderRetreat()&&borderMoves===1,'campaign guard can return home after its recovery');
 // Exercise the actual game warning geometry and projectile release together.
 const main=fs.readFileSync('public/3d/index.html','utf8');
 const rings=[],markers=[],projectiles=[];

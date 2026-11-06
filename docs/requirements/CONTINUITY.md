@@ -3433,3 +3433,7 @@ The new regression reproduced the unwanted rotation on 2.373.0. The 110 facing c
 ## Shield footing (2.376.0)
 
 The same shield commitment state controls movement, frontal knockback, retreat and co-op snapshots. Muted Chrome reproduced a frontal knockback impulse of 220 on 2.375.0. The new build gave the braced Sentinel zero frontal impulse and retained the full rear impulse. Chrome verified the Frostfell Shield Officer rear opening and the Abyss King's ward-break and royal guard recoveries. The co-op check replayed host snapshots in one client. An isolated 2.375.0 campaign save retained its level, gold and route. All 119 focused facing checks and 11 related suites passed.
+
+## Enemy pursuit and campaign guard recovery (2.377.0)
+
+A campaign guard at the edge of its patrol stays planted through recovery and then returns home. Shield bearers and the Abyss King pivot before advancing toward a player behind them. In muted Chrome, the 2.376.0 patrol resumed during recovery and the Sentinel and King both moved backward while turning. On 2.377.0, the patrol stayed in place and finished recovery, and both enemies turned in place before moving forward. Moving behind the King's committed sweep avoided all damage. The Frostfell Shield Officer blocked the front hit and took damage from the rear late in recovery. The royal guard stance and pillar counter passed. The co-op check replayed a host snapshot in one browser. All 124 focused facing checks and 15 adjacent suites passed.

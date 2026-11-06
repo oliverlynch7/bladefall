@@ -3386,3 +3386,10 @@ Verified 60 focused facing assertions and 12 related regression suites, includin
 The Frostfell Shield Officer stays planted through its authored recovery instead of resuming tracking after the generic hold. Each direct hit still requires a rear angle. Status damage can tick after a rear hit in the same window. The Abyss King retains first-warning commitment and his existing pillar and jump counters.
 
 Verification in muted Chrome used the actual world update and hit pipeline. At 1.5 seconds into recovery, the shield had turned zero radians, blocked a front hit for zero damage, and took 175 from a 100-damage rear hit. It resumed turning in hunt. The King's sweep hit the warned arc and missed the rear. An isolated 2.369.0 campaign save kept level 9, 413 gold, and its route after reload. 69 facing checks and 12 adjacent regression suites passed. The local static server returned its expected missing voice endpoint response. The test used staged combat and did not exercise a live co-op connection.
+
+
+## Guard and royal recovery (2.369.2)
+
+Prison Shield Guards and the shield-bearing campaign guard roles keep their attack facing throughout their authored recovery. When a pillar block or wave jump breaks the Abyss King's ward, the King holds his position and facing for the 4.2-second opening. Afterward, he closes the ward and turns at his pursuit rate before beginning another attack.
+
+Verified 80 facing checks, 11 adjacent suites, and the prison layout suite. In muted Chrome, an actual pillar counter opened the ward. After 3.2 seconds with the player behind him, the King had moved and turned zero and a rear hit dealt damage. The ward then closed and he resumed pursuit and began another windup. The Frostfell officer blocked the front hit and took damage from the rear late in recovery. A save from 2.369.1 retained level 9, 413 gold and its campaign route. The combat was staged and used a single browser client.

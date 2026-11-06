@@ -4062,3 +4062,8 @@ Directional attacks keep their first visible aim through release. The Abyss King
 ### 2026-11-05 - v2.369.1 Shield Officer recovery
 
 The Frostfell Shield Officer keeps its attack direction through the full recovery, then turns again while hunting. Direct rear hits land throughout that opening. The shield continues blocking direct hits from the front, and damage-over-time effects can keep ticking after a rear hit.
+
+
+### v2.369.2 — Guard and royal recovery
+
+Campaign and prison guards hold their facing through their recovery. The Abyss King stays planted while his ward is broken, then turns toward the player at his normal pursuit speed. The existing pillar and jump counters still create the opening.

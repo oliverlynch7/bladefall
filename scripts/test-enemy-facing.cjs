@@ -12,7 +12,7 @@ tick(guard,{x:0,z:-80},.016,()=>guard.meleeW=0);for(let i=0;i<35;i++)tick(guard,
 const held={x:0,z:0,yaw:0,staggerT:1};tick(held,{x:0,z:-100},.05,()=>held.yaw=Math.PI);ok(held.yaw===0,'stagger cannot rotate');
 for(const [flags,phase,x,z] of [[{finalKing:true,akState:'wind'},'ak',0,1],[{frostOfficer:'shield',offState:'strike'},'off',1,0],[{marbleGuardian:true,mcState:'wind'},'mc',-1,0],[{furnaceColossus:true,fcState:'strike'},'fc',0,-1],[{fallenDuel:true,fallState:'thrust'},'fall',1,0],[{ceKind:'guard',ceState:'wind'},'ce',0,1],[{prisonFoe:'prison_guard',pcState:'strike'},'pc',1,0]]){const yaw=Math.atan2(x,z),e={x:0,z:0,yaw,...flags,[phase+'DX']:x,[phase+'DZ']:z};for(let i=0;i<80;i++)tick(e,{x:-x*100,z:-z*100},.016,()=>e.yaw=yaw+Math.PI);ok(delta(e.yaw,yaw)<1e-8,'authored '+phase+' commitment survives target switch');}
 const king={finalKing:true,boss:true,x:0,z:0,y:0,yaw:0,hp:100,maxHp:100,akStage:'fight1',akState:'recover',akClock:.01,akBeat:0,akSeq:0,phase:1},front={x:0,z:150,y:0,hp:100,r:16},rear={...front,z:-150};tick(king,front,.016,()=>King.step(king,.016,front));ok(king.akState==='wind','king begins its normal attack');for(let i=0;i<100&&king.akState!=='strike';i++)tick(king,rear,.016,()=>King.step(king,.016,rear));ok(king.akState==='strike','king completes windup');ok(King.inAttack(king,front),'committed sweep hits front');ok(!King.inAttack(king,rear),'king rear is safe from front sweep');ok(delta(king.yaw,0)<1e-8,'king visual sweep stays aligned');
-const late={...king,akState:'recover',akClock:0,yaw:0};tick(late,rear,.016,()=>King.step(late,.016,rear));ok(late.akState==='recover','king waits to turn before new attack');
+const late={...king,akState:'recover',akClock:0,yaw:0};tick(late,rear,.016,()=>King.step(late,.016,rear));ok(late.akState==='approach','king waits to turn before new attack');
 const pg={type:'prison_guard',x:0,z:0,y:0,yaw:0,hp:100};Prison.setup(pg);pg.pcClock=0;for(let i=0;i<10;i++)tick(pg,rear,.016,()=>Prison.step(pg,.016,rear,0));ok(pg.pcState==='approach','prison guard cannot instantly bash behind itself');
 for(const data of [{chargeT:1,cdx:1,cdz:0},{windT:1,teleX:1,teleZ:0},{cleaveW:1,cleaveX:1,cleaveZ:0},{shotW:1,shotAim:{x:100,z:0}},{marksmanCrossing:true,markState:'aim',markClock:.4,markX:100,markZ:0},{bruteOrchard:true,bruteState:'charge',teleX:1,teleZ:0}]){const e={x:0,z:0,yaw:Math.PI/2,...data};for(let i=0;i<40;i++)tick(e,{x:-100,z:0});ok(delta(e.yaw,Math.PI/2)<1e-8,'charge/projectile vectors stay committed');}
 const mirrored={x:0,z:0,yaw:0,facingYaw:1.2,shieldYaw:1.2,role:'shielder'};ok(F.mirror(mirrored)&&mirrored.yaw===1.2&&mirrored.shieldYaw===1.2,'guest uses host facing');ok(!F.mirror({}),'legacy snapshots tolerated');
@@ -46,4 +46,28 @@ ok(Tactics.damage(cavern,officer,front,10)===0,'front stays blocked after a rear
 ok(Tactics.damage(cavern,officer,rear,10)===18,'rear remains open late in recovery');
 for(let i=0;i<15;i++)officerTick(rear);
 ok(officer.offState==='hunt'&&delta(officer.yaw,0)>.2,'shield reacquires the target while hunting');
+for(const [guardRole,state,next] of [
+ [{prisonFoe:'prison_guard'},'pcState','approach'],
+ [{ceKind:'briar_guard',briarRole:'guard'},'ceState','hunt'],
+ [{ceKind:'keep_lance',campaignRole:'guard'},'ceState','hunt']
+]){
+ const e={x:0,z:0,yaw:0,...guardRole,[state]:'recover'};
+ for(let i=0;i<22;i++)tick(e,rear,.05);
+ ok(delta(e.yaw,0)<1e-8,'guard keeps its direction throughout recovery');
+ e[state]=next;tick(e,rear,.05);
+ ok(delta(e.yaw,0)>.05,'guard turns again after recovery');
+}
+const exposed={...king,x:0,y:0,z:0,yaw:0,akKind:'line',akState:'strike',akClock:.01,akSeq:10,akEnvSeq:10,akEnvPhase:1};
+const farRear={...rear,z:-550};
+const exposedTick=()=>tick(exposed,farRear,.05,()=>King.step(exposed,.05,farRear));
+exposedTick();
+for(let i=0;i<75;i++)exposedTick();
+ok(exposed.akState==='recover'&&exposed.z===0&&delta(exposed.yaw,0)<1e-8,'countered king stays planted for the long punish window');
+ok(Tactics.rule({},exposed,farRear).factor===3,'counter still opens the royal ward');
+for(let i=0;i<12&&exposed.akState==='recover';i++)exposedTick();
+ok(exposed.akState==='approach'&&Tactics.rule({},exposed,farRear).factor===0,'ward closes before reacquisition');
+exposedTick();
+ok(exposed.z<0&&delta(exposed.yaw,0)>.05,'king pursues and turns after the opening');
+for(let i=0;i<40&&exposed.akState==='approach';i++)exposedTick();
+ok(exposed.akState==='wind','king eventually lines up and starts the next attack');
 console.log(`Enemy facing: ${checks} checks passed (rates, wrap, locks, recovery, rear contact, authored boss directions, live King cycle, prison gate and guest mirror).`);

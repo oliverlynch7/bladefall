@@ -32,9 +32,14 @@ function action(e){
  return null;
 }
 // Bracket each host AI step, so legacy yaw assignments cannot bypass the turn limit.
-function shieldRecovering(e){return e.frostOfficer==='shield'&&e.offState==='recover';}
+function holdsRecovery(e){
+ if(e.frostOfficer==='shield')return e.offState==='recover';
+ if(e.prisonFoe==='prison_guard')return e.pcState==='recover';
+ if(e.ceKind&&(e.briarRole==='guard'||e.campaignRole==='guard'))return e.ceState==='recover';
+ return !!e.finalKing&&e.akState==='recover'&&e.akClock>0&&e.akEnvSeq>0&&e.akEnvSeq===e.akSeq&&e.akEnvPhase===e.phase;
+}
 function begin(e,target,dt){
- const saved=memory.get(e)||{key:null,aim:0,recover:0},current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,held:saved.recover>0||shieldRecovering(e)||e.staggerT>0||e.fallState==='stagger'};
+ const saved=memory.get(e)||{key:null,aim:0,recover:0},current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,held:saved.recover>0||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
  saved.recover=Math.max(0,saved.recover-Math.max(0,dt));memory.set(e,saved);
  if(!current&&!frame.held&&target)turn(e,target.x-e.x,target.z-e.z,dt);
  // Encounter helpers can also step in isolation. Inside the game loop they share this one turn.
@@ -51,5 +56,5 @@ function finish(e,dt,frame,returning=false){
 }
 function mirror(e){if(!Number.isFinite(e.facingYaw))return false;e.yaw=e.facingYaw;if(e.role==='shielder')e.shieldYaw=Number.isFinite(e.shieldYaw)?e.shieldYaw:e.yaw;return true;}
 function contact(e,p){return aligned(e,p,1.15);}
-const api={turn,aligned,forward,rate,angle,action,begin,finish,mirror,contact};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={turn,aligned,forward,rate,angle,action,begin,finish,mirror,contact,holdsRecovery};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

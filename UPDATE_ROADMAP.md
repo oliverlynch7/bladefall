@@ -4117,3 +4117,7 @@ Bosses using the shared combat loop finish their committed move, recover in plac
 ### 2026-11-06 - v2.381.0 Repeatable boss commitment
 
 Bosses using the shared combat loop turn, pursue, and choose attacks against the same living party member. The Marksman holds position through the marked shot and recovery. The Frost Sorcerer waits until its current attack and recovery finish before blinking.
+
+### 2026-11-06 - v2.382.0 Projectile flanks
+
+Directional shields and rear openings now use the projectile's incoming side. Co-op guests see the result confirmed by the host. The King's close-range rear opening still requires the arena counter for that phase.

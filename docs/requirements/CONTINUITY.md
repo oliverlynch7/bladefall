@@ -3453,3 +3453,7 @@ Muted Chrome reproduced the shared Abyss King sliding 14 world units during reco
 ## Repeatable boss commitment (2.381.0)
 
 In muted Chrome, the shared King faced the nearer teammate but failed to start a lunge in 2.380.0. In 2.381.0 it committed in that direction and held the aim as the teammate crossed behind. The Marksman's marked shot stayed on its original target and the Frost Sorcerer waited through spell recovery before blinking. The campaign King missed a player who moved behind his sweep and took 42 damage from a rear hit after an arena counter. The Frostfell Shield Officer still blocked the front hit and took the rear hit. A 2.380.0 save retained level 9, 413 gold and its campaign checkpoint. All ten Node suites passed, including 134 facing and 164 boss target checks. Co-op targeting was staged in Chrome.
+
+## Projectile flank detection (2.382.0)
+
+Muted Chrome reproduced the live 2.381.0 reversal when the shooter crossed the guard before impact: 34 rear damage and 112 front damage. With the fix the rear did 112 and the front did 34, both solo and through staged guest hit packets and host receipts. A player moving behind the campaign King's warning took zero from the sweep and landed a 42-damage rear hit during recovery after a staged ward counter. A 2.381.0 save retained level 9, 413 gold and its campaign route. Eight Node suites passed, including 140 facing checks. Co-op packets were exercised in one browser.

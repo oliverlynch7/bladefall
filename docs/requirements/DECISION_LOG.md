@@ -2821,3 +2821,7 @@ The browser’s repeatable boss fights can still slide toward a player during a 
 ### U-ENEMY-FACING-20261104 | Repeatable boss target and attack commitment
 
 Use the same living party target for facing, pursuit, and choosing a new attack in shared boss fights. Leave local beam collision tied to the local hero. Hold the Marksman variant in place through its ground-marker attack and recovery, and defer the Frost Sorcerer variant’s blink until it can move again. Verify the original campaign King and shield behavior alongside the repeatable fights.
+
+### U-ENEMY-FACING-20261104 | Projectile approach side
+
+The live hit pipeline replaces player projectiles with the shooter's current position before testing the shield or rear opening. Separate the shot's incoming side from its owner. Check entry side against the host's committed yaw, keep the King's existing close-range gate, and verify frontal and rear impacts with the shooter on the opposite side.

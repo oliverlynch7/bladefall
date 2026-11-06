@@ -2918,3 +2918,5 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 **Facing follows the active combat target.** Scripted guards use the target their encounter actually chooses, including in co-op. A patrol return must yield to a committed strike and guard recovery. Continue to preserve the Abyss King’s arena counters and punish windows.
 
 **Repeatable boss follow-up.** Facing, movement, and attack selection use the same living party target. The shared Marksman finishes its marked shot and recovery before turning or moving again. The shared Frost Sorcerer waits out a committed attack before blinking.
+
+**Projectile-facing follow-up.** Resolve a directional guard against the side the projectile enters, including if its shooter moves around the target while the shot travels. Preserve attack ownership, King rear-hit distance and arena counters, and the host's authority over co-op damage.

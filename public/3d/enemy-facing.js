@@ -28,6 +28,20 @@ function turn(e,dx,dz,dt){
  return e.yaw;
 }
 function aligned(e,p,arc=.65){const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz);return d<.001||(dx*Math.sin(e.yaw||0)+dz*Math.cos(e.yaw||0))/d>=Math.cos(arc);}
+function directionalGuard(e){return e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield'||e.finalKing;}
+// Rewind from the collision point to the incoming edge of the target's hit circle.
+function projectileSide(e,p){
+ const dx=p.x-e.x,dz=p.z-e.z,speed=Math.hypot(p.vx,p.vz),r=e.r+p.size;
+ if(!(speed>0&&r>0))return null;
+ const vx=p.vx/speed,vz=p.vz/speed,along=dx*vx+dz*vz,cross=dx*vz-dz*vx;
+ const back=along+Math.sqrt(Math.max(0,r*r-cross*cross));
+ return [(dx-vx*back)/r,(dz-vz*back)/r];
+}
+function guardSource(e,src,side){
+ if(!Array.isArray(side)||side.length!==2)return src;
+ if(!side.every(Number.isFinite)||Math.abs(Math.hypot(...side)-1)>.01)return src;
+ return {x:e.x+side[0],z:e.z+side[1]};
+}
 function forward(e){return [Math.sin(e.yaw||0),Math.cos(e.yaw||0)];}
 // Authored attack geometry wins over target position. Null yaw means planted melee.
 function action(e){
@@ -85,5 +99,5 @@ function canCommit(e){
  return !saved?.frame?.busy&&!saved?.frame?.held&&!(saved?.recover>0)&&!bracing(e)&&!action(e);
 }
 function contact(e,p){return aligned(e,p,meleeArc);}
-const api={turn,aligned,forward,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={turn,aligned,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

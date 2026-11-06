@@ -236,4 +236,16 @@ ok(knightArena.shockwaves.length===2&&JSON.stringify(hostWave)===JSON.stringify(
 const lateGuest={...knight,...strikePacket};
 crushStep(lateGuest);
 ok(knightArena.shockwaves.length===2,'a guest who missed the warning does not take an untelegraphed wave');
+const shield={x:100,z:200,r:40};
+const side=(x,z,vx,vz)=>F.projectileSide(shield,{x:shield.x+x,z:shield.z+z,vx,vz,size:5});
+const [rearX,rearZ]=side(0,6,0,1200);
+ok(Math.abs(rearX)<1e-8&&rearZ===-1,'a fast shot crossing center still enters from the rear');
+const [frontX,frontZ]=side(0,-6,0,-1200);
+ok(Math.abs(frontX)<1e-8&&frontZ===1,'a fast front shot crossing center still enters from the shield side');
+const [edgeX,edgeZ]=side(44,0,0,1200);
+ok(edgeX>.97&&edgeZ<0&&edgeZ>-.22,'grazing hits use their edge rather than the centerline');
+ok(side(0,0,0,0)===null,'stationary attacks fall back to their source');
+const owner={x:100,z:300};
+ok(F.guardSource(shield,owner,[rearX,rearZ]).z===199,'host translates the impact direction to its own enemy position');
+ok(F.guardSource(shield,owner,[0,0])===owner&&F.guardSource(shield,owner,[NaN,1])===owner&&F.guardSource(shield,owner)===owner,'invalid or legacy guest packets keep the original source');
 console.log(`Enemy facing: ${checks} checks passed (rates, wrap, locks, recovery, rear contact, authored boss directions, live King cycle, prison gate and guest mirror).`);

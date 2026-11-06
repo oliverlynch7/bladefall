@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2381"></script>
+<script src="./enemy-facing.js?v=2382"></script>
 <script src="./prison-combat.js?v=2378"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1153,7 +1153,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./emotes.js?v=2225"></script>
 <script src="./camera-occlusion.js?v=2341"></script>
 <script src="./campaign-threat.js?v=2337"></script>
-<script src="./boss-tactics.js?v=2378"></script>
+<script src="./boss-tactics.js?v=2382"></script>
 <script src="./starter-practice.js?v=2340"></script>
 <script src="./enemy-health.js?v=2217"></script>
 <script src="./rift-welcome.js?v=2234"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.381.0-boss-commitment';
+const VERSION3D='2.382.0-projectile-flanks';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -12210,9 +12210,9 @@ function estat(e){ return e.st||(e.st={burn:0,chill:0,venom:0,rune:0,radiance:0,
 function statTotal(e){ if(!e.st) return 0; let n=0; for(const k in e.st) n+=e.st[k]; return n; }
 // buildup per hit: normalized by attack speed (cd), with the Scythe specialization + boss resistance
 function buildAmt(w,boss){ const cd=(w&&w.cd)||0.4, scy=(w&&w.art==='scythe')?2.2:1; return Math.min(2.4,(cd/0.4))*scy*(boss?0.5:1); }
-function campaignBossDamage(e,dmg,src,kind='direct'){
+function campaignBossDamage(e,dmg,src,kind='direct',guardSrc=src){
  if(!isCampaignAdventure()||G.area>=0)return dmg;
- const r=BFBossTactics.rule(G,e,src,kind),n=BFBossTactics.damage(G,e,src,dmg,kind);
+ const r=BFBossTactics.rule(G,e,src,kind,guardSrc),n=BFBossTactics.damage(G,e,src,dmg,kind,guardSrc);
  if(r.hint&&n<=0&&kind==='direct'&&(e._tacticHintAt||0)<G.time){e._tacticHintAt=G.time+1.8;addText(e.x,(e.y||0)+e.h+24,e.z,r.transition?'PHASE CHANGING':r.ended?'OPENING ENDED':'GUARDED','#ebcf8a');}
  return n;
 }
@@ -13713,7 +13713,9 @@ function guestOwnerFromPacket(raw,peer){
 }
 function hitEnemy(e,dmg,src,kb,lifesteal,el){
  const impactContext=arguments[6]||window.BFCombatDetailSfx?.current;
+ const guardSide=src?.guardSide;
  if(src?.projSrc&&!src.pet)src=G.p;
+ const guardSrc=guardSide?BFEnemyFacing.guardSource(e,src,guardSide):src;
 
  if(e?.marbleGuardian&&!(e.mcExposed>0)){if((e._mcHint||0)<G.time){e._mcHint=G.time+2;addText(e.x,e.y+150,e.z,'BREAK THE ARMOR SEAL','#e4d5a7');}return;}
  if(e?.hydraChain&&(e.dead||!BFHydra.exposed(G,e))){if(!e.dead&&(e._chainHint||0)<G.time){e._chainHint=G.time+2;addText(e.x,e.y+100,e.z,'WAIT FOR THE PALE JOINT','#d1decd');}return;}
@@ -13748,24 +13750,17 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   // Player-owned companions/summons use {pet:true} as their damage source. Guests must relay
   // those hits too; otherwise they appear to attack locally, then the host snapshot restores
   // the mob's HP and makes Necromancer summons (and pets) effectively deal zero shared damage.
-  /* `projSrc` joins `pet` here for the same reason `pet` was added: a damage source that is not
-     literally G.p still belongs to this player and must be relayed, or it is applied locally and
-     then undone by the host's next snapshot. A projectile passes a bare position literal (the
-     bolt's own, since knockback is thrown from it), so it satisfied neither clause - meaning every
-     projectile basic attack and every projectile skill dealt nothing durable on a guest.
-     WIDENED ON THE RELAY SIDE ONLY, deliberately. `src===G.p` is also what dispatches CLASS_BASIC;
-     making projectiles satisfy THAT would ship the largest balance change in the game as a side
-     effect of a netcode fix. A separate marker keeps the two apart. */
+  // Guard geometry travels separately from the source used for perks and healing.
   if(MP.active && !MP.isHost && e && e.mid!=null && !e.dummy && !e.practice && (src===G.p||(src&&(src.pet||src.projSrc)))){
     const offense=src===G.p?guestHitOffense(e,dmg,kb):{dmg,kb,owner:{guest:true,cid:null,bits:0,designated:false,weapon:null}};dmg=offense.dmg;kb=offense.kb;
-    MP.sendHit(e.mid,dmg,kb||0,el||null,src.x,src.z,{rate:src===G.p?Math.max(0,lifesteal||0)*(meta.classId==='reaper'?.5:.3)+healRatio:0,flat:src===G.p?G._hitHeal||0:0,owner:offense.owner,basicMana:src===G.p&&!G._desig,hpDelta:offense.hpDelta||0,manaDelta:offense.manaDelta||0,bloodDelta:offense.bloodDelta||0,impactContext,impactPosition:{x:e.x,y:e.y||0,z:e.z}});
-    if(e.prisonFoe)dmg=BFPrisonCombat.guardDamage(e,src,dmg);
-    e.hitFlash=0.12; addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
+    const waitForGuard=BFEnemyFacing.directionalGuard(e);
+    MP.sendHit(e.mid,dmg,kb||0,el||null,src.x,src.z,{rate:src===G.p?Math.max(0,lifesteal||0)*(meta.classId==='reaper'?.5:.3)+healRatio:0,flat:src===G.p?G._hitHeal||0:0,owner:offense.owner,basicMana:src===G.p&&!G._desig,hpDelta:offense.hpDelta||0,manaDelta:offense.manaDelta||0,bloodDelta:offense.bloodDelta||0,guardSide,waitForGuard,crit:!!G._crit,impactContext,impactPosition:{x:e.x,y:e.y||0,z:e.z,h:e.h}});
+    e.hitFlash=0.12; if(!waitForGuard)addText(e.x,e.y+e.h+10,e.z, Math.round(dmg), G._crit?'#ffd24a':'#fff', false, G._crit?'crit':'dmg');
     burst(e.x,e.y+e.h*0.5,e.z,e.color,4); SFX.hit();
     // Healing follows the host's actual HP-loss receipt, never the predicted hit.
     return;
   }
-  if(e.prisonFoe){const guarded=BFPrisonCombat.guardDamage(e,src,dmg);if(guarded<dmg&&(e._guardHint||0)<G.time){e._guardHint=G.time+1;addText(e.x,e.y+90,e.z,'FLANK THE SHIELD','#dfc78e');}dmg=guarded;}
+  if(e.prisonFoe){const guarded=BFPrisonCombat.guardDamage(e,guardSrc,dmg);if(guarded<dmg&&(e._guardHint||0)<G.time){e._guardHint=G.time+1;addText(e.x,e.y+90,e.z,'FLANK THE SHIELD','#dfc78e');}dmg=guarded;}
   if(e.betaArmor&&!(e.staggerT>0)){
     dmg*=.55;
     if((e._betaArmorHint||0)<G.time){e._betaArmorHint=G.time+3;addText(e.x,e.y+e.h+16,e.z,'LURE ITS RUSH INTO A POST','#e7c990');}
@@ -13811,7 +13806,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(src===G.p&&meta.classId==='warlock'&&(e.warCurseT||0)>0&&(!e.warCurseOwner||e.warCurseOwner===(MP.active?MP.myId:'solo')))dmg*=c2Passive('war_deep')?1.30:1.15;
   if(guestOwner?.cid==='warlock'&&(e.warCurseT||0)>0&&guestOwner.id===e.warCurseOwner)dmg*=hasGuestPerk(guestOwner,'war_deep')?1.30:1.15;
   let blockedByShield=false;
-  if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
+  if(e.role==='shielder' && guardSrc && e.shieldYaw!=null){ const ax=guardSrc.x-e.x, az=guardSrc.z-e.z, dl=Math.hypot(ax,az)||1;
     const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
     if(fr>0.4){ blockedByShield=true; dmg*=0.3; if(BFEnemyFacing.brace(e)||Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
       if(e.spec==='shell' && e.shellHp!=null){ e.shellHp-=dmg; const shatter=(el==='ice'||e.chill>0)?2.4:1; e.shellHp-=dmg*(shatter-1);   // chill/shatter cracks the shell faster
@@ -13862,7 +13857,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   /* The Abyss King's ward: while any of his court still stands he takes a fifth of the damage, so
      the fight is "clear the court" before it is ever "hit the king". */
   if(e.courtWard) dmg=dmg*0.2;
-  dmg=campaignBossDamage(e,dmg,src);if(!(dmg>0))return;
+  dmg=campaignBossDamage(e,dmg,src,'direct',guardSrc);if(!(dmg>0))return;
   if(e.bot && e._def) dmg=Math.round(dmg*0.55);   // arena bot in its low-HP defensive turtle takes reduced damage
   /* ROUND ONCE, HERE, before it is applied or shown.
      Oliver, playtesting: "I'm getting damage numbers in, like, the ten decimal places." Weapon
@@ -15775,7 +15770,7 @@ const MP={
       if(d.token&&c._hitReceipts.has(d.token)){try{c.send(c._hitReceipts.get(d.token).packet);}catch{}return;}}
     const e=this.byMid(d.m),before=e?Math.max(0,e.hp):0;
     let bonusHeal=0,executed=false;
-    if(e&&!e.dead){const owner=guestOwnerFromPacket(d.owner,q),src={x:Number.isFinite(d.sx)?d.sx:e.x,y:Number.isFinite(q?.ty)?q.ty:0,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true,_guestCtx:owner};
+    if(e&&!e.dead){const owner=guestOwnerFromPacket(d.owner,q),src={x:Number.isFinite(d.sx)?d.sx:e.x,y:Number.isFinite(q?.ty)?q.ty:0,z:Number.isFinite(d.sz)?d.sz:e.z,_guest:true,_guestCtx:owner,guardSide:d.guardSide};
       if(!owner.cid&&Number.isFinite(q?.pet?.ty))src.y=q.pet.ty;
       if(owner.execute&&q&&!e.boss&&!e.hydraChain&&!e.marbleGuardian&&!e.furnaceColossus&&!e.finalKing&&dXZ(q.tx,q.tz,e.x,e.z)<200+e.r&&e.hp<e.maxHp*.25){
         e.hp=0;killEnemy(e);executed=true;addText(e.x,e.y+40,e.z,'EXECUTED','#ff2a1a',true);
@@ -15833,8 +15828,8 @@ const MP={
     if(!this.hostConn?.open||!Number.isFinite(dmg)||dmg<=0)return;
     const token=this.myId+':e:'+((this._enemyHitSerial=(this._enemyHitSerial||0)+1));this._pendingEnemyHits=this._pendingEnemyHits||new Map();
     for(const [k,h]of this._pendingEnemyHits)if(performance.now()-h.at>10000)this._pendingEnemyHits.delete(k);
-    this._pendingEnemyHits.set(token,{at:performance.now(),world:G,player:G.p,cls:meta.classId,basicMana:!!effects.basicMana,rate:Math.max(0,effects.rate||0),flat:Math.max(0,effects.flat||0),hpDelta:effects.hpDelta||0,manaDelta:effects.manaDelta||0,bloodDelta:effects.bloodDelta||0,impactContext:effects.impactContext,impactPosition:effects.impactPosition});
-    try{this.hostConn.send({t:'hit',token,m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0),owner:effects.owner||null});}catch{this._pendingEnemyHits.delete(token);}
+    this._pendingEnemyHits.set(token,{at:performance.now(),world:G,player:G.p,cls:meta.classId,basicMana:!!effects.basicMana,rate:Math.max(0,effects.rate||0),flat:Math.max(0,effects.flat||0),hpDelta:effects.hpDelta||0,manaDelta:effects.manaDelta||0,bloodDelta:effects.bloodDelta||0,waitForGuard:effects.waitForGuard,crit:effects.crit,impactContext:effects.impactContext,impactPosition:effects.impactPosition});
+    try{this.hostConn.send({t:'hit',token,m:mid,d:Math.round(dmg),kb:kb||0,el:el||0,sx:Math.round(sx||0),sz:Math.round(sz||0),owner:effects.owner||null,guardSide:effects.guardSide});}catch{this._pendingEnemyHits.delete(token);}
   },
   sendStatus(mid,el,dmg,w){
     if(!this.guest()||!this.hostConn?.open||!Number.isFinite(dmg)||dmg<=0)return;
@@ -15847,6 +15842,10 @@ const MP={
   takeHitResult(d){
     const h=this._pendingEnemyHits?.get(d.token);if(!h)return;this._pendingEnemyHits.delete(d.token);
     if(!this.guest()||h.world!==G||h.player!==G.p||h.cls!==meta.classId||performance.now()-h.at>10000||!Number.isFinite(d.dealt))return;
+    if(h.waitForGuard&&h.impactPosition){
+      const {x,y,z,h:height}=h.impactPosition;
+      addText(x,y+(height||30)+10,z,d.dealt>0?Math.round(d.dealt):'GUARDED',d.dealt<=0?'#8fb7ff':h.crit?'#ffd24a':'#fff',false,h.crit&&d.dealt>0?'crit':'dmg');
+    }
     if(d.dealt<=0){const p=G.p;p.hp=Math.max(0,Math.min(effMaxHp(p),p.hp-h.hpDelta));p.mana=Math.max(0,Math.min(p.maxMana||100,p.mana-h.manaDelta));p._bloodOwed=Math.max(0,(p._bloodOwed||0)-h.bloodDelta);hudUpdate();return;}
     window.BFCombatDetailSfx?.impact(G,h.impactPosition,d.dealt,h.impactContext);
     if(h.basicMana)recoverBasicMana(G.p);
@@ -17212,13 +17211,8 @@ function updateWorld(dt){
       G._desig=!!pr.desig; G._crit=!!pr.pcrit;             // charged bolts / thrown scythe spend Rune Marks + rupture Corruption; crit shots shout their number
       for(const e of combatTargets()){ if(e.dead||!e.active||pr.hitSet.indexOf(e)>=0) continue;
         if(dXZ(e.x,e.z,pr.x,pr.z)<(e.r+pr.size) && Math.abs(pr.y-(e.y+e.h/2))<(e.h/2+pr.size)){
-          /* `projSrc` marks this src as the PLAYER'S SHOT so the co-op relay can recognise it. The
-             src is deliberately the bolt's own position, not the player's, because knockback is
-             thrown from the projectile - which is exactly why the relay guard could not see it and
-             why a guest's projectiles dealt nothing that survived the next host snapshot.
-             NOT named `shot`: enemies already carry `.shot` as their ranged-attack config, so that
-             name would be true on any enemy-shaped src and relay hits that must not be relayed. */
-          pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01,projSrc:true,pet:!!pr.petSeek},pr.kb,pr.petSeek?0:effLifesteal(G.p),pr.el,window.BFCombatDetailSfx?.of(pr));
+          const guardSide=BFEnemyFacing.directionalGuard(e)?BFEnemyFacing.projectileSide(e,pr):null;
+          pr.hitSet.push(e); hitEnemy(e,pr.dmg,{x:pr.x-pr.vx*0.01,z:pr.z-pr.vz*0.01,projSrc:true,pet:!!pr.petSeek,guardSide},pr.kb,pr.petSeek?0:effLifesteal(G.p),pr.el,window.BFCombatDetailSfx?.of(pr));
           if(pr.pierce>0) pr.pierce--; else { pr.life=0; break; } } }
       G._desig=false; G._crit=false;
     } else if(G.duel && pr.foeBot){                          // DUEL: a bot's shot hits only its opponent, never the parked player

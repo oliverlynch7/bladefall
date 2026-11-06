@@ -1,14 +1,14 @@
 /* Campaign-only tactical defenses. Direct hits, companions and status damage share the same limits. */
 (function(root){'use strict';
 const live=e=>e&&!e.dead&&e.hp>0;
-function rule(G,e,src,kind='direct'){
+function rule(G,e,src,kind='direct',guardSrc=src){
  const r={factor:1,floor:0,hint:'',key:null,limit:0};if(!live(e)||e._peer||e.bot||e.practice||e.dummy)return r;
  const close=src&&Math.abs((src.y||0)-(e.y||0))<95&&Math.hypot(src.x-e.x,src.z-e.z)<340;
  if(e.bruteOrchard){const open=e.bruteState==='stagger';r.factor=open?3:0;r.key=open?'cart:'+e.bruteStaggers:null;r.limit=.38;r.hint=open?'Charge stopped — attack now':'Bait another charge into a cart or stone';}
  else if(e.marksmanCrossing){const opening=e.markExposed>0||(e.markState==='recover'&&!(e.markAttack>0)&&((kind==='direct'&&close)||(Number.isInteger(e.markNestSeq)&&e.markNestSeq===e.markTurns)));r.factor=opening?1.75:0;r.floor=!e.markMoved?.55:0;r.key=opening?'marksman:'+(e.markWindowSeq||0):null;r.limit=.34;r.hint=opening?'Bow exposed — attack now':'Block a shot with stone cover, or reach her nest during reload';}
  else if(e.fallenDuel){const open=e.fallState==='stagger';r.factor=open?3:0;r.key=open?'pillar:'+e.fallSeq:null;r.limit=.38;r.hint=open?'Blade caught — attack now':'Lead the thrust into a pillar; ordinary recovery stays guarded';}
  else if(e.frostOfficer){const protector=(G.enemies||[]).find(q=>q.frostOfficer==='shield'&&live(q));const separated=!protector||Math.hypot(e.x-protector.x,e.z-protector.z)>1000;
-  const dx=(src?.x??e.x)-e.x,dz=(src?.z??e.z)-e.z,d=Math.hypot(dx,dz),rear=kind==='direct'&&src&&d>0&&(dx*Math.sin(e.yaw||0)+dz*Math.cos(e.yaw||0))/d<-.15;
+  const dx=(guardSrc?.x??e.x)-e.x,dz=(guardSrc?.z??e.z)-e.z,d=Math.hypot(dx,dz),rear=kind==='direct'&&guardSrc&&d>0&&(dx*Math.sin(e.yaw||0)+dz*Math.cos(e.yaw||0))/d<-.15;
   const open=(e.offSeq||0)>0&&e.offState==='recover'&&(e.frostOfficer==='caster'?separated:e.frostOfficer==='shield'?(kind==='direct'?rear:e.offFlankedSeq===e.offSeq):true);
   r.factor=open?1.75:0;r.key=open?'officer:'+e.offSeq:null;r.limit=.4;r.hint=open?'Officer exposed — attack':e.frostOfficer==='caster'?'Draw the shield officer away from the caster':e.frostOfficer==='shield'?'Jump the wave, then strike the shield from behind':'Sidestep the rush, then close in while the spear recovers';}
  else if(e.furnaceColossus){const open=e.fcExposed>0;r.factor=open?2.5:0;r.key=open?'cool:'+e._fcCool:null;r.limit=.34;r.hint=open?'Armor cooled — strike the joints':e.fcValveCd>0?'Cooling refills in '+Math.ceil(e.fcValveCd)+'s — avoid its attacks':'Turn a cooling valve to open the armor';}
@@ -19,7 +19,7 @@ function rule(G,e,src,kind='direct'){
   const countered=e.akEnvSeq>0&&e.akEnvPhase===e.phase;
   const open=recovered&&countered&&e.akEnvSeq===e.akSeq;
   const sweep=recovered&&countered&&e.akClock>0&&e.akKind==='sweep';
-  const dx=close?src.x-e.x:0,dz=close?src.z-e.z:0;
+  const dx=(guardSrc?.x??e.x)-e.x,dz=(guardSrc?.z??e.z)-e.z;
   const flank=sweep&&kind==='direct'&&close&&dx*e.akDX+dz*e.akDZ<-.15*Math.hypot(dx,dz);
   r.factor=open?3:flank?1.5:0;
   r.floor=e.phase===2&&!e.akSummoned?.55:0;
@@ -50,14 +50,14 @@ function view(G,e,src){
  const clock=e.bruteOrchard?e.bruteClock:e.marksmanCrossing?Math.max(e.markExposed||0,nest?e.markClock||0:0):e.fallenDuel?e.fallClock:e.frostOfficer?e.offClock:e.furnaceColossus?e.fcExposed:e.marbleGuardian?e.mcExposed:e.hydraChain?G.hydraArena?.clock:e.finalKing?e.akClock:0;
  return {state:open?'open':r.transition?'transition':r.ended?'ended':'guarded',label:open?'ATTACK NOW':r.transition?'PHASE CHANGING':r.ended?'OPENING ENDED':'GUARDED',hint:r.hint,seconds:open&&Number.isFinite(clock)?Math.max(0,clock):0};
 }
-function damage(G,e,src,dmg,kind='direct'){
+function damage(G,e,src,dmg,kind='direct',guardSrc=src){
  if(!Number.isFinite(dmg)||dmg<=0)return 0;
  if(e?.marksmanCrossing){const turn=e.markTurns||0;
   // One shared opportunity per actual shot/reload; switching between cover and nest cannot renew it.
   if(e.markExposed>0&&e.markWindowTurn==null)e.markWindowTurn=turn;
   if(kind==='direct'&&closeEnough(e,src)&&e.markState==='recover'&&!(e.markAttack>0)&&!(e.markExposed>0)&&e.markWindowTurn!==turn){e.markWindowSeq=(e.markWindowSeq||0)+1;e.markWindowTurn=turn;e.markNestSeq=turn;}
  }
- const r=rule(G,e,src,kind);
+ const r=rule(G,e,src,kind,guardSrc);
  if(!r.hint)return dmg;if(e.untargetable||r.factor<=0)return 0;
  let n=Math.max(1,Math.round(dmg*r.factor));n=Math.min(n,Math.max(0,e.hp-Math.ceil(e.maxHp*r.floor)));
  if(r.key){

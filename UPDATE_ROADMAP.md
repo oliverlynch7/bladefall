@@ -4071,3 +4071,7 @@ Campaign and prison guards hold their facing through their recovery. The Abyss K
 ### v2.370.0 — Shield commitment
 
 Ordinary shield bearers brace for 0.85 seconds after a frontal block, giving players a chance to get behind them. The Abyss King holds his facing and position through standard recovery, then lines up the next attack before committing. Co-op guests receive the host's brace state and facing.
+
+### v2.371.0 - Readable attack directions
+
+Shield guards finish a brace before starting a new attack. Melee tells show the forward hit arc, projectile tells follow the locked shot, and co-op guests receive the host's basic shield-guard attack state.

@@ -2775,3 +2775,7 @@ Keep shield-bearing guards planted throughout their authored recovery. When a pi
 ### U-ENEMY-FACING-20261104 | Shield blocks and standard royal recovery
 
 Plant ordinary shield bearers briefly when they block a frontal hit. Give players time to go around the shield and prevent repeated hits from extending the brace indefinitely. The Abyss King also stays planted through standard recovery. Keep his environmental ward counters and existing damage rules.
+
+### U-ENEMY-FACING-20261104 | Combat follow-through
+
+A shield brace cannot overlap a new melee attack or Siege Knight crush. A block during an attack leaves the current warning and strike intact. Shield bearers with special behaviors mirror the host's basic melee state in co-op. Ordinary melee tells show their forward hit arc and projectile tells use the actual locked shot angle.

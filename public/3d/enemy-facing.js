@@ -1,7 +1,7 @@
 /* Facing is combat state: bodies, guards and committed attack directions agree. */
 (function(root){'use strict';
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
-const braceTime=.85,braceInterval=2.4;
+const braceTime=.85,braceInterval=2.4,meleeArc=1.15;
 function state(e){
  let saved=memory.get(e);
  if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0};memory.set(e,saved);}
@@ -9,7 +9,7 @@ function state(e){
 }
 function bracing(e){return e.role==='shielder'&&memory.get(e)?.brace>0;}
 function brace(e){
- if(e.role!=='shielder'||e.dummy||e.dead)return false;
+ if(e.role!=='shielder'||e.dummy||e.dead||action(e))return false;
  const saved=state(e);
  if(saved.braceCooldown>0)return false;
  saved.brace=braceTime;saved.braceCooldown=braceInterval;
@@ -72,6 +72,6 @@ function finish(e,dt,frame,returning=false){
  e.yaw=angle(frame.yaw,goal,dt,rate(e));if(e.role==='shielder')e.shieldYaw=e.yaw;
 }
 function mirror(e){if(!Number.isFinite(e.facingYaw))return false;e.yaw=e.facingYaw;if(e.role==='shielder')e.shieldYaw=Number.isFinite(e.shieldYaw)?e.shieldYaw:e.yaw;return true;}
-function contact(e,p){return aligned(e,p,1.15);}
-const api={turn,aligned,forward,rate,angle,action,begin,finish,mirror,contact,holdsRecovery,brace,bracing};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+function contact(e,p){return aligned(e,p,meleeArc);}
+const api={turn,aligned,forward,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

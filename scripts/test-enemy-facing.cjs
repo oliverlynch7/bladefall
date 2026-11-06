@@ -10,6 +10,10 @@ for(let i=0;i<30;i++)tick(guard,{x:0,z:-80},.016,()=>guard.yaw=Math.PI);
 ok(delta(guard.yaw,0)<1e-8,'melee body and shield remain committed');ok(guard.shieldYaw===guard.yaw,'shield agrees with body');ok(!F.contact(guard,{x:0,z:-20}),'no ordinary melee contact behind');ok(F.contact(guard,{x:0,z:20}),'forward melee still works');
 tick(guard,{x:0,z:-80},.016,()=>guard.meleeW=0);for(let i=0;i<35;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,0)<1e-8,'heavy recovery gives a real rear opening');for(let i=0;i<150;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,Math.PI)<.1,'guard eventually reacquires player');
 const held={x:0,z:0,yaw:0,staggerT:1};tick(held,{x:0,z:-100},.05,()=>held.yaw=Math.PI);ok(held.yaw===0,'stagger cannot rotate');
+for(const attack of [{meleeW:.5},{meleeActive:.1},{knightW:.6}]){
+ const committed={x:0,z:0,yaw:0,role:'shielder',...attack};
+ ok(!F.brace(committed)&&!F.bracing(committed),'a frontal block does not interrupt or overlap an existing attack');
+}
 const braced={x:0,z:0,yaw:0,role:'shielder'};
 ok(F.brace(braced)&&F.bracing(braced),'a frontal block can start a shield brace');
 for(let i=0;i<15;i++)tick(braced,{x:0,z:-100},.05,()=>braced.yaw=Math.PI);
@@ -86,4 +90,22 @@ exposedTick();
 ok(exposed.z<0&&delta(exposed.yaw,0)>.05,'king pursues and turns after the opening');
 for(let i=0;i<40&&exposed.akState==='approach';i++)exposedTick();
 ok(exposed.akState==='wind','king eventually lines up and starts the next attack');
+// Exercise the actual game warning geometry and projectile release together.
+const main=fs.readFileSync('public/3d/index.html','utf8');
+const rings=[],markers=[],projectiles=[];
+const warningContext={
+ BFEnemyFacing:F,G:{p:{r:16},projectiles},dangerRing:(...args)=>rings.push(args),
+ bx:(x,y,z)=>markers.push({x,z}),SFX:{shoot:()=>{}},foeName:()=>'test archer',dXZ:(x,z,a,b)=>Math.hypot(a-x,b-z)
+};
+vm.runInNewContext(main.slice(main.indexOf('function drawEnemyDanger('),main.indexOf('function specBehavior(')),warningContext);
+const melee={x:0,y:0,z:0,r:18,yaw:Math.PI/2,meleeReach:12,meleeW:.65};
+warningContext.drawEnemyDanger(melee);
+ok(rings.length===2&&rings[0][3]===46&&rings[0][6]===F.meleeArc&&rings[0][7]===1&&Math.abs(rings[0][8])<1e-8,'melee tell draws the committed forward arc and actual reach');
+const bow={x:0,y:0,z:0,r:15,h:40,dmg:10,shotW:.7,shotAim:{x:0,y:0,z:120,h:40,yaw:.4},shot:{count:3,spread:.2,speed:240}};
+warningContext.drawEnemyDanger(bow);
+warningContext.releaseEnemyShot(bow,bow.shotAim);
+for(let i=0;i<projectiles.length;i++){
+ const m=markers[i*7],p=projectiles[i];
+ ok(delta(Math.atan2(m.x,m.z),Math.atan2(p.vx,p.vz))<1e-8,'each shot lane follows its first warning');
+}
 console.log(`Enemy facing: ${checks} checks passed (rates, wrap, locks, recovery, rear contact, authored boss directions, live King cycle, prison gate and guest mirror).`);

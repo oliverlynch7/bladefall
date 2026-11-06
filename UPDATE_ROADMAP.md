@@ -4083,3 +4083,8 @@ Shield bearers hold their ground after a committed strike so players have time t
 ### 2026-11-05 - v2.373.0 Siege Knight co-op crush
 
 The Siege Knight's warning, facing and crush release now agree for the host and guest. Guests receive the host's strike position and replay a warned strike once.
+
+
+### v2.374.0 - Royal guard stance
+
+The Abyss King holds his position and heading while his summoned guards fight and through the recovery that follows. He then turns at his normal pursuit speed. The pillar and jump counters still open his ward.

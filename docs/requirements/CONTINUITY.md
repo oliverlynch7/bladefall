@@ -3417,3 +3417,10 @@ Ordinary shield bearers now hold their ground and facing through a committed str
 The host owns the knight's warning, facing and release. Guests mirror the warning and apply its wave once at the host's release position after seeing the warning. The live 2.372.0 shield recovery and King counters remain in effect.
 
 106 focused facing checks and 12 related suites passed. In isolated muted Chrome, the actual host update held both the body and shield at their original heading with the player behind. The host packet produced a single guest wave at the reported strike position after its warning. A 2.372.0 save resumed at level 9 with 413 gold in the original campaign area. This staged host-to-guest check used a single browser.
+
+
+## Royal guard stance (2.374.0)
+
+The Abyss King holds his heading and position through the summoned-guard phase and subsequent recovery. He resumes bounded turning and pursuit afterward. The ward remains protected during the summons and the pillar and jump counters retain their existing openings.
+
+The new regression reproduced the unwanted rotation on 2.373.0. The 110 facing checks and six adjacent combat suites pass. Muted Chrome verified the actual summon, stance, recovery and resumed pursuit. The Frostfell officer blocked a front hit and took a rear hit, and the Sentinel took 34 front damage versus 113 rear damage in the staged fight. A seeded 2.373.0 save retained its level 9, 413 gold and route. The co-op shield checks replayed host snapshots in one browser.

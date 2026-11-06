@@ -51,7 +51,7 @@ function holdsRecovery(e){
  if(e.frostOfficer==='shield')return e.offState==='recover';
  if(e.prisonFoe==='prison_guard')return e.pcState==='recover';
  if(e.ceKind&&(e.briarRole==='guard'||e.campaignRole==='guard'))return e.ceState==='recover';
- return !!e.finalKing&&e.akState==='recover'&&e.akClock>0;
+ return !!e.finalKing&&(e.akState==='adds'||e.akState==='recover'&&e.akClock>0);
 }
 function begin(e,target,dt){
  const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,guardPlanted:guardPlanted(e),held:saved.recover>0||bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};

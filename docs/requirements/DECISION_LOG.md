@@ -2787,3 +2787,7 @@ During a shield bearer's existing recovery, keep the body planted and block new 
 ### U-ENEMY-FACING-20261104 | Siege Knight co-op commitment
 
 The live build already limits turning and plants shield enemies and the Abyss King during committed actions. The Siege Knight still runs its crush timer independently on guests, which lets the guest see an attack the host has not committed to. Carry the host's warning and release in the existing enemy snapshot. Replay the wave once from the host's strike position, after the guest has seen that warning. Preserve the solo crush timing, shield recovery and the King's arena counters.
+
+### U-ENEMY-FACING-20261104 | Royal guard stance
+
+The shared facing update still turned the Abyss King during his summoned-guard phase. Hold his facing until the guards fall and the following recovery finishes. Preserve ward protection, then resume bounded pursuit before the next attack. Verify the full phase transition and the existing shield openings in the browser.

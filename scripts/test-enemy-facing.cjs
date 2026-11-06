@@ -33,6 +33,20 @@ for(let i=0;i<40;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRec
 ok(normalRecovery.akState==='recover'&&normalRecovery.yaw===0&&normalRecovery.z===0,'normal King recovery holds body and position');
 for(let i=0;i<10;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
 ok(normalRecovery.akState==='approach'&&delta(normalRecovery.yaw,0)>.2&&normalRecovery.z<0,'King can turn and pursue after normal recovery');
+const summoningKing={...king,akStage:'fight2',phase:2,akState:'approach',akClock:0,akBeat:3,akSummoned:false};
+let royalGuards=0;
+const summonedTick=p=>tick(summoningKing,p,.05,()=>King.step(summoningKing,.05,p,{
+ adds:royalGuards,summon:()=>royalGuards=2
+}));
+summonedTick(front);
+ok(summoningKing.akState==='adds'&&royalGuards===2,'King starts the royal guard stance');
+for(let i=0;i<32;i++)summonedTick(distantRear);
+ok(summoningKing.akState==='adds'&&delta(summoningKing.yaw,0)<1e-8&&summoningKing.z===0,'royal guard stance holds heading and position');
+royalGuards=0;
+for(let i=0;i<35;i++)summonedTick(distantRear);
+ok(summoningKing.akState==='recover'&&delta(summoningKing.yaw,0)<1e-8,'King stays planted through recovery after the guards fall');
+for(let i=0;i<10;i++)summonedTick(distantRear);
+ok(summoningKing.akState==='approach'&&delta(summoningKing.yaw,0)>.2&&summoningKing.z<0,'King turns and pursues once the stance and recovery end');
 const pg={type:'prison_guard',x:0,z:0,y:0,yaw:0,hp:100};Prison.setup(pg);pg.pcClock=0;for(let i=0;i<10;i++)tick(pg,rear,.016,()=>Prison.step(pg,.016,rear,0));ok(pg.pcState==='approach','prison guard cannot instantly bash behind itself');
 for(const data of [{chargeT:1,cdx:1,cdz:0},{windT:1,teleX:1,teleZ:0},{cleaveW:1,cleaveX:1,cleaveZ:0},{shotW:1,shotAim:{x:100,z:0}},{marksmanCrossing:true,markState:'aim',markClock:.4,markX:100,markZ:0},{bruteOrchard:true,bruteState:'charge',teleX:1,teleZ:0}]){const e={x:0,z:0,yaw:Math.PI/2,...data};for(let i=0;i<40;i++)tick(e,{x:-100,z:0});ok(delta(e.yaw,Math.PI/2)<1e-8,'charge/projectile vectors stay committed');}
 const mirrored={x:0,z:0,yaw:0,facingYaw:1.2,shieldYaw:1.2,role:'shielder'};ok(F.mirror(mirrored)&&mirrored.yaw===1.2&&mirrored.shieldYaw===1.2,'guest uses host facing');ok(!F.mirror({}),'legacy snapshots tolerated');

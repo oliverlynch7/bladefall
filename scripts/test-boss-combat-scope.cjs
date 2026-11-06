@@ -9,12 +9,18 @@ const origin={x:0,z:0},p={x:500,z:0,y:0,hp:100},peer={x:40,z:0,y:0,hp:100,zone:0
 let cases=0;
 for(let zone=0;zone<8;zone++){
  ctx.G.zone=zone;const friend={...peer,zone};ctx.MP.peers={friend};assert.equal(ctx.bossPartyTarget(origin,p),friend);cases++;
- for(const change of [{area:0},{zone:zone+1},{downed:true},{dead:true},{hp:0},{x:NaN},{z:NaN},{y:Infinity}]){
+ for(const change of [{area:0},{zone:zone+1},{downed:true},{dead:true},{hp:0},{x:NaN},{z:NaN},{y:Infinity},{last:3}]){
   ctx.MP.peers={friend:{...friend,...change}};assert.equal(ctx.bossPartyTarget(origin,p),p);
   assert.equal(ctx.bossPartyTarget(origin,{...p,downed:true}),null);cases+=2;
  }
  ctx.MP.peers={friend};assert.equal(ctx.bossPartyTarget(origin,{...p,hp:0}),friend);cases++;
 }
+ctx.G.zone=11;ctx.MP.zone=-300;
+ctx.MP.peers={friend:{...peer,zone:-300}};
+assert.equal(ctx.bossPartyTarget(origin,p),ctx.MP.peers.friend);cases++;
+ctx.MP.peers.friend.zone=11;
+assert.equal(ctx.bossPartyTarget(origin,p),p);cases++;
+delete ctx.MP.zone;
 ctx.MP.active=false;assert.equal(ctx.bossPartyTarget(origin,p),p);assert.equal(ctx.bossPartyTarget(origin,{...p,dead:true}),null);cases+=2;
 // The restraint's ordinary 8-point base is preserved; the animal receives the
 // same regional boss scaling as other bosses, without a co-op damage multiplier.

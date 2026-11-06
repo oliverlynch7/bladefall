@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2379"></script>
+<script src="./enemy-facing.js?v=2381"></script>
 <script src="./prison-combat.js?v=2378"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.380.0-boss-footwork';
+const VERSION3D='2.381.0-boss-commitment';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -8619,7 +8619,7 @@ function bossPartyTarget(origin,p){
  const living=q=>q&&q.hp>0&&!q.dead&&!q.downed&&Number.isFinite(q.x)&&Number.isFinite(q.y)&&Number.isFinite(q.z);
  let target=living(p)?p:null;
  for(const q of Object.values(MP.active?MP.peers:{})){
-  if(!living(q)||q.zone!==G.zone||q.area!==G.area)continue;
+  if(!living(q)||(q.last??0)>=3||q.zone!==(MP.zone??G.zone)||q.area!==G.area)continue;
   if(!target||dXZ(origin.x,origin.z,q.x,q.z)<dXZ(origin.x,origin.z,target.x,target.z))target=q;
  }
  return target;
@@ -17160,7 +17160,7 @@ function updateWorld(dt){
         }
       }
     }
-    else if(e.boss){ updateBoss(e,dt,p,dirX,dirZ,d,eff); }
+    else if(e.boss){ updateBoss(e,dt,p,bossTarget,eff); }
     }
     window.BFEnemyWarnings?.tick(e,p,performance.now()/1000,playFx);
     if(Math.abs(e.hurtKbX)>1||Math.abs(e.hurtKbZ)>1){ e.x+=e.hurtKbX*dt; e.z+=e.hurtKbZ*dt; e.hurtKbX*=0.86; e.hurtKbZ*=0.86; }
@@ -17385,7 +17385,7 @@ function drawEnemyDanger(e){
 }
 function bossShoot(e,p){
   if(!e.shot||!BFEnemyFacing.canCommit(e)||!BFEnemyFacing.aligned(e,p))return false;
-  e.shotW=0.7;e.shotAim={x:p.x,y:p.y,z:p.z,h:p.h,yaw:e.yaw};
+  e.shotW=0.7;e.shotAim={x:p.x,y:p.y,z:p.z,h:p.h??G.p.h,yaw:e.yaw};
   return true;
 }
 function releaseEnemyShot(e,p){
@@ -17479,7 +17479,7 @@ function beamBlocked(e,p){ for(const o of G.obstacles){ if(o.h<40) continue;   /
   const px=p.x-e.x, pz=p.z-e.z, pl=(px*px+pz*pz)||1, t=((o.x-e.x)*px+(o.z-e.z)*pz)/pl;
   if(t<0||t>1) continue; const cx=e.x+px*t, cz=e.z+pz*t; if(dXZ(cx,cz,o.x,o.z)<o.w*0.5+16) return true; }
   return false; }
-function bossSignature(e,dt,p,dirX,dirZ,dist){
+function bossSignature(e,dt,p,target,dist){
   const _hx=(e.home?e.home.x:0), _hz=(e.home?e.home.z:0), _hw=(e.home?e.home.hw:400), _hd=(e.home?e.home.hd:400);
 
   /* HOLLOW MARKSMAN - THE PIN. He had NO signature at all: a kiting archer with a boss health bar,
@@ -17497,17 +17497,17 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
         e._pin2=null;
         SFX.shoot&&SFX.shoot(); G.shake=Math.min(G.shake+4,12);
       }
-    } else if(e.pinCd<=0 && dist<820){
+    } else if(e.pinCd<=0 && dist<820 && BFEnemyFacing.canCommit(e) && BFEnemyFacing.aligned(e,target)){
       e.pinCd=(4.5+Math.random()*2)*(e.phase>=2?0.55:1);
-      e.pinX=p.x; e.pinZ=p.z; e.pinT=0.85;
-      (G.trails=G.trails||[]).push({x:p.x,z:p.z,r:150,life:0.85,max:0.85,dmg:0,hit:0,col:'#ffd9a0'});
+      e.pinX=target.x; e.pinZ=target.z; e.pinT=0.85;
+      (G.trails=G.trails||[]).push({x:e.pinX,z:e.pinZ,r:150,life:0.85,max:0.85,dmg:0,hit:0,col:'#ffd9a0'});
       /* Phase 2: three arrows nocked. The extra pins bracket you rather than stack on you, so the
          question stops being "step aside" and becomes "read which gap is left". */
       if(e._volleyPin){
         e._pin2=[];
         for(let q=0;q<(e._volleyPin-1);q++){
           const a=Math.random()*6.283, rr=90+Math.random()*70;
-          const px=p.x+Math.cos(a)*rr, pz=p.z+Math.sin(a)*rr;
+          const px=e.pinX+Math.cos(a)*rr, pz=e.pinZ+Math.sin(a)*rr;
           e._pin2.push({x:px,z:pz});
           (G.trails=G.trails||[]).push({x:px,z:pz,r:150,life:0.85,max:0.85,dmg:0,hit:0,col:'#ffd9a0'});
         }
@@ -17573,14 +17573,14 @@ function bossSignature(e,dt,p,dirX,dirZ,dist){
         if(b.active<=0) G.beam=null; }
     } else { e.beamCd=(e.beamCd==null?5:e.beamCd)-dt;
       if(e.beamCd<=0 && dist<720){ e.beamCd=(7+Math.random()*2)*(e.phase>=2?0.6:1);
-        G.beam={ang:Math.atan2(p.z-e.z,p.x-e.x)-0.9,dir:Math.random()<0.5?1:-1,warn:0.8,active:1.7,ex:e.x,ez:e.z};
+        G.beam={ang:Math.atan2(target.z-e.z,target.x-e.x)-0.9,dir:Math.random()<0.5?1:-1,warn:0.8,active:1.7,ex:e.x,ez:e.z};
         SFX.boss(); addText(e.x,e.h+16,e.z,'RADIANT SWEEP!','#fff2b0',true); }
     }
   }
   // FROST SORCERER (Cracked Ring): teleports between the ring's pillars between volleys
   if(e.type==='sorcerer'){
     e.tpCd=(e.tpCd==null?3.5:e.tpCd)-dt;
-    if(e.tpCd<=0 && (e.novaW||0)<=0){ e.tpCd=(4.5+Math.random()*2)*(e.phase>=2?0.6:1);
+    if(e.tpCd<=0 && BFEnemyFacing.canCommit(e)){ e.tpCd=(4.5+Math.random()*2)*(e.phase>=2?0.6:1);
       const pil=G.obstacles.filter(o=>o.h>40); let dest;
       if(pil.length){ const o=pil[Math.floor(Math.random()*pil.length)], a=Math.random()*6.283; dest={x:o.x+Math.cos(a)*(o.w*0.5+42),z:o.z+Math.sin(a)*(o.d*0.5+42)}; }
       else { const a=Math.random()*6.283; dest={x:hx+Math.cos(a)*hw*0.6,z:hz+Math.sin(a)*hd*0.6}; }
@@ -17608,7 +17608,7 @@ function bossEnterShield(e){ if(!bossRaid(e)) return;
   e.shielded=true; e.shieldHeal=0; spawnBossCrystals(e);
   G.shake=Math.min(G.shake+8,16); SFX.boss(); addText(e.x,e.h+30,e.z,'WARDED','#7fd6ff',true);
   toast('🔮 The '+ (e.label||'boss') +' is shielded — shatter the healing crystals!'); playFx('portalopen'); }
-function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
+function updateBoss(e,dt,p,target,eff){
   if(e.finalKing){updateFinalKing(e,dt,p);return;}
   if(e.marbleGuardian){updateMarbleGuardian(e,dt,p);return;}
   if(e.furnaceColossus){updateFurnaceColossus(e,dt,p);return;}
@@ -17616,6 +17616,9 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
   if(e.fallenDuel){updateFallenDuel(e,dt,p,eff);return;}
   if(e.marksmanCrossing){updateCrossingMarksman(e,dt,p);return;}
   if(e.bruteOrchard){updateOrchardBrute(e,dt,p,eff);return;}
+  // Only the local player takes local hit checks. Aim and pursuit use the chosen party member.
+  const dx=(target?.x??e.x)-e.x,dz=(target?.z??e.z)-e.z;
+  const dist=target?Math.max(1,Math.hypot(dx,dz)):Infinity,dirX=dx/dist,dirZ=dz/dist;
   if(e.slamW>0||e.cleaveW>0||e.novaW>0||e.poundW>0||e.shotW>0)eff=0;
   updateBossBar(e); // y handled by the climb/support logic in the enemy loop
   if(e.staggerT>0) e.staggerT-=dt;
@@ -17641,11 +17644,11 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.windT<=0){ e.lunge=0.45; G.shake=Math.min(G.shake+5,11); SFX.growl(1); }
   }
   else if(e.lunge>0){ e.lunge-=dt;e.yaw=Math.atan2(e.teleX,e.teleZ); e.x+=(e.teleX||0)*eff*2.6*dt;e.z+=(e.teleZ||0)*eff*2.6*dt; }
-  else if(BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,p,Math.PI/2)){
+  else if(target&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,target,Math.PI/2)){
     // Wait out the commitment and turn before chasing a target behind the boss.
     if(e.kite && dist<210){ e.x-=dirX*eff*0.6*dt; e.z-=dirZ*eff*0.6*dt; }
     else { e.x+=dirX*eff*0.7*dt; e.z+=dirZ*eff*0.7*dt; }
-    if(!e.kite && dist<240 && e.atkTimer<=0&&BFEnemyFacing.aligned(e,p)){
+    if(!e.kite && dist<240 && e.atkTimer<=0&&BFEnemyFacing.aligned(e,target)){
       e.windT=0.85; e.windMax=0.85; [e.teleX,e.teleZ]=BFEnemyFacing.forward(e); e.atkTimer=2.3;
       addText(e.x,e.y+e.h+14,e.z,'!','#ff5a3a',true);
     }
@@ -17667,7 +17670,7 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       G.shake=Math.min(G.shake+10,18); SFX.boss(); addText(e.x,e.h+16,e.z,'CLEAVE!','var(--danger)',true);
       for(let i=0;i<12;i++){ const a=Math.atan2(e.cleaveZ,e.cleaveX)+(i/11-0.5)*1.6; G.particles.push({x:e.x+Math.cos(a)*30,y:6,z:e.z+Math.sin(a)*30,vx:Math.cos(a)*150,vy:60,vz:Math.sin(a)*150,life:0.35,color:'#cfd6df',sz:3}); } } }
     else { if(e.cleaveCd==null) e.cleaveCd=4; e.cleaveCd-=dt;
-      if(e.cleaveCd<=0 && dist<300&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,p)){ e.cleaveW=0.75;[e.cleaveX,e.cleaveZ]=BFEnemyFacing.forward(e); e.cleaveCd=(5+Math.random()*2)*(e.phase>=2?0.55:1); e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
+      if(e.cleaveCd<=0 && dist<300&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,target)){ e.cleaveW=0.75;[e.cleaveX,e.cleaveZ]=BFEnemyFacing.forward(e); e.cleaveCd=(5+Math.random()*2)*(e.phase>=2?0.55:1); e.atkTimer=Math.max(e.atkTimer,1.0); G.shake=Math.min(G.shake+3,8); } }
   }
   if(e.type==='sorcerer'){                                // frost nova — a chilling ring that erupts when you crowd the lich
     if(e.novaW>0){ e.novaW-=dt; if(e.novaW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:18,maxR:260,dmg:e.dmg*1.1,life:0,spd:300,col:'#bff0ff',col2:'#7fd6ff'});
@@ -17684,8 +17687,8 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
       if(e.poundCd<=0 && dist<380&&BFEnemyFacing.canCommit(e)){ e.poundW=0.7; e.poundCd=(5+Math.random()*2.5)*(e.phase>=2?0.55:1); G.shake=Math.min(G.shake+3,8); } }
   }
   // ==== Batch 4: boss signature mechanics, keyed to each set-piece arena (readable, telegraphed, reuse ring/beam VFX) ====
-  bossSignature(e,dt,p,dirX,dirZ,dist);
-  if(e.ranged && e.shootT<=0 && dist<2000&&bossShoot(e,p)){ e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
+  bossSignature(e,dt,p,target,dist);
+  if(e.ranged && e.shootT<=0 && dist<2000&&bossShoot(e,target)){ e.shootT=e.shootCd*(e.phase>=2?0.7:1); }
   if(e.type==='king'||e.type==='tyrant'){
     e.summonT-=dt;
     if(e.summonT<=0 && e.hp/e.maxHp<0.7){ e.summonT=e.type==='tyrant'?5:6;
@@ -24723,7 +24726,7 @@ window.__BF3={buyCompanionWhistle,fieldEquipCompanion,openFieldCompanions,COMPAN
   openNpcTalk, openJournal, closeJournal, addJournalNote, adventureStoryState,
   ZONES, openCampaignEntry, enterZone, nextArea, zoneClear, loadArea, questBump, questKill, questUpdate, bandedRarity, rarityCap, makeElite, ARMOR_TYPES, ARMOR_TYPE_IDS, openHub, die,
   startDelve, loadDelveFloor, delveDescend, delveDie, delveExit, openDelveGate, DELVE_BASE,
-  startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature, updateBoss, startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; }, curZone,
+  startEndless, loadEndlessArena, endlessTick, endlessDescend, endlessDie, enterEndlessFromTitle, endlessStageFor, ENDLESS_MODS, offerShrine, endApplyMod, spawnEndlessMob, bossSignature:(e,dt,p,_dx,_dz,dist)=>bossSignature(e,dt,p,p,dist), updateBoss:(e,dt,p,_dx,_dz,_dist,eff)=>updateBoss(e,dt,p,bossPartyTarget(e,p),eff), startBonus, loadBonus, startHubSprint, finishHubSprint, JMPV, JMPH, get G(){ return G; }, get mode(){ return mode; }, curZone,
   PETS, PETIDS, spawnPet, petUpdate, hurtPet, petMaxHp, openBeastkeeper, petBuy, petSell, petEquip, petUnequip, petTrain, petLevel, petNameplate, petTrainLvl, PET_TRAIN_MAX, petToggleLabel, petAtkDmg, petHealAmt, petTrainCost, spawnMinion, minionUpdate, MP, pvpHostiles, pvpPetHostiles, combatTargets, aimTarget, projectileAimTarget, SKILL_FX, loadMode, persist, isHitless,
   chestMaybeMimic, mimicReveal, MIMIC_RATE, hitEnemy, occRay, render,
   /* foeHit is exported for the same reason surfaceHeightAt is: harness/probes/bounceby.probe.js

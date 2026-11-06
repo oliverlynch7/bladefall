@@ -4113,3 +4113,7 @@ Scripted guards pivot toward the target their encounter selected. A committed at
 ### 2026-11-06 - v2.380.0 Shared boss footwork
 
 Bosses using the shared combat loop finish their committed move, recover in place, then turn before pursuing a player behind them. This covers repeatable fights that use the shared loop, including the earlier Abyss King variant. The campaign King's arena counters and rear sweep opening remain in place.
+
+### 2026-11-06 - v2.381.0 Repeatable boss commitment
+
+Bosses using the shared combat loop turn, pursue, and choose attacks against the same living party member. The Marksman holds position through the marked shot and recovery. The Frost Sorcerer waits until its current attack and recovery finish before blinking.

@@ -2916,3 +2916,5 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 **Authored guard follow-up.** Frostfell, prison, and scripted campaign guards should pivot before pursuing a flank. Reward a close rear strike after the King's sweep once a pillar or wave counter has opened the ward in that phase. Keep the arena counter requirement and phase gates.
 
 **Facing follows the active combat target.** Scripted guards use the target their encounter actually chooses, including in co-op. A patrol return must yield to a committed strike and guard recovery. Continue to preserve the Abyss King’s arena counters and punish windows.
+
+**Repeatable boss follow-up.** Facing, movement, and attack selection use the same living party target. The shared Marksman finishes its marked shot and recovery before turning or moving again. The shared Frost Sorcerer waits out a committed attack before blinking.

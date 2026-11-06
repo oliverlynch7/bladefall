@@ -50,7 +50,7 @@ function action(e){
   if(Number.isFinite(yaw))return {key:'shot',yaw};
   return vector('shot',e.shotAim?e.shotAim.x-e.x:null,e.shotAim?e.shotAim.z-e.z:null);
  }
- if(e.slamW>0||e.novaW>0||e.poundW>0||e.knightW>0||e.eruptW>0||e.fuseT>0)return vector('planted',null,null);
+ if(e.pinT>0||e.slamW>0||e.novaW>0||e.poundW>0||e.knightW>0||e.eruptW>0||e.fuseT>0)return vector('planted',null,null);
  return null;
 }
 // Bracket each host AI step, so legacy yaw assignments cannot bypass the turn limit.

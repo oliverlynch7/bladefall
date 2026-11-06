@@ -2817,3 +2817,7 @@ Spend the one bounded turn on the target chosen by scripted encounter AI. A retu
 ### U-ENEMY-FACING-20261104 | Shared boss footwork
 
 The browser’s repeatable boss fights can still slide toward a player during a facing lock. Reuse the existing attack and recovery state for pursuit. A boss should finish its committed movement, recover in place, then turn before moving toward a player behind it. Preserve the campaign King’s arena counters.
+
+### U-ENEMY-FACING-20261104 | Repeatable boss target and attack commitment
+
+Use the same living party target for facing, pursuit, and choosing a new attack in shared boss fights. Leave local beam collision tied to the local hero. Hold the Marksman variant in place through its ground-marker attack and recovery, and defer the Frost Sorcerer variant’s blink until it can move again. Verify the original campaign King and shield behavior alongside the repeatable fights.

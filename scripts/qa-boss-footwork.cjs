@@ -19,6 +19,44 @@ async page=>{
   pump(100);const pursuit={distance:Math.hypot(e.x-origin.x,e.z-origin.z),yaw:e.yaw};
   check(recovery.distance<.001&&pivot.distance<.001,{recovery,pivot});
   check(Math.abs(recovery.yaw)<.001&&Math.abs(pivot.yaw)>.1&&pursuit.distance>6,{recovery,pivot,pursuit});
-  return {version:b.snap().version,recovery,pivot,pursuit};
+  e.stunT=9999;
+  const spawn=(type,extra)=>Object.assign(b.spawnEnemy(type,x,z,true),
+   {x,z,y:p.y,sx:x,sz:z,active:true,dropT:0,home:null,yaw:0,atkTimer:8,shootT:8},extra);
+  const mp=b.MP;
+  const ally=mp.mkPeer({id:'ally',x,y:p.y,z:z+125,zone:b.G.zone,area:b.G.area,hp:100});
+  Object.assign(mp,{active:true,isHost:true,myId:'local',zone:b.G.zone,tick:()=>{},sendCombat:()=>{},peers:{ally}});
+  place(x,z-310);
+  const king=spawn('king',{atkTimer:0,summonT:999,courtCd:999});
+  pump(1);
+  const attack={wind:king.windT,heading:king.yaw,dx:king.teleX,dz:king.teleZ};
+  check(attack.wind>0&&attack.dz===1,{attack});
+  Object.assign(ally,{x,z:z-105});
+  pump(20);
+  check(king.windT>0&&king.yaw===attack.heading&&king.teleZ===attack.dz,{attack,now:king.yaw});
+  king.stunT=9999;
+  Object.assign(ally,{x,z:z+260});
+  const archer=spawn('archer',{pinCd:0});
+  pump(1);
+  const pin={x:archer.pinX,z:archer.pinZ,heading:archer.yaw,bodyX:archer.x,bodyZ:archer.z};
+  check(pin.x===ally.x&&pin.z===ally.z&&archer.pinT>0,{pin});
+  Object.assign(ally,{x,z:z-150});
+  pump(55);
+  check(archer.pinT<=0&&archer.yaw===pin.heading&&archer.x===pin.bodyX&&archer.z===pin.bodyZ,{pin,archer});
+  archer.stunT=9999;
+  Object.assign(ally,{x,z:z+150});
+  const sorcerer=spawn('sorcerer',{shootT:0,tpCd:0,novaCd:999});
+  // A ready blink must wait if a spell has already been committed.
+  Object.assign(sorcerer,{shotW:.1,shotAim:{x,y:p.y,z:ally.z,h:p.h,yaw:0}});
+  pump(1);
+  check(sorcerer.x===x&&sorcerer.z===z&&sorcerer.tpCd<=0,{sorcerer});
+  pump(19);
+  check(sorcerer.x===x&&sorcerer.z===z,{sorcerer});
+  pump(46);
+  check(sorcerer.tpCd>0,{sorcerer});
+  sorcerer.stunT=9999;
+  const ranged=spawn('archer',{pinCd:999,shootT:0});
+  pump(1);
+  check(ranged.shotAim?.z===ally.z&&ranged.shotAim.h===p.h,{shot:ranged.shotAim,ally});
+  return {version:b.snap().version,recovery,pivot,pursuit,attack,pin,shot:ranged.shotAim};
  });
 }

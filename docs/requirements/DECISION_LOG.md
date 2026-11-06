@@ -2796,3 +2796,7 @@ The shared facing update still turned the Abyss King during his summoned-guard p
 ### U-ENEMY-FACING-20261104 | Shared attack recovery
 
 The game loop let a caster start a shot on the frame its melee strike expired, and shared boss attacks could also overlap or restart during the facing lock. Gate shared attack starts on the existing commitment and recovery state. Start the ranged cooldown only when an aimed shot commits. Keep the authored King counters and shield openings.
+
+### U-ENEMY-FACING-20261104 | Keep planted shields in place
+
+A frontal hit still gives a braced shield bearer knockback, and encounter retreat can interrupt the planted window. Preserve its position against blocked hits while braced, striking, or recovering. Hold off on leash retreat until then. Keep rear-hit reactions and the Frostfell and Abyss King tactics. Verify front and rear hits, committed turns, and retreat on the existing browser paths.

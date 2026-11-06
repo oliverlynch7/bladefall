@@ -114,6 +114,17 @@ for(let i=0;i<40;i++){
 ok(F.guardPlanted(planted),'shield recovery remains active just before expiry');
 for(let i=0;i<20;i++)tick(planted,rear,1/60);
 ok(!F.guardPlanted(planted)&&Math.abs(planted.yaw)>.2,'shield can pursue again after recovery');
+const CampaignEncounters=require('../public/3d/campaign-encounters.js');
+const battlefield={zone:2,area:0};
+const leashGuard={role:'shielder',kind:'walk',x:0,y:0,z:240,yaw:0,encHome:{x:0,y:0,z:0},encLeash:200};
+const outsideLeash={x:0,y:0,z:300,hp:100};
+let retreatSteps=0;
+const retreat=()=>CampaignEncounters.retreat(battlefield,leashGuard,[outsideLeash],.05,()=>retreatSteps++);
+ok(F.brace(leashGuard)&&!retreat(),'a guard outside its leash finishes its brace before retreating');
+for(let i=0;i<18;i++)tick(leashGuard,outsideLeash,.05);
+ok(retreat()&&retreatSteps===1,'retreat resumes once the brace expires');
+leashGuard.meleeW=.3;
+ok(F.guardPlanted(leashGuard)&&!retreat()&&!leashGuard.encReturning&&retreatSteps===1,'even a guard already returning holds position through a swing');
 const unshielded={x:0,z:0,yaw:0,meleeActive:.02,meleeSerial:1};
 tick(unshielded,rear,.02,()=>unshielded.meleeActive=0);
 ok(!F.guardPlanted(unshielded),'ordinary melee keeps its existing recovery movement');

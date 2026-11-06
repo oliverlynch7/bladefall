@@ -3429,3 +3429,7 @@ The new regression reproduced the unwanted rotation on 2.373.0. The 110 facing c
 ## Shared enemy attack recovery (2.375.0)
 
 116 focused facing checks and 11 related suites passed. Muted Chrome reproduced a Frost Lobber starting a shot on the melee release frame in 2.374.0. In 2.375.0 it waited through the existing recovery and then fired. The Sentinel took 34 damage from the front and 113 from the rear. The Frostfell Shield Officer blocked a frontal hit and took a rear hit late in recovery. The Abyss King held his heading through the summons and the pillar-counter opening, took a rear hit during the opening, and resumed turning afterward. A 2.374.0 save retained its campaign route, level 9 and 413 gold. Co-op verification replayed a host snapshot in one browser.
+
+## Shield footing (2.376.0)
+
+The same shield commitment state controls movement, frontal knockback, retreat and co-op snapshots. Muted Chrome reproduced a frontal knockback impulse of 220 on 2.375.0. The new build gave the braced Sentinel zero frontal impulse and retained the full rear impulse. Chrome verified the Frostfell Shield Officer rear opening and the Abyss King's ward-break and royal guard recoveries. The co-op check replayed host snapshots in one client. An isolated 2.375.0 campaign save retained its level, gold and route. All 119 focused facing checks and 11 related suites passed.

@@ -4093,3 +4093,7 @@ The Abyss King holds his position and heading while his summoned guards fight an
 ### v2.375.0 - Enemy attack recovery
 
 Shared enemies finish their current attack and recovery before committing to the next. A blocked attack attempt leaves the ranged cooldown ready. Shield and Abyss King flank openings were rechecked in muted Chrome. See continuity for evidence.
+
+### v2.376.0 - Shield footing
+
+Shield bearers stay planted when they block a frontal hit during a brace, strike, or recovery. They wait until that commitment ends before returning to their patrol. Rear strikes still cause knockback.

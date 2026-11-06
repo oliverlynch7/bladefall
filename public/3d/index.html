@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2375"></script>
+<script src="./enemy-facing.js?v=2376"></script>
 <script src="./prison-combat.js?v=2369"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1174,7 +1174,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2342"></script>
 <script src="./campaign-elites.js?v=2369"></script>
-<script src="./campaign-encounters.js?v=2359"></script>
+<script src="./campaign-encounters.js?v=2376"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2319"></script>
 <script src="./briar-journey.js?v=2302"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.375.0-enemy-attack-recovery';
+const VERSION3D='2.376.0-shield-footing';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -13810,9 +13810,10 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(e.markT>0&&((src===G.p&&(!e.markOwner||e.markOwner===(MP.active?MP.myId:'solo')))||(guestOwner?.id&&guestOwner.id===e.markOwner)))dmg*=1.4; // Hunter's Mark belongs to its caster
   if(src===G.p&&meta.classId==='warlock'&&(e.warCurseT||0)>0&&(!e.warCurseOwner||e.warCurseOwner===(MP.active?MP.myId:'solo')))dmg*=c2Passive('war_deep')?1.30:1.15;
   if(guestOwner?.cid==='warlock'&&(e.warCurseT||0)>0&&guestOwner.id===e.warCurseOwner)dmg*=hasGuestPerk(guestOwner,'war_deep')?1.30:1.15;
+  let blockedByShield=false;
   if(e.role==='shielder' && src && e.shieldYaw!=null){ const ax=src.x-e.x, az=src.z-e.z, dl=Math.hypot(ax,az)||1;
     const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
-    if(fr>0.4){ dmg*=0.3; if(BFEnemyFacing.brace(e)||Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
+    if(fr>0.4){ blockedByShield=true; dmg*=0.3; if(BFEnemyFacing.brace(e)||Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
       if(e.spec==='shell' && e.shellHp!=null){ e.shellHp-=dmg; const shatter=(el==='ice'||e.chill>0)?2.4:1; e.shellHp-=dmg*(shatter-1);   // chill/shatter cracks the shell faster
         if(e.shellHp<=0){ e.role=null; e.shieldYaw=null; e.shellCracked=1; addText(e.x,e.y+e.h+14,e.z,'SHELL BROKEN!','#bfe6ff'); playFx('frostclink'); burst(e.x,e.y+e.h*0.55,e.z,'#cfeeff',12); } } } }
   if(e.tethered>0){ dmg*=0.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WARDED','#8f52d6'); }   // void-tether buff: allies take less until the tether dies
@@ -13892,7 +13893,8 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(healRatio>0)classHeal(G.p,dealt*healRatio);
   if(G._artCast && G._artCast.hits.length<16 && !G._artCast.hits.includes(e))G._artCast.hits.push(e);
   if(isCampaignAdventure()&&BFCampaignThreat.stagger(e,dealt,kb,G.time)){e.ceState='recover';e.ceClock=(BFCampaignElites.kits[e.ceKind]?.recover||1)*(e.combatRecovery||1);e.ceSerial++;e.meleeW=0;e.meleeActive=0;addText(e.x,e.y+e.h+20,e.z,'STAGGERED','#ffe0a1');}
-  const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.immobile)?0:isCampaignAdventure()?BFCampaignThreat.knockback(e,kb):kb)*(e.boss?0.25:1);   // Stationary targets stay fixed; sparring opponents react like campaign foes.
+  const plantedBlock=blockedByShield&&BFEnemyFacing.guardPlanted(e);
+  const d=Math.max(1,dXZ(e.x,e.z,src.x,src.z)), kf=((e.dummy||e.immobile||plantedBlock)?0:isCampaignAdventure()?BFCampaignThreat.knockback(e,kb):kb)*(e.boss?0.25:1);   // Stationary targets stay fixed; sparring opponents react like campaign foes.
   e.hurtKbX=(e.x-src.x)/d*kf; e.hurtKbZ=(e.z-src.z)/d*kf;
   const tc= mod>1.05?'#9fffa0':(mod<0.95?'#9aa4ad':'#fff');
   addText(e.x,e.y+e.h+10,e.z, dmg+(mod>1.05?'!':(mod<0.95?'·':'')), G._crit?'#ffd24a':tc, false, G._crit?'crit':'dmg');
@@ -17061,7 +17063,7 @@ function updateWorld(dt){
     if(e.dummy)e.yaw=e.fixedYaw??0;else if(mirrorFacing)BFEnemyFacing.mirror(e);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
     e.shotReleaseT=Math.max(0,(e.shotReleaseT||0)-dt);
-    const guardPlanted=e.role==='shielder'&&(mirrorFacing?(e.guardPlanted??e.guardBraced):facingFrame?.guardPlanted||facingFrame?.busy);
+    const guardPlanted=e.role==='shielder'&&(mirrorFacing?(e.guardPlanted??e.guardBraced):facingFrame?.guardPlanted);
     if(guardPlanted)eff=0;
     const encounterReturning=MP.guest()?!!e.encReturning:BFCampaignEncounters.retreat(G,e,encounterPlayers,dt,(dx,dz)=>moveGroundEnemy(e,dx,dz,eff,dt));
     if(encounterReturning){/* Return on real floors with normal HP and collision; no healing/reset exploit. */}

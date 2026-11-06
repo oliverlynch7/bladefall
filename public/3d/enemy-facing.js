@@ -8,7 +8,7 @@ function state(e){
  return saved;
 }
 function bracing(e){return e.role==='shielder'&&memory.get(e)?.brace>0;}
-function guardPlanted(e){return e.role==='shielder'&&(bracing(e)||memory.get(e)?.recover>0);}
+function guardPlanted(e){return e.role==='shielder'&&(bracing(e)||memory.get(e)?.recover>0||!!action(e));}
 function brace(e){
  if(e.role!=='shielder'||e.dummy||e.dead||action(e))return false;
  const saved=state(e);

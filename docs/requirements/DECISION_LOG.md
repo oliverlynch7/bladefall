@@ -2783,3 +2783,7 @@ A shield brace cannot overlap a new melee attack or Siege Knight crush. A block 
 ### U-ENEMY-FACING-20261104 | Ordinary shield recovery
 
 During a shield bearer's existing recovery, keep the body planted and block new attacks until the facing hold ends. The Siege Knight's crush can start again after recovery. Mirror the host's planted state for guests.
+
+### U-ENEMY-FACING-20261104 | Siege Knight co-op commitment
+
+The live build already limits turning and plants shield enemies and the Abyss King during committed actions. The Siege Knight still runs its crush timer independently on guests, which lets the guest see an attack the host has not committed to. Carry the host's warning and release in the existing enemy snapshot. Replay the wave once from the host's strike position, after the guest has seen that warning. Preserve the solo crush timing, shield recovery and the King's arena counters.

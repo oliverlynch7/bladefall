@@ -4079,3 +4079,7 @@ Shield guards finish a brace before starting a new attack. Melee tells show the 
 ### v2.372.0 - Shield recovery
 
 Shield bearers hold their ground after a committed strike so players have time to get behind them. Siege Knights finish recovery before starting another crush.
+
+### 2026-11-05 - v2.373.0 Siege Knight co-op crush
+
+The Siege Knight's warning, facing and crush release now agree for the host and guest. Guests receive the host's strike position and replay a warned strike once.

@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.372.0-shield-recovery';
+const VERSION3D='2.373.0-shield-commitment';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -15753,6 +15753,7 @@ const MP={
       const row=[e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null];
       row[7]={...row[7],role:e.role||null,roleCol:e.roleCol||null,facingYaw:Number.isFinite(e.yaw)?e.yaw:0,shieldYaw:e.role==='shielder'?e.shieldYaw:null};
       if(e.role==='shielder'){row[7].guardBraced=BFEnemyFacing.bracing(e);row[7].guardPlanted=BFEnemyFacing.guardPlanted(e);}
+      if(e.spec==='knightslam')Object.assign(row[7],{hostCrush:true,knightW:e.knightW||0,knightSerial:e.knightSerial||0,knightStrike:e.knightStrike||null});
       if(e.kind==='charger')Object.assign(row[7],{hostCharge:true,chargeSerial:e.chargeSerial||0,windT:e.windT||0,windMax:e.windMax||0,chargeT:e.chargeT||0,teleX:e.teleX||0,teleZ:e.teleZ||0,cdx:e.cdx||0,cdz:e.cdz||0});
       if(e.boss||e.hydraChain)row[7]={...row[7],...BFBossTactics.snapshot(e)};
       if(e.homeBellWave)row[7]={...row[7],homeBellWave:e.homeBellWave,label:e.label,y:e.y};
@@ -17393,6 +17394,12 @@ function releaseEnemyShot(e,p){
   }
   if(cfg.el) SFX.magic(cfg.el); else SFX.shoot(); // arrows thwip, spells cast by element
 }
+function releaseKnightCrush(e,strike){
+  const [x,y,z,dmg]=strike;
+  (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x,y,z,r:18,maxR:170,dmg,life:0,spd:280,col:'#c9d2dc',col2:'#5a6472'});
+  G.shake=Math.min(G.shake+4,9);
+  playFx('heavyhit',0.9);
+}
 function specBehavior(e,dt,p,dirX,dirZ,d,guardPlanted){
   // ERUPTION TOTEM (Emberdeep): stationary vent, periodic fire ring — kill it first
   if(e.spec==='totem'){ e.shootT=(e.shootT==null?1.8:e.shootT)-dt;
@@ -17436,9 +17443,30 @@ function specBehavior(e,dt,p,dirX,dirZ,d,guardPlanted){
     if(d<170){ p.chillAura=Math.min(1,(p.chillAura||0)+dt*1.5);
       if(e.auraT<=0){ e.auraT=0.5; burst(e.x+(Math.random()-0.5)*40,e.y+12,e.z+(Math.random()-0.5)*40,'#bfe8ff',3); } } }
 
-  else if(e.spec==='knightslam'){ e.slamCd=(e.slamCd==null?2.0:e.slamCd)-dt;
-    if(e.knightW>0){ e.knightW-=dt; if(e.knightW<=0){ (G.shockwaves=G.shockwaves||[]).push({fxType:e.type,x:e.x,z:e.z,y:e.y,r:18,maxR:170,dmg:e.dmg*1.5,life:0,spd:280,col:'#c9d2dc',col2:'#5a6472'}); G.shake=Math.min(G.shake+4,9); playFx('heavyhit',0.9); e.slamCd=2.6; } }
-    else if(e.slamCd<=0 && d<120&&!guardPlanted&&!BFEnemyFacing.action(e)){ e.knightW=0.6; addText(e.x,e.y+e.h+8,e.z,'CRUSH','#ffd24a',true); } }
+  else if(e.spec==='knightslam'){
+    if(MP.guest()){
+      if(!e.hostCrush)return;
+      if(e.knightW>0){
+        if(e._knightWarning!==e.knightSerial){e._knightWarning=e.knightSerial;e._knightSeen=0;addText(e.x,e.y+e.h+8,e.z,'CRUSH','#ffd24a',true);}
+        e._knightSeen+=Math.min(dt,e.knightW);
+        e.knightW=Math.max(0,e.knightW-dt);
+      }else if(e.knightStrike&&e._knightRelease!==e.knightSerial){
+        e._knightRelease=e.knightSerial;
+        if(e._knightWarning===e.knightSerial&&e._knightSeen>=.2)releaseKnightCrush(e,e.knightStrike);
+      }
+      return;
+    }
+    e.slamCd=(e.slamCd??2)-dt;
+    if(e.knightW>0){
+      e.knightW=Math.max(0,e.knightW-dt);
+      if(e.knightW===0){e.knightStrike=[e.x,e.y,e.z,e.dmg*1.5];releaseKnightCrush(e,e.knightStrike);e.slamCd=2.6;}
+    }else if(e.slamCd<=0&&d<120&&!guardPlanted&&!BFEnemyFacing.action(e)){
+      e.knightSerial=(e.knightSerial||0)+1;
+      e.knightStrike=null;
+      e.knightW=.6;
+      addText(e.x,e.y+e.h+8,e.z,'CRUSH','#ffd24a',true);
+    }
+  }
 }
 function beamBlocked(e,p){ for(const o of G.obstacles){ if(o.h<40) continue;   // a pillar tall enough to hide behind
   const px=p.x-e.x, pz=p.z-e.z, pl=(px*px+pz*pz)||1, t=((o.x-e.x)*px+(o.z-e.z)*pz)/pl;

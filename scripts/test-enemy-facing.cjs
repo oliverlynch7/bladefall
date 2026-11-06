@@ -121,4 +121,31 @@ for(let i=0;i<projectiles.length;i++){
  const m=markers[i*7],p=projectiles[i];
  ok(delta(Math.atan2(m.x,m.z),Math.atan2(p.vx,p.vz))<1e-8,'each shot lane follows its first warning');
 }
+const knightArena={shockwaves:[],shake:0}, warnings=[];
+let guest=false;
+const knightContext={BFEnemyFacing:F,G:knightArena,MP:{guest:()=>guest},addText:(...args)=>warnings.push(args),playFx:()=>{}};
+vm.runInNewContext(main.slice(main.indexOf('function releaseKnightCrush('),main.indexOf('function beamBlocked(')),knightContext);
+const knight={x:10,y:20,z:30,h:46,yaw:0,dmg:16,spec:'knightslam',role:'shielder',type:'siegeknight',slamCd:0};
+const crushStep=(e,d=40,planted=false)=>knightContext.specBehavior(e,.05,front,0,1,d,planted);
+crushStep(knight,40,true);
+ok(!knight.knightW,'a planted knight cannot begin a crush');
+crushStep(knight);
+ok(knight.knightW===.6&&knight.knightSerial===1,'host starts one crush warning');
+const warningPacket={hostCrush:true,knightW:knight.knightW,knightSerial:knight.knightSerial,knightStrike:null};
+for(let i=0;i<14;i++)crushStep(knight,200);
+ok(knightArena.shockwaves.length===1&&knight.knightW===0,'host releases despite the target leaving the warning');
+const strikePacket={...warningPacket,knightW:0,knightStrike:knight.knightStrike};
+guest=true;
+const replica={...knight,x:60,y:0,z:-50,slamCd:0,knightStrike:null};
+for(let i=0;i<20;i++)crushStep(replica);
+ok(!replica.knightW&&knightArena.shockwaves.length===1,'a guest cannot begin its own warning');
+Object.assign(replica,warningPacket);
+for(let i=0;i<14;i++)crushStep(replica);
+ok(knightArena.shockwaves.length===1,'guest cannot release before the host confirms the strike');
+for(let i=0;i<3;i++){Object.assign(replica,strikePacket);crushStep(replica);}
+const [hostWave,guestWave]=knightArena.shockwaves;
+ok(knightArena.shockwaves.length===2&&JSON.stringify(hostWave)===JSON.stringify(guestWave),'duplicate packets replay one wave at the host strike position');
+const lateGuest={...knight,...strikePacket};
+crushStep(lateGuest);
+ok(knightArena.shockwaves.length===2,'a guest who missed the warning does not take an untelegraphed wave');
 console.log(`Enemy facing: ${checks} checks passed (rates, wrap, locks, recovery, rear contact, authored boss directions, live King cycle, prison gate and guest mirror).`);

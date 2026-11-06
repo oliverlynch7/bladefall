@@ -3411,3 +3411,9 @@ Verified 95 focused facing assertions and adjacent boss and campaign regressions
 Ordinary shield bearers now hold their ground and facing through a committed strike and its existing recovery. A Siege Knight cannot cancel that recovery into a crush. Guests receive the host's planted state and facing.
 
 99 facing assertions and 14 related suites passed. Muted Chrome reproduced the premature crush on 2.371.0. On 2.372.0, the knight held position and facing until recovery finished, then resumed pursuit. A Frostfell officer blocked a frontal hit and took rear damage. The Abyss King held position through the pillar opening and took rear damage. The host-to-guest snapshot path was staged in one browser. A 2.371.0 save retained its level, gold and campaign route.
+
+## Siege Knight co-op crush (2.373.0)
+
+The host owns the knight's warning, facing and release. Guests mirror the warning and apply its wave once at the host's release position after seeing the warning. The live 2.372.0 shield recovery and King counters remain in effect.
+
+106 focused facing checks and 12 related suites passed. In isolated muted Chrome, the actual host update held both the body and shield at their original heading with the player behind. The host packet produced a single guest wave at the reported strike position after its warning. A 2.372.0 save resumed at level 9 with 413 gold in the original campaign area. This staged host-to-guest check used a single browser.

@@ -4109,3 +4109,7 @@ Frostfell's Shield Officer, the Shield Guard in Prison Break, and scripted campa
 ### 2026-11-06 - v2.379.0 guard targeting and commitment
 
 Scripted guards pivot toward the target their encounter selected. A committed attack takes priority over returning to patrol. Verified front and rear damage, the Abyss King's sweep and rear opening, and an older campaign save in muted Chrome.
+
+### 2026-11-06 - v2.380.0 Shared boss footwork
+
+Bosses using the shared combat loop finish their committed move, recover in place, then turn before pursuing a player behind them. This covers repeatable fights that use the shared loop, including the earlier Abyss King variant. The campaign King's arena counters and rear sweep opening remain in place.

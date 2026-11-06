@@ -2812,3 +2812,8 @@ The shared shield and King pursuit checks do not cover the Frostfell Shield Offi
 ### U-ENEMY-FACING-20261104 | Encounter target and patrol priority
 
 Spend the one bounded turn on the target chosen by scripted encounter AI. A return already in progress must yield to a visible attack, and heavy guards must keep their recovery. Check both against the old build and recheck the King's sweep.
+
+
+### U-ENEMY-FACING-20261104 | Shared boss footwork
+
+The browser’s repeatable boss fights can still slide toward a player during a facing lock. Reuse the existing attack and recovery state for pursuit. A boss should finish its committed movement, recover in place, then turn before moving toward a player behind it. Preserve the campaign King’s arena counters.

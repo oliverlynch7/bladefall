@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.379.0-guard-commitment';
+const VERSION3D='2.380.0-boss-footwork';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -17641,10 +17641,11 @@ function updateBoss(e,dt,p,dirX,dirZ,dist,eff){
     if(e.windT<=0){ e.lunge=0.45; G.shake=Math.min(G.shake+5,11); SFX.growl(1); }
   }
   else if(e.lunge>0){ e.lunge-=dt;e.yaw=Math.atan2(e.teleX,e.teleZ); e.x+=(e.teleX||0)*eff*2.6*dt;e.z+=(e.teleZ||0)*eff*2.6*dt; }
-  else {
+  else if(BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,p,Math.PI/2)){
+    // Wait out the commitment and turn before chasing a target behind the boss.
     if(e.kite && dist<210){ e.x-=dirX*eff*0.6*dt; e.z-=dirZ*eff*0.6*dt; }
     else { e.x+=dirX*eff*0.7*dt; e.z+=dirZ*eff*0.7*dt; }
-    if(!e.kite && dist<240 && e.atkTimer<=0&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,p)){
+    if(!e.kite && dist<240 && e.atkTimer<=0&&BFEnemyFacing.aligned(e,p)){
       e.windT=0.85; e.windMax=0.85; [e.teleX,e.teleZ]=BFEnemyFacing.forward(e); e.atkTimer=2.3;
       addText(e.x,e.y+e.h+14,e.z,'!','#ff5a3a',true);
     }

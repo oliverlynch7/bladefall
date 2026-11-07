@@ -3461,3 +3461,8 @@ Muted Chrome reproduced the live 2.381.0 reversal when the shooter crossed the g
 ## Authored enemy recovery facing (2.383.0)
 
 In muted Chrome, Ember and Marble Colossi and the Hollow Marksman rotated during recovery on 2.382.0. On 2.383.0, each held its heading and then turned and attacked. A staged Sentinel took 9 front damage and 28 rear damage. The Frostfell Shield Officer blocked a front strike and took a rear strike. Moving behind the King's sweep avoided all damage, and the rear hit during recovery dealt 42 after a staged arena counter. A separate run exercised a real pillar block and verified the King's stationary recovery and royal guard stance. The isolated pre-change save reloaded at level 9 with 413 gold and the same campaign area. All ten Node suites passed, including 156 facing assertions. No remote co-op session was used.
+
+
+## Ordinary enemy follow-through (2.384.0)
+
+Muted Chrome reproduced 24.19 world units of movement during a Bones enemy's planted recovery on 2.383.0. The Blink Stalker could begin a blink during a melee warning and turned 1.53 radians during a separate blink tell. On 2.384.0 the Bones enemy stayed planted, the Stalker waited until its previous attack finished, and its next blink held its heading and reached its original landing point. The staged Sentinel and Frostfell Shield Officer took more damage from behind. Movement behind the campaign King's sweep avoided damage, and a separate run confirmed the pillar counter, planted royal guard stance, and pursuit after turning. The isolated old save retained level 9, 413 gold, and its campaign checkpoint. All twelve selected Node suites passed, including 161 facing assertions. No live co-op session was used.

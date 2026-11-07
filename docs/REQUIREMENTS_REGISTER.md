@@ -2922,3 +2922,5 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 **Projectile-facing follow-up.** Resolve a directional guard against the side the projectile enters, including if its shooter moves around the target while the shot travels. Preserve attack ownership, King rear-hit distance and arena counters, and the host's authority over co-op damage.
 
 **Recovery-facing follow-up.** Keep the King and shield enemies flankable and stop other authored bosses from tracking while recovering. A guard can hold its stance through small movements in front. Recovering Colossi and the Hollow Marksman reacquire after the recovery timer, and the Marble Colossus still lines its hammer up with a screen.
+
+**Ordinary enemy follow-through.** Keep footwork and heading committed through the shared recovery window, then resume pursuit. A Blink Stalker finishes its current attack before warning for a blink and holds its heading until the warned teleport resolves. Preserve the campaign King’s arena counters and shield guard arcs.

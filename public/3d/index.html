@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2383"></script>
+<script src="./enemy-facing.js?v=2384"></script>
 <script src="./prison-combat.js?v=2378"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.383.0-enemy-recovery';
+const VERSION3D='2.384.0-enemy-follow-through';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -17065,7 +17065,7 @@ function updateWorld(dt){
     if(e.stunT>0||(G._freezeT||0)>0)continue;
     e.shotReleaseT=Math.max(0,(e.shotReleaseT||0)-dt);
     const guardPlanted=e.role==='shielder'&&(mirrorFacing?(e.guardPlanted??e.guardBraced):facingFrame?.guardPlanted);
-    if(guardPlanted)eff=0;
+    if(guardPlanted||facingFrame?.recovering)eff=0;
     const encounterReturning=MP.guest()?!!e.encReturning:BFCampaignEncounters.retreat(G,e,encounterPlayers,dt,(dx,dz)=>moveGroundEnemy(e,dx,dz,eff,dt));
     // Shield bearers pivot before chasing a flank. Guests follow the host's position instead of chasing a different target.
     if(!encounterReturning&&e.role==='shielder'&&(mirrorFacing||!BFEnemyFacing.aligned(e,meleeTarget,Math.PI/2)))eff=0;
@@ -17074,6 +17074,7 @@ function updateWorld(dt){
     if(e.shotW>0){eff=0;e.shotW=Math.max(0,e.shotW-dt);if(e.shotW===0&&e.shotAim){releaseEnemyShot(e,e.shotAim);e.shotAim=null;}}
     const contactOnly=e.dmg>0&&!e.boss&&e.kind!=='charger'&&e.kind!=='goblin';
     if(contactOnly){
+      if(e.meleeActive>0)eff=0; // Stay planted on the release frame that starts recovery.
       e.meleeCd=Math.max(0,(e.meleeCd||0)-dt);e.meleeActive=Math.max(0,(e.meleeActive||0)-dt);
       const mirror=MP.guest()&&e.normalMelee;
       if(e.meleeW>0){
@@ -17082,7 +17083,7 @@ function updateWorld(dt){
         if(e.meleeW===0&&!mirror){e.meleeActive=.18;e.meleeCd=.9*(e.combatRecovery||1);}
       }
       else if(!mirror&&!guardPlanted&&e.meleeCd===0&&d<e.r+(meleeTarget.r||p.r)+(meleeTarget.escortIndex==null?(e.meleeReach??45):10)&&Math.abs(e.y-meleeTarget.y)<75&&galewispHasStrikeClearance(e,meleeTarget)&&enemyMeleeClear(e,meleeTarget)&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,meleeTarget)){e.meleeW=.65;e.meleeSerial=(e.meleeSerial||0)+1;eff=0;}
-      if(e.meleeActive>0||mirror)eff=0;
+      if(mirror)eff=0;
     }
     if(e.role && e.stunT<=0){                            // Phase 11: role behaviors
       if(e.role==='flanker' && d>90){ const s=e._fs||(e._fs=Math.random()<0.5?1:-1), rx=-dirZ*s, rz=dirX*s;
@@ -17098,8 +17099,9 @@ function updateWorld(dt){
           if(n) addText(e.x,e.h+14,e.z,'HEAL','#7de08a'); } }
       if(e.role==='shielder')e.shieldYaw=e.yaw; // Body, visible shield and frontal block share one direction.
     }
+    const wasBlinking=e.blinkFx>0;
     if(e.spec){ specBehavior(e,dt,meleeTarget,dirX,dirZ,d,guardPlanted); }
-    if(e.eruptW>0||e.knightW>0||e.fuseT>0||e.blinkFx>0)eff=0;
+    if(e.eruptW>0||e.knightW>0||e.fuseT>0||wasBlinking||e.blinkFx>0)eff=0;
     if(e.kind==='fly'){ e.bob+=dt*2.4;
       const flyTarget=e.dive&&isCampaignAdventure()?meleeTarget:p;
       const perch=galewispCoverPerch(e,flyTarget);
@@ -17412,7 +17414,7 @@ function specBehavior(e,dt,p,dirX,dirZ,d,guardPlanted){
   // BLINK-STALKER (The Abyss): telegraphed teleport behind you
   else if(e.spec==='blink'){ e.blinkT=(e.blinkT==null?2.2:e.blinkT)-dt;
     if(e.blinkFx>0){ e.blinkFx-=dt; if(e.blinkFx<=0){ const bx=e.blinkTarget?.x??e.x, bz=e.blinkTarget?.z??e.z; burst(e.x,e.y+e.h*0.5,e.z,'#a86fe0',8); e.x=bx; e.z=bz; e.sx=bx; e.sz=bz; burst(bx,e.y+e.h*0.5,bz,'#a86fe0',10); e.blinkT=2.6+Math.random()*1.6; } }
-    else if(e.blinkT<=0 && d>110 && d<560){ e.blinkFx=.65;e.blinkTarget={x:p.x-dirX*72,z:p.z-dirZ*72}; addText(e.x,e.y+e.h+8,e.z,'blink','#c49bff',true); } }
+    else if(e.blinkT<=0 && d>110 && d<560&&BFEnemyFacing.canCommit(e)){ e.blinkFx=.65;e.blinkTarget={x:p.x-dirX*72,z:p.z-dirZ*72}; addText(e.x,e.y+e.h+8,e.z,'blink','#c49bff',true); } }
   // VOID TETHER (The Abyss): links to nearby allies, buffing them until it dies
   else if(e.spec==='tether'){ e.tetherList=[]; e.tetherPulse=(e.tetherPulse||0)+dt;
     for(const o of G.enemies){ if(o===e||o.dead||!o.active||o.boss) continue;

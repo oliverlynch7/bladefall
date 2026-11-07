@@ -17,6 +17,19 @@ for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'
  ok(delta(shield.yaw,Math.PI/2)<.14,'a shield still pivots when the player moves to the side');
 }
 const held={x:0,z:0,yaw:0,staggerT:1};tick(held,{x:0,z:-100},.05,()=>held.yaw=Math.PI);ok(held.yaw===0,'stagger cannot rotate');
+const blink={x:0,z:0,yaw:0,blinkFx:.65};
+const behind={x:0,z:-120};
+for(let i=0;i<12;i++)tick(blink,behind,.05);
+ok(blink.yaw===0&&!F.canCommit(blink),'a warned blink holds its heading and cannot be replaced');
+tick(blink,behind,.05,()=>blink.blinkFx=0);
+ok(F.holdsRecovery(blink)&&!F.canCommit(blink),'a blink release starts the shared recovery');
+for(let i=0;i<7;i++)tick(blink,behind,.05);
+ok(blink.yaw===0&&F.holdsRecovery(blink),'shared recovery remains visible to patrol logic');
+const lastRecovery=F.begin(blink,behind,.06);
+ok(lastRecovery.recovering&&F.holdsRecovery(blink),'pursuit and patrol still wait on the final recovery frame');
+F.finish(blink,.06,lastRecovery);
+tick(blink,behind,.05);
+ok(blink.yaw!==0&&!F.holdsRecovery(blink),'a stalker can turn again after it recovers');
 for(const attack of [{meleeW:.5},{meleeActive:.1},{knightW:.6}]){
  const committed={x:0,z:0,yaw:0,role:'shielder',...attack};
  ok(!F.brace(committed)&&!F.bracing(committed),'a frontal block does not interrupt or overlap an existing attack');

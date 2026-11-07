@@ -67,11 +67,14 @@ function action(e){
   if(Number.isFinite(yaw))return {key:'shot',yaw};
   return vector('shot',e.shotAim?e.shotAim.x-e.x:null,e.shotAim?e.shotAim.z-e.z:null);
  }
+ if(e.blinkFx>0)return vector('blink',null,null);
  if(e.pinT>0||e.slamW>0||e.novaW>0||e.poundW>0||e.knightW>0||e.eruptW>0||e.fuseT>0)return vector('planted',null,null);
  return null;
 }
 // Bracket each host AI step, so legacy yaw assignments cannot bypass the turn limit.
 function holdsRecovery(e){
+ const saved=memory.get(e);
+ if(saved?.frame?.recovering||saved?.recover>0)return true;
  if(e.frostOfficer)return e.offState==='recover';
  if(e.prisonFoe)return e.pcState==='recover';
  if(e.ceKind)return e.ceState==='recover';
@@ -83,7 +86,7 @@ function holdsRecovery(e){
  return !!e.finalKing&&(e.akState==='adds'||e.akState==='recover'&&e.akClock>0);
 }
 function begin(e,target,dt){
- const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,guardPlanted:guardPlanted(e),held:saved.recover>0||bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
+ const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,guardPlanted:guardPlanted(e),recovering:saved.recover>0,held:bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
  const elapsed=Math.max(0,dt);
  saved.recover=Math.max(0,saved.recover-elapsed);
  saved.brace=Math.max(0,saved.brace-elapsed);

@@ -2825,3 +2825,7 @@ Use the same living party target for facing, pursuit, and choosing a new attack 
 ### U-ENEMY-FACING-20261104 | Projectile approach side
 
 The live hit pipeline replaces player projectiles with the shooter's current position before testing the shield or rear opening. Separate the shot's incoming side from its owner. Check entry side against the host's committed yaw, keep the King's existing close-range gate, and verify frontal and rear impacts with the shooter on the opposite side.
+
+### U-ENEMY-FACING-20261104 | Ordinary enemy follow-through
+
+Use the shared recovery timer to gate pursuit and patrol return as well as turning. Treat the Blink Stalker’s warning as a commitment and preserve its selected landing point. Verify the live shield and King behavior alongside the changed attack paths.

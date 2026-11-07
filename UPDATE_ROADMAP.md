@@ -4125,3 +4125,8 @@ Directional shields and rear openings now use the projectile's incoming side. Co
 ### 2026-11-07 - v2.383.0: enemy recovery and shield facing
 
 Shield bearers hold their heading through small movements in front. The Hollow Marksman and both Colossi keep their facing through recovery, then turn before starting their next attack. Authored melee and spell encounters also hold their heading through recovery. The Marble Colossus still lines up its hammer for the screen counter.
+
+
+### 2026-11-07 - v2.384.0 Enemy follow-through
+
+Ordinary enemies finish their recovery before stepping toward a player or back to patrol. Blink Stalkers finish one attack at a time and hold their heading through the blink warning and recovery. Shield flanks and the Abyss King's arena counters remain available.

@@ -2924,3 +2924,5 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 **Recovery-facing follow-up.** Keep the King and shield enemies flankable and stop other authored bosses from tracking while recovering. A guard can hold its stance through small movements in front. Recovering Colossi and the Hollow Marksman reacquire after the recovery timer, and the Marble Colossus still lines its hammer up with a screen.
 
 **Ordinary enemy follow-through.** Keep footwork and heading committed through the shared recovery window, then resume pursuit. A Blink Stalker finishes its current attack before warning for a blink and holds its heading until the warned teleport resolves. Preserve the campaign King’s arena counters and shield guard arcs.
+
+**Heavy pivot anticipation.** A shield bearer or Abyss King briefly holds its heading when a target enters its rear quarter before beginning the existing bounded turn. The turn delay cancels when the target returns to the front. Keep existing committed attacks, shield arcs and arena counters.

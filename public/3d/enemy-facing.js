@@ -1,10 +1,10 @@
 /* Facing is combat state: bodies, guards and committed attack directions agree. */
 (function(root){'use strict';
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
-const braceTime=.85,braceInterval=2.4,meleeArc=1.15;
+const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24;
 function state(e){
  let saved=memory.get(e);
- if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0};memory.set(e,saved);}
+ if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:0,pivoting:false};memory.set(e,saved);}
  return saved;
 }
 function bracing(e){return e.role==='shielder'&&memory.get(e)?.brace>0;}
@@ -23,9 +23,21 @@ function turn(e,dx,dz,dt){
  const yaw=Number.isFinite(e.yaw)?e.yaw:0,frame=memory.get(e)?.frame;
  if(frame&&(frame.turned||frame.busy||frame.held))return yaw;
  if(!(Math.hypot(dx,dz)>.001))return yaw;
- const goal=Math.atan2(dx,dz);
+ const goal=Math.atan2(dx,dz),offset=Math.abs(wrap(goal-yaw));
+ // Heavy enemies set their feet before making a large turn. The wait is paid once
+ // per pivot and is cancelled if the target comes back into view.
+ if(heavy(e)||e.finalKing||e.type==='king'||e.type==='tyrant'){
+  const saved=state(e);
+  if(offset<=Math.PI/2){saved.pivoting=false;saved.pivotWait=0;}
+  else if(offset>=Math.PI*2/3&&!saved.pivoting){saved.pivoting=true;saved.pivotWait=pivotAnticipation;}
+  if(saved.pivotWait>0){
+   saved.pivotWait=Math.max(0,saved.pivotWait-Math.max(0,dt));
+   if(frame){frame.turned=true;frame.pivotHeld=true;}
+   return yaw;
+  }
+ }
  // A raised shield need not follow every small step within its front arc.
- if((e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield')&&Math.abs(wrap(goal-yaw))<.14)return yaw;
+ if((e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield')&&offset<.14)return yaw;
  e.yaw=angle(frame?.yaw??yaw,goal,dt,rate(e));
  if(frame){frame.turned=true;frame.approachYaw=e.yaw;}
  return e.yaw;
@@ -101,7 +113,7 @@ function finish(e,dt,frame,returning=false){
  if(frame.busy&&!current)saved.recover=Math.max(saved.recover,(heavy(e)||e.boss) ? .7 : .4);
  let goal=frame.yaw;
  if(current){if(saved.key!==current.key){saved.key=current.key;saved.aim=frame.approachYaw;}goal=current.yaw??saved.aim;if(current.yaw!=null)saved.aim=current.yaw;}
- else{saved.key=null;if(!frame.held&&!frame.busy)goal=returning||e.kind==='goblin'?e.yaw:frame.approachYaw;}
+ else{saved.key=null;if(!frame.held&&!frame.busy&&!frame.pivotHeld)goal=returning||e.kind==='goblin'?e.yaw:frame.approachYaw;}
  e.yaw=angle(frame.yaw,goal,dt,rate(e));if(e.role==='shielder')e.shieldYaw=e.yaw;
 }
 function mirror(e){if(!Number.isFinite(e.facingYaw))return false;e.yaw=e.facingYaw;if(e.role==='shielder')e.shieldYaw=Number.isFinite(e.shieldYaw)?e.shieldYaw:e.yaw;return true;}

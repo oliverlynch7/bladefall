@@ -2829,3 +2829,7 @@ The live hit pipeline replaces player projectiles with the shooter's current pos
 ### U-ENEMY-FACING-20261104 | Ordinary enemy follow-through
 
 Use the shared recovery timer to gate pursuit and patrol return as well as turning. Treat the Blink Stalker’s warning as a commitment and preserve its selected landing point. Verify the live shield and King behavior alongside the changed attack paths.
+
+### U-ENEMY-FACING-20261104 | Heavy pivot anticipation
+
+Keep the existing attack and guard locks. During pursuit, a shield bearer or Abyss King that loses the player to its rear quarter should plant briefly before turning. Measure the hold from the first frame behind the enemy, then let it turn normally and resume pursuit. A player who returns to the front cancels the pivot. Preserve the campaign ward counters and host-owned facing.

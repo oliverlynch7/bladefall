@@ -4130,3 +4130,7 @@ Shield bearers hold their heading through small movements in front. The Hollow M
 ### 2026-11-07 - v2.384.0 Enemy follow-through
 
 Ordinary enemies finish their recovery before stepping toward a player or back to patrol. Blink Stalkers finish one attack at a time and hold their heading through the blink warning and recovery. Shield flanks and the Abyss King's arena counters remain available.
+
+### v2.385.0 - Heavy enemy pivots
+
+Shield bearers and the Abyss King plant briefly before pivoting toward a player who slips behind them. Attacks keep their original aim through the strike and recovery, and the King still rewards his arena counters.

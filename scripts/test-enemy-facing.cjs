@@ -16,6 +16,19 @@ for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'
  for(let i=0;i<20;i++)tick(shield,{x:100,z:0},.05);
  ok(delta(shield.yaw,Math.PI/2)<.14,'a shield still pivots when the player moves to the side');
 }
+for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true},{type:'king',boss:true},{type:'tyrant',boss:true}]){
+ for(const hz of [30,60,120]){
+  const e={x:0,z:0,yaw:0,...props},rear={x:0,z:-100},dt=1/hz;
+  for(let i=0;i<Math.ceil(.24*hz);i++)tick(e,rear,dt,()=>F.turn(e,0,-100,dt));
+  ok(e.yaw===0,'a heavy enemy holds its facing before a rear pivot at '+hz+' Hz');
+  for(let i=0;i<3;i++)tick(e,rear,dt);
+  ok(delta(e.yaw,0)>0&&delta(e.yaw,0)<=F.rate(e)*dt*3+1e-8,'the pivot resumes at its bounded rate');
+ }
+}
+const pivot={x:0,z:0,yaw:0,role:'shielder'};
+tick(pivot,{x:0,z:-100},.05);
+tick(pivot,{x:100,z:100},.05);
+ok(pivot.yaw>0,'returning into view cancels the delay immediately');
 const held={x:0,z:0,yaw:0,staggerT:1};tick(held,{x:0,z:-100},.05,()=>held.yaw=Math.PI);ok(held.yaw===0,'stagger cannot rotate');
 const blink={x:0,z:0,yaw:0,blinkFx:.65};
 const behind={x:0,z:-120};
@@ -39,7 +52,7 @@ ok(F.brace(braced)&&F.bracing(braced),'a frontal block can start a shield brace'
 for(let i=0;i<15;i++)tick(braced,{x:0,z:-100},.05,()=>braced.yaw=Math.PI);
 ok(braced.yaw===0&&braced.shieldYaw===0,'body and shield stay planted late in the brace');
 ok(!F.brace(braced),'blocking again does not refresh the brace');
-for(let i=0;i<7;i++)tick(braced,{x:0,z:-100},.05);
+for(let i=0;i<12;i++)tick(braced,{x:0,z:-100},.05);
 ok(!F.bracing(braced)&&delta(braced.yaw,0)>.2,'shield bearer resumes bounded turning');
 ok(!F.brace(braced),'the same opponent cannot immediately restart the brace');
 for(let i=0;i<30;i++)tick(braced,{x:0,z:-100},.05);
@@ -51,7 +64,7 @@ const normalRecovery={...king,akState:'recover',akClock:2.2,yaw:0,akEnvSeq:0};
 const distantRear={...rear,z:-450};
 for(let i=0;i<40;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
 ok(normalRecovery.akState==='recover'&&normalRecovery.yaw===0&&normalRecovery.z===0,'normal King recovery holds body and position');
-for(let i=0;i<10;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
+for(let i=0;i<15;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
 ok(normalRecovery.akState==='approach'&&delta(normalRecovery.yaw,0)>.2&&normalRecovery.z===0,'King turns in place to find the player after normal recovery');
 for(let i=0;i<15;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
 ok(normalRecovery.z<0,'King advances when the player is back in front');
@@ -67,7 +80,7 @@ ok(summoningKing.akState==='adds'&&delta(summoningKing.yaw,0)<1e-8&&summoningKin
 royalGuards=0;
 for(let i=0;i<35;i++)summonedTick(distantRear);
 ok(summoningKing.akState==='recover'&&delta(summoningKing.yaw,0)<1e-8,'King stays planted through recovery after the guards fall');
-for(let i=0;i<10;i++)summonedTick(distantRear);
+for(let i=0;i<15;i++)summonedTick(distantRear);
 ok(summoningKing.akState==='approach'&&delta(summoningKing.yaw,0)>.2&&summoningKing.z===0,'King pivots toward the player once the stance and recovery end');
 for(let i=0;i<15;i++)summonedTick(distantRear);
 ok(summoningKing.z<0,'King resumes forward pursuit after the stance');
@@ -102,7 +115,7 @@ for(let i=0;i<32;i++)officerTick(rear);
 ok(officer.offState==='recover'&&delta(officer.yaw,0)<1e-8,'shield stays planted late in recovery');
 ok(Tactics.damage(cavern,officer,front,10)===0,'front stays blocked after a rear hit');
 ok(Tactics.damage(cavern,officer,rear,10)===18,'rear remains open late in recovery');
-for(let i=0;i<15;i++)officerTick(rear);
+for(let i=0;i<20;i++)officerTick(rear);
 ok(officer.offState==='hunt'&&delta(officer.yaw,0)>.2,'shield reacquires the target while hunting');
 for(const [guardRole,state,next] of [
  [{prisonFoe:'prison_guard'},'pcState','approach'],
@@ -112,7 +125,7 @@ for(const [guardRole,state,next] of [
  const e={x:0,z:0,yaw:0,...guardRole,[state]:'recover'};
  for(let i=0;i<22;i++)tick(e,rear,.05);
  ok(delta(e.yaw,0)<1e-8,'guard keeps its direction throughout recovery');
- e[state]=next;tick(e,rear,.05);
+ e[state]=next;for(let i=0;i<6;i++)tick(e,rear,.05);
  ok(delta(e.yaw,0)>.05,'guard turns again after recovery');
 }
 const Furnace=require('../public/3d/furnace-colossus.js'),Marble=require('../public/3d/marble-guardian.js');
@@ -154,7 +167,7 @@ const pursuitFixtures=[
   (e,p)=>Elites.step(e,.05,p,100)]
 ];
 for(const [e,step] of pursuitFixtures){
- for(let i=0;i<12;i++)tick(e,farRear,.05,()=>step(e,farRear));
+ for(let i=0;i<17;i++)tick(e,farRear,.05,()=>step(e,farRear));
  ok(e.z===0&&Math.abs(e.yaw)>.9,'an authored guard pivots in place to reacquire a flank');
  for(let i=0;i<20;i++)tick(e,farRear,.05,()=>step(e,farRear));
  ok(e.z< -5,'the authored guard advances after facing the player');
@@ -174,7 +187,7 @@ ok(exposed.akState==='recover'&&exposed.z===0&&delta(exposed.yaw,0)<1e-8,'counte
 ok(Tactics.rule({},exposed,farRear).factor===3,'counter still opens the royal ward');
 for(let i=0;i<12&&exposed.akState==='recover';i++)exposedTick();
 ok(exposed.akState==='approach'&&Tactics.rule({},exposed,farRear).factor===0,'ward closes before reacquisition');
-exposedTick();
+for(let i=0;i<6;i++)exposedTick();
 ok(exposed.z===0&&delta(exposed.yaw,0)>.05,'king pivots in place after the opening');
 for(let i=0;i<17;i++)exposedTick();
 ok(exposed.z<0,'king advances once he faces the player again');
@@ -188,7 +201,7 @@ for(let i=0;i<40;i++){
  assert(frame.guardPlanted&&planted.yaw===0,'shield stays planted through the full recovery window');
 }
 ok(F.guardPlanted(planted),'shield recovery remains active just before expiry');
-for(let i=0;i<20;i++)tick(planted,rear,1/60);
+for(let i=0;i<28;i++)tick(planted,rear,1/60);
 ok(!F.guardPlanted(planted)&&Math.abs(planted.yaw)>.2,'shield can pursue again after recovery');
 const CampaignEncounters=require('../public/3d/campaign-encounters.js');
 const battlefield={zone:2,area:0};

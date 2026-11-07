@@ -4121,3 +4121,7 @@ Bosses using the shared combat loop turn, pursue, and choose attacks against the
 ### 2026-11-06 - v2.382.0 Projectile flanks
 
 Directional shields and rear openings now use the projectile's incoming side. Co-op guests see the result confirmed by the host. The King's close-range rear opening still requires the arena counter for that phase.
+
+### 2026-11-07 - v2.383.0: enemy recovery and shield facing
+
+Shield bearers hold their heading through small movements in front. The Hollow Marksman and both Colossi keep their facing through recovery, then turn before starting their next attack. Authored melee and spell encounters also hold their heading through recovery. The Marble Colossus still lines up its hammer for the screen counter.

@@ -2920,3 +2920,5 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 **Repeatable boss follow-up.** Facing, movement, and attack selection use the same living party target. The shared Marksman finishes its marked shot and recovery before turning or moving again. The shared Frost Sorcerer waits out a committed attack before blinking.
 
 **Projectile-facing follow-up.** Resolve a directional guard against the side the projectile enters, including if its shooter moves around the target while the shot travels. Preserve attack ownership, King rear-hit distance and arena counters, and the host's authority over co-op damage.
+
+**Recovery-facing follow-up.** Keep the King and shield enemies flankable and stop other authored bosses from tracking while recovering. A guard can hold its stance through small movements in front. Recovering Colossi and the Hollow Marksman reacquire after the recovery timer, and the Marble Colossus still lines its hammer up with a screen.

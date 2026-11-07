@@ -8,7 +8,14 @@ ok(delta(F.angle(Math.PI-.01,-Math.PI+.01,.016,1),Math.PI-.01)<.017,'wrap takes 
 const guard={x:0,z:0,yaw:0,role:'shielder',meleeW:.5,meleeSerial:1};
 for(let i=0;i<30;i++)tick(guard,{x:0,z:-80},.016,()=>guard.yaw=Math.PI);
 ok(delta(guard.yaw,0)<1e-8,'melee body and shield remain committed');ok(guard.shieldYaw===guard.yaw,'shield agrees with body');ok(!F.contact(guard,{x:0,z:-20}),'no ordinary melee contact behind');ok(F.contact(guard,{x:0,z:20}),'forward melee still works');
-tick(guard,{x:0,z:-80},.016,()=>guard.meleeW=0);for(let i=0;i<35;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,0)<1e-8,'heavy recovery gives a real rear opening');for(let i=0;i<150;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,Math.PI)<.1,'guard eventually reacquires player');
+tick(guard,{x:0,z:-80},.016,()=>guard.meleeW=0);for(let i=0;i<35;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,0)<1e-8,'heavy recovery gives a real rear opening');for(let i=0;i<150;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,Math.PI)<.14,'guard eventually reacquires player');
+for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'}]){
+ const shield={x:0,z:0,yaw:0,...props};
+ for(let i=0;i<60;i++)tick(shield,{x:12*Math.sin(i),z:100});
+ ok(shield.yaw===0,'a shield holds its heading through small movements in front');
+ for(let i=0;i<20;i++)tick(shield,{x:100,z:0},.05);
+ ok(delta(shield.yaw,Math.PI/2)<.14,'a shield still pivots when the player moves to the side');
+}
 const held={x:0,z:0,yaw:0,staggerT:1};tick(held,{x:0,z:-100},.05,()=>held.yaw=Math.PI);ok(held.yaw===0,'stagger cannot rotate');
 for(const attack of [{meleeW:.5},{meleeActive:.1},{knightW:.6}]){
  const committed={x:0,z:0,yaw:0,role:'shielder',...attack};
@@ -94,6 +101,31 @@ for(const [guardRole,state,next] of [
  ok(delta(e.yaw,0)<1e-8,'guard keeps its direction throughout recovery');
  e[state]=next;tick(e,rear,.05);
  ok(delta(e.yaw,0)>.05,'guard turns again after recovery');
+}
+const Furnace=require('../public/3d/furnace-colossus.js'),Marble=require('../public/3d/marble-guardian.js');
+for(const [props,key,step] of [
+ [{furnaceColossus:true},'fc',(e,p)=>Furnace.step(e,.05,p,{enemies:[]})],
+ [{marbleGuardian:true,mcScreens:[1,0,0],mcUsed:[0,0,0]},'mc',(e,p)=>Marble.step(e,.05,p)]
+]){
+ const e={x:0,y:0,z:0,yaw:0,hp:100,maxHp:100,boss:true,...props,
+  [key+'State']:'recover',[key+'Clock']:1,[key+'Beat']:0,[key+'Seq']:0,[key+'Exposed']:1};
+ const side={x:-650,z:0,y:0,hp:100};
+ for(let i=0;i<16;i++)tick(e,side,.05,()=>step(e,side));
+ ok(e.yaw===0&&e[key+'State']==='recover','colossus does not track a flank during recovery');
+ for(let i=0;i<40&&e[key+'State']!=='wind';i++)tick(e,side,.05,()=>step(e,side));
+ ok(e[key+'State']==='wind'&&e.yaw<-.9,'colossus turns and starts a new attack after recovery');
+ if(key==='mc')ok(Marble.deflector(e)===0,'a hammer reacquired from the flank still intercepts the active screen');
+}
+for(const props of [
+ {prisonFoe:'prison_pike',pcState:'recover'},
+ {ceKind:'cliff_lunge',ceState:'recover',campaignRole:'runner'},
+ {frostOfficer:'spear',offState:'recover'},
+ {fallenDuel:true,fallState:'recover'},
+ {bruteOrchard:true,bruteState:'recover'}
+]){
+ const e={x:0,z:0,yaw:0,...props};
+ tick(e,rear,.05);
+ ok(e.yaw===0,'authored enemy does not rotate during its recovery');
 }
 const exposed={...king,x:0,y:0,z:0,yaw:0,akKind:'line',akState:'strike',akClock:.01,akSeq:10,akEnvSeq:10,akEnvPhase:1};
 const farRear={...rear,z:-550};

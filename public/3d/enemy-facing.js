@@ -23,7 +23,10 @@ function turn(e,dx,dz,dt){
  const yaw=Number.isFinite(e.yaw)?e.yaw:0,frame=memory.get(e)?.frame;
  if(frame&&(frame.turned||frame.busy||frame.held))return yaw;
  if(!(Math.hypot(dx,dz)>.001))return yaw;
- e.yaw=angle(frame?.yaw??yaw,Math.atan2(dx,dz),dt,rate(e));
+ const goal=Math.atan2(dx,dz);
+ // A raised shield need not follow every small step within its front arc.
+ if((e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield')&&Math.abs(wrap(goal-yaw))<.14)return yaw;
+ e.yaw=angle(frame?.yaw??yaw,goal,dt,rate(e));
  if(frame){frame.turned=true;frame.approachYaw=e.yaw;}
  return e.yaw;
 }
@@ -69,9 +72,14 @@ function action(e){
 }
 // Bracket each host AI step, so legacy yaw assignments cannot bypass the turn limit.
 function holdsRecovery(e){
- if(e.frostOfficer==='shield')return e.offState==='recover';
- if(e.prisonFoe==='prison_guard')return e.pcState==='recover';
- if(e.ceKind&&(e.briarRole==='guard'||e.campaignRole==='guard'))return e.ceState==='recover';
+ if(e.frostOfficer)return e.offState==='recover';
+ if(e.prisonFoe)return e.pcState==='recover';
+ if(e.ceKind)return e.ceState==='recover';
+ if(e.fallenDuel)return e.fallState==='recover';
+ if(e.bruteOrchard)return e.bruteState==='recover'||e.bruteState==='stagger';
+ if(e.marksmanCrossing)return (e.markState==='recover'&&e.markClock>0)||e.markState==='relocate'||e.markState==='glide';
+ if(e.marbleGuardian)return e.mcState==='recover'&&e.mcClock>0;
+ if(e.furnaceColossus)return e.fcState==='recover'&&e.fcClock>0;
  return !!e.finalKing&&(e.akState==='adds'||e.akState==='recover'&&e.akClock>0);
 }
 function begin(e,target,dt){

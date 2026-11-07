@@ -3457,3 +3457,7 @@ In muted Chrome, the shared King faced the nearer teammate but failed to start a
 ## Projectile flank detection (2.382.0)
 
 Muted Chrome reproduced the live 2.381.0 reversal when the shooter crossed the guard before impact: 34 rear damage and 112 front damage. With the fix the rear did 112 and the front did 34, both solo and through staged guest hit packets and host receipts. A player moving behind the campaign King's warning took zero from the sweep and landed a 42-damage rear hit during recovery after a staged ward counter. A 2.381.0 save retained level 9, 413 gold and its campaign route. Eight Node suites passed, including 140 facing checks. Co-op packets were exercised in one browser.
+
+## Authored enemy recovery facing (2.383.0)
+
+In muted Chrome, Ember and Marble Colossi and the Hollow Marksman rotated during recovery on 2.382.0. On 2.383.0, each held its heading and then turned and attacked. A staged Sentinel took 9 front damage and 28 rear damage. The Frostfell Shield Officer blocked a front strike and took a rear strike. Moving behind the King's sweep avoided all damage, and the rear hit during recovery dealt 42 after a staged arena counter. A separate run exercised a real pillar block and verified the King's stationary recovery and royal guard stance. The isolated pre-change save reloaded at level 9 with 413 gold and the same campaign area. All ten Node suites passed, including 156 facing assertions. No remote co-op session was used.

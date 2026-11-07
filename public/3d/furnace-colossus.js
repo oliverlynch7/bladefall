@@ -26,8 +26,9 @@ function step(e,dt,p,a){if(!alive(e))return;dt=Math.min(.05,Math.max(0,dt));e.fc
  if(!e.fcRepair&&e.hp<e.maxHp*.55){e.fcRepair=true;a.repair?.();}
  // One limited crew can repair at most eight percent of maximum health in total.
  if(e.fcRepair&&(e._fcHealed||0)<e.maxHp*.08&&a.enemies.some(q=>q.furnaceRepair&&alive(q))){const d=Math.min(e.maxHp*.003*dt,e.maxHp*.08-(e._fcHealed||0));e.hp=Math.min(e.maxHp,e.hp+d);e._fcHealed=(e._fcHealed||0)+d;}
- if(e.fcState==='recover')facing?.turn(e,p.x-e.x,p.z-e.z,dt);if(e.fcClock)return;
- if(e.fcState==='recover'){if(facing&&!facing.aligned(e,p)){e.fcClock=.1;return;}
+ if(e.fcClock)return;
+ if(e.fcState==='recover'){
+  facing.turn(e,p.x-e.x,p.z-e.z,dt);if(!facing.aligned(e,p))return;
   e.fcBeat++;e.fcKind=e.fcBeat%3===0?'sweep':e.fcBeat%3===1?'slam':'vents';e.fcState='wind';e.fcClock=e.fcKind==='sweep'?1.8:1.5;e.fcX=p.x;e.fcZ=p.z;e.fcY=p.y;[e.fcDX,e.fcDZ]=facing.forward(e);e.slamW=e.fcClock;a.cue?.('wind');return;
  }
  if(e.fcState==='wind'){e.fcState='strike';e.fcClock=.45;e.fcSeq++;e.slamW=0;e.atkT=.45;a.cue?.('strike');return;}

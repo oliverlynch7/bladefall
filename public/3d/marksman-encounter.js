@@ -7,11 +7,13 @@ const fields=['marksmanCrossing','markState','markClock','markMoved','markFromX'
 function enter(e,s,t){e.markState=s;e.markClock=t;}
 function step(e,dt,p,a){if(e.dead||e.hp<=0)return;dt=Math.min(.05,Math.max(0,dt));if(!e.markState){enter(e,'recover',1.8);e.markTurns=0;e.markMoved=false;}e.markClock=Math.max(0,e.markClock-dt);e.markAttack=Math.max(0,(e.markAttack||0)-dt);e.markExposed=Math.max(0,(e.markExposed||0)-dt);
  if(e.markState==='glide'){const t=1-e.markClock/2.4,n=nests[1];e.x=e.markFromX+(n.x-e.markFromX)*t;e.z=e.markFromZ+(n.z-e.markFromZ)*t;e.y=e.markFromY+(n.y-e.markFromY)*t+Math.sin(t*Math.PI)*180;if(!e.markClock){e.untargetable=false;enter(e,'recover',3.2);}return;}
- const n=nests[e.markMoved?1:0];e.x=n.x;e.z=n.z;e.y=n.y;if(e.markState!=='aim'&&!(e.markAttack>0))facing?.turn(e,p.x-e.x,p.z-e.z,dt);
+ const n=nests[e.markMoved?1:0];e.x=n.x;e.z=n.z;e.y=n.y;
  if(e.markState==='relocate'){if(!e.markClock){e.markFromX=e.x;e.markFromZ=e.z;e.markFromY=e.y;e.markMoved=true;e.phase=2;e.untargetable=true;a.reinforce();enter(e,'glide',2.4);}return;}
  if(e.markState==='aim'){e.yaw=Math.atan2(e.markX-e.x,e.markZ-e.z);if(!e.markClock){e.markAttack=.28;a.fire({x:e.markX,z:e.markZ,y:e.markY,h:e.markH});enter(e,'recover',e.markExposed>0?4:e.markMoved?1.45:1.8);}return;}
  if(!e.markMoved&&e.hp<=Math.ceil(e.maxHp*.55)){enter(e,'relocate',1.5);a.tell('She is moving to the rear nest. Guards are coming up the east path!');return;}
- if(!e.markClock&&facing.aligned(e,p,.08)){const distance=Math.hypot(p.x-e.x,p.z-e.z),[dx,dz]=facing.forward(e);e.markTurns++;e.markX=e.x+dx*distance;e.markZ=e.z+dz*distance;e.markY=p.y;e.markH=p.h||54;enter(e,'aim',1.25);a.cue();}
+ if(e.markClock||e.markAttack>0)return;
+ facing.turn(e,p.x-e.x,p.z-e.z,dt);
+ if(facing.aligned(e,p,.08)){const distance=Math.hypot(p.x-e.x,p.z-e.z),[dx,dz]=facing.forward(e);e.markTurns++;e.markX=e.x+dx*distance;e.markZ=e.z+dz*distance;e.markY=p.y;e.markH=p.h||54;enter(e,'aim',1.25);a.cue();}
 }
 function snapshot(e){return Object.fromEntries(fields.map(k=>[k,e[k]??0]));}
 function build(a){const {G,seg,plat,col,spawn}=a;G._scapeTable='MARKSMAN_CROSSING';G.vertical=true;G.haz=null;G.spireRY=null;G.marksmanArena={walks:{},cover:[],supports:[],seen:false};

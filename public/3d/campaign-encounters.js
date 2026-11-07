@@ -135,7 +135,7 @@ function retreat(G,e,players,dt,move){
  if(!e.encHome)home(e);
  const facing=root.BFEnemyFacing;
  // A visible attack takes priority even if a patrol return was already in progress.
- if(facing?.action(e)||facing?.guardPlanted(e)||facing?.holdsRecovery(e)||root.BFCampaignElites?.dangerous(e)){
+ if(facing?.action(e)||facing?.pivoting(e)||facing?.guardPlanted(e)||facing?.holdsRecovery(e)||root.BFCampaignElites?.dangerous(e)){
   e.encReturning=false;
   return false;
  }

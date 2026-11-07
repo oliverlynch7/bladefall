@@ -29,6 +29,24 @@ const pivot={x:0,z:0,yaw:0,role:'shielder'};
 tick(pivot,{x:0,z:-100},.05);
 tick(pivot,{x:100,z:100},.05);
 ok(pivot.yaw>0,'returning into view cancels the delay immediately');
+const azimuth=(yaw,range)=>({x:Math.sin(yaw)*range,y:0,z:Math.cos(yaw)*range,hp:100,r:16});
+for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true},{type:'king',boss:true}]){
+ const e={x:0,z:0,yaw:0,...props};
+ for(let i=0;i<7;i++)tick(e,azimuth(2.8,120),.05);
+ const start=e.yaw;
+ for(let i=0;i<8;i++)tick(e,azimuth(-2.2,120),.05,()=>{
+  ok(F.pivoting(e)&&!F.canCommit(e),'a crossover cannot cancel a planted pivot or start a new attack');
+ });
+ ok(e.yaw>start+.4,'crossing behind the other way cannot reverse a committed pivot');
+ for(let i=0;i<30;i++)tick(e,azimuth(.8,120),.05);
+ ok(delta(e.yaw,.8)<.14&&!F.pivoting(e),'the enemy resumes normal tracking after the step');
+}
+const turningKing={x:0,z:0,y:0,yaw:0,hp:100,finalKing:true,boss:true,akStage:'fight1',akState:'approach',akClock:0,akBeat:0,phase:1};
+const kingTick=p=>tick(turningKing,p,.05,()=>King.step(turningKing,.05,p));
+for(let i=0;i<7;i++)kingTick(azimuth(2.8,320));
+for(let i=0;i<8;i++)kingTick(azimuth(.8,300));
+ok(turningKing.x===0&&turningKing.z===0&&turningKing.akState==='approach','the King cannot slide or attack when the player re-enters his arc mid-pivot');
+
 const held={x:0,z:0,yaw:0,staggerT:1};tick(held,{x:0,z:-100},.05,()=>held.yaw=Math.PI);ok(held.yaw===0,'stagger cannot rotate');
 const blink={x:0,z:0,yaw:0,blinkFx:.65};
 const behind={x:0,z:-120};

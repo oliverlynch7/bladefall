@@ -3470,3 +3470,7 @@ Muted Chrome reproduced 24.19 world units of movement during a Bones enemy's pla
 ## Heavy pivot anticipation (2.385.0)
 
 A heavy guard or Abyss King that loses a player to its rear quarter plants for about a quarter second before turning. Returning into its front half cancels the delay. In muted Chrome, the previous Sentinel and campaign King turned 0.34 and 0.42 radians in the first 0.2 seconds. Both held their heading on 2.385.0, then turned and resumed pursuit. Equal strikes dealt 10 damage from the front and 34 from the rear on the Sentinel. Normal movement behind the King's sweep avoided all damage, and a rear strike during recovery dealt 42 after a staged ward counter. A separate pre-change save retained its level, gold and campaign checkpoint. All 13 selected Node suites passed, including 198 facing assertions. Co-op facing was checked through snapshots.
+
+## Committed rear pivots (2.386.0)
+
+Muted Chrome reproduced a Sentinel reversing its turn when the player crossed the other way behind it in 2.385.0. On 2.386.0, the Sentinel and campaign Abyss King finished the same turn in place before reacquiring. The Sentinel took 9 frontal and 30 rear damage from equal hits. The King held the original sweep heading, missed the player behind him, and took a rear hit after a staged ward counter. Guest snapshot replay matched the host's shield and body heading. A save created on 2.385.0 kept level 9, 413 gold, and its campaign checkpoint. All 14 selected Node suites passed, including 249 facing checks. Co-op evidence used a snapshot replay.

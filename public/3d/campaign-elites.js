@@ -71,7 +71,8 @@ function shape(e){return kits[e.ceKind]?.shape||(e.briarRole==='hex'?'circle':e.
 function step(e,dt,target,speed,canAttack=true,move=null){const k=kits[e.ceKind];if(!k||e.dead||!target)return;dt=Math.min(.05,Math.max(0,dt));const form=shape(e),travel=(dx,dz,n,rush=false)=>{if(move)move(dx,dz,n,rush);else{e.x+=dx*n;e.z+=dz*n;}};e.ceClock=Math.max(0,e.ceClock-dt);
  if(e.ceState==='hunt'){
   let dx=target.x-e.x,dz=target.z-e.z,d=Math.hypot(dx,dz);if(d<.001){dx=Math.sin(e.yaw||0);dz=Math.cos(e.yaw||0);d=1;}
-  facing?.turn(e,dx,dz,dt);const stop=k.stop??(!canAttack?20:e.ceKind==='shore'?210:e.briarRole==='hex'?305:e.briarRole==='runner'?125:e.briarRole==='guard'?85:85);
+  facing?.turn(e,dx,dz,dt);if(facing.pivoting(e))return;
+  const stop=k.stop??(!canAttack?20:e.ceKind==='shore'?210:e.briarRole==='hex'?305:e.briarRole==='runner'?125:e.briarRole==='guard'?85:85);
   const guard=e.briarRole==='guard'||e.campaignRole==='guard';
   if(d>stop&&(!guard||facing.aligned(e,target,Math.PI/2))){const length=Math.min(d-stop,speed*dt);travel(dx/d,dz/d,length);}
   if((e.briarRole==='hex'||e.campaignRole==='caster')&&d<150)travel(-dx/d,-dz/d,speed*dt*.6);

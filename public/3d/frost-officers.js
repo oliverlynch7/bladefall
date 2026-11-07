@@ -16,6 +16,7 @@ function move(e,p,arena,dt,speed){let q=[p.x,p.z,p.y];if(Math.abs(e.y-p.y)>28||e
 function step(e,dt,p,a){if(!alive(e))return;dt=clamp(dt,0,.05);const group=a.enemies.filter(q=>q.frostOfficer&&alive(q)),shield=group.some(q=>q.frostOfficer==='shield'),caster=group.some(q=>q.frostOfficer==='caster');
  if(!e.offState){e.offState='hunt';e.offClock={caster:2,shield:3.4,spear:4.6}[e.frostOfficer];e.offSeq=0;}e.offClock=Math.max(0,e.offClock-dt);e.offAttack=Math.max(0,(e.offAttack||0)-dt);
  if(e.offState==='hunt'){facing?.turn(e,p.x-e.x,p.z-e.z,dt);
+  if(facing.pivoting(e))return;
   const distance=Math.hypot(p.x-e.x,p.z-e.z),reach=e.frostOfficer==='caster'?450:e.frostOfficer==='shield'?230:480;
   const facingPlayer=e.frostOfficer!=='shield'||facing.aligned(e,p,Math.PI/2);
   if(facingPlayer&&(distance>(e.frostOfficer==='caster'?300:140)||Math.abs(e.y-p.y)>45)){let target=p;if(e.frostOfficer==='shield'&&caster){const c=group.find(q=>q.frostOfficer==='caster');if(distance>500&&Math.abs(c.y-p.y)<20&&Math.abs(e.y-p.y)<20)target={x:(c.x+p.x)/2,z:(c.z+p.z)/2,y:c.y};}move(e,target,a.arena,dt,a.speed*(e.frostOfficer==='spear'?(shield?1.4:1.8):e.frostOfficer==='shield'?(caster?.85:1.25):.8));}

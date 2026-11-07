@@ -2833,3 +2833,7 @@ Use the shared recovery timer to gate pursuit and patrol return as well as turni
 ### U-ENEMY-FACING-20261104 | Heavy pivot anticipation
 
 Keep the existing attack and guard locks. During pursuit, a shield bearer or Abyss King that loses the player to its rear quarter should plant briefly before turning. Measure the hold from the first frame behind the enemy, then let it turn normally and resume pursuit. A player who returns to the front cancels the pivot. Preserve the campaign ward counters and host-owned facing.
+
+### U-ENEMY-FACING-20261104 | Committed rear pivots
+
+After the existing rear hesitation, heavy enemies commit to a bounded pivot step toward the chosen side. Reacquire the target after the step instead of steering each frame, and hold pursuit and new attacks while planted. Verify an opposite-side crossover, shields, the campaign King, and the host-facing snapshot.

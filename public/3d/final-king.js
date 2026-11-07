@@ -19,7 +19,7 @@ function step(e,dt,p,{adds=0,summon=()=>{},cue=()=>{}}={}){if(!combat(e))return;
 if(e.akState==='approach'){
  const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz);
  facing.turn(e,dx,dz,dt);
- if(d>240&&facing.aligned(e,p,Math.PI/2)){
+ if(d>240&&!facing.pivoting(e)&&facing.aligned(e,p,Math.PI/2)){
   const x=Math.max(-760,Math.min(760,e.x+dx/d*115*dt)),z=Math.max(-800,Math.min(850,e.z+dz/d*115*dt));
   if(!pillars.some(q=>Math.abs(x-q.x)<45+(e.r||43)&&Math.abs(z-q.z)<45+(e.r||43))){e.x=x;e.z=z;}
  }
@@ -28,7 +28,7 @@ if(e.akClock)return;if(e.akState==='adds'){if(adds)return;e.akState='recover';e.
 if(e.akState==='recover'||e.akState==='approach'){
  const sequence=attacks[e.phase===1?1:2],kind=sequence[e.akBeat%sequence.length];
  // The narrow beam must line up before it commits so a player baiting it behind cover can open the ward.
- if(!facing.aligned(e,p,kind==='line'?.06:.65)){e.akState='approach';return;}
+ if(facing.pivoting(e)||!facing.aligned(e,p,kind==='line'?.06:.65)){e.akState='approach';return;}
  if(e.phase===2&&e.akBeat>=3&&!e.akSummoned){e.akSummoned=true;e.akState='adds';summon();return;}
  e.akBeat++;e.akKind=kind;e.akState='wind';e.akClock={sweep:1.45,line:1.8,burst:1.9,wave:1.9}[kind];e.akX=p.x;e.akY=p.y;e.akZ=p.z;[e.akDX,e.akDZ]=facing.forward(e);e.slamW=e.akClock;cue('wind');return;
 }

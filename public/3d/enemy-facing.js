@@ -4,9 +4,10 @@ const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24;
 function state(e){
  let saved=memory.get(e);
- if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:0,pivoting:false};memory.set(e,saved);}
+ if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null};memory.set(e,saved);}
  return saved;
 }
+function pivoting(e){return !!memory.get(e)?.frame?.pivotHeld;}
 function bracing(e){return e.role==='shielder'&&memory.get(e)?.brace>0;}
 function guardPlanted(e){return e.role==='shielder'&&(bracing(e)||memory.get(e)?.recover>0||!!action(e));}
 function brace(e){
@@ -24,16 +25,29 @@ function turn(e,dx,dz,dt){
  if(frame&&(frame.turned||frame.busy||frame.held))return yaw;
  if(!(Math.hypot(dx,dz)>.001))return yaw;
  const goal=Math.atan2(dx,dz),offset=Math.abs(wrap(goal-yaw));
- // Heavy enemies set their feet before making a large turn. The wait is paid once
- // per pivot and is cancelled if the target comes back into view.
+ // After setting their feet, heavies turn toward one sampled heading. Cap the step
+ // at a quarter turn so they can read the target again before committing to more.
  if(heavy(e)||e.finalKing||e.type==='king'||e.type==='tyrant'){
   const saved=state(e);
-  if(offset<=Math.PI/2){saved.pivoting=false;saved.pivotWait=0;}
-  else if(offset>=Math.PI*2/3&&!saved.pivoting){saved.pivoting=true;saved.pivotWait=pivotAnticipation;}
-  if(saved.pivotWait>0){
-   saved.pivotWait=Math.max(0,saved.pivotWait-Math.max(0,dt));
-   if(frame){frame.turned=true;frame.pivotHeld=true;}
-   return yaw;
+  if(saved.pivotAim==null){
+   if(offset<=Math.PI/2)saved.pivotWait=null;
+   if(offset>=Math.PI*2/3&&saved.pivotWait==null)saved.pivotWait=pivotAnticipation;
+   if(saved.pivotWait>0){
+    saved.pivotWait=Math.max(0,saved.pivotWait-Math.max(0,dt));
+    if(frame){frame.turned=true;frame.pivotHeld=true;}
+    return yaw;
+   }
+   if(saved.pivotWait===0){
+    const delta=wrap(goal-yaw);
+    saved.pivotAim=wrap(yaw+Math.sign(delta)*Math.min(offset,Math.PI/2));
+    saved.pivotWait=null;
+   }
+  }
+  if(saved.pivotAim!=null){
+   e.yaw=angle(yaw,saved.pivotAim,dt,rate(e));
+   if(frame){frame.turned=true;frame.pivotHeld=true;frame.approachYaw=e.yaw;}
+   if(Math.abs(wrap(saved.pivotAim-e.yaw))<1e-8)saved.pivotAim=null;
+   return e.yaw;
   }
  }
  // A raised shield need not follow every small step within its front arc.
@@ -113,14 +127,14 @@ function finish(e,dt,frame,returning=false){
  if(frame.busy&&!current)saved.recover=Math.max(saved.recover,(heavy(e)||e.boss) ? .7 : .4);
  let goal=frame.yaw;
  if(current){if(saved.key!==current.key){saved.key=current.key;saved.aim=frame.approachYaw;}goal=current.yaw??saved.aim;if(current.yaw!=null)saved.aim=current.yaw;}
- else{saved.key=null;if(!frame.held&&!frame.busy&&!frame.pivotHeld)goal=returning||e.kind==='goblin'?e.yaw:frame.approachYaw;}
+ else{saved.key=null;if(!frame.held&&!frame.busy)goal=!frame.pivotHeld&&(returning||e.kind==='goblin')?e.yaw:frame.approachYaw;}
  e.yaw=angle(frame.yaw,goal,dt,rate(e));if(e.role==='shielder')e.shieldYaw=e.yaw;
 }
 function mirror(e){if(!Number.isFinite(e.facingYaw))return false;e.yaw=e.facingYaw;if(e.role==='shielder')e.shieldYaw=Number.isFinite(e.shieldYaw)?e.shieldYaw:e.yaw;return true;}
 function canCommit(e){
  const saved=memory.get(e);
- return !saved?.frame?.busy&&!saved?.frame?.held&&!(saved?.recover>0)&&!bracing(e)&&!action(e);
+ return !pivoting(e)&&!saved?.frame?.busy&&!saved?.frame?.held&&!(saved?.recover>0)&&!bracing(e)&&!action(e);
 }
 function contact(e,p){return aligned(e,p,meleeArc);}
-const api={turn,aligned,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={turn,aligned,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

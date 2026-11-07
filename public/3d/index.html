@@ -1129,8 +1129,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2385"></script>
-<script src="./prison-combat.js?v=2378"></script>
+<script src="./enemy-facing.js?v=2386"></script>
+<script src="./prison-combat.js?v=2386"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
 <script src="./sprint-race.js?v=2255"></script>
@@ -1173,8 +1173,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./campaign-hunts.js?v=2365"></script>
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2342"></script>
-<script src="./campaign-elites.js?v=2378"></script>
-<script src="./campaign-encounters.js?v=2379"></script>
+<script src="./campaign-elites.js?v=2386"></script>
+<script src="./campaign-encounters.js?v=2386"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2319"></script>
 <script src="./briar-journey.js?v=2302"></script>
@@ -1191,7 +1191,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./thunder-cliffs.js?v=2318"></script>
 <script src="./castle-gates.js?v=2318"></script>
 <script src="./long-ascent.js?v=2185"></script>
-<script src="./final-king.js?v=2377"></script>
+<script src="./final-king.js?v=2386"></script>
 <script src="./return-adventures.js?v=2356"></script>
 <script src="./return-visits.js?v=2356"></script>
 <script src="./palace-courtyard.js?v=2317"></script>
@@ -1211,7 +1211,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./journal-clues.js?v=2203"></script>
 <script src="./music-score.js?v=2293"></script>
 <script src="./fallen-encounter.js?v=2369"></script>
-<script src="./frost-officers.js?v=2378"></script>
+<script src="./frost-officers.js?v=2386"></script>
 <script src="./story-authority.js?v=2325"></script>
 <script src="./skill-surfaces.js?v=2330f"></script><script src="./skill-identity.js?v=2362b"></script>
 <script src="./campaign-journey.js?v=2318"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.385.0-heavy-pivots';
+const VERSION3D='2.386.0-committed-pivots';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -17065,7 +17065,7 @@ function updateWorld(dt){
     if(e.stunT>0||(G._freezeT||0)>0)continue;
     e.shotReleaseT=Math.max(0,(e.shotReleaseT||0)-dt);
     const guardPlanted=e.role==='shielder'&&(mirrorFacing?(e.guardPlanted??e.guardBraced):facingFrame?.guardPlanted);
-    if(guardPlanted||facingFrame?.recovering)eff=0;
+    if(guardPlanted||facingFrame?.recovering||BFEnemyFacing.pivoting(e))eff=0;
     const encounterReturning=MP.guest()?!!e.encReturning:BFCampaignEncounters.retreat(G,e,encounterPlayers,dt,(dx,dz)=>moveGroundEnemy(e,dx,dz,eff,dt));
     // Shield bearers pivot before chasing a flank. Guests follow the host's position instead of chasing a different target.
     if(!encounterReturning&&e.role==='shielder'&&(mirrorFacing||!BFEnemyFacing.aligned(e,meleeTarget,Math.PI/2)))eff=0;

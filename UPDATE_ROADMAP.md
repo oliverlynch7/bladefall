@@ -4134,3 +4134,7 @@ Ordinary enemies finish their recovery before stepping toward a player or back t
 ### v2.385.0 - Heavy enemy pivots
 
 Shield bearers and the Abyss King plant briefly before pivoting toward a player who slips behind them. Attacks keep their original aim through the strike and recovery, and the King still rewards his arena counters.
+
+## [Codex | 2026-11-07] Committed heavy turns (v2.386.0)
+
+Shield enemies and the Abyss King finish a planted turn before reacquiring the player. Committed attacks keep their original direction and give the player an opening to flank. Verified in desktop Chrome with a pre-update campaign save and staged host-facing replay.

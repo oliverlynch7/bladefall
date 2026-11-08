@@ -2871,3 +2871,7 @@ The live 100-degree combat threshold starts the planted turn after the player ha
 ### U-ENEMY-FACING-20261104 | Match the shield edge
 
 Normal shields block within 66 degrees and Prison Shield Guards within 60 degrees. Plant at each block edge with a 10-degree margin for returning to the front. Reuse the block threshold for both damage and turning. Compare a hit just past each edge against the live build and check reacquisition, committed attacks, and the Abyss King's counters.
+
+### U-ENEMY-FACING-20261104 | Continuous close flanks
+
+The same player direction covers sustained close circling. Test this path as well as sudden crossings of the shield edge. Close footwork should create a flank while the existing attack geometry, route steering, and boss counters remain authoritative.

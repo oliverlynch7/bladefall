@@ -3,11 +3,12 @@
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,pivotSettle=.4,heavyLookInterval=.45,focusSwitchLead=65;
 const combatFlank=Math.PI*85/180,flankMargin=Math.PI/18,rearFlank=Math.PI*5/9,routeFlank=Math.PI*2/3;
+const closeOrbitRange=190,closeOrbitArc=Math.PI*50/180,closeOrbitHold=.8;
 const standardShieldDot=.4,prisonShieldDot=.5;
 const standardShieldFlank=Math.acos(standardShieldDot),prisonShieldFlank=Math.acos(prisonShieldDot);
 function state(e){
  let saved=memory.get(e);
- if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,pivotSettle:0,combatPivoted:false,lookAim:0,lookT:0};memory.set(e,saved);}
+ if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,pivotSettle:0,combatPivoted:false,lookAim:0,lookT:0,closeBearing:null};memory.set(e,saved);}
  return saved;
 }
 function pivoting(e){return !!memory.get(e)?.frame?.pivotHeld;}
@@ -32,7 +33,7 @@ function selectTarget(e,targets){
   const distance=Math.hypot(target.x-e.x,target.z-e.z)-(target===previous?focusSwitchLead:0);
   if(distance<bestDistance){best=target;bestDistance=distance;}
  }
- if(saved)saved.target=best;
+ if(saved){if(previous!==best)saved.closeBearing=null;saved.target=best;}
  return best;
 }
 function rate(e){return heavy(e)?1.7:e.boss?2.1:e.kind==='charger'?2.6:e.kind==='fly'?4.4:3.4;}
@@ -69,6 +70,7 @@ function turn(e,dx,dz,dt,routeAim=false){
    }
   }
   if(saved.pivotAim!=null){
+   saved.closeBearing=null;
    e.yaw=angle(yaw,saved.pivotAim,dt,rate(e));
    if(frame){frame.turned=true;frame.pivotHeld=true;frame.approachYaw=e.yaw;}
    if(Math.abs(wrap(saved.pivotAim-e.yaw))<1e-8){
@@ -76,6 +78,15 @@ function turn(e,dx,dz,dt,routeAim=false){
     saved.pivotSettle=pivotSettle;
    }
    return e.yaw;
+  }
+  // Measure close circling from the last planted heading reference. Measuring only
+  // against the current body yaw lets a guard track a walking orbit indefinitely.
+  if(onRoute||Math.hypot(dx,dz)>closeOrbitRange)saved.closeBearing=null;
+  else if(saved.closeBearing==null)saved.closeBearing=goal;
+  else if(Math.abs(wrap(goal-saved.closeBearing))>=closeOrbitArc){
+   saved.closeBearing=null;saved.lookT=0;saved.pivotSettle=closeOrbitHold;saved.pivotWait=0;
+   if(frame)frame.turned=frame.pivotHeld=true;
+   return yaw;
   }
   // Between looks, a sidestep or a co-op target change cannot steer the turn.
   saved.lookT-=Math.max(0,Math.min(.05,dt));
@@ -153,7 +164,7 @@ function holdsRecovery(e){
 }
 function begin(e,target,dt){
  const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,guardPlanted:guardPlanted(e),recovering:saved.recover>0,pivotHeld:saved.pivotSettle>1e-8,held:bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
- if(frame.busy||frame.held)saved.lookT=0;
+ if(frame.busy||frame.held){saved.lookT=0;saved.closeBearing=null;}
  const elapsed=Math.max(0,dt);
  saved.recover=Math.max(0,saved.recover-elapsed);
  saved.pivotSettle=Math.max(0,saved.pivotSettle-elapsed);

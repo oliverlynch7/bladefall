@@ -4191,3 +4191,8 @@ Heavy enemies plant their feet when the player reaches their side, leaving time 
 ### Shield edge openings (2.399.0)
 
 Shield enemies start a planted turn when the player crosses the edge of their frontal block. This creates a brief chance to land a flank hit, after which they turn and resume pursuit. The Abyss King's sweep stays committed, and a pillar still opens his ward.
+
+
+### Continuous close flanks (2.400.0)
+
+Walking around a heavy enemy at close range now makes it plant briefly before it turns. Circling a shield enemy opens a full-damage hit, and the Abyss King still holds his sweep heading and requires the arena counter to open his ward.

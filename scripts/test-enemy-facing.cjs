@@ -61,6 +61,26 @@ tick(pivot,{x:0,z:-100},.05);
 tick(pivot,{x:100,z:100},.05);
 ok(pivot.yaw>0,'returning into view cancels the delay immediately');
 const azimuth=(yaw,range)=>({x:Math.sin(yaw)*range,y:0,z:Math.cos(yaw)*range,hp:100,r:16});
+for(const [props,arc] of [[{role:'shielder'},Math.acos(.4)],[{prisonFoe:'prison_guard'},Math.acos(.5)],[{finalKing:true,boss:true},Math.PI/2]]){
+ for(const direction of [-1,1]){
+  const e={x:0,z:0,yaw:0,...props},dt=1/60;
+  let target,opening=false;
+  for(let i=0;i<90;i++){
+   target=azimuth(direction*i*1.55*dt,130);
+   const yaw=e.yaw;
+   const frame=F.begin(e,target,dt);
+   if(frame.pivotHeld)assert(!F.canAdvance(e,target)&&!F.canCommit(e));
+   F.finish(e,dt,frame);
+   opening ||= frame.pivotHeld&&e.yaw===yaw&&!F.aligned(e,target,arc);
+  }
+  ok(opening,'walking a continuous circle earns an unguarded flank before a heavy can turn again');
+  for(let i=0;i<190;i++)tick(e,target,dt);
+  ok(F.aligned(e,target,.18)&&!F.pivoting(e),'a heavy reacquires after circling stops');
+ }
+}
+const closeSway={x:0,z:0,yaw:0,role:'shielder'};
+for(let i=0;i<120;i++)assert(!tick(closeSway,azimuth(.3*Math.sin(i/16),130),1/60).pivotHeld,'small alternating movements do not accumulate into a flank');
+ok(F.aligned(closeSway,azimuth(0,130),.65),'ordinary near pursuit remains responsive');
 for(const [props,edge] of [[{role:'shielder'},Math.acos(.4)],[{prisonFoe:'prison_guard'},Math.acos(.5)]]){
  for(const side of [-1,1]){
   const shield={x:0,z:0,yaw:0,...props},dt=1/60;

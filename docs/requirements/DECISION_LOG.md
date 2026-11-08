@@ -2859,3 +2859,7 @@ After the existing rear hesitation, heavy enemies commit to a bounded pivot step
 ### U-ENEMY-FACING-20261104 | Committed Galewisp dives
 
 Apply the existing attack commitment rule to Gale Wisps. Verify that a sidestep during the dive leaves its trajectory and facing unchanged, while shelter still protects the player and a stationary target can still be hit by the warned melee strike. The host supplies the dive and its facing to guests.
+
+### U-ENEMY-FACING-20261104 | Wide combat flanks
+
+The 120-degree rear trigger leaves a band outside the shield arc where a heavy enemy can immediately turn a flank back into a block. Use the existing planted pivot at 100 degrees in combat and keep the established detour behavior. Check equal hits after crossing behind a guard's shoulder, the King's committed sweep and ward, and pursuit after the pause.

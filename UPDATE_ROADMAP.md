@@ -4179,3 +4179,7 @@ The Shield Officer plants briefly after a frontal block and displays an icy shie
 ### Galewisp dive commitment (2.396.0)
 
 Gale Wisps commit to their launch direction and height during a dive. They can turn and pursue again afterward. The host shares the dive pose, heading, and melee timing with guests. Cover, stationary-target hits, and timed dodges passed in Chrome. See the requirements continuity entry for shield, King, and save checks.
+
+### Wide combat flanks (2.397.0)
+
+Heavy guards and the Abyss King plant when a player slips just behind their shoulder. After the pause they pivot and resume pursuit. See requirements continuity for the flank comparison, arena counters, and save check.

@@ -2942,3 +2942,5 @@ Heavy pursuit should wait for a forward step when a player moves far to the side
 **Galewisp dives.** Hold the launch heading and descent height through the swoop. Keep cover and the warned melee strike functional. Guests follow the host's dive and attack state.
 
 **Frostfell block follow-up.** The Shield Officer already holds its attack and recovery facing but can immediately turn after a frontal block in pursuit. Reuse the short shield brace for a frontal block while hunting, with a visible cue, the existing cooldown, and a host-mirrored stance. Preserve the recovery flank and shared attack slot, damage gates, and Abyss King counters.
+
+**Wide-flank follow-up.** Give heavy enemies and the Abyss King the existing planted pivot when a player crosses just behind the shoulder. Check the resulting opening, pursuit afterward, committed attacks, navigation, and the arena counters.

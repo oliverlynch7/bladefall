@@ -61,6 +61,20 @@ tick(pivot,{x:0,z:-100},.05);
 tick(pivot,{x:100,z:100},.05);
 ok(pivot.yaw>0,'returning into view cancels the delay immediately');
 const azimuth=(yaw,range)=>({x:Math.sin(yaw)*range,y:0,z:Math.cos(yaw)*range,hp:100,r:16});
+for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true}]){
+ for(const side of [-1,1]){
+  const e={x:0,z:0,yaw:0,...props},flank=azimuth(side*Math.PI*7/12,120);
+  const first=tick(e,flank,.05);
+  ok(first.pivotHeld&&e.yaw===0&&!F.canAdvance(e,flank),'a wide flank plants a heavy before it can track');
+  for(let i=0;i<3;i++)tick(e,flank,.05);
+  ok(e.yaw===0,'a wide flank leaves a stable initial opening');
+  for(let i=0;i<45;i++)tick(e,flank,.05);
+  ok(F.aligned(e,flank,.18)&&F.canAdvance(e,flank),'the enemy reacquires a persistent wide flank');
+ }
+}
+const detourFlank=azimuth(Math.PI*7/12,120);
+const detourHeavy={x:0,z:0,yaw:0,role:'shielder',_facingRoute:true,_route:[detourFlank]};
+ok(!tick(detourHeavy,detourFlank,.05).pivotHeld&&detourHeavy.yaw>0,'an obstacle detour retains its existing waypoint turn');
 const stepGuard={x:0,z:0,yaw:0,role:'shielder'};
 ok(F.canAdvance(stepGuard,azimuth(Math.PI/4,120)),'ordinary diagonal pursuit stays available');
 ok(!F.canAdvance(stepGuard,azimuth(Math.PI*.44,120)),'the guard cannot step nearly sideways');

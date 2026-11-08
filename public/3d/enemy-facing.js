@@ -2,6 +2,7 @@
 (function(root){'use strict';
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,pivotSettle=.4,heavyLookInterval=.45,focusSwitchLead=65;
+const combatFlank=Math.PI*5/9,routeFlank=Math.PI*2/3;
 function state(e){
  let saved=memory.get(e);
  if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,pivotSettle:0,lookAim:0,lookT:0};memory.set(e,saved);}
@@ -47,7 +48,7 @@ function turn(e,dx,dz,dt){
   const saved=state(e),offset=Math.abs(wrap(goal-yaw));
   if(saved.pivotAim==null){
    if(offset<=Math.PI/2)saved.pivotWait=null;
-   if(offset>=Math.PI*2/3&&saved.pivotWait==null){saved.pivotWait=pivotAnticipation;saved.lookT=0;}
+   if(offset>=(waypoint?routeFlank:combatFlank)&&saved.pivotWait==null){saved.pivotWait=pivotAnticipation;saved.lookT=0;}
    if(saved.pivotWait>0){
     saved.pivotWait=Math.max(0,saved.pivotWait-Math.max(0,dt));
     if(frame){frame.turned=true;frame.pivotHeld=true;}

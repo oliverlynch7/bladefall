@@ -4138,3 +4138,7 @@ Shield bearers and the Abyss King plant briefly before pivoting toward a player 
 ## [Codex | 2026-11-07] Committed heavy turns (v2.386.0)
 
 Shield enemies and the Abyss King finish a planted turn before reacquiring the player. Committed attacks keep their original direction and give the player an opening to flank. Verified in desktop Chrome with a pre-update campaign save and staged host-facing replay.
+
+## [Codex | 2026-11-07] Heavy enemy pursuit (v2.387.0)
+
+Heavy guards and the Abyss King check the player's position at intervals during pursuit instead of following every sidestep. They keep the aim they committed to through an attack or planted stance, giving players a chance to circle behind.

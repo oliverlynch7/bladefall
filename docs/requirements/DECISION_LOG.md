@@ -2837,3 +2837,5 @@ Keep the existing attack and guard locks. During pursuit, a shield bearer or Aby
 ### U-ENEMY-FACING-20261104 | Committed rear pivots
 
 After the existing rear hesitation, heavy enemies commit to a bounded pivot step toward the chosen side. Reacquire the target after the step instead of steering each frame, and hold pursuit and new attacks while planted. Verify an opposite-side crossover, shields, the campaign King, and the host-facing snapshot.
+
+**Pursuit aim.** Heavy guards and the Abyss King currently update their pursuit heading every frame, so a close target moving inside the turning rate can stay centered in their view. Sample their pursuit heading at footwork intervals, then turn toward that heading at the existing rate. Preserve planted stance and attack locks, rear pivot anticipation, and the King's arena counters. Test a moving flank, a direction reversal, and reacquisition on a stationary target.

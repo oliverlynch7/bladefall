@@ -13,7 +13,7 @@ for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'
  const shield={x:0,z:0,yaw:0,...props};
  for(let i=0;i<60;i++)tick(shield,{x:12*Math.sin(i),z:100});
  ok(shield.yaw===0,'a shield holds its heading through small movements in front');
- for(let i=0;i<20;i++)tick(shield,{x:100,z:0},.05);
+ for(let i=0;i<28;i++)tick(shield,{x:100,z:0},.05);
  ok(delta(shield.yaw,Math.PI/2)<.14,'a shield still pivots when the player moves to the side');
 }
 for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true},{type:'king',boss:true},{type:'tyrant',boss:true}]){
@@ -30,6 +30,21 @@ tick(pivot,{x:0,z:-100},.05);
 tick(pivot,{x:100,z:100},.05);
 ok(pivot.yaw>0,'returning into view cancels the delay immediately');
 const azimuth=(yaw,range)=>({x:Math.sin(yaw)*range,y:0,z:Math.cos(yaw)*range,hp:100,r:16});
+for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true},{type:'tyrant',boss:true}]){
+ for(const hz of [30,60,120]){
+  const e={x:0,z:0,yaw:0,...props},dt=1/hz;
+  tick(e,azimuth(0,120),dt);
+  for(let i=0;i<Math.floor(.3*hz);i++)tick(e,azimuth(.6,120),dt);
+  ok(e.yaw===0,'heavy pursuit holds its heading between looks at '+hz+' Hz');
+  for(let i=0;i<Math.ceil(.19*hz);i++)tick(e,azimuth(.6,120),dt);
+  const previous=e.yaw;
+  ok(previous>0,'heavy pursuit turns on its next look');
+  tick(e,azimuth(-.6,120),dt);
+  ok(e.yaw>previous,'a shallow crossover cannot immediately steer heavy pursuit');
+  for(let i=0;i<Math.ceil(1.4*hz);i++)tick(e,azimuth(-.6,120),dt);
+  ok(delta(e.yaw,-.6)<.14,'heavy pursuit reacquires a stationary target');
+ }
+}
 for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true},{type:'king',boss:true}]){
  const e={x:0,z:0,yaw:0,...props};
  for(let i=0;i<7;i++)tick(e,azimuth(2.8,120),.05);

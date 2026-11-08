@@ -2928,3 +2928,5 @@ Implemented approved Ninja, Necromancer, Warrior, Ranger and Mage progression: c
 **Heavy pivot anticipation.** A shield bearer or Abyss King briefly holds its heading when a target enters its rear quarter before beginning the existing bounded turn. The turn delay cancels when the target returns to the front. Keep existing committed attacks, shield arcs and arena counters.
 
 **Committed rear pivots.** After the existing hesitation, heavy enemies turn toward one sampled heading in a step of up to 90 degrees. They stay planted and cannot start a new attack during that step. They reacquire the active target afterward.
+
+**Pursuit follow-up.** During pursuit, heavy guards and the Abyss King reacquire a moving target at short intervals. Attacks and planted guards keep their committed direction and the existing boss counters still apply.

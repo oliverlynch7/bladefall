@@ -1,10 +1,10 @@
 /* Facing is combat state: bodies, guards and committed attack directions agree. */
 (function(root){'use strict';
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
-const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24;
+const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,heavyLookInterval=.45;
 function state(e){
  let saved=memory.get(e);
- if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null};memory.set(e,saved);}
+ if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,lookAim:0,lookT:0};memory.set(e,saved);}
  return saved;
 }
 function pivoting(e){return !!memory.get(e)?.frame?.pivotHeld;}
@@ -24,14 +24,14 @@ function turn(e,dx,dz,dt){
  const yaw=Number.isFinite(e.yaw)?e.yaw:0,frame=memory.get(e)?.frame;
  if(frame&&(frame.turned||frame.busy||frame.held))return yaw;
  if(!(Math.hypot(dx,dz)>.001))return yaw;
- const goal=Math.atan2(dx,dz),offset=Math.abs(wrap(goal-yaw));
+ let goal=Math.atan2(dx,dz);
  // After setting their feet, heavies turn toward one sampled heading. Cap the step
  // at a quarter turn so they can read the target again before committing to more.
  if(heavy(e)||e.finalKing||e.type==='king'||e.type==='tyrant'){
-  const saved=state(e);
+  const saved=state(e),offset=Math.abs(wrap(goal-yaw));
   if(saved.pivotAim==null){
    if(offset<=Math.PI/2)saved.pivotWait=null;
-   if(offset>=Math.PI*2/3&&saved.pivotWait==null)saved.pivotWait=pivotAnticipation;
+   if(offset>=Math.PI*2/3&&saved.pivotWait==null){saved.pivotWait=pivotAnticipation;saved.lookT=0;}
    if(saved.pivotWait>0){
     saved.pivotWait=Math.max(0,saved.pivotWait-Math.max(0,dt));
     if(frame){frame.turned=true;frame.pivotHeld=true;}
@@ -49,9 +49,14 @@ function turn(e,dx,dz,dt){
    if(Math.abs(wrap(saved.pivotAim-e.yaw))<1e-8)saved.pivotAim=null;
    return e.yaw;
   }
+  // Between looks, a sidestep or a co-op target change cannot steer the turn.
+  saved.lookT-=Math.max(0,Math.min(.05,dt));
+  if(saved.lookT<=1e-8){saved.lookAim=goal;saved.lookT=heavyLookInterval;}
+  goal=saved.lookAim;
+  if(frame)frame.turned=true;
  }
  // A raised shield need not follow every small step within its front arc.
- if((e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield')&&offset<.14)return yaw;
+ if((e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield')&&Math.abs(wrap(goal-yaw))<.14)return yaw;
  e.yaw=angle(frame?.yaw??yaw,goal,dt,rate(e));
  if(frame){frame.turned=true;frame.approachYaw=e.yaw;}
  return e.yaw;
@@ -113,6 +118,7 @@ function holdsRecovery(e){
 }
 function begin(e,target,dt){
  const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,guardPlanted:guardPlanted(e),recovering:saved.recover>0,held:bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
+ if(frame.busy||frame.held)saved.lookT=0;
  const elapsed=Math.max(0,dt);
  saved.recover=Math.max(0,saved.recover-elapsed);
  saved.brace=Math.max(0,saved.brace-elapsed);

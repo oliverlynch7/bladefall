@@ -35,6 +35,7 @@ function move(e,p,arena,dt,speed){
 function step(e,dt,p,a){if(!alive(e))return;dt=clamp(dt,0,.05);const group=a.enemies.filter(q=>q.frostOfficer&&alive(q)),shield=group.some(q=>q.frostOfficer==='shield'),caster=group.some(q=>q.frostOfficer==='caster');
  if(!e.offState){e.offState='hunt';e.offClock={caster:2,shield:3.4,spear:4.6}[e.frostOfficer];e.offSeq=0;}e.offClock=Math.max(0,e.offClock-dt);e.offAttack=Math.max(0,(e.offAttack||0)-dt);
  if(e.offState==='hunt'){
+  if(facing.bracing(e))return;
   const distance=Math.hypot(p.x-e.x,p.z-e.z),reach=e.frostOfficer==='caster'?450:e.frostOfficer==='shield'?230:480,shieldOfficer=e.frostOfficer==='shield';
   const shouldMove=distance>(e.frostOfficer==='caster'?300:140)||Math.abs(e.y-p.y)>45;
   if(!shouldMove||!shieldOfficer)facing.turn(e,p.x-e.x,p.z-e.z,dt);
@@ -48,7 +49,7 @@ function step(e,dt,p,a){if(!alive(e))return;dt=clamp(dt,0,.05);const group=a.ene
    const speed=a.speed*(e.frostOfficer==='spear'?(shield?1.4:1.8):shieldOfficer?(caster?.85:1.25):.8);
    move(e,target,a.arena,dt,speed);
   }
-  if(facing.pivoting(e)||e.offClock||distance>reach||!facing.aligned(e,p)||a.enemies.some(q=>q!==e&&busy(q))||(e.frostOfficer!=='caster'&&Math.abs(e.y-p.y)>40))return;
+  if(!facing.canCommit(e)||e.offClock||distance>reach||!facing.aligned(e,p)||a.enemies.some(q=>q!==e&&busy(q))||(e.frostOfficer!=='caster'&&Math.abs(e.y-p.y)>40))return;
   e.offTurn=(e.offTurn||0)+1;e.offState='wind';e.offClock=e.frostOfficer==='caster'?1.35:e.frostOfficer==='shield'?1.15:1.05;e.offX=e.x;e.offZ=e.z;e.offY=e.y;[e.offDX,e.offDZ]=facing.forward(e);e.offTwin=e.frostOfficer==='caster'&&!shield;
   if(e.frostOfficer==='caster'){e.offX=p.x;e.offZ=p.z;e.offY=floor(p.x,p.z,a.arena);e.offRange=115;}
   else if(e.frostOfficer==='spear'){e.offRange=0;for(let r=8;r<=420;r+=8){const x=e.x+e.offDX*r,z=e.z+e.offDZ*r;if(Math.abs(x)>800||z< -810||z>760||Math.abs(floor(x,z,a.arena)-e.y)>28)break;e.offRange=r;}}
@@ -80,6 +81,10 @@ function build({G,seg,plat,col,spawn}){const arena=G.frostOfficers={surfaces:[],
 }
 function draw({G,bx,ring},t){
  const shield=G.enemies.find(e=>e.frostOfficer==='shield'&&alive(e)),caster=G.enemies.find(e=>e.frostOfficer==='caster'&&alive(e));
+ if(shield&&(shield.guardBraced||facing.bracing(shield))){
+  const [dx,dz]=facing.forward(shield);
+  ring(shield.x,shield.y+3,shield.z,shield.r+12,'#93d6eb',.75,.95,dx,dz);
+ }
  if(shield&&caster&&Math.hypot(shield.x-caster.x,shield.z-caster.z)<1000){for(let i=1;i<9;i++){const q=i/9;bx(shield.x+(caster.x-shield.x)*q,shield.y+(caster.y-shield.y)*q+35,shield.z+(caster.z-shield.z)*q,7,7,7,'#93d6eb','#73bed9',.6);}ring(caster.x,caster.y+5,caster.z,42,'#93d6eb',.6);}
  for(const e of G.enemies){if(!e.frostOfficer||!busy(e))continue;const strike=e.offState==='strike',color=strike?'#e9fcff':e.frostOfficer==='caster'?'#75cde3':e.frostOfficer==='shield'?'#e6c47c':'#f0a478',y=e.offY+5;
  if(e.frostOfficer==='caster'){for(const offset of e.offTwin?[0,240]:[0]){ring(e.offX+offset,y,e.offZ,115,color,.9);if(strike)for(let i=0;i<7;i++){const a=i*Math.PI*2/7;bx(e.offX+offset+Math.cos(a)*70,y+40,e.offZ+Math.sin(a)*70,15,80,15,color);}}}

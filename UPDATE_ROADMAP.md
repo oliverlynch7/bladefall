@@ -4171,3 +4171,7 @@ Campaign guards turn toward their route when returning to their post. Shield ene
 ## Prison Shield Guard commitment (2.394.0)
 
 A pursuing Prison Shield Guard plants its feet and holds its shield direction for 0.85 seconds after a frontal block. The guard resumes pursuit afterward, and an existing bash keeps its original aim. Muted Chrome verified the flank, a staged guest snapshot, the Frostfell Shield Officer, and the Abyss King sweep and pillar counter. See docs/requirements/CONTINUITY.md for test results.
+
+### Frostfell Shield Officer brace (2.395.0)
+
+The Shield Officer plants briefly after a frontal block and displays an icy shield arc in the committed direction. The existing post-wave flank still opens the officer to damage.

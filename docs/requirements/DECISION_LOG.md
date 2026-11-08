@@ -2853,3 +2853,5 @@ After the existing rear hesitation, heavy enemies commit to a bounded pivot step
 **Patrol return footwork.** Let a returning guard spend its turn on its home route. Heavy guards use the existing pivot, pause and forward-step rules on that route. When a player re-enters the territory, the guard resumes combat without interrupting an attack or resetting health.
 
 **Prison Shield Guard commitment.** A frontal block during pursuit should plant this guard and hold its heading long enough to circle it. A block during a bash must preserve the bash and its recovery. Keep the Frostfell and Abyss King arena counters.
+
+- Enemy facing follow-up. Apply the existing planted shield brace to the Frostfell Shield Officer's frontal blocks in pursuit. The wave and its rear recovery remain the damage opportunity.

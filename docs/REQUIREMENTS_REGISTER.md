@@ -2938,3 +2938,5 @@ Heavy pursuit should wait for a forward step when a player moves far to the side
 **Heavy obstacle routes.** When a campaign guard has to go around cover, make its body turn toward its route before stepping. Keep turning bounded and preserve the existing attack and defensive commitments.
 
 **Heavy target selection and ramps.** Keep a heavy enemy focused on its current living opponent when another co-op player is only marginally closer. Let it switch when the other player closes substantially or the current target leaves the fight. Make the Frostfell Shield Officer turn toward the ramp waypoint before stepping onto it, then return to facing its opponent. Keep committed attacks, shield arcs and boss counters.
+
+**Frostfell block follow-up.** The Shield Officer already holds its attack and recovery facing but can immediately turn after a frontal block in pursuit. Reuse the short shield brace for a frontal block while hunting, with a visible cue, the existing cooldown, and a host-mirrored stance. Preserve the recovery flank and shared attack slot, damage gates, and Abyss King counters.

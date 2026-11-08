@@ -25,3 +25,28 @@ for(let i=0;i<100;i++){
 }
 assert(rampGuard.x>50,'the Shield Officer pursues after turning toward the ramp');
 console.log('Shield Officer turns in place before walking onto a ramp.');
+
+const blockGuard={x:0,z:0,y:0,yaw:0,hp:100,r:22,frostOfficer:'shield',offState:'hunt',offClock:0};
+const blockArena={...ctx,enemies:[blockGuard]};
+const front={x:0,z:120,y:0,hp:100};
+const flank={x:185,z:120,y:0,hp:100};
+function stepBlockGuard(target) {
+ const dt=1/60,frame=RampFacing.begin(blockGuard,null,dt);
+ F.step(blockGuard,dt,target,blockArena);
+ RampFacing.finish(blockGuard,dt,frame);
+}
+assert(RampFacing.brace(blockGuard),'an idle Shield Officer can brace');
+for(let i=0;i<30;i++)stepBlockGuard(flank);
+assert.deepEqual([blockGuard.x,blockGuard.z,blockGuard.yaw],[0,0,0],'the brace holds position and heading');
+for(let i=0;i<12;i++)stepBlockGuard(front);
+assert.equal(blockGuard.offState,'hunt','the brace cannot be interrupted by starting an aligned attack');
+for(let i=0;i<20;i++)stepBlockGuard(front);
+assert.equal(blockGuard.offState,'wind','the wave can begin after the brace expires');
+assert(!RampFacing.brace(blockGuard),'a new block cannot override an existing wave');
+stepBlockGuard(flank);
+assert.deepEqual([blockGuard.offDX,blockGuard.offDZ,blockGuard.yaw],[0,1,0],'the wave holds its warned direction');
+assert(!RampFacing.brace({...blockGuard,offState:'recover'}),'recovery cannot turn into a new brace');
+const cueRings=[];
+F.draw({G:{enemies:[{...blockGuard,offState:'hunt',guardBraced:true}]},bx(){},ring(...args){cueRings.push(args);}},0);
+assert.deepEqual(cueRings,[[0,3,0,34,'#93d6eb',.75,.95,0,1]],'the replicated brace draws a small forward shield arc');
+console.log('Shield Officer holds a frontal brace, resumes its wave and draws the host brace direction.');

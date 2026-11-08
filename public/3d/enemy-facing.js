@@ -8,17 +8,18 @@ function state(e){
  return saved;
 }
 function pivoting(e){return !!memory.get(e)?.frame?.pivotHeld;}
-const canBrace=e=>e.role==='shielder'||e.prisonFoe==='prison_guard';
-function bracing(e){return canBrace(e)&&memory.get(e)?.brace>0;}
-function guardPlanted(e){return canBrace(e)&&(bracing(e)||holdsRecovery(e)||!!action(e));}
+const shieldBearer=e=>e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield';
+function bracing(e){return shieldBearer(e)&&memory.get(e)?.brace>0;}
+function guardPlanted(e){return shieldBearer(e)&&(bracing(e)||holdsRecovery(e)||!!action(e));}
 function brace(e){
- if(!canBrace(e)||e.dummy||e.dead||action(e)||(e.prisonFoe&&e.pcState!=='approach'))return false;
+ if(!shieldBearer(e)||e.dummy||e.dead||action(e)||(e.prisonFoe&&e.pcState!=='approach')||
+    (e.frostOfficer==='shield'&&e.offState!=='hunt'))return false;
  const saved=state(e);
  if(saved.braceCooldown>0)return false;
  saved.brace=braceTime;saved.braceCooldown=braceInterval;
  return true;
 }
-function heavy(e){return e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield'||e.briarRole==='guard'||e.campaignRole==='guard'||['sentinel','siegeknight','marblestatue'].includes(e.type);}
+function heavy(e){return shieldBearer(e)||e.briarRole==='guard'||e.campaignRole==='guard'||['sentinel','siegeknight','marblestatue'].includes(e.type);}
 function heavyPivot(e){return heavy(e)||e.finalKing||e.type==='king'||e.type==='tyrant';}
 function selectTarget(e,targets){
  const saved=heavyPivot(e)?state(e):null,previous=saved?.target;
@@ -74,7 +75,7 @@ function turn(e,dx,dz,dt){
   if(frame)frame.turned=true;
  }
  // A raised shield need not follow every small step within its front arc.
- if((e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield')&&Math.abs(wrap(goal-yaw))<.14)return yaw;
+ if(shieldBearer(e)&&Math.abs(wrap(goal-yaw))<.14)return yaw;
  e.yaw=angle(frame?.yaw??yaw,goal,dt,rate(e));
  if(frame){frame.turned=true;frame.approachYaw=e.yaw;}
  return e.yaw;
@@ -87,7 +88,7 @@ function advanceHeading(e,dx,dz){
  const yaw=e.yaw||0,offset=wrap(Math.atan2(dx,dz)-yaw);
  return yaw+Math.max(-.26,Math.min(.26,offset));
 }
-function directionalGuard(e){return e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield'||e.finalKing;}
+function directionalGuard(e){return shieldBearer(e)||e.finalKing;}
 // Rewind from the collision point to the incoming edge of the target's hit circle.
 function projectileSide(e,p){
  const dx=p.x-e.x,dz=p.z-e.z,speed=Math.hypot(p.vx,p.vz),r=e.r+p.size;
@@ -168,5 +169,5 @@ function canCommit(e){
  return !pivoting(e)&&!saved?.frame?.busy&&!saved?.frame?.held&&!(saved?.recover>0)&&!bracing(e)&&!action(e);
 }
 function contact(e,p){return aligned(e,p,meleeArc);}
-const api={heavy,selectTarget,turn,aligned,canAdvance,advanceHeading,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={shieldBearer,heavy,selectTarget,turn,aligned,canAdvance,advanceHeading,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

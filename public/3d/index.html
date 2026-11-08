@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2394"></script>
+<script src="./enemy-facing.js?v=2395"></script>
 <script src="./prison-combat.js?v=2394"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1211,7 +1211,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./journal-clues.js?v=2203"></script>
 <script src="./music-score.js?v=2293"></script>
 <script src="./fallen-encounter.js?v=2369"></script>
-<script src="./frost-officers.js?v=2391"></script>
+<script src="./frost-officers.js?v=2395"></script>
 <script src="./story-authority.js?v=2325"></script>
 <script src="./skill-surfaces.js?v=2330f"></script><script src="./skill-identity.js?v=2362b"></script>
 <script src="./campaign-journey.js?v=2318"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.394.0-shield-commitment';
+const VERSION3D='2.395.0-officer-brace';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -13873,7 +13873,13 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   /* The Abyss King's ward: while any of his court still stands he takes a fifth of the damage, so
      the fight is "clear the court" before it is ever "hit the king". */
   if(e.courtWard) dmg=dmg*0.2;
-  dmg=campaignBossDamage(e,dmg,src,'direct',guardSrc);if(!(dmg>0))return;
+  dmg=campaignBossDamage(e,dmg,src,'direct',guardSrc);
+  if(!(dmg>0)){
+    if(e.frostOfficer==='shield'&&guardSrc&&
+       Math.hypot(guardSrc.x-e.x,guardSrc.z-e.z)>.001&&
+       BFEnemyFacing.aligned(e,guardSrc,Math.acos(.4))) BFEnemyFacing.brace(e);
+    return;
+  }
   if(e.bot && e._def) dmg=Math.round(dmg*0.55);   // arena bot in its low-HP defensive turtle takes reduced damage
   /* ROUND ONCE, HERE, before it is applied or shown.
      Oliver, playtesting: "I'm getting damage numbers in, like, the ten decimal places." Weapon
@@ -15765,7 +15771,7 @@ const MP={
     for(let i=0;i<es.length && out.length<60;i++){ const e=es[i]; if(e.dead||e.practice||e.dummy||e.mid==null) continue;
       const row=[e.mid,this.typeIdx(e.type),Math.round(e.x),Math.round(e.z),Math.max(0,Math.round(e.hp)),Math.round(e.maxHp),e.active?1:0,e.prisonFoe?BFPrisonCombat.snapshot(e):e.finalKing?BFFinalKing.snapshot(e):e.marbleGuardian?BFMarbleGuardian.snapshot(e):e.furnaceColossus?BFFurnaceColossus.snapshot(e):e.frostOfficer?BFFrostOfficers.snapshot(e):e.fallenDuel?BFFallen.snapshot(e):e.marksmanCrossing?BFMarksman.snapshot(e):e.bruteOrchard?BFBruteEncounter.snapshot(e):e.libraryGuard?{libraryGuard:e.libraryGuard,y:e.y}:e.ceKind?BFCampaignElites.snapshot(e):e.campaignElite||e.patrolReturn||e.patrolGroup?{patrolGroup:e.patrolGroup||null,patrolParent:e.patrolParent||null,patrolStyle:e.patrolStyle||null,homeRaid:e.homeRaid||null,role:e.role,roleCol:e.roleCol,color:e.color,speed:e.speed,shot:e.shot,shootCd:e.shootCd,campaignElite:!!e.campaignElite,patrolReturn:!!e.patrolReturn,elite:!!e.elite,label:e.label,y:e.y,h:e.h,r:e.r}:null];
       row[7]={...row[7],role:e.role||null,roleCol:e.roleCol||null,facingYaw:Number.isFinite(e.yaw)?e.yaw:0,shieldYaw:e.role==='shielder'?e.shieldYaw:null};
-      if(e.role==='shielder'||e.prisonFoe==='prison_guard'){row[7].guardBraced=BFEnemyFacing.bracing(e);row[7].guardPlanted=BFEnemyFacing.guardPlanted(e);}
+      if(BFEnemyFacing.shieldBearer(e)){row[7].guardBraced=BFEnemyFacing.bracing(e);row[7].guardPlanted=BFEnemyFacing.guardPlanted(e);}
       if(e.spec==='knightslam')Object.assign(row[7],{hostCrush:true,knightW:e.knightW||0,knightSerial:e.knightSerial||0,knightStrike:e.knightStrike||null});
       if(e.kind==='charger')Object.assign(row[7],{hostCharge:true,chargeSerial:e.chargeSerial||0,windT:e.windT||0,windMax:e.windMax||0,chargeT:e.chargeT||0,teleX:e.teleX||0,teleZ:e.teleZ||0,cdx:e.cdx||0,cdz:e.cdz||0});
       if(e.boss||e.hydraChain)row[7]={...row[7],...BFBossTactics.snapshot(e)};
@@ -17081,7 +17087,7 @@ function updateWorld(dt){
     if(e.dummy)e.yaw=e.fixedYaw??0;else if(mirrorFacing)BFEnemyFacing.mirror(e);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
     e.shotReleaseT=Math.max(0,(e.shotReleaseT||0)-dt);
-    const guardPlanted=(e.role==='shielder'||e.prisonFoe==='prison_guard')&&
+    const guardPlanted=BFEnemyFacing.shieldBearer(e)&&
       (mirrorFacing?(e.guardPlanted??e.guardBraced):facingFrame?.guardPlanted);
     if(guardPlanted||facingFrame?.recovering)eff=0;
     const encounterReturning=MP.guest()?!!e.encReturning:patrolManaged&&BFCampaignEncounters.retreat(G,e,encounterPlayers,dt,(dx,dz,heavy)=>moveGroundEnemy(e,dx,dz,eff,dt,300,heavy));

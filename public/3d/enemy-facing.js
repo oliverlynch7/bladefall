@@ -2,10 +2,10 @@
 (function(root){'use strict';
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,pivotSettle=.4,heavyLookInterval=.45,focusSwitchLead=65;
-const combatFlank=Math.PI*5/9,routeFlank=Math.PI*2/3;
+const combatFlank=Math.PI*85/180,combatFront=Math.PI*75/180,rearFlank=Math.PI*5/9,routeFlank=Math.PI*2/3;
 function state(e){
  let saved=memory.get(e);
- if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,pivotSettle:0,lookAim:0,lookT:0};memory.set(e,saved);}
+ if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,pivotSettle:0,combatPivoted:false,lookAim:0,lookT:0};memory.set(e,saved);}
  return saved;
 }
 function pivoting(e){return !!memory.get(e)?.frame?.pivotHeld;}
@@ -35,7 +35,7 @@ function selectTarget(e,targets){
 function rate(e){return heavy(e)?1.7:e.boss?2.1:e.kind==='charger'?2.6:e.kind==='fly'?4.4:3.4;}
 function angle(yaw,goal,dt,speed){const step=Math.max(0,Math.min(.05,dt))*speed;return wrap(yaw+Math.max(-step,Math.min(step,wrap(goal-yaw))));}
 function routeWaypoint(e){return e._facingRoute&&e._route?.find(q=>Math.hypot(q.x-e.x,q.z-e.z)>=8);}
-function turn(e,dx,dz,dt){
+function turn(e,dx,dz,dt,routeAim=false){
  const yaw=Number.isFinite(e.yaw)?e.yaw:0,frame=memory.get(e)?.frame;
  if(e.diving>0||frame&&(frame.turned||frame.busy||frame.held||frame.pivotHeld))return yaw;
  const waypoint=routeWaypoint(e);
@@ -45,10 +45,13 @@ function turn(e,dx,dz,dt){
  // After setting their feet, heavies turn toward one sampled heading. Cap the step
  // at a quarter turn so they can read the target again before committing to more.
  if(heavyPivot(e)){
-  const saved=state(e),offset=Math.abs(wrap(goal-yaw));
+  const saved=state(e),offset=Math.abs(wrap(goal-yaw)),onRoute=!!waypoint||routeAim;
   if(saved.pivotAim==null){
-   if(offset<=Math.PI/2)saved.pivotWait=null;
-   if(offset>=(waypoint?routeFlank:combatFlank)&&saved.pivotWait==null){saved.pivotWait=pivotAnticipation;saved.lookT=0;}
+   // Plant near the shoulder and only cancel once the target moves back in front.
+   if(offset<=(onRoute?Math.PI/2:combatFront)){saved.pivotWait=null;saved.combatPivoted=false;}
+   // After the first pivot, finish reacquiring without planting twice for the same shoulder.
+   const flank=onRoute?routeFlank:saved.combatPivoted?rearFlank:combatFlank;
+   if(offset>=flank&&saved.pivotWait==null){saved.pivotWait=pivotAnticipation;saved.lookT=0;}
    if(saved.pivotWait>0){
     saved.pivotWait=Math.max(0,saved.pivotWait-Math.max(0,dt));
     if(frame){frame.turned=true;frame.pivotHeld=true;}
@@ -57,6 +60,7 @@ function turn(e,dx,dz,dt){
    if(saved.pivotWait===0){
     const delta=wrap(goal-yaw);
     saved.pivotAim=wrap(yaw+Math.sign(delta)*Math.min(offset,Math.PI/2));
+    if(!onRoute)saved.combatPivoted=true;
     saved.pivotWait=null;
    }
   }

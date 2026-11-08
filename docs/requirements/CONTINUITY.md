@@ -3518,3 +3518,9 @@ In muted Chrome, moving sideways after a dive began made the previous Galewisp t
 ## Wide combat flanks (2.397.0)
 
 In a staged Chrome comparison at 105 degrees, the Sentinel and the Abyss King started tracking immediately on 2.396.0. On 2.397.0 both held their initial heading through the first 0.2 seconds, then turned and reacquired. The same Sentinel hit dealt 35 damage instead of 11. The Prison Shield Guard kept its aim through the bash and its shield brace, and a replayed guest snapshot matched the host. The Frostfell Shield Officer took 0 front damage and 61 from behind during recovery. The player's movement behind the King's sweep avoided damage and a pillar still opened the ward for a rear hit. A 2.396.0 test save retained level 9, 413 gold and the same checkpoint. The 455 focused checks and seven adjacent suites passed. Co-op evidence is a staged snapshot replay.
+
+## Shoulder openings (2.398.0)
+
+A heavy enemy plants at an 85-degree flank and cancels the wait if the player returns within 75 degrees. After the first pivot it can finish finding the player without stopping again at the same shoulder. The Frostfell Shield Officer uses the existing route threshold when aiming at a ramp waypoint.
+
+At 90 degrees, the staged Chrome Sentinel took 35 damage after 0.4 seconds, up from 11 on the previous version. Both the Sentinel and the Abyss King held their original headings for the first 0.2 seconds, then reacquired the player. A player moved behind the King's locked sweep without taking damage. A pillar still opened his ward. The Prison Shield Guard took 14 damage from the front and 35 from the rear. The Frostfell Officer took 0 from the front and 61 from the rear during recovery. A replayed guest snapshot matched the host's heading and stance. An isolated 2.397.0 checkpoint retained level 9, 413 gold and the same campaign area. Chrome used the normal game update loop with staged encounters.

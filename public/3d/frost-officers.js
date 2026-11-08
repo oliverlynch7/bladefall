@@ -22,7 +22,7 @@ function move(e,p,arena,dt,speed){
   length=Math.min(distance,speed*dt);pos=next(direction.x/distance*length,direction.z/distance*length);
  }
  if(e.frostOfficer==='shield'){
-  facing.turn(e,direction.x,direction.z,dt);
+  facing.turn(e,direction.x,direction.z,dt,routed);
   const waypoint={x:q[0],z:q[1]};
   if(facing.pivoting(e)||!facing.aligned(e,waypoint,routed?.26:Math.PI/3))return;
   if(!routed){

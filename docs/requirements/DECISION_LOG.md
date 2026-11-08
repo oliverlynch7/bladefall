@@ -2863,3 +2863,7 @@ Apply the existing attack commitment rule to Gale Wisps. Verify that a sidestep 
 ### U-ENEMY-FACING-20261104 | Wide combat flanks
 
 The 120-degree rear trigger leaves a band outside the shield arc where a heavy enemy can immediately turn a flank back into a block. Use the existing planted pivot at 100 degrees in combat and keep the established detour behavior. Check equal hits after crossing behind a guard's shoulder, the King's committed sweep and ward, and pursuit after the pause.
+
+### U-ENEMY-FACING-20261104 | Shoulder openings
+
+The live 100-degree combat threshold starts the planted turn after the player has already crossed behind the shoulder. Apply the same anticipation at 85 degrees, with a small return-to-front margin so a moving target cannot restart it every frame. Keep the 120-degree navigation-detour threshold. Compare a 90-degree flank against the live build, then check pursuit, attack recovery, shields, and the King's ward.

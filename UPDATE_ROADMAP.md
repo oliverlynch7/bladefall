@@ -4183,3 +4183,7 @@ Gale Wisps commit to their launch direction and height during a dive. They can t
 ### Wide combat flanks (2.397.0)
 
 Heavy guards and the Abyss King plant when a player slips just behind their shoulder. After the pause they pivot and resume pursuit. See requirements continuity for the flank comparison, arena counters, and save check.
+
+### Shoulder openings (2.398.0)
+
+Heavy enemies plant their feet when the player reaches their side, leaving time for a flank hit before they turn. The Abyss King keeps his committed sweep direction. Shield braces, Frostfell ramp pursuit, and the King's pillar counter were verified.

@@ -63,7 +63,7 @@ ok(pivot.yaw>0,'returning into view cancels the delay immediately');
 const azimuth=(yaw,range)=>({x:Math.sin(yaw)*range,y:0,z:Math.cos(yaw)*range,hp:100,r:16});
 for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true}]){
  for(const side of [-1,1]){
-  const e={x:0,z:0,yaw:0,...props},flank=azimuth(side*Math.PI*7/12,120);
+  const e={x:0,z:0,yaw:0,...props},flank=azimuth(side*Math.PI/2,120);
   const first=tick(e,flank,.05);
   ok(first.pivotHeld&&e.yaw===0&&!F.canAdvance(e,flank),'a wide flank plants a heavy before it can track');
   for(let i=0;i<3;i++)tick(e,flank,.05);
@@ -72,6 +72,13 @@ for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'
   ok(F.aligned(e,flank,.18)&&F.canAdvance(e,flank),'the enemy reacquires a persistent wide flank');
  }
 }
+const shoulder={x:0,z:0,yaw:0,role:'shielder'};
+for(const degrees of [89,83,86,82,84]){
+ const frame=tick(shoulder,azimuth(degrees*Math.PI/180,120),.05);
+ ok(frame.pivotHeld&&shoulder.yaw===0,'small crossings of the shoulder do not restart the planted wait');
+}
+tick(shoulder,azimuth(88*Math.PI/180,120),.05);
+ok(shoulder.yaw>0,'the planted wait completes even when the target straddles the trigger angle');
 const detourFlank=azimuth(Math.PI*7/12,120);
 const detourHeavy={x:0,z:0,yaw:0,role:'shielder',_facingRoute:true,_route:[detourFlank]};
 ok(!tick(detourHeavy,detourFlank,.05).pivotHeld&&detourHeavy.yaw>0,'an obstacle detour retains its existing waypoint turn');
@@ -313,7 +320,9 @@ for(const [e,step] of pursuitFixtures){
 const diverted={x:0,y:0,z:0,yaw:0,type:'prison_guard',hp:100,maxHp:100};
 Prison.setup(diverted);
 const nearerAlly={x:75,y:0,z:0,hp:100};
-for(let i=0;i<14;i++)tick(diverted,null,.05,()=>Prison.step(diverted,.05,nearerAlly,0));
+for(let i=0;i<4;i++)tick(diverted,null,.05,()=>Prison.step(diverted,.05,nearerAlly,0));
+ok(diverted.yaw===0&&diverted.pcState==='approach','a side target must wait out the planted turn before the bash');
+for(let i=0;i<36&&diverted.pcState==='approach';i++)tick(diverted,null,.05,()=>Prison.step(diverted,.05,nearerAlly,0));
 ok(diverted.pcState==='wind'&&diverted.yaw>.9,'deferred prison facing uses the actual encounter target');
 const aim=diverted.yaw;
 for(let i=0;i<12;i++)tick(diverted,null,.05,()=>Prison.step(diverted,.05,rear,0));

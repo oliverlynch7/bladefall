@@ -38,6 +38,7 @@ function step(e,dt,target,speed,canAttack=true){
   if(!e.pcClock){e.pcState='recover';e.pcClock=m.recover;}return;
  }
  if(e.pcState==='recover'){if(!e.pcClock){e.pcState='approach';e.pcClock=.18;}return;}
+ if(facing.bracing(e))return;
  const seq=e.hp<e.maxHp*.5&&k.second?k.second:k.sequence,next=seq[e.pcCount%seq.length],a=moves[next];
  const dx=target.x-e.x,dz=target.z-e.z,d=Math.hypot(dx,dz)||1;facing?.turn(e,dx,dz,dt);
  if(facing.pivoting(e))return;
@@ -48,7 +49,7 @@ function step(e,dt,target,speed,canAttack=true){
    e.x+=Math.sin(heading)*speed*dt;e.z+=Math.cos(heading)*speed*dt;
   }else{e.x+=dx/d*speed*dt;e.z+=dz/d*speed*dt;}
  }
- else if(!e.pcClock&&canAttack&&(!facing||facing.aligned(e,target))){
+ else if(!e.pcClock&&canAttack&&facing.canCommit(e)&&facing.aligned(e,target)){
   e.pcMove=next;e.pcState='wind';e.pcClock=a.wind;e.pcSerial++;e.pcCount++;
   [e.pcDX,e.pcDZ]=facing.forward(e);e.pcX=a.target?target.x:e.x;e.pcZ=a.target?target.z:e.z;e.pcY=e.y;
  }
@@ -85,7 +86,8 @@ function draw(e,t,a){
  const {push,pop,mv,rx,ry,rz,bx}=a,k=roster[e.prisonFoe],m=moves[e.pcMove];if(!k)return;
  const wind=e.pcState==='wind',strike=e.pcState==='strike',recover=e.pcState==='recover';
  const phase=wind?1-e.pcClock/m.wind:strike?1-e.pcClock/m.strike:0;
- const gait=e.pcState==='approach'?Math.sin(t*(e.boss?4:7)):0,flash=e.hitFlash>0;
+ const braced=e.guardBraced||facing.bracing(e);
+ const gait=e.pcState==='approach'&&!braced?Math.sin(t*(e.boss?4:7)):0,flash=e.hitFlash>0;
  const metal=flash?'#ffffff':k.color,dark=flash?'#ffffff':'#292e38',trim='#d1bea0',glow=recover?'#8de3bc':wind?'#ffb358':'#d6c9f3';
  const part=(x,y,z,w,h,d,c)=>bx(x,y,z,w,h,d,c,c===glow?glow:null);
  const limb=(x,y,z,angle,len,w,c)=>{push();mv(x,y,z);rx(angle);part(0,-len/2,0,w,len,w,c);pop();};
@@ -94,9 +96,9 @@ function draw(e,t,a){
   limb(-9,32,0,gait*.45,30,9,dark);limb(9,32,0,-gait*.45,30,9,dark);
   part(0,48,0,25,33,16,metal);part(0,53,9,19,17,4,trim);part(0,33,0,29,5,20,dark);part(0,69,0,16,18,16,dark);part(0,70,9,12,3,2,glow);part(0,80,-2,4,13,8,trim);
   const arm=wind?-.45-phase*.35:strike?-1.5:recover?-1.1:-.65;
-  limb(-18,59,0,arm,25,8,metal);limb(18,59,0,arm,25,8,metal);
+  limb(-18,59,0,braced?-1.05:arm,25,8,metal);limb(18,59,0,arm,25,8,metal);
   if(e.type==='prison_guard'){
-   push();mv(-13,44,recover?-3:18);rz(recover?-.6:0);part(0,0,0,29,48,8,metal);part(0,0,5,5,39,3,trim);pop();
+   push();mv(braced?-9:-13,braced?50:44,recover?-3:braced?23:18);rz(recover?-.6:0);part(0,0,0,29,48,8,metal);part(0,0,5,5,39,3,trim);pop();
    part(18,40,strike?35:16,8,8,35,dark);part(18,40,strike?52:33,15,14,12,trim);
   }else{push();mv(15,40,wind?-10:strike?42:12);part(0,0,24,4,4,80,trim);part(0,0,69,8,3,16,metal);pop();
   part(-19,47,7,9,25,5,trim);}

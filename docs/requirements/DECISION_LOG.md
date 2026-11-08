@@ -2851,3 +2851,5 @@ After the existing rear hesitation, heavy enemies commit to a bounded pivot step
 **Heavy targets and Frostfell ramps.** The live update chooses the nearest player twice for some bosses, allowing small co-op movement to change the preferred opponent. Give heavy enemies a 65-unit lead requirement to change focus. Reuse the selected target for the King's and Shield Officer's pursuit and next attack. Choose the officer's safe waypoint before taking the frame's turn, and require a forward step at ramp corners. Verify both shelf routes, a downed or clearly nearer player, rear hits in recovery and the King's pillar counter.
 
 **Patrol return footwork.** Let a returning guard spend its turn on its home route. Heavy guards use the existing pivot, pause and forward-step rules on that route. When a player re-enters the territory, the guard resumes combat without interrupting an attack or resetting health.
+
+**Prison Shield Guard commitment.** A frontal block during pursuit should plant this guard and hold its heading long enough to circle it. A block during a bash must preserve the bash and its recovery. Keep the Frostfell and Abyss King arena counters.

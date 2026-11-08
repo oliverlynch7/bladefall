@@ -4167,3 +4167,7 @@ Heavy enemies plant for 0.4 seconds after a committed rear pivot, then resume tu
 ## Guard footwork (2.393.0)
 
 Campaign guards turn toward their route when returning to their post. Shield enemies plant and pivot before stepping, with the same turn limits they use in a fight.
+
+## Prison Shield Guard commitment (2.394.0)
+
+A pursuing Prison Shield Guard plants its feet and holds its shield direction for 0.85 seconds after a frontal block. The guard resumes pursuit afterward, and an existing bash keeps its original aim. Muted Chrome verified the flank, a staged guest snapshot, the Frostfell Shield Officer, and the Abyss King sweep and pillar counter. See docs/requirements/CONTINUITY.md for test results.

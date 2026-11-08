@@ -3502,3 +3502,7 @@ In muted Chrome, the old Sentinel rotated 0.62 radians after completing its rear
 ## Guard footwork (2.393.0)
 
 In muted Chrome, a returning Sentinel on 2.392.0 slid 19 world units toward its post over the first 0.2 seconds while facing away. On 2.393.0 it held position, pivoted, then walked back to its post. A staged Sentinel took 12 damage from the front and 39 from the rear. The Frostfell Shield Officer blocked a front hit and took 61 from the rear during recovery. Moving behind the King's sweep avoided all damage, and a pillar counter opened the ward for a rear hit. A staged guest snapshot matched the host's shield heading. The 421 facing checks and 12 adjacent suites passed. An isolated save made on 2.392.0 kept its level, gold, and campaign checkpoint.
+
+## Prison Shield Guard commitment (2.394.0)
+
+On 2.393.0 the Prison Shield Guard turned 0.765 radians and moved 21.8 world units within 0.55 seconds of blocking in the muted Chrome test. On 2.394.0 it held both position and heading. Equal hits dealt 14 front and 35 rear damage. A block during a bash preserved the windup, and the guard resumed pursuit when the brace ended. A guest snapshot replay matched the host's heading and brace. The Frostfell Shield Officer blocked from the front and took 61 rear damage during recovery. Player movement behind the Abyss King's sweep avoided damage, and a pillar counter opened the ward for a rear strike. The 428 focused facing checks and 11 adjacent suites passed. An isolated 2.393.0 save kept its level, gold and campaign checkpoint.

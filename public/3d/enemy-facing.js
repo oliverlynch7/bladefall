@@ -8,10 +8,11 @@ function state(e){
  return saved;
 }
 function pivoting(e){return !!memory.get(e)?.frame?.pivotHeld;}
-function bracing(e){return e.role==='shielder'&&memory.get(e)?.brace>0;}
-function guardPlanted(e){return e.role==='shielder'&&(bracing(e)||memory.get(e)?.recover>0||!!action(e));}
+const canBrace=e=>e.role==='shielder'||e.prisonFoe==='prison_guard';
+function bracing(e){return canBrace(e)&&memory.get(e)?.brace>0;}
+function guardPlanted(e){return canBrace(e)&&(bracing(e)||holdsRecovery(e)||!!action(e));}
 function brace(e){
- if(e.role!=='shielder'||e.dummy||e.dead||action(e))return false;
+ if(!canBrace(e)||e.dummy||e.dead||action(e)||(e.prisonFoe&&e.pcState!=='approach'))return false;
  const saved=state(e);
  if(saved.braceCooldown>0)return false;
  saved.brace=braceTime;saved.braceCooldown=braceInterval;

@@ -154,6 +154,22 @@ ok(!F.bracing(braced)&&delta(braced.yaw,0)>.2,'shield bearer resumes bounded tur
 ok(!F.brace(braced),'the same opponent cannot immediately restart the brace');
 for(let i=0;i<30;i++)tick(braced,{x:0,z:-100},.05);
 ok(F.brace(braced),'another block can brace after cooldown');
+const prisonBrace={type:'prison_guard',x:0,y:0,z:0,yaw:0,hp:100,maxHp:100};
+Prison.setup(prisonBrace);
+prisonBrace.pcClock=0;
+const stepPrison=target=>tick(prisonBrace,null,.05,()=>Prison.step(prisonBrace,.05,target,100));
+ok(F.brace(prisonBrace),'a pursuing Prison Shield Guard can brace');
+for(let i=0;i<8;i++)stepPrison({x:0,y:0,z:75});
+ok(prisonBrace.pcState==='approach'&&prisonBrace.pcSerial===0,'the brace prevents a new point-blank bash');
+for(let i=0;i<8;i++)stepPrison({x:130,y:0,z:220});
+ok(prisonBrace.x===0&&prisonBrace.z===0&&prisonBrace.yaw===0,'a braced Prison Shield Guard holds its footing and heading');
+ok(Prison.guardDamage(prisonBrace,{x:0,z:75},100)===40&&
+   Prison.guardDamage(prisonBrace,{x:0,z:-75},100)===100,'the planted shield covers the front and leaves the back open');
+ok(!F.brace(prisonBrace),'successive blocks do not extend the prison brace');
+for(let i=0;i<50;i++)stepPrison({x:130,y:0,z:220});
+ok(!F.bracing(prisonBrace)&&prisonBrace.x>0&&prisonBrace.yaw>.3,'the prison guard turns and pursues after the brace');
+prisonBrace.pcState='wind';
+ok(!F.brace(prisonBrace),'a block cannot interrupt a committed prison bash');
 for(const [flags,phase,x,z] of [[{finalKing:true,akState:'wind'},'ak',0,1],[{frostOfficer:'shield',offState:'strike'},'off',1,0],[{marbleGuardian:true,mcState:'wind'},'mc',-1,0],[{furnaceColossus:true,fcState:'strike'},'fc',0,-1],[{fallenDuel:true,fallState:'thrust'},'fall',1,0],[{ceKind:'guard',ceState:'wind'},'ce',0,1],[{prisonFoe:'prison_guard',pcState:'strike'},'pc',1,0]]){const yaw=Math.atan2(x,z),e={x:0,z:0,yaw,...flags,[phase+'DX']:x,[phase+'DZ']:z};for(let i=0;i<80;i++)tick(e,{x:-x*100,z:-z*100},.016,()=>e.yaw=yaw+Math.PI);ok(delta(e.yaw,yaw)<1e-8,'authored '+phase+' commitment survives target switch');}
 const king={finalKing:true,boss:true,x:0,z:0,y:0,yaw:0,hp:100,maxHp:100,akStage:'fight1',akState:'recover',akClock:.01,akBeat:0,akSeq:0,phase:1},front={x:0,z:150,y:0,hp:100,r:16},rear={...front,z:-150};tick(king,front,.016,()=>King.step(king,.016,front));ok(king.akState==='wind','king begins its normal attack');for(let i=0;i<100&&king.akState!=='strike';i++)tick(king,rear,.016,()=>King.step(king,.016,rear));ok(king.akState==='strike','king completes windup');ok(King.inAttack(king,front),'committed sweep hits front');ok(!King.inAttack(king,rear),'king rear is safe from front sweep');ok(delta(king.yaw,0)<1e-8,'king visual sweep stays aligned');
 const late={...king,akState:'recover',akClock:0,yaw:0};tick(late,rear,.016,()=>King.step(late,.016,rear));ok(late.akState==='approach','king waits to turn before new attack');

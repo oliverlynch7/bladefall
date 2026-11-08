@@ -3482,3 +3482,8 @@ Heavy guards and the Abyss King now turn toward a sampled heading during pursuit
 ## Heavy enemy footwork (2.388.0)
 
 In muted Chrome, a staged wide sidestep moved the Sentinel and Abyss King 30 and 34.5 world units sideways in the first 0.3 seconds on 2.387.0. Both held position on 2.388.0 and resumed pursuit after facing within 60 degrees of the player. Equal hits dealt 12 front and 39 rear damage to the Sentinel. Player movement behind the King's committed sweep avoided damage, and a pillar counter still opened the ward for a rear hit. The host snapshot and guest projectile hit round trip preserved shield behavior. A 2.387.0 save resumed with level 9, 413 gold and its campaign checkpoint. All 13 selected Node suites passed, including 316 facing checks. Co-op evidence used staged packets in one browser.
+
+
+## Heavy enemy stepping (2.389.0)
+
+At a 45-degree sidestep in Chrome, the Sentinel's lateral movement over the first 0.3 seconds fell from 21.2 to 7.7 world units and the Abyss King's from 24.4 to 8.9. Both turned and pursued afterward. The Sentinel still took 12 frontal damage versus 39 from behind, and a staged guest snapshot preserved its planted facing. The King's sweep missed the player behind him, and his pillar counter opened the ward for a rear hit. The shared boss variant held through lunge recovery, then turned and chased. The 332 focused facing checks, related combat suites, and a pre-update campaign save reload passed. Co-op targeting and snapshots were staged in Chrome.

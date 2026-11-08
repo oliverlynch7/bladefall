@@ -10,7 +10,11 @@ function nav(arena,e,p){const nodes=arena.nodes,nearest=q=>nodes.reduce((best,n,
  if(!e._offRoute||e._offEnd!==end){const route=[end];let v=end;while(prev[v]!=null){v=prev[v];route.unshift(v);}e._offRoute=route;e._offEnd=end;}
  while(e._offRoute.length){const n=nodes[e._offRoute[0]];if(Math.hypot(e.x-n[0],e.z-n[1])<40&&Math.abs(e.y-floor(n[0],n[1],arena))<45)e._offRoute.shift();else return n;}return [p.x,p.z,p.y];
 }
-function move(e,p,arena,dt,speed){let q=[p.x,p.z,p.y];if(Math.abs(e.y-p.y)>28||e._offRoute?.length)q=nav(arena,e,p);let dx=q[0]-e.x,dz=q[1]-e.z,d=Math.hypot(dx,dz)||1;const length=Math.min(d,speed*dt);let x=clamp(e.x+dx/d*length,-800,800),z=clamp(e.z+dz/d*length,-810,760),y=floor(x,z,arena);
+function move(e,p,arena,dt,speed){const routed=Math.abs(e.y-p.y)>28||e._offRoute?.length;let q=routed?nav(arena,e,p):[p.x,p.z,p.y];let dx=q[0]-e.x,dz=q[1]-e.z,d=Math.hypot(dx,dz)||1;const length=Math.min(d,speed*dt);let x=clamp(e.x+dx/d*length,-800,800),z=clamp(e.z+dz/d*length,-810,760),y=floor(x,z,arena);
+ if(!routed&&e.frostOfficer==='shield'&&facing.canAdvance(e,p)&&Math.abs(y-e.y)<=28){
+  const heading=facing.advanceHeading(e,dx,dz),sx=clamp(e.x+Math.sin(heading)*length,-800,800),sz=clamp(e.z+Math.cos(heading)*length,-810,760),sy=floor(sx,sz,arena);
+  if(Math.abs(sy-e.y)<=28){x=sx;z=sz;y=sy;}
+ }
  if(y-e.y>50){q=nav(arena,e,p);dx=q[0]-e.x;dz=q[1]-e.z;d=Math.hypot(dx,dz)||1;x=e.x+dx/d*length;z=e.z+dz/d*length;y=floor(x,z,arena);}
  if(y-e.y<=50){e.x=x;e.z=z;e.y=y;facing?.turn(e,dx,dz,dt);} }
 function step(e,dt,p,a){if(!alive(e))return;dt=clamp(dt,0,.05);const group=a.enemies.filter(q=>q.frostOfficer&&alive(q)),shield=group.some(q=>q.frostOfficer==='shield'),caster=group.some(q=>q.frostOfficer==='caster');

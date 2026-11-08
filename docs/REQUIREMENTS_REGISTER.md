@@ -2932,3 +2932,5 @@ Heavy pursuit should wait for a forward step when a player moves far to the side
 **Committed rear pivots.** After the existing hesitation, heavy enemies turn toward one sampled heading in a step of up to 90 degrees. They stay planted and cannot start a new attack during that step. They reacquire the active target afterward.
 
 **Pursuit follow-up.** During pursuit, heavy guards and the Abyss King reacquire a moving target at short intervals. Attacks and planted guards keep their committed direction and the existing boss counters still apply.
+
+**Heavy footwork.** On open ground, heavy guards and the Abyss King take steps mostly in the direction they face. Keep existing attack and guard commitments, arena counters, and obstacle routes.

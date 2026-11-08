@@ -33,6 +33,13 @@ const azimuth=(yaw,range)=>({x:Math.sin(yaw)*range,y:0,z:Math.cos(yaw)*range,hp:
 const stepGuard={x:0,z:0,yaw:0,role:'shielder'};
 ok(F.canAdvance(stepGuard,azimuth(Math.PI/4,120)),'ordinary diagonal pursuit stays available');
 ok(!F.canAdvance(stepGuard,azimuth(Math.PI*.44,120)),'the guard cannot step nearly sideways');
+for(const yaw of [-Math.PI+.04,0,Math.PI-.04]){
+ const guard={yaw};
+ for(const offset of [-.7,-.12,0,.12,.7]){
+  const target=azimuth(yaw+offset,100),heading=F.advanceHeading(guard,target.x,target.z);
+  ok(delta(heading,yaw+Math.sign(offset)*Math.min(.26,Math.abs(offset)))<1e-8,'a heavy step preserves small corrections and limits wide strafing across the angle seam');
+ }
+}
 for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true},{type:'tyrant',boss:true}]){
  for(const hz of [30,60,120]){
   const e={x:0,z:0,yaw:0,...props},dt=1/hz;
@@ -71,6 +78,11 @@ for(let i=0;i<7;i++)tick(sideKing,kingFlank,.05,()=>King.step(sideKing,.05,kingF
 ok(sideKing.x===0&&sideKing.z===0&&sideKing.yaw===0,'the King waits out a wide sidestep before advancing');
 for(let i=0;i<15;i++)tick(sideKing,kingFlank,.05,()=>King.step(sideKing,.05,kingFlank));
 ok(sideKing.x>0&&sideKing.yaw>0,'the King approaches after turning into the flank');
+const diagonalKing={...turningKing,x:0,z:0,yaw:0,akClock:3};
+const straight=azimuth(0,235),diagonal=azimuth(Math.PI/4,390);
+tick(diagonalKing,straight,.05,()=>King.step(diagonalKing,.05,straight));
+for(let i=0;i<5;i++)tick(diagonalKing,diagonal,.05,()=>King.step(diagonalKing,.05,diagonal));
+ok(diagonalKing.yaw===0&&diagonalKing.z>20&&diagonalKing.x/diagonalKing.z<.28,'the King takes forward steps through a diagonal sidestep while his heading is planted');
 
 const held={x:0,z:0,yaw:0,staggerT:1};tick(held,{x:0,z:-100},.05,()=>held.yaw=Math.PI);ok(held.yaw===0,'stagger cannot rotate');
 const blink={x:0,z:0,yaw:0,blinkFx:.65};

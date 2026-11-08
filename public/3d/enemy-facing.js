@@ -64,6 +64,11 @@ function turn(e,dx,dz,dt){
 function aligned(e,p,arc=.65){const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz);return d<.001||(dx*Math.sin(e.yaw||0)+dz*Math.cos(e.yaw||0))/d>=Math.cos(arc);}
 // Heavy enemies plant rather than taking a near-sideways step to follow a flank.
 function canAdvance(e,p){return !pivoting(e)&&aligned(e,p,Math.PI/3);}
+// Small steering corrections are fine, but a heavy enemy cannot strafe at walking speed.
+function advanceHeading(e,dx,dz){
+ const yaw=e.yaw||0,offset=wrap(Math.atan2(dx,dz)-yaw);
+ return yaw+Math.max(-.26,Math.min(.26,offset));
+}
 function directionalGuard(e){return e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield'||e.finalKing;}
 // Rewind from the collision point to the incoming edge of the target's hit circle.
 function projectileSide(e,p){
@@ -144,5 +149,5 @@ function canCommit(e){
  return !pivoting(e)&&!saved?.frame?.busy&&!saved?.frame?.held&&!(saved?.recover>0)&&!bracing(e)&&!action(e);
 }
 function contact(e,p){return aligned(e,p,meleeArc);}
-const api={turn,aligned,canAdvance,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={turn,aligned,canAdvance,advanceHeading,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

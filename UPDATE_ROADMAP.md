@@ -4146,3 +4146,8 @@ Heavy guards and the Abyss King check the player's position at intervals during 
 ## [Codex | 2026-11-07] Heavy enemy footwork (v2.388.0)
 
 Shield enemies and the Abyss King turn before advancing on a player who slips wide to the side. Windups, active strikes and planted recoveries retain their original facing. The King still rewards using the arena to open his ward.
+
+
+## [Codex | 2026-11-07] Heavy enemy stepping (v2.389.0)
+
+Shield enemies and the Abyss King step mostly forward when pursuing across open ground, even when the player moves diagonally. They can still follow obstacle routes and commit to the same attacks and arena counters.

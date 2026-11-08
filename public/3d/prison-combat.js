@@ -42,8 +42,11 @@ function step(e,dt,target,speed,canAttack=true){
  const dx=target.x-e.x,dz=target.z-e.z,d=Math.hypot(dx,dz)||1;facing?.turn(e,dx,dz,dt);
  if(facing.pivoting(e))return;
  if(d>a.range){
-  if(e.prisonFoe==='prison_guard'&&!facing.canAdvance(e,target))return;
-  e.x+=dx/d*speed*dt;e.z+=dz/d*speed*dt;
+  if(e.prisonFoe==='prison_guard'){
+   if(!facing.canAdvance(e,target))return;
+   const heading=facing.advanceHeading(e,dx,dz);
+   e.x+=Math.sin(heading)*speed*dt;e.z+=Math.cos(heading)*speed*dt;
+  }else{e.x+=dx/d*speed*dt;e.z+=dz/d*speed*dt;}
  }
  else if(!e.pcClock&&canAttack&&(!facing||facing.aligned(e,target))){
   e.pcMove=next;e.pcState='wind';e.pcClock=a.wind;e.pcSerial++;e.pcCount++;

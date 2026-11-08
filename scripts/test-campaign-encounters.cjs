@@ -63,7 +63,7 @@ test('real host snapshots include specialist melee timing and clear obsolete tim
  const fs=require('node:fs'),vm=require('node:vm'),source=fs.readFileSync('public/3d/index.html','utf8');
  const start=source.indexOf('  enemySnap(){'),end=source.indexOf('  noteKill(',start);
  const g=world();g.enemies=[foe({type:'sporeback',spec:'spores',meleeW:.4,meleeSerial:7,encReturning:true}),foe({mid:2,ceKind:'briar_guard',ceState:'hunt',ceSerial:2})];
- const c={G:g,BFCampaignEncounters:C,BFCampaignElites:E,STATUS_ORDER:[],syncedMelee:e=>e.kind==='walk'&&!e.ceKind&&!e.spec};vm.createContext(c);
+ const c={G:g,BFCampaignEncounters:C,BFCampaignElites:E,BFEnemyFacing:require('../public/3d/enemy-facing.js'),STATUS_ORDER:[],syncedMelee:e=>e.kind==='walk'&&!e.ceKind&&!e.spec};vm.createContext(c);
  const host=vm.runInContext('({typeIdx:()=>0,'+source.slice(start,end)+'})',c),rows=host.enemySnap();
  assert.equal(rows[0][7].encounterOwned,true);assert.equal(rows[0][7].normalMelee,true);assert.equal(rows[0][7].meleeSerial,7);assert.equal(rows[0][7].meleeW,.4);assert.equal(rows[0][7].encReturning,true);
  assert.equal(rows[1][7].normalMelee,false);assert.equal(rows[1][7].ceState,'hunt');

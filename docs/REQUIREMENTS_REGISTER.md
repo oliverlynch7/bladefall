@@ -2934,3 +2934,5 @@ Heavy pursuit should wait for a forward step when a player moves far to the side
 **Pursuit follow-up.** During pursuit, heavy guards and the Abyss King reacquire a moving target at short intervals. Attacks and planted guards keep their committed direction and the existing boss counters still apply.
 
 **Heavy footwork.** On open ground, heavy guards and the Abyss King take steps mostly in the direction they face. Keep existing attack and guard commitments, arena counters, and obstacle routes.
+
+**Heavy obstacle routes.** When a campaign guard has to go around cover, make its body turn toward its route before stepping. Keep turning bounded and preserve the existing attack and defensive commitments.

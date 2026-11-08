@@ -4151,3 +4151,7 @@ Shield enemies and the Abyss King turn before advancing on a player who slips wi
 ## [Codex | 2026-11-07] Heavy enemy stepping (v2.389.0)
 
 Shield enemies and the Abyss King step mostly forward when pursuing across open ground, even when the player moves diagonally. They can still follow obstacle routes and commit to the same attacks and arena counters.
+
+## [Codex | 2026-11-07] Heavy guard detours (v2.390.0)
+
+Heavy ground guards turn toward their next safe step around cover. They hold their attack and shield commitments, then reacquire the player when the direct path clears.

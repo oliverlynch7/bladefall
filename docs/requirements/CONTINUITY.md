@@ -3487,3 +3487,7 @@ In muted Chrome, a staged wide sidestep moved the Sentinel and Abyss King 30 and
 ## Heavy enemy stepping (2.389.0)
 
 At a 45-degree sidestep in Chrome, the Sentinel's lateral movement over the first 0.3 seconds fell from 21.2 to 7.7 world units and the Abyss King's from 24.4 to 8.9. Both turned and pursued afterward. The Sentinel still took 12 frontal damage versus 39 from behind, and a staged guest snapshot preserved its planted facing. The King's sweep missed the player behind him, and his pillar counter opened the ward for a rear hit. The shared boss variant held through lunge recovery, then turned and chased. The 332 focused facing checks, related combat suites, and a pre-update campaign save reload passed. Co-op targeting and snapshots were staged in Chrome.
+
+## Heavy guard detours (2.390.0)
+
+In muted Chrome, a staged guard walked directly sideways while detouring around a wall in 2.389.0. In 2.390.0 it turned and cleared the same wall, with sideways movement at most 26% of a step and with the same turn-rate limit. The Sentinel took 12 damage from a frontal hit and 39 from the rear. The King's committed sweep missed the player behind him, and the pillar counter opened the ward for a rear hit. Staged guest snapshot replay, shared boss commitments, 336 focused facing assertions, seven related Node suites, and a 2.389.0 campaign save reload passed.

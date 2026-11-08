@@ -20,9 +20,12 @@ function brace(e){
 function heavy(e){return e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield'||e.briarRole==='guard'||e.campaignRole==='guard'||['sentinel','siegeknight','marblestatue'].includes(e.type);}
 function rate(e){return heavy(e)?1.7:e.boss?2.1:e.kind==='charger'?2.6:e.kind==='fly'?4.4:3.4;}
 function angle(yaw,goal,dt,speed){const step=Math.max(0,Math.min(.05,dt))*speed;return wrap(yaw+Math.max(-step,Math.min(step,wrap(goal-yaw))));}
+function routeWaypoint(e){return e._facingRoute&&e._route?.find(q=>Math.hypot(q.x-e.x,q.z-e.z)>=8);}
 function turn(e,dx,dz,dt){
  const yaw=Number.isFinite(e.yaw)?e.yaw:0,frame=memory.get(e)?.frame;
  if(frame&&(frame.turned||frame.busy||frame.held))return yaw;
+ const waypoint=routeWaypoint(e);
+ if(waypoint){dx=waypoint.x-e.x;dz=waypoint.z-e.z;}
  if(!(Math.hypot(dx,dz)>.001))return yaw;
  let goal=Math.atan2(dx,dz);
  // After setting their feet, heavies turn toward one sampled heading. Cap the step
@@ -63,7 +66,7 @@ function turn(e,dx,dz,dt){
 }
 function aligned(e,p,arc=.65){const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz);return d<.001||(dx*Math.sin(e.yaw||0)+dz*Math.cos(e.yaw||0))/d>=Math.cos(arc);}
 // Heavy enemies plant rather than taking a near-sideways step to follow a flank.
-function canAdvance(e,p){return !pivoting(e)&&aligned(e,p,Math.PI/3);}
+function canAdvance(e,p){return !pivoting(e)&&aligned(e,routeWaypoint(e)||p,Math.PI/3);}
 // Small steering corrections are fine, but a heavy enemy cannot strafe at walking speed.
 function advanceHeading(e,dx,dz){
  const yaw=e.yaw||0,offset=wrap(Math.atan2(dx,dz)-yaw);

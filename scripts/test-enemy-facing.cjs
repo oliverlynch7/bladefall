@@ -3,6 +3,18 @@ const fs=require('node:fs'),vm=require('node:vm'),ctx={window:{BFEnemyFacing:F},
 const delta=(a,b)=>Math.abs(Math.atan2(Math.sin(a-b),Math.cos(a-b)));
 let checks=0;function ok(v,msg){assert(v,msg);checks++;}
 function tick(e,p,dt=.016,ai=()=>{}){const frame=F.begin(e,p,dt);ai();F.finish(e,dt,frame);return frame;}
+const routeGuard={x:0,z:0,yaw:0,role:'shielder',_facingRoute:true,_route:[{x:0,z:4},{x:60,z:0}]};
+const routePlayer={x:0,z:200};
+ok(!F.canAdvance(routeGuard,routePlayer),'a guard does not sidestep to a route while facing the player');
+for(let i=0;i<20;i++)tick(routeGuard,routePlayer,.05);
+ok(F.aligned(routeGuard,routeGuard._route[1],.26)&&F.canAdvance(routeGuard,routePlayer),'the guard turns to the next safe waypoint');
+const routeHeading=routeGuard.yaw;
+routeGuard.meleeW=.6;routeGuard.meleeSerial=1;routeGuard._route=[{x:-60,z:0}];
+tick(routeGuard,routePlayer,.05);
+ok(routeGuard.yaw===routeHeading,'route changes cannot redirect a committed attack');
+routeGuard.meleeW=0;routeGuard._facingRoute=false;
+for(let i=0;i<50;i++)tick(routeGuard,routePlayer,.05);
+ok(F.aligned(routeGuard,routePlayer,.26),'the guard reacquires the player when the detour ends');
 for(const dt of [1/120,1/60,1/30,.05,.2])for(const props of [{role:'shielder'},{boss:true},{kind:'charger'},{kind:'fly'},{}]){const e={x:0,z:0,yaw:Math.PI-.02,...props};tick(e,{x:0,z:100},dt,()=>e.yaw=0);ok(delta(e.yaw,Math.PI-.02)<=F.rate(e)*Math.min(.05,dt)+1e-8,'no snap even when AI overwrites yaw');}
 ok(delta(F.angle(Math.PI-.01,-Math.PI+.01,.016,1),Math.PI-.01)<.017,'wrap takes short arc');
 const guard={x:0,z:0,yaw:0,role:'shielder',meleeW:.5,meleeSerial:1};

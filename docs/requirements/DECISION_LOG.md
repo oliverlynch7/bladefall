@@ -2843,3 +2843,5 @@ After the existing rear hesitation, heavy enemies commit to a bounded pivot step
 **Pursuit footwork.** The 2.387.0 heading sampler is live, but guards and the Abyss King can still move almost perpendicular to their facing. Require a player to be within 60 degrees of their front before these enemies advance. Preserve existing routes, stance and attack timings, and ward counters. Compare a wide sidestep and subsequent pursuit with the previous live build.
 
 **Diagonal pursuit.** At a 45-degree sidestep in 2.388.0, the Sentinel and the Abyss King move equally sideways and forward without turning. Limit lateral steering during open-ground pursuit. Compare early displacement and subsequent reacquisition, and exercise the existing shield and arena counters.
+
+**Obstacle detours.** The open-ground steering cap in 2.389.0 is skipped on a navigation detour. Let a heavy ground guard turn toward its next safe waypoint and take a forward step, then look back to the player when the direct path clears. Exercise the detour, melee recovery, and King's sweep separately.

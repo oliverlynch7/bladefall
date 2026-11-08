@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2389"></script>
+<script src="./enemy-facing.js?v=2390"></script>
 <script src="./prison-combat.js?v=2389"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.389.0-heavy-footwork';
+const VERSION3D='2.390.0-guard-detours';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -11489,6 +11489,7 @@ function enemyRouteContext(e){
 }
 function moveGroundEnemy(e,dx,dz,speed,dt,range=300,faceStep=false){
  if(speed<=0)return;const length=Math.hypot(dx,dz);if(length<.001)return;dx/=length;dz/=length;
+ if(!faceStep)e._facingRoute=false;
  const reach=Math.max(1,Math.min(300,range)),look=Math.min(reach,Math.max(48,speed*dt));
  const goal={x:e.x+dx*reach,z:e.z+dz*reach,y:e.y},ahead={x:e.x+dx*look,z:e.z+dz*look};
  const directContext=enemyRouteContext(e,look+2*(e.r||0)+32);
@@ -11503,13 +11504,19 @@ function moveGroundEnemy(e,dx,dz,speed,dt,range=300,faceStep=false){
   while(e._route?.length&&Math.hypot(e._route[0].x-e.x,e._route[0].z-e.z)<8)e._route.shift();
   node=e._route?.[0];
  }
+ e._facingRoute=faceStep&&!direct&&!!node;
  if(!node)return;
  const d=Math.hypot(node.x-e.x,node.z-e.z),step=Math.min(speed*dt,d);if(d<.001)return;
  let stepX=(node.x-e.x)/d,stepZ=(node.z-e.z)/d;
- if(faceStep&&direct){const heading=BFEnemyFacing.advanceHeading(e,dx,dz);stepX=Math.sin(heading);stepZ=Math.cos(heading);}
+ if(faceStep){
+  if(direct){
+   if(!BFEnemyFacing.canAdvance(e,node))return;
+   const heading=BFEnemyFacing.advanceHeading(e,stepX,stepZ);stepX=Math.sin(heading);stepZ=Math.cos(heading);
+  }else if(!BFEnemyFacing.aligned(e,node,.26))return; // Keep the safe route line at tight corners.
+ }
  const next={x:e.x+stepX*step,z:e.z+stepZ*step};
  if(enemyRouteEdge(e,e,next,directContext)){e.x=next.x;e.z=next.z;}
- else {e._route=null;e._routeAt=Math.min(e._routeAt||0,G.time+.15);}
+ else {e._route=null;e._facingRoute=false;e._routeAt=Math.min(e._routeAt||0,G.time+.15);}
 }
 function syncedMelee(e){return e.kind==='walk'&&!e.boss&&!e.ceKind&&!e.prisonFoe&&(!e.spec||e.role==='shielder');}
 function enemyPartyTarget(e,p){

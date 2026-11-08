@@ -330,6 +330,29 @@ for(const state of ['wind','strike']){
 }
 borderGuard.ceState='hunt';
 ok(borderRetreat()&&borderMoves===1,'campaign guard can return home after its recovery');
+const returningShield={...leashGuard,active:true,hp:71,meleeW:0,yaw:0,shieldYaw:0};
+let firstPatrolStep=null,patrolFrames=0;
+function patrolFrame(players=[outsideLeash]){
+ const dt=1/60,frame=F.begin(returningShield,null,dt);
+ const returning=CampaignEncounters.retreat(battlefield,returningShield,players,dt,(dx,dz,heavy)=>{
+  assert.equal(heavy,true);
+  if(!F.canAdvance(returningShield,returningShield.encHome))return;
+  const heading=F.advanceHeading(returningShield,dx,dz);
+  firstPatrolStep??=patrolFrames;
+  returningShield.x+=Math.sin(heading)*3;returningShield.z+=Math.cos(heading)*3;
+ });
+ F.finish(returningShield,dt,frame);
+ patrolFrames++;
+ return returning;
+}
+for(let i=0;i<12;i++)patrolFrame();
+ok(returningShield.encReturning&&returningShield.yaw===0&&returningShield.z===240,'rear patrol return starts by planting');
+for(let i=0;i<90;i++)patrolFrame();
+ok(returningShield.encReturning&&firstPatrolStep===null&&delta(returningShield.yaw,Math.PI/2)<.3,'heavy patrol holds in place through the first pivot and pause');
+for(let i=0;i<180&&returningShield.active;i++)patrolFrame();
+ok(firstPatrolStep!==null&&!returningShield.active&&returningShield.z<30&&returningShield.hp===71,'heavy patrol walks home and keeps existing damage');
+Object.assign(returningShield,{active:true,x:0,z:240,yaw:0,encReturning:true});
+ok(!patrolFrame([{x:0,y:0,z:10,hp:100}])&&!returningShield.encReturning,'a returning heavy guard reengages a player who enters its territory');
 // Exercise the actual game warning geometry and projectile release together.
 const main=fs.readFileSync('public/3d/index.html','utf8');
 const rings=[],markers=[],projectiles=[];

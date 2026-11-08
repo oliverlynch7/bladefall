@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2392"></script>
+<script src="./enemy-facing.js?v=2393"></script>
 <script src="./prison-combat.js?v=2389"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1174,7 +1174,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./home-bell-defense.js?v=2153"></script>
 <script src="./briar-combat.js?v=2342"></script>
 <script src="./campaign-elites.js?v=2388"></script>
-<script src="./campaign-encounters.js?v=2386"></script>
+<script src="./campaign-encounters.js?v=2393"></script>
 <script src="./enemy-navigation.js?v=2103"></script>
 <script src="./campaign-objects.js?v=2319"></script>
 <script src="./briar-journey.js?v=2302"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.392.0-rear-openings';
+const VERSION3D='2.393.0-guard-footwork';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -17043,8 +17043,9 @@ function updateWorld(dt){
     if(e.bot){ botAI(e,dt); continue; }                 // Arena AI bots run their own player-like combat AI
     if(e.boss&&!e.active&&!(e.dropT>0))e.dropT=.65;
     const bossTarget=e.boss?bossPartyTarget(e,p):null;
-    const wakeDistance=e.boss?(bossTarget?dXZ(e.x,e.z,bossTarget.x,bossTarget.z):Infinity):MP.active&&(e.ceKind||syncedMelee(e)||BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e))?Math.min(...encounterPlayers.map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
-    if(MP.guest()&&BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e)){if(!e.active)continue;e.dropT=0;}
+    const patrolManaged=BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e);
+    const wakeDistance=e.boss?(bossTarget?dXZ(e.x,e.z,bossTarget.x,bossTarget.z):Infinity):MP.active&&(e.ceKind||syncedMelee(e)||patrolManaged)?Math.min(...encounterPlayers.map(q=>dXZ(e.x,e.z,q.x,q.z))):dXZ(e.x,e.z,p.x,p.z);
+    if(MP.guest()&&patrolManaged){if(!e.active)continue;e.dropT=0;}
     if(e.dropT>0){ if(wakeDistance<(e.marksmanCrossing?1600:640)&&(MP.guest()||BFCampaignEncounters.canWake(G,e,encounterPlayers,enemyMeleeClear))){ e.dropT-=dt; if(e.dropT<=0){ e.active=true; burst(e.x,4,e.z,e.color,8);
       if(e.boss) onBossActivate(e); else mobAggro(e); } } continue; }   // curated per-mob aggro voice on wake
     if(!e.active) continue;
@@ -17062,19 +17063,21 @@ function updateWorld(dt){
        respects a stun respects this. */
     if((G._freezeT||0)>0)eff=0;
     if(e.stunT>0){ e.stunT-=dt; eff=0; }
-    const partyTarget=e.ceKind||e.prisonFoe||syncedMelee(e)||BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e)?enemyPartyTarget(e,p):p;
+    const partyTarget=e.ceKind||e.prisonFoe||syncedMelee(e)||patrolManaged?enemyPartyTarget(e,p):p;
     const meleeTarget=inBrokenWalls()&&e.keepEscort?BFBrokenWalls.target(G,e,partyTarget):inGreatFurnace()&&e.furnaceEscort?BFGreatFurnace.target(G,e,partyTarget):inLostCanyon()&&(e.canyonEscort||e.canyonAlarm)?BFLostCanyon.target(G,e,partyTarget):partyTarget;
     const d=Math.max(1,dXZ(meleeTarget.x,meleeTarget.z,e.x,e.z)); let dirX=(meleeTarget.x-e.x)/d, dirZ=(meleeTarget.z-e.z)/d;
     // Scripted guards choose a target or return waypoint inside their encounter AI.
     const facingTarget=e.prisonFoe||e.ceKind||e.frostOfficer?null:e.boss?bossTarget:meleeTarget;
     const mirrorFacing=MP.guest()&&Number.isFinite(e.facingYaw);
-    const facingFrame=e.dummy||mirrorFacing||e.stunT>0||(G._freezeT||0)>0?null:BFEnemyFacing.begin(e,facingTarget,dt);
+    const facingFrame=e.dummy||mirrorFacing||e.stunT>0||(G._freezeT||0)>0?null:BFEnemyFacing.begin(e,patrolManaged?null:facingTarget,dt);
     if(e.dummy)e.yaw=e.fixedYaw??0;else if(mirrorFacing)BFEnemyFacing.mirror(e);
     if(e.stunT>0||(G._freezeT||0)>0)continue;
     e.shotReleaseT=Math.max(0,(e.shotReleaseT||0)-dt);
     const guardPlanted=e.role==='shielder'&&(mirrorFacing?(e.guardPlanted??e.guardBraced):facingFrame?.guardPlanted);
-    if(guardPlanted||facingFrame?.recovering||BFEnemyFacing.pivoting(e))eff=0;
-    const encounterReturning=MP.guest()?!!e.encReturning:BFCampaignEncounters.retreat(G,e,encounterPlayers,dt,(dx,dz)=>moveGroundEnemy(e,dx,dz,eff,dt));
+    if(guardPlanted||facingFrame?.recovering)eff=0;
+    const encounterReturning=MP.guest()?!!e.encReturning:patrolManaged&&BFCampaignEncounters.retreat(G,e,encounterPlayers,dt,(dx,dz,heavy)=>moveGroundEnemy(e,dx,dz,eff,dt,300,heavy));
+    if(facingFrame&&patrolManaged&&!encounterReturning&&facingTarget)BFEnemyFacing.turn(e,facingTarget.x-e.x,facingTarget.z-e.z,dt);
+    if(BFEnemyFacing.pivoting(e))eff=0;
     // Shield bearers pivot before chasing a flank. Guests follow the host's position instead of chasing a different target.
     if(!encounterReturning&&e.role==='shielder'&&(mirrorFacing||!BFEnemyFacing.canAdvance(e,meleeTarget)))eff=0;
     if(encounterReturning){/* Return on real floors with normal HP and collision; no healing/reset exploit. */}
@@ -17191,7 +17194,7 @@ function updateWorld(dt){
         else if(e.y>sup) e.y=Math.max(sup,e.y-340*dt);// hop down
       }
     }
-    if(!e.dummy){if(mirrorFacing)BFEnemyFacing.mirror(e);else BFEnemyFacing.finish(e,dt,facingFrame,encounterReturning);}
+    if(!e.dummy){if(mirrorFacing)BFEnemyFacing.mirror(e);else BFEnemyFacing.finish(e,dt,facingFrame);}
     if(!e.dead && !encounterReturning && !e.ceKind && !e.prisonFoe && !(MP.guest()&&e.normalMelee&&(e._meleeSeenSerial!==e.meleeSerial||(e._meleeSeen||0)<.4)) && e.dmg>0 && (e.boss?e.lunge>0:e.kind==='charger'?e.chargeT>0&&(!MP.guest()||!e.hostCharge||e._chargeSeen>=.18):e.meleeActive>0)){ const pd=G.pet&&!G.pet.dead?dXZ(e.x,e.z,G.pet.x,G.pet.z):1e9, petClose=pd<e.r+15&&Math.abs(e.y-G.pet.y)<42;
       if(inBrokenWalls()&&!MP.guest()&&e.keepEscort&&e.meleeActive>0&&BFBrokenWalls.hitEscort(G,e)){/* The host owns escort health and retry state. */}
       else if(inGreatFurnace()&&!MP.guest()&&e.furnaceEscort&&e.meleeActive>0&&BFGreatFurnace.hitEscort(G,e)){/* The host owns worker health and retry state. */}

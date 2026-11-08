@@ -4163,3 +4163,7 @@ Heavy enemies stick with their current opponent through near ties in co-op. The 
 ## Rear openings (2.392.0)
 
 Heavy enemies plant for 0.4 seconds after a committed rear pivot, then resume turning and moving. The pause gives players time to finish their flank. Existing attack and guard locks still apply.
+
+## Guard footwork (2.393.0)
+
+Campaign guards turn toward their route when returning to their post. Shield enemies plant and pivot before stepping, with the same turn limits they use in a fight.

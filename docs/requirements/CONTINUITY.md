@@ -3498,3 +3498,7 @@ The King and other heavy enemies retain their current opponent when a co-op team
 ## Rear openings (2.392.0)
 
 In muted Chrome, the old Sentinel rotated 0.62 radians after completing its rear pivot and reduced the staged flank hit to 12 damage. The new Sentinel held its heading and took 39 from the same hit. The King held position and heading during the pause, then resumed pursuit. Moving behind his sweep avoided damage and his pillar counter still opened the ward. A staged guest snapshot preserved the host's guard direction. The 417 focused facing assertions and 12 related suites passed. A pre-change save loaded with the same level, gold, and campaign checkpoint.
+
+## Guard footwork (2.393.0)
+
+In muted Chrome, a returning Sentinel on 2.392.0 slid 19 world units toward its post over the first 0.2 seconds while facing away. On 2.393.0 it held position, pivoted, then walked back to its post. A staged Sentinel took 12 damage from the front and 39 from the rear. The Frostfell Shield Officer blocked a front hit and took 61 from the rear during recovery. Moving behind the King's sweep avoided all damage, and a pillar counter opened the ward for a rear hit. A staged guest snapshot matched the host's shield heading. The 421 facing checks and 12 adjacent suites passed. An isolated save made on 2.392.0 kept its level, gold, and campaign checkpoint.

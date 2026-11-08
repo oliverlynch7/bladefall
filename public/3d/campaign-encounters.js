@@ -135,7 +135,7 @@ function retreat(G,e,players,dt,move){
  if(!e.encHome)home(e);
  const facing=root.BFEnemyFacing;
  // A visible attack takes priority even if a patrol return was already in progress.
- if(facing?.action(e)||facing?.pivoting(e)||facing?.guardPlanted(e)||facing?.holdsRecovery(e)||root.BFCampaignElites?.dangerous(e)){
+ if(facing?.action(e)||facing?.guardPlanted(e)||facing?.holdsRecovery(e)||root.BFCampaignElites?.dangerous(e)){
   e.encReturning=false;
   return false;
  }
@@ -146,7 +146,10 @@ function retreat(G,e,players,dt,move){
  if(!e.encReturning)return false;
  if(near){e.encReturning=false;return false;}
  if(homeDistance<30&&Math.abs(e.y-h.y)<45){e.encReturning=false;e.active=false;e.dropT=.65;return true;}
- const dx=(h.x-e.x)/(homeDistance||1),dz=(h.z-e.z)/(homeDistance||1);e.yaw=Math.atan2(dx,dz);move(dx,dz);
+ const dx=(h.x-e.x)/(homeDistance||1),dz=(h.z-e.z)/(homeDistance||1);
+ const heavy=!!facing?.heavy(e);
+ facing?.turn(e,dx,dz,dt);
+ if(!heavy||!facing.pivoting(e))move(dx,dz,heavy);
  return true;
 }
 const api={plans,active,managed,install,reinstate,canWake,retreat};root.BFCampaignEncounters=api;if(typeof module!=='undefined')module.exports=api;

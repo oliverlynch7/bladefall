@@ -15,7 +15,7 @@ async page=>{
   const place=(px,pz)=>Object.assign(p,{x:px,z:pz,vx:0,vy:0,vz:0,onGround:true,invuln:100});
   place(x,z-105);pump(1);const origin={x:e.x,z:e.z};
   pump(24);const recovery={distance:Math.hypot(e.x-origin.x,e.z-origin.z),yaw:e.yaw,lunge:e.lunge};
-  pump(24);const pivot={distance:Math.hypot(e.x-origin.x,e.z-origin.z),yaw:e.yaw};
+  pump(42);const pivot={distance:Math.hypot(e.x-origin.x,e.z-origin.z),yaw:e.yaw};
   pump(100);const pursuit={distance:Math.hypot(e.x-origin.x,e.z-origin.z),yaw:e.yaw};
   check(recovery.distance<.001&&pivot.distance<.001,{recovery,pivot});
   check(Math.abs(recovery.yaw)<.001&&Math.abs(pivot.yaw)>.1&&pursuit.distance>6,{recovery,pivot,pursuit});

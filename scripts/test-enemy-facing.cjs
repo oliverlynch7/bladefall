@@ -30,6 +30,9 @@ tick(pivot,{x:0,z:-100},.05);
 tick(pivot,{x:100,z:100},.05);
 ok(pivot.yaw>0,'returning into view cancels the delay immediately');
 const azimuth=(yaw,range)=>({x:Math.sin(yaw)*range,y:0,z:Math.cos(yaw)*range,hp:100,r:16});
+const stepGuard={x:0,z:0,yaw:0,role:'shielder'};
+ok(F.canAdvance(stepGuard,azimuth(Math.PI/4,120)),'ordinary diagonal pursuit stays available');
+ok(!F.canAdvance(stepGuard,azimuth(Math.PI*.44,120)),'the guard cannot step nearly sideways');
 for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true},{type:'tyrant',boss:true}]){
  for(const hz of [30,60,120]){
   const e={x:0,z:0,yaw:0,...props},dt=1/hz;
@@ -61,6 +64,13 @@ const kingTick=p=>tick(turningKing,p,.05,()=>King.step(turningKing,.05,p));
 for(let i=0;i<7;i++)kingTick(azimuth(2.8,320));
 for(let i=0;i<8;i++)kingTick(azimuth(.8,300));
 ok(turningKing.x===0&&turningKing.z===0&&turningKing.akState==='approach','the King cannot slide or attack when the player re-enters his arc mid-pivot');
+const sideKing={...turningKing,x:0,z:0,yaw:0,akClock:3};
+tick(sideKing,azimuth(0,235),.05,()=>King.step(sideKing,.05,azimuth(0,235)));
+const kingFlank=azimuth(Math.PI*.44,350);
+for(let i=0;i<7;i++)tick(sideKing,kingFlank,.05,()=>King.step(sideKing,.05,kingFlank));
+ok(sideKing.x===0&&sideKing.z===0&&sideKing.yaw===0,'the King waits out a wide sidestep before advancing');
+for(let i=0;i<15;i++)tick(sideKing,kingFlank,.05,()=>King.step(sideKing,.05,kingFlank));
+ok(sideKing.x>0&&sideKing.yaw>0,'the King approaches after turning into the flank');
 
 const held={x:0,z:0,yaw:0,staggerT:1};tick(held,{x:0,z:-100},.05,()=>held.yaw=Math.PI);ok(held.yaw===0,'stagger cannot rotate');
 const blink={x:0,z:0,yaw:0,blinkFx:.65};
@@ -115,7 +125,7 @@ for(let i=0;i<35;i++)summonedTick(distantRear);
 ok(summoningKing.akState==='recover'&&delta(summoningKing.yaw,0)<1e-8,'King stays planted through recovery after the guards fall');
 for(let i=0;i<15;i++)summonedTick(distantRear);
 ok(summoningKing.akState==='approach'&&delta(summoningKing.yaw,0)>.2&&summoningKing.z===0,'King pivots toward the player once the stance and recovery end');
-for(let i=0;i<15;i++)summonedTick(distantRear);
+for(let i=0;i<21;i++)summonedTick(distantRear);
 ok(summoningKing.z<0,'King resumes forward pursuit after the stance');
 const pg={type:'prison_guard',x:0,z:0,y:0,yaw:0,hp:100};Prison.setup(pg);pg.pcClock=0;for(let i=0;i<10;i++)tick(pg,rear,.016,()=>Prison.step(pg,.016,rear,0));ok(pg.pcState==='approach','prison guard cannot instantly bash behind itself');
 for(const data of [{chargeT:1,cdx:1,cdz:0},{windT:1,teleX:1,teleZ:0},{cleaveW:1,cleaveX:1,cleaveZ:0},{shotW:1,shotAim:{x:100,z:0}},{marksmanCrossing:true,markState:'aim',markClock:.4,markX:100,markZ:0},{bruteOrchard:true,bruteState:'charge',teleX:1,teleZ:0}]){const e={x:0,z:0,yaw:Math.PI/2,...data};for(let i=0;i<40;i++)tick(e,{x:-100,z:0});ok(delta(e.yaw,Math.PI/2)<1e-8,'charge/projectile vectors stay committed');}
@@ -200,6 +210,11 @@ const pursuitFixtures=[
   (e,p)=>Elites.step(e,.05,p,100)]
 ];
 for(const [e,step] of pursuitFixtures){
+ const sidestepGuard={...e},sideTarget=azimuth(Math.PI*.44,500);
+ tick(sidestepGuard,azimuth(0,100),.05,()=>step(sidestepGuard,azimuth(0,100)));
+ const foot={x:sidestepGuard.x,z:sidestepGuard.z};
+ for(let i=0;i<6;i++)tick(sidestepGuard,sideTarget,.05,()=>step(sidestepGuard,sideTarget));
+ ok(sidestepGuard.x===foot.x&&sidestepGuard.z===foot.z,'authored guards wait before pursuing a wide sidestep');
  for(let i=0;i<17;i++)tick(e,farRear,.05,()=>step(e,farRear));
  ok(e.z===0&&Math.abs(e.yaw)>.9,'an authored guard pivots in place to reacquire a flank');
  for(let i=0;i<20;i++)tick(e,farRear,.05,()=>step(e,farRear));
@@ -222,7 +237,7 @@ for(let i=0;i<12&&exposed.akState==='recover';i++)exposedTick();
 ok(exposed.akState==='approach'&&Tactics.rule({},exposed,farRear).factor===0,'ward closes before reacquisition');
 for(let i=0;i<6;i++)exposedTick();
 ok(exposed.z===0&&delta(exposed.yaw,0)>.05,'king pivots in place after the opening');
-for(let i=0;i<17;i++)exposedTick();
+for(let i=0;i<30&&exposed.z===0;i++)exposedTick();
 ok(exposed.z<0,'king advances once he faces the player again');
 for(let i=0;i<40&&exposed.akState==='approach';i++)exposedTick();
 ok(exposed.akState==='wind','king eventually lines up and starts the next attack');

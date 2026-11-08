@@ -42,7 +42,7 @@ function step(e,dt,target,speed,canAttack=true){
  const dx=target.x-e.x,dz=target.z-e.z,d=Math.hypot(dx,dz)||1;facing?.turn(e,dx,dz,dt);
  if(facing.pivoting(e))return;
  if(d>a.range){
-  if(e.prisonFoe==='prison_guard'&&!facing.aligned(e,target,Math.PI/2))return;
+  if(e.prisonFoe==='prison_guard'&&!facing.canAdvance(e,target))return;
   e.x+=dx/d*speed*dt;e.z+=dz/d*speed*dt;
  }
  else if(!e.pcClock&&canAttack&&(!facing||facing.aligned(e,target))){

@@ -4142,3 +4142,7 @@ Shield enemies and the Abyss King finish a planted turn before reacquiring the p
 ## [Codex | 2026-11-07] Heavy enemy pursuit (v2.387.0)
 
 Heavy guards and the Abyss King check the player's position at intervals during pursuit instead of following every sidestep. They keep the aim they committed to through an attack or planted stance, giving players a chance to circle behind.
+
+## [Codex | 2026-11-07] Heavy enemy footwork (v2.388.0)
+
+Shield enemies and the Abyss King turn before advancing on a player who slips wide to the side. Windups, active strikes and planted recoveries retain their original facing. The King still rewards using the arena to open his ward.

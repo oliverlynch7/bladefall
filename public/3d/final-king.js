@@ -19,7 +19,7 @@ function step(e,dt,p,{adds=0,summon=()=>{},cue=()=>{}}={}){if(!combat(e))return;
 if(e.akState==='approach'){
  const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz);
  facing.turn(e,dx,dz,dt);
- if(d>240&&!facing.pivoting(e)&&facing.aligned(e,p,Math.PI/2)){
+ if(d>240&&facing.canAdvance(e,p)){
   const x=Math.max(-760,Math.min(760,e.x+dx/d*115*dt)),z=Math.max(-800,Math.min(850,e.z+dz/d*115*dt));
   if(!pillars.some(q=>Math.abs(x-q.x)<45+(e.r||43)&&Math.abs(z-q.z)<45+(e.r||43))){e.x=x;e.z=z;}
  }

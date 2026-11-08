@@ -16,6 +16,12 @@ for(const type of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'s
 }
 focusAlly.x=175;
 ok(F.selectTarget({x:0,z:0},[focusPlayer,focusAlly])===focusAlly,'ordinary enemies still choose the nearest opponent');
+const wisp={x:0,z:0,yaw:0,kind:'fly',diving:.5};
+tick(wisp,focusAlly,.05);
+ok(wisp.yaw===0,'a diving Galewisp keeps its initial heading after a sidestep');
+wisp.diving=0;
+tick(wisp,focusAlly,.05);
+ok(wisp.yaw>0,'a Galewisp can turn toward its target again after the dive');
 const routeGuard={x:0,z:0,yaw:0,role:'shielder',_facingRoute:true,_route:[{x:0,z:4},{x:60,z:0}]};
 const routePlayer={x:0,z:200};
 ok(!F.canAdvance(routeGuard,routePlayer),'a guard does not sidestep to a route while facing the player');

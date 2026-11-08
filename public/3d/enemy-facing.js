@@ -36,7 +36,7 @@ function angle(yaw,goal,dt,speed){const step=Math.max(0,Math.min(.05,dt))*speed;
 function routeWaypoint(e){return e._facingRoute&&e._route?.find(q=>Math.hypot(q.x-e.x,q.z-e.z)>=8);}
 function turn(e,dx,dz,dt){
  const yaw=Number.isFinite(e.yaw)?e.yaw:0,frame=memory.get(e)?.frame;
- if(frame&&(frame.turned||frame.busy||frame.held||frame.pivotHeld))return yaw;
+ if(e.diving>0||frame&&(frame.turned||frame.busy||frame.held||frame.pivotHeld))return yaw;
  const waypoint=routeWaypoint(e);
  if(waypoint){dx=waypoint.x-e.x;dz=waypoint.z-e.z;}
  if(!(Math.hypot(dx,dz)>.001))return yaw;

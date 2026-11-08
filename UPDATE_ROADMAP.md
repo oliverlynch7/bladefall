@@ -4175,3 +4175,7 @@ A pursuing Prison Shield Guard plants its feet and holds its shield direction fo
 ### Frostfell Shield Officer brace (2.395.0)
 
 The Shield Officer plants briefly after a frontal block and displays an icy shield arc in the committed direction. The existing post-wave flank still opens the officer to damage.
+
+### Galewisp dive commitment (2.396.0)
+
+Gale Wisps commit to their launch direction and height during a dive. They can turn and pursue again afterward. The host shares the dive pose, heading, and melee timing with guests. Cover, stationary-target hits, and timed dodges passed in Chrome. See the requirements continuity entry for shield, King, and save checks.

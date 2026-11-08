@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2395"></script>
+<script src="./enemy-facing.js?v=2396"></script>
 <script src="./prison-combat.js?v=2394"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.395.0-officer-brace';
+const VERSION3D='2.396.0-committed-dives';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -11516,7 +11516,7 @@ function moveGroundEnemy(e,dx,dz,speed,dt,range=300,faceStep=false){
  if(enemyRouteEdge(e,e,next,directContext)){e.x=next.x;e.z=next.z;}
  else {e._route=null;e._facingRoute=false;e._routeAt=Math.min(e._routeAt||0,G.time+.15);}
 }
-function syncedMelee(e){return e.kind==='walk'&&!e.boss&&!e.ceKind&&!e.prisonFoe&&(!e.spec||e.role==='shielder');}
+function syncedMelee(e){return !!e.dive||e.kind==='walk'&&!e.boss&&!e.ceKind&&!e.prisonFoe&&(!e.spec||e.role==='shielder');}
 function enemyPartyTarget(e,p){
  if((e.petTauntT||0)>0){
   if(!MP.active||e.petTauntId===MP.myId){if(G.pet&&!G.pet.dead&&G.pet.hp>0)return G.pet;}
@@ -15774,6 +15774,7 @@ const MP={
       if(BFEnemyFacing.shieldBearer(e)){row[7].guardBraced=BFEnemyFacing.bracing(e);row[7].guardPlanted=BFEnemyFacing.guardPlanted(e);}
       if(e.spec==='knightslam')Object.assign(row[7],{hostCrush:true,knightW:e.knightW||0,knightSerial:e.knightSerial||0,knightStrike:e.knightStrike||null});
       if(e.kind==='charger')Object.assign(row[7],{hostCharge:true,chargeSerial:e.chargeSerial||0,windT:e.windT||0,windMax:e.windMax||0,chargeT:e.chargeT||0,teleX:e.teleX||0,teleZ:e.teleZ||0,cdx:e.cdx||0,cdz:e.cdz||0});
+      if(e.dive)row[7].diving=e.diving||0;
       if(e.boss||e.hydraChain)row[7]={...row[7],...BFBossTactics.snapshot(e)};
       if(e.homeBellWave)row[7]={...row[7],homeBellWave:e.homeBellWave,label:e.label,y:e.y};
       if(BFCampaignEncounters.active(G)&&BFCampaignEncounters.managed(e))row[7]={...row[7],encounterOwned:true,encReturning:!!e.encReturning,y:e.y};
@@ -17128,17 +17129,31 @@ function updateWorld(dt){
     const wasBlinking=e.blinkFx>0;
     if(e.spec){ specBehavior(e,dt,meleeTarget,dirX,dirZ,d,guardPlanted); }
     if(e.eruptW>0||e.knightW>0||e.fuseT>0||wasBlinking||e.blinkFx>0)eff=0;
-    if(e.kind==='fly'){ e.bob+=dt*2.4;
+    if(e.kind==='fly')e.bob+=dt*2.4;
+    if(e.dive&&mirrorFacing){e.diving=Math.max(0,(e.diving||0)-dt);}
+    else if(e.kind==='fly'){
       const flyTarget=e.dive&&isCampaignAdventure()?meleeTarget:p;
-      const perch=galewispCoverPerch(e,flyTarget);
-      if(perch)e.diving=0; // Sheltered players stay safe; the wisp waits at the approach-side edge.
+      const perch=e.diving>0?null:galewispCoverPerch(e,flyTarget);
       let ty=Math.max(0,flyTarget.y+44+Math.sin(e.bob)*52-8), spd=eff;   // wave tracks the target's height
+      let diveStep=null;
       if(e.dive){                                                // galewisp: hover high, telegraphed swoop to your level, then climb back
-        if(e.diving>0){ e.diving-=dt; ty=Math.max(0,flyTarget.y+4); spd=eff*2.5; if(e.diving<=0) e.diveCd=2.4+Math.random()*1.8; }
-        else { e.diveCd=(e.diveCd==null?1.4:e.diveCd)-dt; ty=Math.max(0,flyTarget.y+78+Math.sin(e.bob)*26);
-          if(!perch&&e.diveCd<=0 && d<420){ e.diving=0.8; SFX.growl(1.25); addText(e.x,e.y+e.h+10,e.z,'!','#bfe0e8',true); } } }
+        if(e.diving>0){
+          e.diving=Math.max(0,e.diving-dt);
+          ty=e.diveHeight;spd=eff*2.5;
+          diveStep=Math.min(e.diveTravel,spd*dt);
+          e.diveTravel-=diveStep;
+          [dirX,dirZ]=BFEnemyFacing.forward(e);
+          if(e.diving===0)e.diveCd=2.4+Math.random()*1.8;
+        }else{
+          e.diveCd=(e.diveCd??1.4)-dt;ty=Math.max(0,flyTarget.y+78+Math.sin(e.bob)*26);
+          if(!perch&&e.diveCd<=0&&d<420&&BFEnemyFacing.canCommit(e)&&BFEnemyFacing.aligned(e,flyTarget,.2)){
+            e.diving=.8;e.diveHeight=Math.max(0,flyTarget.y+4);e.diveTravel=d;diveStep=0;
+            SFX.growl(1.25);addText(e.x,e.y+e.h+10,e.z,'!','#bfe0e8',true);
+          }
+        }
+      }
       if(perch){const toEdge=Math.hypot(perch.x-e.x,perch.z-e.z);dirX=toEdge>6?(perch.x-e.x)/toEdge:0;dirZ=toEdge>6?(perch.z-e.z)/toEdge:0;}
-      e.x+=dirX*spd*dt; e.z+=dirZ*spd*dt;
+      e.x+=dirX*(diveStep??spd*dt); e.z+=dirZ*(diveStep??spd*dt);
       e.y+=Math.sign(ty-e.y)*Math.min(Math.abs(ty-e.y),spd*1.6*dt);
       // A Galewisp's warned strike must carry its body down to contact height, even though
       // the shared melee wind-up halts horizontal movement. The player can still dodge out.

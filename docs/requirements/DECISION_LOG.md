@@ -2855,3 +2855,7 @@ After the existing rear hesitation, heavy enemies commit to a bounded pivot step
 **Prison Shield Guard commitment.** A frontal block during pursuit should plant this guard and hold its heading long enough to circle it. A block during a bash must preserve the bash and its recovery. Keep the Frostfell and Abyss King arena counters.
 
 - Enemy facing follow-up. Apply the existing planted shield brace to the Frostfell Shield Officer's frontal blocks in pursuit. The wave and its rear recovery remain the damage opportunity.
+
+### U-ENEMY-FACING-20261104 | Committed Galewisp dives
+
+Apply the existing attack commitment rule to Gale Wisps. Verify that a sidestep during the dive leaves its trajectory and facing unchanged, while shelter still protects the player and a stationary target can still be hit by the warned melee strike. The host supplies the dive and its facing to guests.

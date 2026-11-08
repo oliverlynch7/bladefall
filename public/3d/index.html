@@ -1129,7 +1129,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2390"></script>
+<script src="./enemy-facing.js?v=2391"></script>
 <script src="./prison-combat.js?v=2389"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
@@ -1211,7 +1211,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <script src="./journal-clues.js?v=2203"></script>
 <script src="./music-score.js?v=2293"></script>
 <script src="./fallen-encounter.js?v=2369"></script>
-<script src="./frost-officers.js?v=2389"></script>
+<script src="./frost-officers.js?v=2391"></script>
 <script src="./story-authority.js?v=2325"></script>
 <script src="./skill-surfaces.js?v=2330f"></script><script src="./skill-identity.js?v=2362b"></script>
 <script src="./campaign-journey.js?v=2318"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.390.0-guard-detours';
+const VERSION3D='2.391.0-heavy-targets';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -8546,8 +8546,7 @@ function buildBruteOrchard(ctx){
 function updatePrisonFoe(e,dt,p,eff){
  const C=BFPrisonCombat,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
  if(!MP.guest()){
-  let target=p.hp>0&&!p.dead&&!p.downed?p:null;
-  for(const q of Object.values(MP.active?MP.peers:{}))if(q.hp>0&&!q.downed&&!q.dead&&q.zone===MP.zone&&q.area===G.area&&(!target||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z)))target=q;
+  let target=bossPartyTarget(e,p);
   if(G.devKeep)target=devBeta().target(e,target);
   const busy=G.enemies.filter(o=>o!==e&&!o.dead&&o.prisonRoom===e.prisonRoom&&['wind','strike'].includes(o.pcState)).length;
   C.step(e,dt,target,eff,busy<2&&!!target&&!losBlocked(e.x,e.z,target.x,target.z));
@@ -8617,12 +8616,11 @@ function drawCampaignEliteDanger(e){
 // downed companion or a stale position from another level/half of the campaign.
 function bossPartyTarget(origin,p){
  const living=q=>q&&q.hp>0&&!q.dead&&!q.downed&&Number.isFinite(q.x)&&Number.isFinite(q.y)&&Number.isFinite(q.z);
- let target=living(p)?p:null;
- for(const q of Object.values(MP.active?MP.peers:{})){
-  if(!living(q)||(q.last??0)>=3||q.zone!==(MP.zone??G.zone)||q.area!==G.area)continue;
-  if(!target||dXZ(origin.x,origin.z,q.x,q.z)<dXZ(origin.x,origin.z,target.x,target.z))target=q;
+ const targets=living(p)?[p]:[];
+ if(MP.active)for(const q of Object.values(MP.peers)){
+  if(living(q)&&(q.last??0)<3&&q.zone===(MP.zone??G.zone)&&q.area===G.area)targets.push(q);
  }
- return target;
+ return BFEnemyFacing.selectTarget(origin,targets);
 }
 function bruteChargeGround(e,x,z){
  const body={...e,x,z};resolveObstacles(body,e.r,null,0);if(Math.hypot(body.x-x,body.z-z)>.1)return false;
@@ -8706,7 +8704,7 @@ function finalKingTick(dt){if(!G?.kingFinal){document.getElementById('finalCharg
  }
  return mode==='npc';
 }
-function updateFinalKing(e,dt,p){updateBossBar(e);if(!BFFinalKing.combat(e))return;if(!MP.guest()){const target=bossPartyTarget(e,p);
+function updateFinalKing(e,dt,p,target){updateBossBar(e);if(!BFFinalKing.combat(e))return;if(!MP.guest()){
  if(target)BFFinalKing.step(e,dt,target,{adds:G.enemies.filter(q=>q.kingAdd&&!q.dead&&q.hp>0).length,cue:k=>{if(k!=='wind'||!window.BFWorldSfx?.warningReady(e,key=>!!FXBUF[key]))playFx(k==='wind'?'atk2':'heavyhit',.6);},summon:()=>{for(const [i,type]of ['grunt','royalarcanist','grunt'].entries()){const q=spawnEnemy(type,-250+i*250,450,false);Object.assign(q,{y:0,active:true,dropT:0,kingAdd:true});}toast('His last guards enter. The King holds back while they fight.');}});}
  BFFinalKing.trackWaveJump(e,p); // Local to each player: a cleared wave cannot hit again on landing.
  if(!MP.guest()&&BFFinalKing.environmentalCounter(e,[...(pauseState().protected?[]:[p]),...Object.values(MP.active?MP.peers:{}).filter(q=>q.zone===G.zone&&q.area===G.area&&(q.last==null||q.last<3))])){addText(e.x,e.y+e.h+25,e.z,'ROYAL WARD BROKEN','#a6edb5');playFx('heavyhit',.6);}
@@ -8725,9 +8723,9 @@ function updateFurnaceColossus(e,dt,p){
  if(target)BFFurnaceColossus.step(e,dt,target,{enemies:G.enemies,cue:kind=>{if(kind!=='wind'||!window.BFWorldSfx?.warningReady(e,key=>!!FXBUF[key]))playFx(kind==='wind'?'atk2':'heavyhit',.6);},repair:()=>{for(const x of [-700,700]){const q=spawnEnemy('grunt',x,400,false);Object.assign(q,{active:true,dropT:0,y:120,furnaceRepair:true,label:'Forge repair guard'});}toast('A repair crew has arrived. Defeat them to stop the repairs.');}});}
  if(BFFurnaceColossus.inAttack(e,p)&&e._fcHit!==e.fcSeq){e._fcHit=e.fcSeq;hurtPlayer(e.dmg,e.fcX,e.fcZ,foeHit(e,e.fcKind==='sweep'?'a low furnace sweep':e.fcKind==='slam'?'a marked hammer strike':'a marked heat vent'));}
 }
-function updateFrostOfficer(e,dt,p,eff){
+function updateFrostOfficer(e,dt,p,target,eff){
  updateBossBar(e);if(!G.frostOfficers.intro){G.frostOfficers.intro=true;toast('Three officers block the exit. Leave the marked circles, jump the shield wave, and dodge the spear line. Ramps reach both shelves.');}
- if(!MP.guest()){const target=bossPartyTarget(e,p);if(target)BFFrostOfficers.step(e,dt,target,{enemies:G.enemies,arena:G.frostOfficers,speed:eff,cue:kind=>{if(kind!=='wind'||!window.BFWorldSfx?.warningReady(e,key=>!!FXBUF[key]))playFx(kind==='wind'?'atk2':'heavyhit',.55);}});}
+ if(!MP.guest()&&target){BFFrostOfficers.step(e,dt,target,{enemies:G.enemies,arena:G.frostOfficers,speed:eff,cue:kind=>{if(kind!=='wind'||!window.BFWorldSfx?.warningReady(e,key=>!!FXBUF[key]))playFx(kind==='wind'?'atk2':'heavyhit',.55);}});}
  if(BFFrostOfficers.inAttack(e,p)&&e._offHit!==e.offSeq){e._offHit=e.offSeq;hurtPlayer(e.dmg,e.offX,e.offZ,foeHit(e,{caster:'a marked ice burst',shield:'a shield wave',spear:'a locked spear thrust'}[e.frostOfficer]));}
 }
 function updateFallenDuel(e,dt,p,eff){
@@ -11529,11 +11527,12 @@ function enemyPartyTarget(e,p){
   const forced=MP.peers[e.tauntId];
   if(forced&&forced.zone===MP.zone&&forced.area===G.area&&forced.hp>0&&!forced.downed)return forced;
  }
- let target=p;
- if(MP.host_())for(const q of Object.values(MP.peers)){
-  if(q.zone!==MP.zone||q.area!==G.area||q.hp<=0||q.downed||!Number.isFinite(q.x)||!Number.isFinite(q.z))continue;
-  if(target.hp<=0||target.downed||dXZ(e.x,e.z,q.x,q.z)<dXZ(e.x,e.z,target.x,target.z))target=q;
- }return target;
+ if(!MP.host_())return p;
+ const targets=p.hp>0&&!p.downed&&!p.dead?[p]:[];
+ for(const q of Object.values(MP.peers)){
+  if(q.zone===MP.zone&&q.area===G.area&&q.hp>0&&!q.downed&&!q.dead&&(q.last??0)<3&&Number.isFinite(q.x)&&Number.isFinite(q.z))targets.push(q);
+ }
+ return BFEnemyFacing.selectTarget(e,targets)||p;
 }
 function enemyMeleeClear(e,target){
  const a={x:e.x,z:e.z,y:(e.y||0)+Math.min(e.h||40,48)*.55},b={x:target.x,z:target.z,y:(target.y||0)+Math.min(target.h||40,48)*.55};
@@ -17067,7 +17066,7 @@ function updateWorld(dt){
     const meleeTarget=inBrokenWalls()&&e.keepEscort?BFBrokenWalls.target(G,e,partyTarget):inGreatFurnace()&&e.furnaceEscort?BFGreatFurnace.target(G,e,partyTarget):inLostCanyon()&&(e.canyonEscort||e.canyonAlarm)?BFLostCanyon.target(G,e,partyTarget):partyTarget;
     const d=Math.max(1,dXZ(meleeTarget.x,meleeTarget.z,e.x,e.z)); let dirX=(meleeTarget.x-e.x)/d, dirZ=(meleeTarget.z-e.z)/d;
     // Scripted guards choose a target or return waypoint inside their encounter AI.
-    const facingTarget=e.prisonFoe||e.ceKind?null:e.boss?bossTarget:meleeTarget;
+    const facingTarget=e.prisonFoe||e.ceKind||e.frostOfficer?null:e.boss?bossTarget:meleeTarget;
     const mirrorFacing=MP.guest()&&Number.isFinite(e.facingYaw);
     const facingFrame=e.dummy||mirrorFacing||e.stunT>0||(G._freezeT||0)>0?null:BFEnemyFacing.begin(e,facingTarget,dt);
     if(e.dummy)e.yaw=e.fixedYaw??0;else if(mirrorFacing)BFEnemyFacing.mirror(e);
@@ -17614,10 +17613,10 @@ function bossEnterShield(e){ if(!bossRaid(e)) return;
   G.shake=Math.min(G.shake+8,16); SFX.boss(); addText(e.x,e.h+30,e.z,'WARDED','#7fd6ff',true);
   toast('🔮 The '+ (e.label||'boss') +' is shielded — shatter the healing crystals!'); playFx('portalopen'); }
 function updateBoss(e,dt,p,target,eff){
-  if(e.finalKing){updateFinalKing(e,dt,p);return;}
+  if(e.finalKing){updateFinalKing(e,dt,p,target);return;}
   if(e.marbleGuardian){updateMarbleGuardian(e,dt,p);return;}
   if(e.furnaceColossus){updateFurnaceColossus(e,dt,p);return;}
-  if(e.frostOfficer){updateFrostOfficer(e,dt,p,eff);return;}
+  if(e.frostOfficer){updateFrostOfficer(e,dt,p,target,eff);return;}
   if(e.fallenDuel){updateFallenDuel(e,dt,p,eff);return;}
   if(e.marksmanCrossing){updateCrossingMarksman(e,dt,p);return;}
   if(e.bruteOrchard){updateOrchardBrute(e,dt,p,eff);return;}

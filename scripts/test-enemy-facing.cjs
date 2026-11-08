@@ -3,6 +3,19 @@ const fs=require('node:fs'),vm=require('node:vm'),ctx={window:{BFEnemyFacing:F},
 const delta=(a,b)=>Math.abs(Math.atan2(Math.sin(a-b),Math.cos(a-b)));
 let checks=0;function ok(v,msg){assert(v,msg);checks++;}
 function tick(e,p,dt=.016,ai=()=>{}){const frame=F.begin(e,p,dt);ai();F.finish(e,dt,frame);return frame;}
+const focusPlayer={x:0,z:180},focusAlly={x:170,z:0};
+for(const type of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true},{type:'tyrant'}]){
+ const enemy={x:0,z:0,...type};
+ focusAlly.x=190;
+ ok(F.selectTarget(enemy,[focusPlayer,focusAlly])===focusPlayer,'heavy enemies initially choose the nearer opponent');
+ focusAlly.x=150;
+ ok(F.selectTarget(enemy,[focusPlayer,focusAlly])===focusPlayer,'a near tie does not redirect a heavy enemy');
+ focusAlly.x=90;
+ ok(F.selectTarget(enemy,[focusPlayer,focusAlly])===focusAlly,'a substantially closer opponent can draw focus');
+ ok(F.selectTarget(enemy,[focusPlayer])===focusPlayer,'an unavailable target is dropped immediately');
+}
+focusAlly.x=175;
+ok(F.selectTarget({x:0,z:0},[focusPlayer,focusAlly])===focusAlly,'ordinary enemies still choose the nearest opponent');
 const routeGuard={x:0,z:0,yaw:0,role:'shielder',_facingRoute:true,_route:[{x:0,z:4},{x:60,z:0}]};
 const routePlayer={x:0,z:200};
 ok(!F.canAdvance(routeGuard,routePlayer),'a guard does not sidestep to a route while facing the player');

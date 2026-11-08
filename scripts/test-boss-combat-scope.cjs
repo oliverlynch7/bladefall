@@ -3,7 +3,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const source=fs.readFileSync('public/3d/index.html','utf8');
 const functionSource=name=>{const start=source.indexOf('function '+name+'(');assert(start>=0,name);const end=source.indexOf('\n}',start);assert(end>start,name);return source.slice(start,end+2);};
 const threat=require('../public/3d/campaign-threat.js');
-const ctx={BFCampaignThreat:threat,G:{zone:0,area:-1,ngDmg:1},MP:{active:true,peers:{}},isCampaignAdventure:()=>true,dXZ:(a,b,c,d)=>Math.hypot(c-a,d-b),DIFFICULTY:1,stageScale:()=>1+ctx.G.zone*.22,campaignEnemyDamageMul:()=>1,tEnemyDmg:()=>1,dtune:()=>({boss:1})};
+const ctx={BFCampaignThreat:threat,BFEnemyFacing:require('../public/3d/enemy-facing.js'),G:{zone:0,area:-1,ngDmg:1},MP:{active:true,peers:{}},isCampaignAdventure:()=>true,dXZ:(a,b,c,d)=>Math.hypot(c-a,d-b),DIFFICULTY:1,stageScale:()=>1+ctx.G.zone*.22,campaignEnemyDamageMul:()=>1,tEnemyDmg:()=>1,dtune:()=>({boss:1})};
 vm.createContext(ctx);vm.runInContext(functionSource('bossPartyTarget')+'\n'+functionSource('scaledEnemyDamage'),ctx);
 const origin={x:0,z:0},p={x:500,z:0,y:0,hp:100},peer={x:40,z:0,y:0,hp:100,zone:0,area:-1};
 let cases=0;

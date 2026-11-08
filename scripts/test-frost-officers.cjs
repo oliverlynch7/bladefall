@@ -9,3 +9,19 @@ const shield=G.enemies.find(e=>e.frostOfficer==='shield');shield.dead=true;const
 console.log('Officers passed: all three roles, single major attack cap across 256 seconds, locked warnings, no early hits, height dodges, death cancellation and survivor tactic.');
 for(const target of [{x:-600,z:-300,y:100,hp:100},{x:600,z:-350,y:180,hp:100},{x:0,z:-740,y:160,hp:100}]){for(const e of G.enemies)Object.assign(e,{x:0,z:500,y:0,dead:false,offState:'hunt',offClock:0,_offRoute:null,offTurn:0});for(let i=0;i<18000;i++)for(const e of G.enemies)F.step(e,.016,target,ctx);assert(G.enemies.every(e=>e.offTurn>0),'all roles pursue shelf '+JSON.stringify({target,enemies:G.enemies.map(e=>({role:e.frostOfficer,x:e.x,z:e.z,y:e.y,turn:e.offTurn}))}));}
 console.log('All three officers pursue players onto both shelves and the high northern exit.');
+
+const RampFacing=require('../public/3d/enemy-facing.js');
+const rampGuard={x:0,z:0,y:0,yaw:0,hp:100,frostOfficer:'shield',offState:'hunt',offClock:5};
+const rampTarget={x:0,z:320,y:100,hp:100};
+const ramp={arena:{nodes:[[0,0,0],[220,0,0],[220,320,100],[0,320,100]],edges:[[1],[0,2],[1,3],[2]],surfaces:[]},enemies:[rampGuard],speed:125};
+for(let i=0;i<100;i++){
+ const dt=1/60,{x,z}=rampGuard;
+ const frame=RampFacing.begin(rampGuard,null,dt);
+ F.step(rampGuard,dt,rampTarget,ramp);
+ RampFacing.finish(rampGuard,dt,frame);
+ const dx=rampGuard.x-x,dz=rampGuard.z-z,step=Math.hypot(dx,dz);
+ if(i<24)assert.equal(step,0,'the Shield Officer plants before walking toward a side ramp');
+ if(step>0)assert(RampFacing.aligned(rampGuard,{x:rampGuard.x+dx,z:rampGuard.z+dz},.26+1e-6),'each ramp step follows the shield heading');
+}
+assert(rampGuard.x>50,'the Shield Officer pursues after turning toward the ramp');
+console.log('Shield Officer turns in place before walking onto a ramp.');

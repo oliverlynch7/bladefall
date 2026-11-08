@@ -4155,3 +4155,7 @@ Shield enemies and the Abyss King step mostly forward when pursuing across open 
 ## [Codex | 2026-11-07] Heavy guard detours (v2.390.0)
 
 Heavy ground guards turn toward their next safe step around cover. They hold their attack and shield commitments, then reacquire the player when the direct path clears.
+
+## [Codex | 2026-11-07] Heavy targets and shield ramps (v2.391.0)
+
+Heavy enemies stick with their current opponent through near ties in co-op. The Frostfell Shield Officer turns into its ramp route before taking a step. The King's sweep, rear openings and ward counters passed the browser regression checks.

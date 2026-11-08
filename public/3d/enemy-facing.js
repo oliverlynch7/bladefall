@@ -1,7 +1,7 @@
 /* Facing is combat state: bodies, guards and committed attack directions agree. */
 (function(root){'use strict';
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
-const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,heavyLookInterval=.45;
+const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,heavyLookInterval=.45,focusSwitchLead=65;
 function state(e){
  let saved=memory.get(e);
  if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,lookAim:0,lookT:0};memory.set(e,saved);}
@@ -18,6 +18,17 @@ function brace(e){
  return true;
 }
 function heavy(e){return e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield'||e.briarRole==='guard'||e.campaignRole==='guard'||['sentinel','siegeknight','marblestatue'].includes(e.type);}
+function heavyPivot(e){return heavy(e)||e.finalKing||e.type==='king'||e.type==='tyrant';}
+function selectTarget(e,targets){
+ const saved=heavyPivot(e)?state(e):null,previous=saved?.target;
+ let best=null,bestDistance=Infinity;
+ for(const target of targets){
+  const distance=Math.hypot(target.x-e.x,target.z-e.z)-(target===previous?focusSwitchLead:0);
+  if(distance<bestDistance){best=target;bestDistance=distance;}
+ }
+ if(saved)saved.target=best;
+ return best;
+}
 function rate(e){return heavy(e)?1.7:e.boss?2.1:e.kind==='charger'?2.6:e.kind==='fly'?4.4:3.4;}
 function angle(yaw,goal,dt,speed){const step=Math.max(0,Math.min(.05,dt))*speed;return wrap(yaw+Math.max(-step,Math.min(step,wrap(goal-yaw))));}
 function routeWaypoint(e){return e._facingRoute&&e._route?.find(q=>Math.hypot(q.x-e.x,q.z-e.z)>=8);}
@@ -30,7 +41,7 @@ function turn(e,dx,dz,dt){
  let goal=Math.atan2(dx,dz);
  // After setting their feet, heavies turn toward one sampled heading. Cap the step
  // at a quarter turn so they can read the target again before committing to more.
- if(heavy(e)||e.finalKing||e.type==='king'||e.type==='tyrant'){
+ if(heavyPivot(e)){
   const saved=state(e),offset=Math.abs(wrap(goal-yaw));
   if(saved.pivotAim==null){
    if(offset<=Math.PI/2)saved.pivotWait=null;
@@ -152,5 +163,5 @@ function canCommit(e){
  return !pivoting(e)&&!saved?.frame?.busy&&!saved?.frame?.held&&!(saved?.recover>0)&&!bracing(e)&&!action(e);
 }
 function contact(e,p){return aligned(e,p,meleeArc);}
-const api={turn,aligned,canAdvance,advanceHeading,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={selectTarget,turn,aligned,canAdvance,advanceHeading,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -2936,3 +2936,5 @@ Heavy pursuit should wait for a forward step when a player moves far to the side
 **Heavy footwork.** On open ground, heavy guards and the Abyss King take steps mostly in the direction they face. Keep existing attack and guard commitments, arena counters, and obstacle routes.
 
 **Heavy obstacle routes.** When a campaign guard has to go around cover, make its body turn toward its route before stepping. Keep turning bounded and preserve the existing attack and defensive commitments.
+
+**Heavy target selection and ramps.** Keep a heavy enemy focused on its current living opponent when another co-op player is only marginally closer. Let it switch when the other player closes substantially or the current target leaves the fight. Make the Frostfell Shield Officer turn toward the ramp waypoint before stepping onto it, then return to facing its opponent. Keep committed attacks, shield arcs and boss counters.

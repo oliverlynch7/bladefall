@@ -2846,4 +2846,6 @@ After the existing rear hesitation, heavy enemies commit to a bounded pivot step
 
 **Obstacle detours.** The open-ground steering cap in 2.389.0 is skipped on a navigation detour. Let a heavy ground guard turn toward its next safe waypoint and take a forward step, then look back to the player when the direct path clears. Exercise the detour, melee recovery, and King's sweep separately.
 
+**Rear pivot follow-through.** Heavy enemies can resume tracking the frame their committed rear turn ends. Give them a brief, stationary beat after that turn so a player can finish circling and attack a stable flank. Verify that the same beat holds for shields and the King, and that both resume pursuit.
+
 **Heavy targets and Frostfell ramps.** The live update chooses the nearest player twice for some bosses, allowing small co-op movement to change the preferred opponent. Give heavy enemies a 65-unit lead requirement to change focus. Reuse the selected target for the King's and Shield Officer's pursuit and next attack. Choose the officer's safe waypoint before taking the frame's turn, and require a forward step at ramp corners. Verify both shelf routes, a downed or clearly nearer player, rear hits in recovery and the King's pillar counter.

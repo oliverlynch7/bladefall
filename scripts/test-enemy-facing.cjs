@@ -33,7 +33,7 @@ ok(delta(F.angle(Math.PI-.01,-Math.PI+.01,.016,1),Math.PI-.01)<.017,'wrap takes 
 const guard={x:0,z:0,yaw:0,role:'shielder',meleeW:.5,meleeSerial:1};
 for(let i=0;i<30;i++)tick(guard,{x:0,z:-80},.016,()=>guard.yaw=Math.PI);
 ok(delta(guard.yaw,0)<1e-8,'melee body and shield remain committed');ok(guard.shieldYaw===guard.yaw,'shield agrees with body');ok(!F.contact(guard,{x:0,z:-20}),'no ordinary melee contact behind');ok(F.contact(guard,{x:0,z:20}),'forward melee still works');
-tick(guard,{x:0,z:-80},.016,()=>guard.meleeW=0);for(let i=0;i<35;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,0)<1e-8,'heavy recovery gives a real rear opening');for(let i=0;i<150;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,Math.PI)<.14,'guard eventually reacquires player');
+tick(guard,{x:0,z:-80},.016,()=>guard.meleeW=0);for(let i=0;i<35;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,0)<1e-8,'heavy recovery gives a real rear opening');for(let i=0;i<180;i++)tick(guard,{x:0,z:-80});ok(delta(guard.yaw,Math.PI)<.14,'guard eventually reacquires player');
 for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'}]){
  const shield={x:0,z:0,yaw:0,...props};
  for(let i=0;i<60;i++)tick(shield,{x:12*Math.sin(i),z:100});
@@ -91,6 +91,23 @@ for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'
  for(let i=0;i<30;i++)tick(e,azimuth(.8,120),.05);
  ok(delta(e.yaw,.8)<.14&&!F.pivoting(e),'the enemy resumes normal tracking after the step');
 }
+for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true}]){
+ for(const hz of [30,60,120]){
+  const e={x:0,z:0,yaw:0,...props},dt=1/hz;
+  const flank=azimuth(Math.PI,100);
+  for(let i=0;i<2*hz&&e.yaw<Math.PI/2-1e-8;i++)tick(e,flank,dt);
+  ok(delta(e.yaw,Math.PI/2)<1e-8,'the first heavy rear pivot ends at a quarter turn');
+  const nearSide=azimuth(Math.PI/2+.55,100);
+  const planted=tick(e,nearSide,dt,()=>{
+   ok(F.pivoting(e)&&!F.canAdvance(e,nearSide)&&!F.canCommit(e),'settling heavy cannot move or attack even with the target in reach');
+  });
+  ok(planted.pivotHeld,'the completed turn leaves a stationary opening');
+  for(let i=1;i<Math.round(.4*hz);i++)tick(e,nearSide,dt);
+  ok(delta(e.yaw,Math.PI/2)<1e-8,'the opening lasts 0.4 seconds at '+hz+' Hz');
+  tick(e,nearSide,dt);
+  ok(e.yaw>Math.PI/2,'the enemy resumes turning toward the player once settled');
+ }
+}
 const turningKing={x:0,z:0,y:0,yaw:0,hp:100,finalKing:true,boss:true,akStage:'fight1',akState:'approach',akClock:0,akBeat:0,phase:1};
 const kingTick=p=>tick(turningKing,p,.05,()=>King.step(turningKing,.05,p));
 for(let i=0;i<7;i++)kingTick(azimuth(2.8,320));
@@ -146,7 +163,7 @@ for(let i=0;i<40;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRec
 ok(normalRecovery.akState==='recover'&&normalRecovery.yaw===0&&normalRecovery.z===0,'normal King recovery holds body and position');
 for(let i=0;i<15;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
 ok(normalRecovery.akState==='approach'&&delta(normalRecovery.yaw,0)>.2&&normalRecovery.z===0,'King turns in place to find the player after normal recovery');
-for(let i=0;i<15;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
+for(let i=0;i<25;i++)tick(normalRecovery,distantRear,.05,()=>King.step(normalRecovery,.05,distantRear));
 ok(normalRecovery.z<0,'King advances when the player is back in front');
 const summoningKing={...king,akStage:'fight2',phase:2,akState:'approach',akClock:0,akBeat:3,akSummoned:false};
 let royalGuards=0;
@@ -162,7 +179,7 @@ for(let i=0;i<35;i++)summonedTick(distantRear);
 ok(summoningKing.akState==='recover'&&delta(summoningKing.yaw,0)<1e-8,'King stays planted through recovery after the guards fall');
 for(let i=0;i<15;i++)summonedTick(distantRear);
 ok(summoningKing.akState==='approach'&&delta(summoningKing.yaw,0)>.2&&summoningKing.z===0,'King pivots toward the player once the stance and recovery end');
-for(let i=0;i<21;i++)summonedTick(distantRear);
+for(let i=0;i<29;i++)summonedTick(distantRear);
 ok(summoningKing.z<0,'King resumes forward pursuit after the stance');
 const pg={type:'prison_guard',x:0,z:0,y:0,yaw:0,hp:100};Prison.setup(pg);pg.pcClock=0;for(let i=0;i<10;i++)tick(pg,rear,.016,()=>Prison.step(pg,.016,rear,0));ok(pg.pcState==='approach','prison guard cannot instantly bash behind itself');
 for(const data of [{chargeT:1,cdx:1,cdz:0},{windT:1,teleX:1,teleZ:0},{cleaveW:1,cleaveX:1,cleaveZ:0},{shotW:1,shotAim:{x:100,z:0}},{marksmanCrossing:true,markState:'aim',markClock:.4,markX:100,markZ:0},{bruteOrchard:true,bruteState:'charge',teleX:1,teleZ:0}]){const e={x:0,z:0,yaw:Math.PI/2,...data};for(let i=0;i<40;i++)tick(e,{x:-100,z:0});ok(delta(e.yaw,Math.PI/2)<1e-8,'charge/projectile vectors stay committed');}
@@ -254,7 +271,7 @@ for(const [e,step] of pursuitFixtures){
  ok(sidestepGuard.x===foot.x&&sidestepGuard.z===foot.z,'authored guards wait before pursuing a wide sidestep');
  for(let i=0;i<17;i++)tick(e,farRear,.05,()=>step(e,farRear));
  ok(e.z===0&&Math.abs(e.yaw)>.9,'an authored guard pivots in place to reacquire a flank');
- for(let i=0;i<20;i++)tick(e,farRear,.05,()=>step(e,farRear));
+ for(let i=0;i<28;i++)tick(e,farRear,.05,()=>step(e,farRear));
  ok(e.z< -5,'the authored guard advances after facing the player');
 }
 const diverted={x:0,y:0,z:0,yaw:0,type:'prison_guard',hp:100,maxHp:100};

@@ -4159,3 +4159,7 @@ Heavy ground guards turn toward their next safe step around cover. They hold the
 ## [Codex | 2026-11-07] Heavy targets and shield ramps (v2.391.0)
 
 Heavy enemies stick with their current opponent through near ties in co-op. The Frostfell Shield Officer turns into its ramp route before taking a step. The King's sweep, rear openings and ward counters passed the browser regression checks.
+
+## Rear openings (2.392.0)
+
+Heavy enemies plant for 0.4 seconds after a committed rear pivot, then resume turning and moving. The pause gives players time to finish their flank. Existing attack and guard locks still apply.

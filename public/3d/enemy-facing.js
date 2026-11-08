@@ -1,10 +1,10 @@
 /* Facing is combat state: bodies, guards and committed attack directions agree. */
 (function(root){'use strict';
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
-const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,heavyLookInterval=.45,focusSwitchLead=65;
+const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,pivotSettle=.4,heavyLookInterval=.45,focusSwitchLead=65;
 function state(e){
  let saved=memory.get(e);
- if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,lookAim:0,lookT:0};memory.set(e,saved);}
+ if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,pivotSettle:0,lookAim:0,lookT:0};memory.set(e,saved);}
  return saved;
 }
 function pivoting(e){return !!memory.get(e)?.frame?.pivotHeld;}
@@ -34,7 +34,7 @@ function angle(yaw,goal,dt,speed){const step=Math.max(0,Math.min(.05,dt))*speed;
 function routeWaypoint(e){return e._facingRoute&&e._route?.find(q=>Math.hypot(q.x-e.x,q.z-e.z)>=8);}
 function turn(e,dx,dz,dt){
  const yaw=Number.isFinite(e.yaw)?e.yaw:0,frame=memory.get(e)?.frame;
- if(frame&&(frame.turned||frame.busy||frame.held))return yaw;
+ if(frame&&(frame.turned||frame.busy||frame.held||frame.pivotHeld))return yaw;
  const waypoint=routeWaypoint(e);
  if(waypoint){dx=waypoint.x-e.x;dz=waypoint.z-e.z;}
  if(!(Math.hypot(dx,dz)>.001))return yaw;
@@ -60,7 +60,10 @@ function turn(e,dx,dz,dt){
   if(saved.pivotAim!=null){
    e.yaw=angle(yaw,saved.pivotAim,dt,rate(e));
    if(frame){frame.turned=true;frame.pivotHeld=true;frame.approachYaw=e.yaw;}
-   if(Math.abs(wrap(saved.pivotAim-e.yaw))<1e-8)saved.pivotAim=null;
+   if(Math.abs(wrap(saved.pivotAim-e.yaw))<1e-8){
+    saved.pivotAim=null;
+    saved.pivotSettle=pivotSettle;
+   }
    return e.yaw;
   }
   // Between looks, a sidestep or a co-op target change cannot steer the turn.
@@ -138,10 +141,11 @@ function holdsRecovery(e){
  return !!e.finalKing&&(e.akState==='adds'||e.akState==='recover'&&e.akClock>0);
 }
 function begin(e,target,dt){
- const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,guardPlanted:guardPlanted(e),recovering:saved.recover>0,held:bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
+ const saved=state(e),current=action(e),frame={yaw:Number.isFinite(e.yaw)?e.yaw:0,busy:!!current,guardPlanted:guardPlanted(e),recovering:saved.recover>0,pivotHeld:saved.pivotSettle>1e-8,held:bracing(e)||holdsRecovery(e)||e.staggerT>0||e.fallState==='stagger'};
  if(frame.busy||frame.held)saved.lookT=0;
  const elapsed=Math.max(0,dt);
  saved.recover=Math.max(0,saved.recover-elapsed);
+ saved.pivotSettle=Math.max(0,saved.pivotSettle-elapsed);
  saved.brace=Math.max(0,saved.brace-elapsed);
  saved.braceCooldown=Math.max(0,saved.braceCooldown-elapsed);
  // Authored encounters can defer the turn until they choose their actual target.

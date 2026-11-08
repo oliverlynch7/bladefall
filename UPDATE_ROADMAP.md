@@ -4196,3 +4196,7 @@ Shield enemies start a planted turn when the player crosses the edge of their fr
 ### Continuous close flanks (2.400.0)
 
 Walking around a heavy enemy at close range now makes it plant briefly before it turns. Circling a shield enemy opens a full-damage hit, and the Abyss King still holds his sweep heading and requires the arena counter to open his ward.
+
+### Abyss King footwork (2.401.0)
+
+Walking around the King inside his normal approach distance can expose his rear. Small changes in distance no longer reset a close flank on heavy enemies. The King's sweep keeps its original direction, and the arena counter still opens his ward.

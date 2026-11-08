@@ -2950,3 +2950,5 @@ Heavy pursuit should wait for a forward step when a player moves far to the side
 **Shield edge timing.** A regular shield enemy should plant when a player crosses the actual edge of its frontal block. A hit from that side should get a short opening before pursuit resumes. Preserve scripted boss openings and navigation turns.
 
 **Continuous close flanks.** A player circling on foot should be able to create a flank even when a heavy enemy's current facing keeps the player inside its frontal arc. Track the change in target bearing at close range, then plant the heavy enemy briefly on a sustained flank. Check the normal game loop against a continuous walk-speed orbit, followed by reacquisition, attack and shield recovery, and the King's existing arena counters.
+
+**Abyss King flank at sweep distance.** Give a player moving on foot inside the King's normal stop distance a rear opening. Small range changes must not reset a close flank, and the King's attack, recovery, and ward counter commitments still apply.

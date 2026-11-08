@@ -78,6 +78,21 @@ for(const [props,arc] of [[{role:'shielder'},Math.acos(.4)],[{prisonFoe:'prison_
   ok(F.aligned(e,target,.18)&&!F.pivoting(e),'a heavy reacquires after circling stops');
  }
 }
+for(const [props,arc,radius] of [[{role:'shielder'},Math.acos(.4),185],[{finalKing:true,boss:true},Math.PI/2,230]]){
+ for(const hz of [30,60,120])for(const side of [-1,1]){
+  const e={x:0,z:0,yaw:0,...props},dt=1/hz;
+  let target,opening=false;
+  for(let i=0;i<Math.ceil(3.7*hz);i++){
+   const bearing=side*i*dt*220/radius;
+   target=azimuth(bearing,radius+12*Math.sin(i*dt*8));
+   const yaw=e.yaw,frame=tick(e,target,dt);
+   opening ||= frame.pivotHeld&&delta(e.yaw,yaw)<1e-8&&!F.aligned(e,target,arc);
+  }
+  ok(opening,'a walking flank survives range changes at the edge of close pursuit');
+  for(let i=0;i<Math.ceil(4*hz);i++)tick(e,target,dt);
+  ok(F.aligned(e,target,.18),'heavies still find a stationary player after the wider flank');
+ }
+}
 const closeSway={x:0,z:0,yaw:0,role:'shielder'};
 for(let i=0;i<120;i++)assert(!tick(closeSway,azimuth(.3*Math.sin(i/16),130),1/60).pivotHeld,'small alternating movements do not accumulate into a flank');
 ok(F.aligned(closeSway,azimuth(0,130),.65),'ordinary near pursuit remains responsive');

@@ -2875,3 +2875,7 @@ Normal shields block within 66 degrees and Prison Shield Guards within 60 degree
 ### U-ENEMY-FACING-20261104 | Continuous close flanks
 
 The same player direction covers sustained close circling. Test this path as well as sudden crossings of the shield edge. Close footwork should create a flank while the existing attack geometry, route steering, and boss counters remain authoritative.
+
+### U-ENEMY-FACING-20261104 | Abyss King close pursuit
+
+The live King stops advancing at 240 units but stops counting close circling past 190. Use his approach distance for the close flank and retain the tracked bearing across a small range change. Leave enough time to reach his rear at walking speed and then let him reacquire. Retest the committed sweep and pillar counter.

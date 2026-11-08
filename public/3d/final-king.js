@@ -19,7 +19,7 @@ function step(e,dt,p,{adds=0,summon=()=>{},cue=()=>{}}={}){if(!combat(e))return;
 if(e.akState==='approach'){
  const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz);
  facing.turn(e,dx,dz,dt);
- if(d>240&&facing.canAdvance(e,p)){
+ if(d>facing.kingApproachRange&&facing.canAdvance(e,p)){
   const heading=facing.advanceHeading(e,dx,dz);
   const x=Math.max(-760,Math.min(760,e.x+Math.sin(heading)*115*dt)),z=Math.max(-800,Math.min(850,e.z+Math.cos(heading)*115*dt));
   if(!pillars.some(q=>Math.abs(x-q.x)<45+(e.r||43)&&Math.abs(z-q.z)<45+(e.r||43))){e.x=x;e.z=z;}

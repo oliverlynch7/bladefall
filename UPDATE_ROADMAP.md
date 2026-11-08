@@ -4187,3 +4187,7 @@ Heavy guards and the Abyss King plant when a player slips just behind their shou
 ### Shoulder openings (2.398.0)
 
 Heavy enemies plant their feet when the player reaches their side, leaving time for a flank hit before they turn. The Abyss King keeps his committed sweep direction. Shield braces, Frostfell ramp pursuit, and the King's pillar counter were verified.
+
+### Shield edge openings (2.399.0)
+
+Shield enemies start a planted turn when the player crosses the edge of their frontal block. This creates a brief chance to land a flank hit, after which they turn and resume pursuit. The Abyss King's sweep stays committed, and a pillar still opens his ward.

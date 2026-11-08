@@ -67,7 +67,7 @@ function contains(e,p){
 function guardDamage(e,src,dmg){
  if(e.prisonFoe!=='prison_guard'||!src||e.pcState==='recover'||e.stunT>0||e.staggerT>0)return dmg;
  const dx=src.x-e.x,dz=src.z-e.z,d=Math.hypot(dx,dz);
- return d>0&&(dx*Math.sin(e.yaw)+dz*Math.cos(e.yaw))/d>.5?dmg*.4:dmg;
+ return d>0&&(dx*Math.sin(e.yaw)+dz*Math.cos(e.yaw))/d>facing.shieldFrontDot(e)?dmg*.4:dmg;
 }
 function snapshot(e){const o={};for(const k of ['prisonFoe','pcState','pcClock','pcSerial','pcCount','pcMove','pcDX','pcDZ','pcX','pcY','pcZ','label','stunT','y','r','h','dmg','speed','elite','boss','prisonRoom'])if(e[k]!=null)o[k]=e[k];return o;}
 function danger(e,api){

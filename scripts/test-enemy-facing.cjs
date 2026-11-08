@@ -61,6 +61,17 @@ tick(pivot,{x:0,z:-100},.05);
 tick(pivot,{x:100,z:100},.05);
 ok(pivot.yaw>0,'returning into view cancels the delay immediately');
 const azimuth=(yaw,range)=>({x:Math.sin(yaw)*range,y:0,z:Math.cos(yaw)*range,hp:100,r:16});
+for(const [props,edge] of [[{role:'shielder'},Math.acos(.4)],[{prisonFoe:'prison_guard'},Math.acos(.5)]]){
+ for(const side of [-1,1]){
+  const shield={x:0,z:0,yaw:0,...props},dt=1/60;
+  const outside=azimuth(side*(edge+.08),120),inside=azimuth(side*(edge-.08),120);
+  ok(Math.abs(F.shieldFrontDot(shield)-Math.cos(edge))<1e-8,'the planted turn uses the frontal block edge');
+  for(let i=0;i<12;i++)tick(shield,i%2?inside:outside,dt);
+  ok(shield.yaw===0,'a shield cannot erase a just-outside hit by tracking the edge');
+  for(let i=0;i<110;i++)tick(shield,outside,dt);
+  ok(F.aligned(shield,outside,.18)&&!F.pivoting(shield),'a shield resumes pursuit after the edge opening');
+ }
+}
 for(const props of [{role:'shielder'},{prisonFoe:'prison_guard'},{frostOfficer:'shield'},{finalKing:true,boss:true}]){
  for(const side of [-1,1]){
   const e={x:0,z:0,yaw:0,...props},flank=azimuth(side*Math.PI/2,120);

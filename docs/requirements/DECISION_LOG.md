@@ -2867,3 +2867,7 @@ The 120-degree rear trigger leaves a band outside the shield arc where a heavy e
 ### U-ENEMY-FACING-20261104 | Shoulder openings
 
 The live 100-degree combat threshold starts the planted turn after the player has already crossed behind the shoulder. Apply the same anticipation at 85 degrees, with a small return-to-front margin so a moving target cannot restart it every frame. Keep the 120-degree navigation-detour threshold. Compare a 90-degree flank against the live build, then check pursuit, attack recovery, shields, and the King's ward.
+
+### U-ENEMY-FACING-20261104 | Match the shield edge
+
+Normal shields block within 66 degrees and Prison Shield Guards within 60 degrees. Plant at each block edge with a 10-degree margin for returning to the front. Reuse the block threshold for both damage and turning. Compare a hit just past each edge against the live build and check reacquisition, committed attacks, and the Abyss King's counters.

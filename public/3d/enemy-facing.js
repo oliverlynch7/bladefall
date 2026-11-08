@@ -2,7 +2,9 @@
 (function(root){'use strict';
 const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,pivotSettle=.4,heavyLookInterval=.45,focusSwitchLead=65;
-const combatFlank=Math.PI*85/180,combatFront=Math.PI*75/180,rearFlank=Math.PI*5/9,routeFlank=Math.PI*2/3;
+const combatFlank=Math.PI*85/180,flankMargin=Math.PI/18,rearFlank=Math.PI*5/9,routeFlank=Math.PI*2/3;
+const standardShieldDot=.4,prisonShieldDot=.5;
+const standardShieldFlank=Math.acos(standardShieldDot),prisonShieldFlank=Math.acos(prisonShieldDot);
 function state(e){
  let saved=memory.get(e);
  if(!saved){saved={key:null,aim:0,recover:0,brace:0,braceCooldown:0,pivotWait:null,pivotAim:null,pivotSettle:0,combatPivoted:false,lookAim:0,lookT:0};memory.set(e,saved);}
@@ -10,6 +12,7 @@ function state(e){
 }
 function pivoting(e){return !!memory.get(e)?.frame?.pivotHeld;}
 const shieldBearer=e=>e.role==='shielder'||e.prisonFoe==='prison_guard'||e.frostOfficer==='shield';
+function shieldFrontDot(e){return e.prisonFoe==='prison_guard'?prisonShieldDot:standardShieldDot;}
 function bracing(e){return shieldBearer(e)&&memory.get(e)?.brace>0;}
 function guardPlanted(e){return shieldBearer(e)&&(bracing(e)||holdsRecovery(e)||!!action(e));}
 function brace(e){
@@ -48,9 +51,10 @@ function turn(e,dx,dz,dt,routeAim=false){
   const saved=state(e),offset=Math.abs(wrap(goal-yaw)),onRoute=!!waypoint||routeAim;
   if(saved.pivotAim==null){
    // Plant near the shoulder and only cancel once the target moves back in front.
-   if(offset<=(onRoute?Math.PI/2:combatFront)){saved.pivotWait=null;saved.combatPivoted=false;}
+   const firstFlank=e.prisonFoe==='prison_guard'?prisonShieldFlank:e.role==='shielder'?standardShieldFlank:combatFlank;
+   if(offset<=(onRoute?Math.PI/2:firstFlank-flankMargin)){saved.pivotWait=null;saved.combatPivoted=false;}
    // After the first pivot, finish reacquiring without planting twice for the same shoulder.
-   const flank=onRoute?routeFlank:saved.combatPivoted?rearFlank:combatFlank;
+   const flank=onRoute?routeFlank:saved.combatPivoted?rearFlank:firstFlank;
    if(offset>=flank&&saved.pivotWait==null){saved.pivotWait=pivotAnticipation;saved.lookT=0;}
    if(saved.pivotWait>0){
     saved.pivotWait=Math.max(0,saved.pivotWait-Math.max(0,dt));
@@ -174,5 +178,5 @@ function canCommit(e){
  return !pivoting(e)&&!saved?.frame?.busy&&!saved?.frame?.held&&!(saved?.recover>0)&&!bracing(e)&&!action(e);
 }
 function contact(e,p){return aligned(e,p,meleeArc);}
-const api={shieldBearer,heavy,selectTarget,turn,aligned,canAdvance,advanceHeading,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={shieldBearer,shieldFrontDot,heavy,selectTarget,turn,aligned,canAdvance,advanceHeading,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

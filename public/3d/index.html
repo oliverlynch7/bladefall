@@ -1129,8 +1129,8 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
 <div id="storycard" class="hide"></div>
 <div id="storyveil" class="hide"><div id="storytext"></div><button id="storyskip">Skip ▸</button></div>
 <script src="./prison-dungeon.js?v=2306"></script>
-<script src="./enemy-facing.js?v=2398"></script>
-<script src="./prison-combat.js?v=2394"></script>
+<script src="./enemy-facing.js?v=2399"></script>
+<script src="./prison-combat.js?v=2399"></script>
 <link rel="stylesheet" href="./prison-menu.css?v=2306"><script src="./prison-menu.js?v=2097"></script>
 <script src="./loading.js?v=2292"></script>
 <script src="./sprint-race.js?v=2255"></script>
@@ -1248,7 +1248,7 @@ body.dragon-riding #bLMB,body.dragon-riding #bSk0,body.dragon-riding #bSk1,body.
    (rarity loot, elements, 3-slot armor, achievements,
    skins + god cheat) ported 1:1 from the 2D game.
    ============================================================ */
-const VERSION3D='2.398.0-shoulder-openings';
+const VERSION3D='2.399.0-shield-edge';
 let hudInputDevice='keyboard';
 
 /* ---------------- Persistence: shared "global" store + per-mode saves ----------------
@@ -13824,7 +13824,7 @@ function hitEnemy(e,dmg,src,kb,lifesteal,el){
   if(guestOwner?.cid==='warlock'&&(e.warCurseT||0)>0&&guestOwner.id===e.warCurseOwner)dmg*=hasGuestPerk(guestOwner,'war_deep')?1.30:1.15;
   if(e.role==='shielder' && guardSrc && e.shieldYaw!=null){ const ax=guardSrc.x-e.x, az=guardSrc.z-e.z, dl=Math.hypot(ax,az)||1;
     const fr=(ax/dl)*Math.sin(e.shieldYaw)+(az/dl)*Math.cos(e.shieldYaw);   // Shielder blocks frontal hits — flank it (its guard turns slowly)
-    if(fr>0.4){ blockedByShield=true; dmg*=0.3; if(BFEnemyFacing.brace(e)||Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
+    if(fr>BFEnemyFacing.shieldFrontDot(e)){ blockedByShield=true; dmg*=0.3; if(BFEnemyFacing.brace(e)||Math.random()<0.4) addText(e.x,e.y+e.h+10,e.z,'BLOCK','#8fb7ff');
       if(e.spec==='shell' && e.shellHp!=null){ e.shellHp-=dmg; const shatter=(el==='ice'||e.chill>0)?2.4:1; e.shellHp-=dmg*(shatter-1);   // chill/shatter cracks the shell faster
         if(e.shellHp<=0){ e.role=null; e.shieldYaw=null; e.shellCracked=1; addText(e.x,e.y+e.h+14,e.z,'SHELL BROKEN!','#bfe6ff'); playFx('frostclink'); burst(e.x,e.y+e.h*0.55,e.z,'#cfeeff',12); } } } }
   if(e.tethered>0){ dmg*=0.6; if(Math.random()<0.3) addText(e.x,e.y+e.h+10,e.z,'WARDED','#8f52d6'); }   // void-tether buff: allies take less until the tether dies

@@ -2946,3 +2946,5 @@ Heavy pursuit should wait for a forward step when a player moves far to the side
 **Wide-flank follow-up.** Give heavy enemies and the Abyss King the existing planted pivot when a player crosses just behind the shoulder. Check the resulting opening, pursuit afterward, committed attacks, navigation, and the arena counters.
 
 **Shoulder openings.** Heavy enemies should plant at a close side flank, before the player has already reached their rear. Keep pursuit responsive in front and preserve committed attacks, guard stances and the King's arena counters.
+
+**Shield edge timing.** A regular shield enemy should plant when a player crosses the actual edge of its frontal block. A hit from that side should get a short opening before pursuit resumes. Preserve scripted boss openings and navigation turns.

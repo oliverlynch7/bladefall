@@ -2952,3 +2952,5 @@ Heavy pursuit should wait for a forward step when a player moves far to the side
 **Continuous close flanks.** A player circling on foot should be able to create a flank even when a heavy enemy's current facing keeps the player inside its frontal arc. Track the change in target bearing at close range, then plant the heavy enemy briefly on a sustained flank. Check the normal game loop against a continuous walk-speed orbit, followed by reacquisition, attack and shield recovery, and the King's existing arena counters.
 
 **Abyss King flank at sweep distance.** Give a player moving on foot inside the King's normal stop distance a rear opening. Small range changes must not reset a close flank, and the King's attack, recovery, and ward counter commitments still apply.
+
+**Abyss King sweep commitment.** The King should approach a distant player before committing to his close sweep. Once he winds up, keep the original direction through the hit and recovery. Preserve the pillar and jump counters.

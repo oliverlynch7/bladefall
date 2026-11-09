@@ -2879,3 +2879,9 @@ The same player direction covers sustained close circling. Test this path as wel
 ### U-ENEMY-FACING-20261104 | Abyss King close pursuit
 
 The live King stops advancing at 240 units but stops counting close circling past 190. Use his approach distance for the close flank and retain the tracked bearing across a small range change. Leave enough time to reach his rear at walking speed and then let him reacquire. Retest the committed sweep and pillar counter.
+
+### U-ENEMY-FACING-20261104 | Commit the sweep in range
+
+The King can finish his opening approach timer and sweep while the player is outside the full warning arc. Keep him in approach until a target is within the sweep's hit reach and in front of him. Use the same radius for commitment, the warning and the strike. Check that circling after commitment still avoids the attack.
+
+If the King reaches a pillar or the arena edge while trying to close the gap, allow him to line up his beam. This keeps the fight moving and gives the player a chance to use the pillar counter.

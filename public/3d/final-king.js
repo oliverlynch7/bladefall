@@ -4,6 +4,7 @@ const facing=root.BFEnemyFacing||(typeof require==='function'?require('./enemy-f
 const pillars=[{x:-430,z:-170},{x:430,z:-170},{x:-430,z:440},{x:430,z:440}];
 const fields=['finalKing','akStage','akClock','akState','akKind','akBeat','akSeq','akX','akY','akZ','akDX','akDZ','akBaseHP','akCharge','akSummoned','akEnvSeq','akEnvPhase','phase','yaw','y','h','r','boss','kind','label','slamW','meleeActive','untargetable'];
 const attacks={1:['sweep','line','burst','sweep'],2:['burst','wave','line','sweep','burst','wave']};
+const sweepReach=365;
 const waveClearances=new WeakMap();
 const combat=e=>e&&['fight1','fight2'].includes(e.akStage);
 function build({G,plat,spawn}){for(const k of ['segments','obstacles','walls','deco','rooms','enemies','pickups','projectiles','qmarks','dens','chests','healpads','movers','pads','shockwaves','trails','crumbles','geysers','springs','spikefields','torches','gates','keys','doors','plates'])G[k]=[];
@@ -16,25 +17,30 @@ const e=spawn('tyrant',0,-450,false);Object.assign(e,{finalKing:true,boss:true,k
 function startFight(e,phase){e.phase=phase;e.akStage=phase===1?'fight1':'fight2';e.label=phase===1?'The Abyss King':'The Abyss King, Awakened';e.maxHp=Math.round(e.akBaseHP*(phase===2?1.15:1));e.hp=e.maxHp;e.akState='approach';e.akClock=3;e.akBeat=0;e.akSeq++;e.untargetable=false;e.x=0;e.z=-450;e.y=0;e.slamW=e.meleeActive=0;}
 function lethal(e){e.hp=1;e.dead=false;if(!combat(e))return;e.akStage=e.phase===1?'recognition':'collapse';e.akClock=e.phase===1?0:5;e.untargetable=true;e.slamW=e.meleeActive=0;e.akSeq++;}
 function step(e,dt,p,{adds=0,summon=()=>{},cue=()=>{}}={}){if(!combat(e))return;dt=Math.min(.05,Math.max(0,dt));e.akClock=Math.max(0,e.akClock-dt);e.slamW=e.akState==='wind'?e.akClock:0;e.meleeActive=e.akState==='strike'?e.akClock:0;
+let approachBlocked=false;
 if(e.akState==='approach'){
  const dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz);
  facing.turn(e,dx,dz,dt);
  if(d>facing.kingApproachRange&&facing.canAdvance(e,p)){
   const heading=facing.advanceHeading(e,dx,dz);
   const x=Math.max(-760,Math.min(760,e.x+Math.sin(heading)*115*dt)),z=Math.max(-800,Math.min(850,e.z+Math.cos(heading)*115*dt));
-  if(!pillars.some(q=>Math.abs(x-q.x)<45+(e.r||43)&&Math.abs(z-q.z)<45+(e.r||43))){e.x=x;e.z=z;}
+  approachBlocked=(x===e.x&&z===e.z)||pillars.some(q=>Math.abs(x-q.x)<45+(e.r||43)&&Math.abs(z-q.z)<45+(e.r||43));
+  if(!approachBlocked){e.x=x;e.z=z;}
  }
 }
 if(e.akClock)return;if(e.akState==='adds'){if(adds)return;e.akState='recover';e.akClock=2;return;}
 if(e.akState==='recover'||e.akState==='approach'){
  const sequence=attacks[e.phase===1?1:2],kind=sequence[e.akBeat%sequence.length];
+ const outOfSweepReach=kind==='sweep'&&Math.hypot(p.x-e.x,p.z-e.z)>=sweepReach+(p.r||16);
+ // If a pillar or arena edge prevents closing the gap, use the ranged counter move.
+ const move=outOfSweepReach&&approachBlocked?'line':kind;
  // The narrow beam must line up before it commits so a player baiting it behind cover can open the ward.
- if(facing.pivoting(e)||!facing.aligned(e,p,kind==='line'?.06:.65)){e.akState='approach';return;}
+ if((outOfSweepReach&&!approachBlocked)||facing.pivoting(e)||!facing.aligned(e,p,move==='line'?.06:.65)){e.akState='approach';return;}
  if(e.phase===2&&e.akBeat>=3&&!e.akSummoned){e.akSummoned=true;e.akState='adds';summon();return;}
- e.akBeat++;e.akKind=kind;e.akState='wind';e.akClock={sweep:1.45,line:1.8,burst:1.9,wave:1.9}[kind];e.akX=p.x;e.akY=p.y;e.akZ=p.z;[e.akDX,e.akDZ]=facing.forward(e);e.slamW=e.akClock;cue('wind');return;
+ e.akBeat++;e.akKind=move;e.akState='wind';e.akClock={sweep:1.45,line:1.8,burst:1.9,wave:1.9}[move];e.akX=p.x;e.akY=p.y;e.akZ=p.z;[e.akDX,e.akDZ]=facing.forward(e);e.slamW=e.akClock;cue('wind');return;
 }
 if(e.akState==='wind'){e.akState='strike';e.akClock=.32;e.akSeq++;e.slamW=0;e.meleeActive=.32;cue('strike');return;}e.akState='recover';e.akClock=e.akEnvSeq===e.akSeq&&e.akEnvPhase===e.phase?4.2:e.phase===1?2.2:1.6;}
-function inAttack(e,p){if(!combat(e)||e.akState!=='strike'||p.hp<=0||p.downed)return false;const dx=p.x-e.x,dz=p.z-e.z,r=p.r||16,d=Math.hypot(dx,dz);if(e.akKind==='burst')return Math.hypot(p.x-e.akX,p.z-e.akZ)<185+r&&Math.abs(p.y-e.akY)<90;if(e.akKind==='wave')return d<590+r&&p.y<80&&!(e.akSeq>0&&waveClearances.get(p)?.enemy===e&&waveClearances.get(p)?.seq===e.akSeq);if(e.akKind==='sweep')return d<365+r&&p.y<95&&(dx*e.akDX+dz*e.akDZ)>d*.3;
+function inAttack(e,p){if(!combat(e)||e.akState!=='strike'||p.hp<=0||p.downed)return false;const dx=p.x-e.x,dz=p.z-e.z,r=p.r||16,d=Math.hypot(dx,dz);if(e.akKind==='burst')return Math.hypot(p.x-e.akX,p.z-e.akZ)<185+r&&Math.abs(p.y-e.akY)<90;if(e.akKind==='wave')return d<590+r&&p.y<80&&!(e.akSeq>0&&waveClearances.get(p)?.enemy===e&&waveClearances.get(p)?.seq===e.akSeq);if(e.akKind==='sweep')return d<sweepReach+r&&p.y<95&&(dx*e.akDX+dz*e.akDZ)>d*.3;
 const along=dx*e.akDX+dz*e.akDZ;if(along<0||along>1450||Math.abs(dx*e.akDZ-dz*e.akDX)>95+r||p.y>160)return false;return !beamCovered(e,p);}
 function beamCovered(e,p){const dx=p.x-e.x,dz=p.z-e.z,along=dx*e.akDX+dz*e.akDZ;return pillars.some(q=>{const x=q.x-e.x,z=q.z-e.z,a=x*e.akDX+z*e.akDZ;return a>0&&a<along&&Math.abs(x*e.akDZ-z*e.akDX)<80;});}
 function trackWaveJump(e,p){if(!combat(e)||e.akState!=='strike'||e.akKind!=='wave'||!(e.akSeq>0)||!p||p.hp<=0||p.dead||p.downed||p.busy||![p.x,p.y,p.z].every(Number.isFinite))return false;const airborne=p.onGround===false||p.jumping===true||p.vy>0||p.motion?.ground===false||p.motion?.vy>0;if(Math.hypot(p.x-e.x,p.z-e.z)>=590||!airborne||p.y<80||p.y>=240)return false;waveClearances.set(p,{enemy:e,seq:e.akSeq});return true;}
@@ -52,7 +58,7 @@ if(cmd.type==='skip'&&c.state==='failed'&&c.failures>=5&&actor===crew[0]){c.stat
 if(cmd.type!=='press'||c.state!=='charging'||c.elapsed-(c.last[actor]??-10)<.055)return false;c.last[actor]=c.elapsed;c.presses++;if(c.presses>=c.target)c.state='won';return true;}
 function chargeStep(c,dt){if(c.state!=='charging')return;c.elapsed+=Math.max(0,dt);c.remaining=Math.max(0,10-c.elapsed);if(c.remaining===0){c.failures++;c.state='failed';}}
 function draw({G,bx,ring},t){const e=G.boss;if(!e?.finalKing)return;
-if(combat(e)&&['wind','strike'].includes(e.akState)){const c=e.akState==='wind'?'#f5bb69':'#e8d3ff';if(e.akKind==='burst'){ring(e.akX,e.akY+4,e.akZ,185,c,.9);if(e.akState==='strike')bx(e.akX,e.akY+160,e.akZ,75,320,75,'#b290e2','#e6ceff',1);}else if(e.akKind==='wave'){ring(e.x,5,e.z,590,c,.95);if(e.akState==='strike')ring(e.x,35,e.z,420,'#d4b5fa',1);}else if(e.akKind==='line'){for(let i=1;i<=28;i++)for(const side of [-1,1])bx(e.x+e.akDX*i*50+e.akDZ*side*95,5,e.z+e.akDZ*i*50-e.akDX*side*95,12,4,12,c,c,.8);if(e.akState==='strike')for(let i=1;i<24;i++)bx(e.x+e.akDX*i*60,60,e.z+e.akDZ*i*60,55,120,55,'#a18acb','#d6bbff',.7);}else{const arc=Math.acos(.3),aim=Math.atan2(e.akDX,e.akDZ);for(let i=0;i<=18;i++){const a=aim-arc+i*2*arc/18;bx(e.x+Math.sin(a)*365,5,e.z+Math.cos(a)*365,22,4,22,c,c,.8);}}}
+if(combat(e)&&['wind','strike'].includes(e.akState)){const c=e.akState==='wind'?'#f5bb69':'#e8d3ff';if(e.akKind==='burst'){ring(e.akX,e.akY+4,e.akZ,185,c,.9);if(e.akState==='strike')bx(e.akX,e.akY+160,e.akZ,75,320,75,'#b290e2','#e6ceff',1);}else if(e.akKind==='wave'){ring(e.x,5,e.z,590,c,.95);if(e.akState==='strike')ring(e.x,35,e.z,420,'#d4b5fa',1);}else if(e.akKind==='line'){for(let i=1;i<=28;i++)for(const side of [-1,1])bx(e.x+e.akDX*i*50+e.akDZ*side*95,5,e.z+e.akDZ*i*50-e.akDX*side*95,12,4,12,c,c,.8);if(e.akState==='strike')for(let i=1;i<24;i++)bx(e.x+e.akDX*i*60,60,e.z+e.akDZ*i*60,55,120,55,'#a18acb','#d6bbff',.7);}else{const arc=Math.acos(.3),aim=Math.atan2(e.akDX,e.akDZ);for(let i=0;i<=18;i++){const a=aim-arc+i*2*arc/18;bx(e.x+Math.sin(a)*sweepReach,5,e.z+Math.cos(a)*sweepReach,22,4,22,c,c,.8);}}}
 }
 const api={pillars,fields,build,combat,startFight,lethal,step,inAttack,trackWaveJump,environmentalCounter,newCharge,command,chargeStep,draw,snapshot:e=>Object.fromEntries(fields.map(k=>[k,e[k]??0]))};root.BFFinalKing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

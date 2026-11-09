@@ -78,7 +78,7 @@ for(const [props,arc] of [[{role:'shielder'},Math.acos(.4)],[{prisonFoe:'prison_
   ok(F.aligned(e,target,.18)&&!F.pivoting(e),'a heavy reacquires after circling stops');
  }
 }
-for(const [props,arc,radius] of [[{role:'shielder'},Math.acos(.4),185],[{finalKing:true,boss:true},Math.PI/2,230]]){
+for(const [props,arc,radius] of [[{role:'shielder'},Math.acos(.4),185],[{frostOfficer:'shield'},Math.acos(-.15),220],[{finalKing:true,boss:true},Math.PI/2,230]]){
  for(const hz of [30,60,120])for(const side of [-1,1]){
   const e={x:0,z:0,yaw:0,...props},dt=1/hz;
   let target,opening=false;

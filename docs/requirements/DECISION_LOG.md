@@ -2885,3 +2885,7 @@ The live King stops advancing at 240 units but stops counting close circling pas
 The King can finish his opening approach timer and sweep while the player is outside the full warning arc. Keep him in approach until a target is within the sweep's hit reach and in front of him. Use the same radius for commitment, the warning and the strike. Check that circling after commitment still avoids the attack.
 
 If the King reaches a pillar or the arena edge while trying to close the gap, allow him to line up his beam. This keeps the fight moving and gives the player a chance to use the pillar counter.
+
+### U-ENEMY-FACING-20261104 | Shield Officer pursuit
+
+The Shield Officer can begin a wave at 230 units, but close circling previously counted only to 190. Use the same range for wave commitment and close circling. Match the King’s planted beat for sustained circling, and verify rear access, reacquisition, and the wave and ramp behavior.

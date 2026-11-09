@@ -4,7 +4,7 @@ const memory=new WeakMap(),wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
 const braceTime=.85,braceInterval=2.4,meleeArc=1.15,pivotAnticipation=.24,pivotSettle=.4,heavyLookInterval=.45,focusSwitchLead=65;
 const combatFlank=Math.PI*85/180,flankMargin=Math.PI/18,rearFlank=Math.PI*5/9,routeFlank=Math.PI*2/3;
 const closeOrbitRange=190,closeOrbitMargin=16,closeOrbitArc=Math.PI*50/180,closeOrbitHold=.8;
-const kingApproachRange=240,kingOrbitHold=2;
+const kingApproachRange=240,shieldOfficerReach=230,bossOrbitHold=2;
 const standardShieldDot=.4,prisonShieldDot=.5;
 const standardShieldFlank=Math.acos(standardShieldDot),prisonShieldFlank=Math.acos(prisonShieldDot);
 function state(e){
@@ -82,12 +82,13 @@ function turn(e,dx,dz,dt,routeAim=false){
   }
   // Measure close circling from the last planted heading reference. Measuring only
   // against the current body yaw lets a guard track a walking orbit indefinitely.
-  const orbitRange=e.finalKing?kingApproachRange:closeOrbitRange;
+  const shieldOfficer=e.frostOfficer==='shield';
+  const orbitRange=e.finalKing?kingApproachRange:shieldOfficer?shieldOfficerReach:closeOrbitRange;
   const rangeLimit=orbitRange+(saved.closeBearing==null?0:closeOrbitMargin);
   if(onRoute||Math.hypot(dx,dz)>rangeLimit)saved.closeBearing=null;
   else if(saved.closeBearing==null)saved.closeBearing=goal;
   else if(Math.abs(wrap(goal-saved.closeBearing))>=closeOrbitArc){
-   saved.closeBearing=null;saved.lookT=0;saved.pivotSettle=e.finalKing?kingOrbitHold:closeOrbitHold;saved.pivotWait=0;
+   saved.closeBearing=null;saved.lookT=0;saved.pivotSettle=e.finalKing||shieldOfficer?bossOrbitHold:closeOrbitHold;saved.pivotWait=0;
    if(frame)frame.turned=frame.pivotHeld=true;
    return yaw;
   }
@@ -192,5 +193,5 @@ function canCommit(e){
  return !pivoting(e)&&!saved?.frame?.busy&&!saved?.frame?.held&&!(saved?.recover>0)&&!bracing(e)&&!action(e);
 }
 function contact(e,p){return aligned(e,p,meleeArc);}
-const api={shieldBearer,shieldFrontDot,heavy,selectTarget,turn,aligned,canAdvance,advanceHeading,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting,kingApproachRange};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
+const api={shieldBearer,shieldFrontDot,heavy,selectTarget,turn,aligned,canAdvance,advanceHeading,forward,directionalGuard,projectileSide,guardSource,rate,angle,action,begin,finish,mirror,contact,meleeArc,holdsRecovery,brace,bracing,guardPlanted,canCommit,pivoting,kingApproachRange,shieldOfficerReach};root.BFEnemyFacing=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

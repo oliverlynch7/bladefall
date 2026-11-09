@@ -3541,3 +3541,7 @@ Muted desktop Chrome drove a fresh Warrior around the King using normal movement
 ## Abyss King sweep range (2.402.0)
 
 Muted desktop Chrome reproduced the old King's sweep starting from 848 units away. The updated King approached to 377 units before winding up. He stayed planted, held his direction and dealt zero damage to a player behind him. A pillar blocked his approach in a second test, so he lined up a beam and the pillar opened his ward. Equal hits still dealt 14 front and 35 rear damage to the Prison Shield Guard and 0 front and 61 rear damage to the Shield Officer in recovery. A staged guest snapshot retained the guard's brace and heading. A 2.401.0 campaign save reloaded with level 9, 413 gold and its original checkpoint. Ten Node suites passed. The guest test replayed a host snapshot in one client.
+
+## Shield Officer footwork (2.403.0)
+
+In muted Chrome, walking around the Shield Officer at 208 to 225 units reached a 121-degree flank, up from 27 degrees on 2.402.0. The officer planted for two seconds, then reacquired the stopped player and began a wave. Rear recovery damage was 61 versus 0 from the front. A Prison Shield Guard took 14 frontal and 35 rear damage. The King's sweep kept its original direction, and walking behind it avoided damage. A pillar still opened his ward. A staged guest snapshot preserved the guard's brace and heading. A prior-version test save retained level 9, 413 gold and its checkpoint. The 523 facing checks and ten adjacent suites passed. The local static host has no voice API route.

@@ -2954,3 +2954,7 @@ Heavy pursuit should wait for a forward step when a player moves far to the side
 **Abyss King flank at sweep distance.** Give a player moving on foot inside the King's normal stop distance a rear opening. Small range changes must not reset a close flank, and the King's attack, recovery, and ward counter commitments still apply.
 
 **Abyss King sweep commitment.** The King should approach a distant player before committing to his close sweep. Once he winds up, keep the original direction through the hit and recovery. Preserve the pillar and jump counters.
+
+### Shield Officer pursuit
+
+Let players create a flank by circling the Shield Officer within its wave commitment range. Keep the existing recovery requirement for rear damage.

@@ -36,7 +36,7 @@ function step(e,dt,p,a){if(!alive(e))return;dt=clamp(dt,0,.05);const group=a.ene
  if(!e.offState){e.offState='hunt';e.offClock={caster:2,shield:3.4,spear:4.6}[e.frostOfficer];e.offSeq=0;}e.offClock=Math.max(0,e.offClock-dt);e.offAttack=Math.max(0,(e.offAttack||0)-dt);
  if(e.offState==='hunt'){
   if(facing.bracing(e))return;
-  const distance=Math.hypot(p.x-e.x,p.z-e.z),reach=e.frostOfficer==='caster'?450:e.frostOfficer==='shield'?230:480,shieldOfficer=e.frostOfficer==='shield';
+  const distance=Math.hypot(p.x-e.x,p.z-e.z),reach=e.frostOfficer==='caster'?450:e.frostOfficer==='shield'?facing.shieldOfficerReach:480,shieldOfficer=e.frostOfficer==='shield';
   const shouldMove=distance>(e.frostOfficer==='caster'?300:140)||Math.abs(e.y-p.y)>45;
   if(!shouldMove||!shieldOfficer)facing.turn(e,p.x-e.x,p.z-e.z,dt);
   if(facing.pivoting(e))return;

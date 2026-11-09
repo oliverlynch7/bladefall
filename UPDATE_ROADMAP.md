@@ -4204,3 +4204,7 @@ Walking around the King inside his normal approach distance can expose his rear.
 ### Abyss King sweep range (2.402.0)
 
 The King closes to sweep range before winding up. When a pillar stops his approach, he can use the beam and the pillar can still break his ward. Once the sweep starts, moving behind him avoids the hit.
+
+### Shield Officer footwork (2.403.0)
+
+Walking around the Frostfell Shield Officer within wave range can now make it plant before turning. It resumes pursuit afterward and remains vulnerable to rear hits during wave recovery.
